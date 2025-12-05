@@ -1,11 +1,21 @@
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+import router from '@/router'
+import { getToken } from '@/utils/cache'
+
+function fixUrl(url) {
+  const protocol = document.location.protocol
+  if (protocol === 'http:') {
+    return 'http://' + url
+  } else if (protocol === 'https:') {
+    return 'https://' + url
+  }
+}
 
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: fixUrl(process.env.VUE_APP_BASE_API), // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
@@ -13,19 +23,14 @@ const service = axios.create({
 // request interceptor
 service.interceptors.request.use(
   config => {
-    // do something before request is sent
-
     if (store.getters.token) {
-      // let each request carry token
-      // ['X-Token'] is a custom headers key
-      // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken()
+      // 附加登录信息
+      config.headers['token'] = getToken()
     }
     return config
   },
   error => {
     // do something with request error
-    console.log(error) // for debug
     return Promise.reject(error)
   }
 )
@@ -36,48 +41,46 @@ service.interceptors.response.use(
    * If you want to get http information such as headers or status
    * Please return  response => response
   */
-
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
-   */
   response => {
     const res = response.data
-
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-        // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
+    if (res.code !== 0) {
+      if (res.code === -3) {
+        MessageBox.confirm(res.msg, '确定登出', {
+          confirmButtonText: '重新登陆',
+          cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          store.dispatch('user/resetToken').then(() => {
-            location.reload()
+          store.dispatch('account/relogin').then(() => {
+            router.push('/login')
           })
         })
+      } else {
+        Message({
+          message: res.msg,
+          type: 'error',
+          duration: 2000
+        })
       }
-      return Promise.reject(new Error(res.message || 'Error'))
+      return Promise.reject(res.msg)
     } else {
-      return res
+      return response
     }
   },
   error => {
-    console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
+    const status = error.response.status
+    if (status === 400) {
+      Message({
+        message: error.response.data.msg,
+        type: 'error',
+        duration: 2000
+      })
+    } else {
+      Message({
+        message: '网络异常，请联系客服',
+        type: 'error',
+        duration: 2000
+      })
+    }
     return Promise.reject(error)
   }
 )

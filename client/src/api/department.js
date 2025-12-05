@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/user'
+const path = '/department'
 
-export function addUser(data) {
+export function addDepartment(data) {
   return request({
     url: `${path}/add`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addUser(data) {
   })
 }
 
-export function setUser(data) {
+export function setDepartment(data) {
   return request({
     url: `${path}/set`,
     method: 'post',
@@ -17,7 +17,7 @@ export function setUser(data) {
   })
 }
 
-export function delUser(data) {
+export function delDepartment(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -25,25 +25,25 @@ export function delUser(data) {
   })
 }
 
-export function getUser(data) {
-  return request({
-    url: `${path}/get`,
-    method: 'post',
-    data
-  })
-}
-
-export function getUserByPhone(data) {
-  return request({
-    url: `${path}/getByPhone`,
-    method: 'post',
-    data
-  })
-}
-
-export function getUserList(data) {
+export function getGroupDepartmentList(data) {
   return request({
     url: `${path}/getList`,
+    method: 'post',
+    data
+  })
+}
+
+export function getGroupDepartmentTree(data) {
+  return request({
+    url: `${path}/getTree`,
+    method: 'post',
+    data
+  })
+}
+
+export function setUserDepartment(data) {
+  return request({
+    url: `${path}/setUserDepartment`,
     method: 'post',
     data
   })

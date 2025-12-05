@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/user'
+const path = '/storage'
 
-export function addUser(data) {
+export function addStorage(data) {
   return request({
     url: `${path}/add`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addUser(data) {
   })
 }
 
-export function setUser(data) {
+export function setStorage(data) {
   return request({
     url: `${path}/set`,
     method: 'post',
@@ -17,7 +17,7 @@ export function setUser(data) {
   })
 }
 
-export function delUser(data) {
+export function delStorage(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -25,7 +25,7 @@ export function delUser(data) {
   })
 }
 
-export function getUser(data) {
+export function getGroupStorage(data) {
   return request({
     url: `${path}/get`,
     method: 'post',
@@ -33,17 +33,9 @@ export function getUser(data) {
   })
 }
 
-export function getUserByPhone(data) {
+export function getGroupAllStorage(data) {
   return request({
-    url: `${path}/getByPhone`,
-    method: 'post',
-    data
-  })
-}
-
-export function getUserList(data) {
-  return request({
-    url: `${path}/getList`,
+    url: `${path}/getAll`,
     method: 'post',
     data
   })
