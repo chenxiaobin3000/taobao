@@ -56,7 +56,7 @@
     </el-form>
 
     <div class="footer">
-      <a href="https://beian.miit.gov.cn/" target="_blank">闽ICP备2023001340号</a>
+      <a href="https://beian.miit.gov.cn/" target="_blank">闽ICP备2025号</a>
     </div>
   </div>
 </template>

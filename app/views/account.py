@@ -11,7 +11,11 @@ def register(request):
 @require_POST
 def login(request):
     response = {}
-    response['a'] = '111'
+    response['code'] = 0
+    response['msg'] = '登录成功'
+    response['data'] = {}
+    response['data']['id'] = 1
+    response['data']['token'] = '123456'
     return JsonResponse(response)
 
 @require_POST
