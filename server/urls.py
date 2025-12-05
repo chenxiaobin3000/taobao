@@ -16,10 +16,15 @@ Including another URLconf
 """
 from django.urls import path
 from django.views.generic.base import TemplateView
-from app.views import index, baseOrder
+from app.views import account
 
 urlpatterns = [
-    path('index/', index.index),
-    path('order/', baseOrder.list),
+    # 账号
+    path('api/account/register', account.register),
+    path('api/account/login', account.login),
+    path('api/account/logout', account.logout),
+    path('api/account/setPassword', account.setPassword),
+    path('api/account/resetPwd', account.resetPwd),
+
     path('', TemplateView.as_view(template_name='index.html'))
 ]

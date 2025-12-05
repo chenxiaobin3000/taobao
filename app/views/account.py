@@ -11,7 +11,7 @@ def register(request):
 @require_POST
 def login(request):
     response = {}
-    response['a'] = account.objects.get(id=1)
+    response['a'] = '111'
     return JsonResponse(response)
 
 @require_POST
