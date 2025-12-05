@@ -6,7 +6,7 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || '集数助手' // page title
+const name = defaultSettings.title || '创想酷玩' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -37,9 +37,9 @@ module.exports = {
       errors: true
     },
     proxy: {
-      '/api': { 'target': 'http://localhost:8080' },
-      '/upload': { 'target': 'http://localhost:8080' },
-      '/s': { 'target': 'http://localhost:8080' }
+      '/api': { 'target': 'http://localhost:8000' },
+      '/upload': { 'target': 'http://localhost:8000' },
+      '/s': { 'target': 'http://localhost:8000' }
     }
   },
   configureWebpack: {

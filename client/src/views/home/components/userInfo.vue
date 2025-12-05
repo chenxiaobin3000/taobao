@@ -3,7 +3,7 @@
     <br>
     <span class="firstLine">{{ userdata.user.name }} ( {{ userdata.group.name }} ) :</span>
     <br><br>
-    <span class="secondLine">您好！欢迎使用集数助手，新的一天也要开心哦！</span>
+    <span class="secondLine">您好！欢迎使用管理系统，新的一天也要开心哦！</span>
   </div>
 </template>
 

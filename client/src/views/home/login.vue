@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">集数助手 - 管理后台</h3>
+        <h3 class="title">创想酷玩 - 管理后台</h3>
       </div>
 
       <el-form-item prop="account">

@@ -1,5 +1,5 @@
 module.exports = {
-  title: '集数助手',
+  title: '创想酷玩',
 
   /**
    * @type {boolean} true | false
