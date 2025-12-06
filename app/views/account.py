@@ -12,7 +12,7 @@ def register(request):
 def login(request):
     response = {}
     response['code'] = 0
-    response['msg'] = '登录成功'
+    response['msg'] = 'success'
     response['data'] = {}
     response['data']['id'] = 1
     response['data']['token'] = '123456'

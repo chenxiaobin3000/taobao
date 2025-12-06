@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path
 from django.views.generic.base import TemplateView
-from app.views import account
+from app.views import account, user
 
 urlpatterns = [
     # 账号
@@ -25,6 +25,14 @@ urlpatterns = [
     path('api/account/logout', account.logout),
     path('api/account/setPassword', account.setPassword),
     path('api/account/resetPwd', account.resetPwd),
+
+    # 用户
+    path('api/user/add', user.addUser),
+    path('api/user/set', user.setUser),
+    path('api/user/del', user.delUser),
+    path('api/user/get', user.getUser),
+    path('api/user/getByPhone', user.getUserByPhone),
+    path('api/user/getList', user.getUserList),
 
     path('', TemplateView.as_view(template_name='index.html'))
 ]
