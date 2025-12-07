@@ -10,12 +10,14 @@ def register(request):
 
 @require_POST
 def login(request):
-    response = {}
-    response['code'] = 0
-    response['msg'] = 'success'
-    response['data'] = {}
-    response['data']['id'] = 1
-    response['data']['token'] = '123456'
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {
+            'id': 1,
+            'token': '123456'
+        }
+    }
     return JsonResponse(response)
 
 @require_POST

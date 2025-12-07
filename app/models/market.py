@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils import timezone
 
-# 原始订单表
-class order(models.Model):
-    user_name = models.CharField(max_length=20)
+# 平台表
+class market(models.Model):
+    name = models.CharField(max_length = 8, db_index = True, unique = True)
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):
-        db_table = 't_order'
+        db_table = 't_market'

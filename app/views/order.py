@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app.models import order
 
 @require_POST
-def list(request):
+def addOrder(request):
     response = {}
     response['a'] = order.objects.get(id=1)
     return JsonResponse(response)

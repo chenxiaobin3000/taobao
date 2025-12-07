@@ -22,14 +22,19 @@ def delUser(request):
 
 @require_POST
 def getUser(request):
-    response = {}
-    response['code'] = 0
-    response['msg'] = 'success'
-    response['data'] = {}
-    response['data']['user'] = {}
-    response['data']['user']['name'] = 'test'
-    response['data']['perms'] = [1000,1001]
-    response['data']['market'] = [1]
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {
+            'user': {
+                'name': 'test',
+                'phone': '123'
+            },
+            'depart': {},
+            'perms': [1000,1001],
+            'market': [1]
+        }
+    }
     return JsonResponse(response)
 
 @require_POST
