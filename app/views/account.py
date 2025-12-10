@@ -4,8 +4,11 @@ from app.models import account
 
 @require_POST
 def register(request):
-    response = {}
-    response['a'] = account.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
 
 @require_POST
@@ -22,18 +25,27 @@ def login(request):
 
 @require_POST
 def logout(request):
-    response = {}
-    response['a'] = account.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
 
 @require_POST
 def setPassword(request):
-    response = {}
-    response['a'] = account.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
 
 @require_POST
 def resetPwd(request):
-    response = {}
-    response['a'] = account.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)

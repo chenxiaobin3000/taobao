@@ -4,6 +4,9 @@ from app.models import order
 
 @require_POST
 def addOrder(request):
-    response = {}
-    response['a'] = order.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)

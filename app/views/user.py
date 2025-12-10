@@ -4,20 +4,29 @@ from app.models import user
 
 @require_POST
 def addUser(request):
-    response = {}
-    response['a'] = user.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
 
 @require_POST
 def setUser(request):
-    response = {}
-    response['a'] = user.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
 
 @require_POST
 def delUser(request):
-    response = {}
-    response['a'] = user.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
 
 @require_POST
@@ -31,7 +40,7 @@ def getUser(request):
                 'phone': '123'
             },
             'depart': {},
-            'perms': [1000,1001],
+            'perms': [1000,1001,1002,1003],
             'market': [1]
         }
     }
@@ -39,12 +48,18 @@ def getUser(request):
 
 @require_POST
 def getUserByPhone(request):
-    response = {}
-    response['a'] = user.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
 
 @require_POST
 def getUserList(request):
-    response = {}
-    response['a'] = user.objects.get(id=1)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': {}
+    }
     return JsonResponse(response)
