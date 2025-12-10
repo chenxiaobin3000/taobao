@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <br>
-    <span class="firstLine">{{ userdata.user.name }} ( {{ userdata.group.name }} ) :</span>
+    <span class="firstLine">{{ userdata.user.name }}:</span>
     <br><br>
     <span class="secondLine">您好！欢迎使用管理系统，新的一天也要开心哦！</span>
   </div>
