@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.urls import path
 from django.views.generic.base import TemplateView
-from app.views import account, user, order
+from app.views import account
+from app.views.system import department, market, permission, role, user
+from app.views.original import order
 
 urlpatterns = [
     # 账号
@@ -36,6 +38,10 @@ urlpatterns = [
 
     # 订单
     path('api/order/add', order.addOrder),
+    path('api/order/set', order.setOrder),
+    path('api/order/del', order.delOrder),
+    path('api/order/get', order.getOrder),
+    path('api/order/getList', order.getOrderList),
 
     path('', TemplateView.as_view(template_name='index.html'))
 ]

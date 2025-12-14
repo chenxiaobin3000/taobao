@@ -1,6 +1,6 @@
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from app.models import user
+from app.models.system import user
 
 @require_POST
 def addUser(request):
