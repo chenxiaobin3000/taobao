@@ -9,7 +9,7 @@ def add(request):
     good_id = request.POST.get('gid', 0)
     name = request.POST.get('name', 0)
     good = Good.objects.add(shop_id, good_id, name)
-    data = model_to_dict(good)
+    data = model_to_dict(good, fields=['id'])
     response = {
         'code': 0,
         'msg': 'success',
