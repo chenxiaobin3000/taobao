@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app.models.system import department
 
 @require_POST
-def addDepartment(request):
+def add(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -12,7 +12,7 @@ def addDepartment(request):
     return JsonResponse(response)
 
 @require_POST
-def setDepartment(request):
+def set(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -21,7 +21,7 @@ def setDepartment(request):
     return JsonResponse(response)
 
 @require_POST
-def delDepartment(request):
+def delete(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -30,7 +30,7 @@ def delDepartment(request):
     return JsonResponse(response)
 
 @require_POST
-def getDepartment(request):
+def get(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -39,7 +39,7 @@ def getDepartment(request):
     return JsonResponse(response)
 
 @require_POST
-def getDepartmentList(request):
+def getList(request):
     response = {
         'code': 0,
         'msg': 'success',

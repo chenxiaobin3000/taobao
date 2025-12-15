@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app.models.system import user
 
 @require_POST
-def addUser(request):
+def add(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -12,7 +12,7 @@ def addUser(request):
     return JsonResponse(response)
 
 @require_POST
-def setUser(request):
+def set(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -21,7 +21,7 @@ def setUser(request):
     return JsonResponse(response)
 
 @require_POST
-def delUser(request):
+def delete(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -30,7 +30,7 @@ def delUser(request):
     return JsonResponse(response)
 
 @require_POST
-def getUser(request):
+def get(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -47,7 +47,7 @@ def getUser(request):
     return JsonResponse(response)
 
 @require_POST
-def getUserByPhone(request):
+def getByPhone(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -56,7 +56,7 @@ def getUserByPhone(request):
     return JsonResponse(response)
 
 @require_POST
-def getUserList(request):
+def getList(request):
     response = {
         'code': 0,
         'msg': 'success',

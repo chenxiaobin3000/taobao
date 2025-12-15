@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app.models.system import role
 
 @require_POST
-def addRole(request):
+def add(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -12,7 +12,7 @@ def addRole(request):
     return JsonResponse(response)
 
 @require_POST
-def setRole(request):
+def set(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -21,7 +21,7 @@ def setRole(request):
     return JsonResponse(response)
 
 @require_POST
-def delRole(request):
+def delete(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -30,7 +30,7 @@ def delRole(request):
     return JsonResponse(response)
 
 @require_POST
-def getRole(request):
+def get(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -39,7 +39,7 @@ def getRole(request):
     return JsonResponse(response)
 
 @require_POST
-def getRoleList(request):
+def getList(request):
     response = {
         'code': 0,
         'msg': 'success',

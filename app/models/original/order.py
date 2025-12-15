@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 # 原始订单表
-class order(models.Model):
+class Order(models.Model):
     order_id = models.CharField(max_length=20, db_index = True) # 订单id
     payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
     actual_pay = models.DecimalField(max_digits=10, decimal_places=2) # 实际付款

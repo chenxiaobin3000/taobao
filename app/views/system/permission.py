@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app.models.system import permission
 
 @require_POST
-def addPermission(request):
+def add(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -12,7 +12,7 @@ def addPermission(request):
     return JsonResponse(response)
 
 @require_POST
-def setPermission(request):
+def set(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -21,7 +21,7 @@ def setPermission(request):
     return JsonResponse(response)
 
 @require_POST
-def delPermission(request):
+def delete(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -30,7 +30,7 @@ def delPermission(request):
     return JsonResponse(response)
 
 @require_POST
-def getPermission(request):
+def get(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -39,7 +39,7 @@ def getPermission(request):
     return JsonResponse(response)
 
 @require_POST
-def getPermissionList(request):
+def getList(request):
     response = {
         'code': 0,
         'msg': 'success',

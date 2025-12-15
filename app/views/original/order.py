@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app.models.original import order
 
 @require_POST
-def addOrder(request):
+def add(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -12,7 +12,7 @@ def addOrder(request):
     return JsonResponse(response)
 
 @require_POST
-def setOrder(request):
+def set(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -21,7 +21,7 @@ def setOrder(request):
     return JsonResponse(response)
 
 @require_POST
-def delOrder(request):
+def delete(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -30,7 +30,7 @@ def delOrder(request):
     return JsonResponse(response)
 
 @require_POST
-def getOrder(request):
+def get(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -39,7 +39,7 @@ def getOrder(request):
     return JsonResponse(response)
 
 @require_POST
-def getOrderList(request):
+def getList(request):
     response = {
         'code': 0,
         'msg': 'success',

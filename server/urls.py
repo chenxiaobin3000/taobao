@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path
 from django.views.generic.base import TemplateView
 from app.views import account
-from app.views.system import department, market, permission, role, user
+from app.views.system import department, good, market, permission, role, user
 from app.views.original import order
 
 urlpatterns = [
@@ -26,22 +26,29 @@ urlpatterns = [
     path('api/account/login', account.login),
     path('api/account/logout', account.logout),
     path('api/account/setPassword', account.setPassword),
-    path('api/account/resetPwd', account.resetPwd),
+    path('api/account/resetPassword', account.resetPassword),
 
     # 用户
-    path('api/user/add', user.addUser),
-    path('api/user/set', user.setUser),
-    path('api/user/del', user.delUser),
-    path('api/user/get', user.getUser),
-    path('api/user/getByPhone', user.getUserByPhone),
-    path('api/user/getList', user.getUserList),
+    path('api/user/add', user.add),
+    path('api/user/set', user.set),
+    path('api/user/del', user.delete),
+    path('api/user/get', user.get),
+    path('api/user/getByPhone', user.getByPhone),
+    path('api/user/getList', user.getList),
 
+    # 商品
+    path('api/good/add', good.add),
+    path('api/good/set', good.set),
+    path('api/good/del', good.delete),
+    path('api/good/get', good.get),
+    path('api/good/getList', good.getList),
+    
     # 订单
-    path('api/order/add', order.addOrder),
-    path('api/order/set', order.setOrder),
-    path('api/order/del', order.delOrder),
-    path('api/order/get', order.getOrder),
-    path('api/order/getList', order.getOrderList),
+    path('api/order/add', order.add),
+    path('api/order/set', order.set),
+    path('api/order/del', order.delete),
+    path('api/order/get', order.get),
+    path('api/order/getList', order.getList),
 
     path('', TemplateView.as_view(template_name='index.html'))
 ]

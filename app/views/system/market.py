@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app.models.system import market
 
 @require_POST
-def addMarket(request):
+def add(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -12,7 +12,7 @@ def addMarket(request):
     return JsonResponse(response)
 
 @require_POST
-def setMarket(request):
+def set(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -21,7 +21,7 @@ def setMarket(request):
     return JsonResponse(response)
 
 @require_POST
-def delMarket(request):
+def delete(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -30,7 +30,7 @@ def delMarket(request):
     return JsonResponse(response)
 
 @require_POST
-def getMarket(request):
+def get(request):
     response = {
         'code': 0,
         'msg': 'success',
@@ -39,7 +39,7 @@ def getMarket(request):
     return JsonResponse(response)
 
 @require_POST
-def getMarketList(request):
+def getList(request):
     response = {
         'code': 0,
         'msg': 'success',

@@ -1,4 +1,5 @@
 @echo off
-python manage.py makemigrations app
-python manage.py migrate
+call clean.bat
+call makemigrations.bat
+call migrate.bat
 python manage.py runserver
