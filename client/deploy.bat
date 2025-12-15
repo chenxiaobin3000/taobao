@@ -1,3 +1,4 @@
+@echo off
 rd /S /Q ..\static\css
 rd /S /Q ..\static\fonts
 rd /S /Q ..\static\img
