@@ -14,10 +14,10 @@ class CompanyManager(models.Manager):
         return company.save()
 
     def delete(self, pk):
-        return self.filter(pk=pk).delete()
+        return self.get(pk=pk).delete()
 
     def find(self, pk):
-        return self.filter(pk=pk)
+        return self.get(pk=pk)
 
     def getList(self, user_id, page, num):
         left = (page - 1) * num

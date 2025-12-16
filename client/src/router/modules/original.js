@@ -18,11 +18,11 @@ export default {
     path: 'promotionDetail', component: () => import('@/views/original/promotionDetail'),
     name: 'original_promotionDetail', meta: { title: '推广明细', roles: [2003] }
   }, {
-    path: 'zhifubao', component: () => import('@/views/original/zhifubao'),
-    name: 'original_zhifubao', meta: { title: '支付宝', roles: [2004] }
+    path: 'deduction', component: () => import('@/views/original/deduction'),
+    name: 'original_deduction', meta: { title: '扣费管理', roles: [2004] }
   }, {
-    path: 'weixin', component: () => import('@/views/original/weixin'),
-    name: 'original_weixin', meta: { title: '微信支付', roles: [2005] }
+    path: 'polymerize', component: () => import('@/views/original/polymerize'),
+    name: 'original_weixin', meta: { title: '聚合管理', roles: [2005] }
   }, {
     path: 'refund', component: () => import('@/views/original/refund'),
     name: 'original_refund', meta: { title: '退货管理', roles: [2006] }

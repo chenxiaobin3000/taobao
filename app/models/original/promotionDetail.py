@@ -2,8 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.forms.models import model_to_dict
 
-# 订单表
-class Order(models.Model):
+# 推广明细表
+class PromotionDetail(models.Model):
     order_id = models.CharField(max_length=20, db_index = True) # 订单id
     payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
     actual_pay = models.DecimalField(max_digits=10, decimal_places=2) # 实际付款
@@ -14,4 +14,4 @@ class Order(models.Model):
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):
-        db_table = 't_order'
+        db_table = 't_promotion_detail'
