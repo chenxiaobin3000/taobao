@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path
 from django.views.generic.base import TemplateView
 from app.views import account
-from app.views.system import department, good, market, permission, role, user
+from app.views.system import company, good, market, permission, role, shop, user
 from app.views.original import order
 
 urlpatterns = [

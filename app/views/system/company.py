@@ -1,6 +1,6 @@
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from app.models.system import department
+from app.models.system.company import Company
 
 @require_POST
 def add(request):
