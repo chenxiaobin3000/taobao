@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.forms.models import model_to_dict
 
 # 商品表
 class GoodManager(models.Manager):
@@ -7,16 +8,28 @@ class GoodManager(models.Manager):
         return self.create(shop_id=shop_id, good_id=good_id, name=name)
 
     def set(self, pk, shop_id, good_id, name):
-        return self.filter(pk=pk).update(shop_id=shop_id, good_id=good_id, name=name)
+        good = self.get(pk=pk)
+        good.shop_id = shop_id
+        good.good_id = good_id
+        good.name = name
+        return good.save()
 
     def delete(self, pk):
-        return self.filter(pk=pk).delete()
+        return self.get(pk=pk).delete()
 
-    def get(self, pk):
-        return self.filter(pk=pk)
+    def find(self, pk):
+        return self.get(pk=pk)
 
-    def getList(self, shop_id):
-        return self.filter(shop_id=shop_id)
+    def getList(self, shop_id, page, num):
+        left = (page - 1) * num
+        right = page * num
+        return self.filter(shop_id=shop_id)[left:right]
+
+    def encoder(self, good):
+        return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name'])
+
+    def encoderList(self, goods):
+        return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name']) for good in goods]
 
 class Good(models.Model):
     objects = GoodManager()

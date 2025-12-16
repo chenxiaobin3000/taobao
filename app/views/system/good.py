@@ -1,15 +1,14 @@
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from django.forms.models import model_to_dict
 from app.models.system.good import Good
 
 @require_POST
 def add(request):
-    shop_id = request.POST.get('sid', 0)
-    good_id = request.POST.get('gid', 0)
-    name = request.POST.get('name', 0)
+    shop_id = request.POST.get('sid')
+    good_id = request.POST.get('gid')
+    name = request.POST.get('name')
     good = Good.objects.add(shop_id, good_id, name)
-    data = model_to_dict(good, fields=['id'])
+    data = Good.objects.encoder(good)
     response = {
         'code': 0,
         'msg': 'success',
@@ -19,39 +18,51 @@ def add(request):
 
 @require_POST
 def set(request):
+    pk = request.POST.get('id')
+    shop_id = request.POST.get('sid')
+    good_id = request.POST.get('gid')
+    name = request.POST.get('name')
+    data = Good.objects.set(pk, shop_id, good_id, name)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
-    Good.objects.set(1, 'a223', 'hj45')
     return JsonResponse(response)
 
 @require_POST
 def delete(request):
+    pk = request.POST.get('id')
+    data = Good.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
-    pk = request.POST.get('id', 0)
-    Good.objects.delete(pk)
     return JsonResponse(response)
 
 @require_POST
 def get(request):
+    pk = request.POST.get('id')
+    good = Good.objects.find(pk)
+    data = Good.objects.encoder(good)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
     return JsonResponse(response)
 
 @require_POST
 def getList(request):
+    shop_id = request.POST.get('sid')
+    page = int(request.POST.get('page'))
+    num = int(request.POST.get('num'))
+    goods = Good.objects.getList(shop_id, page, num)
+    data = Good.objects.encoderList(goods)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
     return JsonResponse(response)

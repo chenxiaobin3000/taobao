@@ -1,26 +1,41 @@
 from django.db import models
 from django.utils import timezone
+from django.forms.models import model_to_dict
 
 # 账号表
 class AccountManager(models.Manager):
-    def add(self, account, password):
-        return self.create(account=account, password=password, user_id=0)
+    def add(self, account, password, user_id):
+        return self.create(account=account, password=password, user_id=user_id)
 
-    def set(self, pk, account, password, user_id):
-        return self.filter(pk=pk).update(account=account, password=password, user_id=user_id)
+    def set(self, pk, password):
+        account = self.get(pk=pk)
+        account.password = password
+        return account.save()
 
     def delete(self, pk):
-        return self.filter(pk=pk).delete()
+        return self.get(pk=pk).delete()
 
-    def get(self, pk):
-        return self.filter(pk=pk)
+    def find(self, pk):
+        return self.get(pk=pk)
 
-    def getList(self, user_id):
-        return self.filter(user_id=user_id)
+    def getByAccount(self, account):
+        return self.filter(account=account).first()
+
+    def getList(self, user_id, page, num):
+        left = (page - 1) * num
+        right = page * num
+        return self.filter(user_id=user_id)[left:right]
+
+    def encoder(self, account):
+        return model_to_dict(account, fields=['id', 'account', 'password', 'user_id'])
+
+    def encoderList(self, accounts):
+        return [model_to_dict(account, fields=['id', 'account', 'password', 'user_id']) for account in accounts]
 
 class Account(models.Model):
-    account = models.CharField(max_length=16, db_index=True, unique=True)
-    password = models.CharField(max_length=32)
+    objects = AccountManager()
+    account = models.CharField(max_length=16, db_index=True, unique=True) # 账号
+    password = models.CharField(max_length=32) # 密码
     user_id = models.IntegerField(db_index=True) # 用户id
     ctime = models.DateTimeField(default=timezone.now)
 
