@@ -1,9 +1,11 @@
+import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from app.models.system import market
+from app.models.system.market import Market
 
 @require_POST
 def add(request):
+    post = json.loads(request.body)
     response = {
         'code': 0,
         'msg': 'success',
@@ -13,6 +15,7 @@ def add(request):
 
 @require_POST
 def set(request):
+    post = json.loads(request.body)
     response = {
         'code': 0,
         'msg': 'success',
@@ -22,6 +25,7 @@ def set(request):
 
 @require_POST
 def delete(request):
+    post = json.loads(request.body)
     response = {
         'code': 0,
         'msg': 'success',
@@ -31,6 +35,7 @@ def delete(request):
 
 @require_POST
 def get(request):
+    post = json.loads(request.body)
     response = {
         'code': 0,
         'msg': 'success',
@@ -40,6 +45,7 @@ def get(request):
 
 @require_POST
 def getList(request):
+    post = json.loads(request.body)
     response = {
         'code': 0,
         'msg': 'success',

@@ -1,3 +1,4 @@
+import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from app.models.account import Account
@@ -7,8 +8,9 @@ default_password = '888888'
 
 @require_POST
 def register(request):
-    account = request.POST.get('account')
-    password = request.POST.get('password')
+    post = json.loads(request.body)
+    account = post.get('account')
+    password = post.get('password')
     # 创建用户
     user_id = 0
 
@@ -24,10 +26,9 @@ def register(request):
 
 @require_POST
 def login(request):
-    print(request.POST)
-    account = request.POST.get('account')
-    password = request.POST.get('password')
-    print(account)
+    post = json.loads(request.body)
+    account = post.get('account')
+    password = post.get('password')
     object = Account.objects.getByAccount(account)
     response = {
         'code': 0,
@@ -48,7 +49,8 @@ def login(request):
 
 @require_POST
 def logout(request):
-    pk = request.POST.get('id')
+    post = json.loads(request.body)
+    pk = post.get('id')
     # 清除session信息
     
     response = {
@@ -60,8 +62,9 @@ def logout(request):
 
 @require_POST
 def setPassword(request):
-    pk = request.POST.get('id')
-    password = request.POST.get('password')
+    post = json.loads(request.body)
+    pk = post.get('id')
+    password = post.get('password')
     data = Account.objects.set(pk, password)
     response = {
         'code': 0,
@@ -72,7 +75,8 @@ def setPassword(request):
 
 @require_POST
 def resetPassword(request):
-    pk = request.POST.get('id')
+    post = json.loads(request.body)
+    pk = post.get('id')
     data = Account.objects.set(pk, default_password)
     response = {
         'code': 0,
