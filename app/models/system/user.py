@@ -21,6 +21,9 @@ class UserManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
+    def getByPhone(self, phone):
+        return self.filter(phone=phone).first()
+
     def getList(self, company_id, page, num):
         left = (page - 1) * num
         right = page * num

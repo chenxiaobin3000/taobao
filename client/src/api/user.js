@@ -19,7 +19,7 @@ export function setUser(data) {
 
 export function delUser(data) {
   return request({
-    url: `${path}/del`,
+    url: `${path}/delete`,
     method: 'post',
     data
   })
@@ -28,6 +28,14 @@ export function delUser(data) {
 export function getUser(data) {
   return request({
     url: `${path}/get`,
+    method: 'post',
+    data
+  })
+}
+
+export function getUserInfo(data) {
+  return request({
+    url: `${path}/getInfo`,
     method: 'post',
     data
   })

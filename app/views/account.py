@@ -26,14 +26,12 @@ def register(request):
 def login(request):
     account = request.POST.get('account')
     password = request.POST.get('password')
+    print(account)
     object = Account.objects.getByAccount(account)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {
-            'id': 0,
-            'token': ''
-        }
+        'data': {}
     }
     
     # 校验密码
@@ -44,6 +42,7 @@ def login(request):
     response['data']['id'] = object.user_id
 
     # 刷新session信息
+    # response['data']['token'] = ''
     return JsonResponse(response)
 
 @require_POST

@@ -1,6 +1,6 @@
 import md5 from 'js-md5'
 import { login, logout } from '@/api/account'
-import { getUser } from '@/api/user'
+import { getUserInfo } from '@/api/user'
 import { setToken, getToken, removeToken, setUserId, getUserId, removeUserId } from '@/utils/cache'
 import { resetRouter } from '@/router'
 
@@ -49,7 +49,7 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getUser({ id: state.id }).then(response => {
+      getUserInfo({ id: state.id }).then(response => {
         const { user, perms, market } = response.data.data
         // roles must be a non-empty array
         if (!perms || perms.length <= 0) {

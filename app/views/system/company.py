@@ -4,6 +4,7 @@ from app.models.system.company import Company
 
 @require_POST
 def add(request):
+    name = request.POST.get('name')
     response = {
         'code': 0,
         'msg': 'success',

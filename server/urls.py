@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/user/set', user.set),
     path('api/user/del', user.delete),
     path('api/user/get', user.get),
+    path('api/user/getInfo', user.getInfo),
     path('api/user/getByPhone', user.getByPhone),
     path('api/user/getList', user.getList),
 
