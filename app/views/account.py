@@ -24,6 +24,7 @@ def register(request):
 
 @require_POST
 def login(request):
+    print(request.POST)
     account = request.POST.get('account')
     password = request.POST.get('password')
     print(account)
