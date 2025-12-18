@@ -2,6 +2,8 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from app.models.system.user import User
+from app.models.system.company_market import CompanyMarket
+from app.models.system.permission import Permission
 
 @require_POST
 def add(request):
@@ -64,15 +66,24 @@ def get(request):
 def getInfo(request):
     post = json.loads(request.body)
     pk = post.get('id')
-    good = User.objects.find(pk)
-    data = User.objects.encoder(good)
+    user = User.objects.find(pk)
+
+    # 平台信息
+    companyMarket = CompanyMarket.objects.find(user.company_id)
+
+    # 权限信息
+    permission = Permission.objects.getList(user.role_id)
+
+    dataUser = User.objects.encoder(user)
+    dataCM = CompanyMarket.objects.encoder(companyMarket)
+    dataP = Permission.objects.encoder(permission)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'user': data,
-            'perms': [1000,1001,1002,1003],
-            'market': [1]
+            'user': dataUser,
+            'perms': dataP,
+            'market': dataCM
         }
     }
     return JsonResponse(response)

@@ -1,5 +1,9 @@
 from django.core.management.base import BaseCommand
 from app.models.system.market import Market
+from app.models.system.company import Company
+from app.models.system.company_market import CompanyMarket
+from app.models.system.role import Role
+from app.models.system.permission import Permission
 from app.models.account import Account
 from app.models.system.user import User
 
@@ -7,6 +11,15 @@ from app.models.system.user import User
 class Command(BaseCommand):
     def handle(self, *args, **options):
         Market.objects.add('taobao')
+        Company.objects.add('创想酷玩', 1)
+        CompanyMarket.objects.add(1, 1)
+
+        Role.objects.add(1, '运营')
+        Permission.objects.add(1, 1000)
+        Permission.objects.add(1, 1001)
+        Permission.objects.add(1, 1002)
+        Permission.objects.add(1, 1003)
+
         Account.objects.add('admin', '21218cca77804d2ba1922c33e0151105', 1)
-        User.objects.add('test', '01234567890', 1, 1)
+        User.objects.add('小月', '01234567890', 1, 1)
         print("init success")
