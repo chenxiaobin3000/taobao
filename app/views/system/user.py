@@ -69,21 +69,23 @@ def getInfo(request):
     user = User.objects.find(pk)
 
     # 平台信息
-    companyMarket = CompanyMarket.objects.find(user.company_id)
+    companyMarkets = CompanyMarket.objects.getList(user.company_id)
 
     # 权限信息
-    permission = Permission.objects.getList(user.role_id)
+    permissions = Permission.objects.getList(user.role_id)
 
     dataUser = User.objects.encoder(user)
-    dataCM = CompanyMarket.objects.encoder(companyMarket)
-    dataP = Permission.objects.encoder(permission)
+    dataCM = CompanyMarket.objects.encoderList(companyMarkets)
+    dataCM = [data['market_id'] for data in dataCM]
+    dataP = Permission.objects.encoderList(permissions)
+    dataP = [data['permission'] for data in dataP]
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'user': dataUser,
-            'perms': dataP,
-            'market': dataCM
+            'market': dataCM,
+            'perms': dataP
         }
     }
     return JsonResponse(response)

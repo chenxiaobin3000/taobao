@@ -16,11 +16,11 @@ class CompanyMarketManager(models.Manager):
     def getList(self, company_id):
         return self.filter(company_id=company_id)
 
-    def encoder(self, company_market):
-        return model_to_dict(company_market, fields=['id', 'company_id', 'market_id'])
+    def encoder(self, companyMarket):
+        return model_to_dict(companyMarket, fields=['id', 'company_id', 'market_id'])
 
-    def encoderList(self, company_markets):
-        return [model_to_dict(company_market, fields=['id', 'company_id', 'market_id']) for company_market in company_markets]
+    def encoderList(self, companyMarkets):
+        return [model_to_dict(companyMarket, fields=['id', 'company_id', 'market_id']) for companyMarket in companyMarkets]
     
 class CompanyMarket(models.Model):
     objects = CompanyMarketManager()

@@ -11,8 +11,10 @@ from app.models.system.user import User
 class Command(BaseCommand):
     def handle(self, *args, **options):
         Market.objects.add('taobao')
+        Market.objects.add('douyin')
         Company.objects.add('创想酷玩', 1)
         CompanyMarket.objects.add(1, 1)
+        CompanyMarket.objects.add(1, 2)
 
         Role.objects.add(1, '运营')
         Permission.objects.add(1, 1000)

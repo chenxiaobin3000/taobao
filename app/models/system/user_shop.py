@@ -16,11 +16,11 @@ class UserShopManager(models.Manager):
     def getList(self, user_id):
         return self.filter(user_id=user_id)
 
-    def encoder(self, user_shop):
-        return model_to_dict(user_shop, fields=['id', 'user_id', 'shop_id'])
+    def encoder(self, userShop):
+        return model_to_dict(userShop, fields=['id', 'user_id', 'shop_id'])
 
-    def encoderList(self, user_shops):
-        return [model_to_dict(user_shop, fields=['id', 'user_id', 'shop_id']) for user_shop in user_shops]
+    def encoderList(self, userShops):
+        return [model_to_dict(userShop, fields=['id', 'user_id', 'shop_id']) for userShop in userShops]
     
 class UserShop(models.Model):
     objects = UserShopManager()
