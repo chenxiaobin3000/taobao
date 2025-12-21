@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/role'
+const path = '/market'
 
-export function addRole(data) {
+export function addMarket(data) {
   return request({
     url: `${path}/add`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addRole(data) {
   })
 }
 
-export function setRole(data) {
+export function setMarket(data) {
   return request({
     url: `${path}/set`,
     method: 'post',
@@ -17,7 +17,7 @@ export function setRole(data) {
   })
 }
 
-export function delRole(data) {
+export function delMarket(data) {
   return request({
     url: `${path}/delete`,
     method: 'post',
@@ -25,7 +25,7 @@ export function delRole(data) {
   })
 }
 
-export function getRole(data) {
+export function getMarket(data) {
   return request({
     url: `${path}/get`,
     method: 'post',
@@ -33,7 +33,7 @@ export function getRole(data) {
   })
 }
 
-export function getRoleList(data) {
+export function getMarketList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

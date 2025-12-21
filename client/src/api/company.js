@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/role'
+const path = '/company'
 
-export function addRole(data) {
+export function addCompany(data) {
   return request({
     url: `${path}/add`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addRole(data) {
   })
 }
 
-export function setRole(data) {
+export function setCompany(data) {
   return request({
     url: `${path}/set`,
     method: 'post',
@@ -17,7 +17,7 @@ export function setRole(data) {
   })
 }
 
-export function delRole(data) {
+export function delCompany(data) {
   return request({
     url: `${path}/delete`,
     method: 'post',
@@ -25,7 +25,7 @@ export function delRole(data) {
   })
 }
 
-export function getRole(data) {
+export function getCompany(data) {
   return request({
     url: `${path}/get`,
     method: 'post',
@@ -33,7 +33,7 @@ export function getRole(data) {
   })
 }
 
-export function getRoleList(data) {
+export function getCompanyList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

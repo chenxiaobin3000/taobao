@@ -69,7 +69,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { getUserList, addUser, setUser, delUser } from '@/api/user'
-import { getGroupDepartmentTree, setUserDepartment } from '@/api/department'
+import { getGroupDepartmentTree, setUserDepartment } from '@/api/good'
 import { getRoleList, setUserRole } from '@/api/role'
 
 export default {

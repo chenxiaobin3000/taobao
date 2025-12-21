@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/storage'
+const path = '/permission'
 
-export function addStorage(data) {
+export function addPermission(data) {
   return request({
     url: `${path}/add`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addStorage(data) {
   })
 }
 
-export function setStorage(data) {
+export function setPermission(data) {
   return request({
     url: `${path}/set`,
     method: 'post',
@@ -17,15 +17,15 @@ export function setStorage(data) {
   })
 }
 
-export function delStorage(data) {
+export function delPermission(data) {
   return request({
-    url: `${path}/del`,
+    url: `${path}/delete`,
     method: 'post',
     data
   })
 }
 
-export function getGroupStorage(data) {
+export function getPermission(data) {
   return request({
     url: `${path}/get`,
     method: 'post',
@@ -33,9 +33,9 @@ export function getGroupStorage(data) {
   })
 }
 
-export function getGroupAllStorage(data) {
+export function getPermissionList(data) {
   return request({
-    url: `${path}/getAll`,
+    url: `${path}/getList`,
     method: 'post',
     data
   })

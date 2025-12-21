@@ -33,9 +33,9 @@ export function setPassword(data) {
   })
 }
 
-export function resetPwd(data) {
+export function resetPassword(data) {
   return request({
-    url: `${path}/resetPwd`,
+    url: `${path}/resetPassword`,
     method: 'post',
     data
   })
