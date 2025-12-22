@@ -18,8 +18,10 @@ class MarketManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self):
-        return self.all()
+    def getList(self, page, num):
+        left = (page - 1) * num
+        right = page * num
+        return self.all()[left:right]
 
     def encoder(self, market):
         return model_to_dict(market, fields=['id', 'company_id', 'market_id', 'name'])

@@ -2,8 +2,10 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from app.models.system.user import User
+from app.models.system.company import Company
 from app.models.system.company_market import CompanyMarket
 from app.models.system.permission import Permission
+from app.models.system.role import Role
 
 @require_POST
 def add(request):
@@ -106,14 +108,25 @@ def getByPhone(request):
 @require_POST
 def getList(request):
     post = json.loads(request.body)
-    company_id = int(post.get('cid'))
+    company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    goods = User.objects.getList(company_id, page, num)
-    data = User.objects.encoderList(goods)
+    users = User.objects.getList(company_id, page, num)
+    data = User.objects.encoderList(users)
+
+    # 获取公司、角色信息
+    for user in data:
+        company = Company.objects.find(user['company_id'])
+        user['company'] = company.name
+        role = Role.objects.find(user['role_id'])
+        user['role'] = role.name
+
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': {
+            'total': len(data),
+            'list': data
+        }
     }
     return JsonResponse(response)

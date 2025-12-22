@@ -17,5 +17,8 @@ export default {
   }, {
     path: 'resetPwd', component: () => import('@/views/system/resetPwd'),
     name: 'system_resetPwd', meta: { title: '重置密码', roles: [1001] }
+  }, {
+    path: 'roleList', component: () => import('@/views/system/roleList'),
+    name: 'system_roleList', meta: { title: '角色管理', roles: [1004] }
   }]
 }

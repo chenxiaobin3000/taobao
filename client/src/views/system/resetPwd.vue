@@ -36,7 +36,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { getUserList } from '@/api/user'
-import { resetPwd } from '@/api/account'
+import { resetPassword } from '@/api/account'
 
 export default {
   components: { Pagination },
@@ -81,8 +81,8 @@ export default {
         this.total = response.data.data.total
         this.list = response.data.data.list
         this.list.forEach(v => {
-          if (v.depart == null) {
-            v.depart = {
+          if (v.company == null) {
+            v.company = {
               name: ''
             }
           }
@@ -105,7 +105,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        resetPwd({
+        resetPassword({
           id: this.listQuery.id,
           uid: row.id
         }).then(() => {

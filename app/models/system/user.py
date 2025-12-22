@@ -34,7 +34,7 @@ class UserManager(models.Manager):
 
     def encoderList(self, users):
         return [model_to_dict(user, fields=['id', 'name', 'phone', 'company_id', 'role_id']) for user in users]
-    
+
 class User(models.Model):
     objects = UserManager()
     name = models.CharField(max_length = 16, db_index = True, unique = True)
