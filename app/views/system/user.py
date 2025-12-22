@@ -12,8 +12,8 @@ def add(request):
     post = json.loads(request.body)
     name = post.get('name')
     phone = post.get('phone')
-    company_id = post.get('cid')
-    role_id = post.get('rid')
+    company_id = int(post.get('cid'))
+    role_id = int(post.get('rid'))
     user = User.objects.add(name, phone, company_id, role_id)
     data = User.objects.encoder(user)
     response = {
@@ -26,11 +26,11 @@ def add(request):
 @require_POST
 def set(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     name = post.get('name')
     phone = post.get('phone')
-    company_id = post.get('cid')
-    role_id = post.get('rid')
+    company_id = int(post.get('cid'))
+    role_id = int(post.get('rid'))
     data = User.objects.set(pk, name, phone, company_id, role_id)
     response = {
         'code': 0,
@@ -42,7 +42,7 @@ def set(request):
 @require_POST
 def delete(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     data = User.objects.delete(pk)
     response = {
         'code': 0,
@@ -54,7 +54,7 @@ def delete(request):
 @require_POST
 def get(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     good = User.objects.find(pk)
     data = User.objects.encoder(good)
     response = {
@@ -67,7 +67,7 @@ def get(request):
 @require_POST
 def getInfo(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     user = User.objects.find(pk)
 
     # 平台信息

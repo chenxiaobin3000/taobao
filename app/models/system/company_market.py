@@ -10,14 +10,8 @@ class CompanyMarketManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getList(self, company_id):
         return self.filter(company_id=company_id)
-
-    def encoder(self, companyMarket):
-        return model_to_dict(companyMarket, fields=['id', 'company_id', 'market_id'])
 
     def encoderList(self, companyMarkets):
         return [model_to_dict(companyMarket, fields=['id', 'company_id', 'market_id']) for companyMarket in companyMarkets]

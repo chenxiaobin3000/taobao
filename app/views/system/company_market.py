@@ -1,15 +1,15 @@
 import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from app.models.system import Permission
+from app.models.system.company_market import CompanyMarket
 
 @require_POST
 def add(request):
     post = json.loads(request.body)
-    role_id = int(post.get('rid'))
-    permission = int(post.get('pid'))
-    permission = Permission.objects.add(role_id, permission)
-    data = Permission.objects.encoder(permission)
+    company_id = int(post.get('cid'))
+    market_id = int(post.get('mid'))
+    cm = CompanyMarket.objects.add(company_id, market_id)
+    data = CompanyMarket.objects.encoder(cm)
     response = {
         'code': 0,
         'msg': 'success',
@@ -21,7 +21,7 @@ def add(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Permission.objects.delete(pk)
+    data = CompanyMarket.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success',
@@ -32,11 +32,11 @@ def delete(request):
 @require_POST
 def getList(request):
     post = json.loads(request.body)
-    role_id = int(post.get('id'))
+    company_id = int(post.get('cid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    permissions = Permission.objects.getList(role_id, page, num)
-    data = Permission.objects.encoderList(permissions)
+    cms = CompanyMarket.objects.getList(company_id, page, num)
+    data = CompanyMarket.objects.encoderList(cms)
     response = {
         'code': 0,
         'msg': 'success',

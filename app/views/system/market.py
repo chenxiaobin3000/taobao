@@ -19,7 +19,7 @@ def add(request):
 @require_POST
 def set(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     name = post.get('name')
     data = Market.objects.set(pk, name)
     response = {
@@ -32,7 +32,7 @@ def set(request):
 @require_POST
 def delete(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     data = Market.objects.delete(pk)
     response = {
         'code': 0,
@@ -44,7 +44,7 @@ def delete(request):
 @require_POST
 def get(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     market = Market.objects.find(pk)
     data = Market.objects.encoder(market)
     response = {

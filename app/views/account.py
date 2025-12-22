@@ -50,7 +50,7 @@ def login(request):
 @require_POST
 def logout(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     # 清除session信息
     
     response = {
@@ -63,7 +63,7 @@ def logout(request):
 @require_POST
 def setPassword(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     password = post.get('password')
     data = Account.objects.set(pk, password)
     response = {
@@ -76,7 +76,7 @@ def setPassword(request):
 @require_POST
 def resetPassword(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     data = Account.objects.set(pk, default_password)
     response = {
         'code': 0,

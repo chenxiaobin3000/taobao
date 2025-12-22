@@ -10,14 +10,8 @@ class PermissionManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getList(self, role_id):
         return self.filter(role_id=role_id)
-
-    def encoder(self, permission):
-        return model_to_dict(permission, fields=['id', 'role_id', 'permission'])
 
     def encoderList(self, permissions):
         return [model_to_dict(permission, fields=['id', 'role_id', 'permission']) for permission in permissions]

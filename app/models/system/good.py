@@ -7,9 +7,8 @@ class GoodManager(models.Manager):
     def add(self, shop_id, good_id, name, short_name):
         return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name)
 
-    def set(self, pk, shop_id, good_id, name, short_name):
+    def set(self, pk, good_id, name, short_name):
         good = self.get(pk=pk)
-        good.shop_id = shop_id
         good.good_id = good_id
         good.name = name
         good.short_name = short_name

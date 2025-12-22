@@ -7,7 +7,7 @@ from app.models.system.company import Company
 def add(request):
     post = json.loads(request.body)
     name = post.get('name')
-    user_id = post.get('uid')
+    user_id = int(post.get('uid'))
     company = Company.objects.add(name, user_id)
     data = Company.objects.encoder(company)
     response = {
@@ -20,9 +20,9 @@ def add(request):
 @require_POST
 def set(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     name = post.get('name')
-    user_id = post.get('uid')
+    user_id = int(post.get('uid'))
     company = Company.objects.set(pk, name, user_id)
     data = Company.objects.encoder(company)
     response = {
@@ -35,7 +35,7 @@ def set(request):
 @require_POST
 def delete(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     data = Company.objects.delete(pk)
     response = {
         'code': 0,
@@ -47,7 +47,7 @@ def delete(request):
 @require_POST
 def get(request):
     post = json.loads(request.body)
-    pk = post.get('id')
+    pk = int(post.get('id'))
     company = Company.objects.find(pk)
     data = Company.objects.encoder(company)
     response = {
