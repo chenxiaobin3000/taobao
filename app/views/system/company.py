@@ -2,6 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from app.models.system.company import Company
+from app.models.system.user import User
 
 @require_POST
 def add(request):
@@ -60,11 +61,16 @@ def get(request):
 @require_POST
 def getList(request):
     post = json.loads(request.body)
-    company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    companys = Company.objects.getList(company_id, page, num)
+    companys = Company.objects.getList(page, num)
     data = Company.objects.encoderList(companys)
+
+    # 获取负责人信息
+    for company in data:
+        user = User.objects.find(company['user_id'])
+        company['user'] = user.name
+
     response = {
         'code': 0,
         'msg': 'success',

@@ -7,11 +7,10 @@ class UserManager(models.Manager):
     def add(self, name, phone, company_id, role_id):
         return self.create(name=name, phone=phone, company_id=company_id, role_id=role_id)
 
-    def set(self, pk, name, phone, company_id, role_id):
+    def set(self, pk, name, phone, role_id):
         user = self.get(pk=pk)
         user.name = name
         user.phone = phone
-        user.company_id = company_id
         user.role_id = role_id
         return user.save()
 

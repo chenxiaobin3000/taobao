@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path
 from django.views.generic.base import TemplateView
 from app.views import account
-from app.views.system import company, good, market, permission, role, shop, user
+from app.views.system import company, good, market, permission, role, shop, user, user_shop
 from app.views.original import order
 
 urlpatterns = [
@@ -67,6 +67,11 @@ urlpatterns = [
     path('api/shop/del', shop.delete),
     path('api/shop/get', shop.get),
     path('api/shop/getList', shop.getList),
+
+    # 用户-店铺
+    path('api/userShop/add', user_shop.add),
+    path('api/userShop/del', user_shop.delete),
+    path('api/userShop/getList', user_shop.getList),
 
     # 用户
     path('api/user/add', user.add),

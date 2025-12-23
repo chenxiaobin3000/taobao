@@ -18,10 +18,10 @@ class ShopManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, user_id, page, num):
+    def getList(self, company_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(user_id=user_id)[left:right]
+        return self.filter(company_id=company_id)[left:right]
 
     def encoder(self, shop):
         return model_to_dict(shop, fields=['id', 'company_id', 'market_id', 'name'])
