@@ -7,10 +7,8 @@ class ShopManager(models.Manager):
     def add(self, company_id, market_id, name):
         return self.create(company_id=company_id, market_id=market_id, name=name)
 
-    def set(self, pk, company_id, market_id, name):
+    def set(self, pk, name):
         shop = self.get(pk=pk)
-        shop.company_id = company_id
-        shop.market_id = market_id
         shop.name = name
         return shop.save()
 

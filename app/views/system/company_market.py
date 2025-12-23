@@ -40,6 +40,9 @@ def getList(request):
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': {
+            'total': len(data),
+            'list': data
+        }
     }
     return JsonResponse(response)

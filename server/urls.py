@@ -51,9 +51,7 @@ urlpatterns = [
 
     # 权限
     path('api/permission/add', permission.add),
-    path('api/permission/set', permission.set),
     path('api/permission/del', permission.delete),
-    path('api/permission/get', permission.get),
     path('api/permission/getList', permission.getList),
 
     # 角色

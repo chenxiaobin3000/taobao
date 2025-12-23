@@ -1,7 +1,7 @@
 import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from app.models.system import Permission
+from app.models.system.permission import Permission
 
 @require_POST
 def add(request):
@@ -40,6 +40,9 @@ def getList(request):
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': {
+            'total': len(data),
+            'list': data
+        }
     }
     return JsonResponse(response)
