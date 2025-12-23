@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from app.models.system.user import User
 from app.models.system.company import Company
 from app.models.system.company_market import CompanyMarket
+from app.models.system.shop import Shop
+from app.models.system.user_shop import UserShop
 from app.models.system.permission import Permission
 from app.models.system.role import Role
 
@@ -113,12 +115,19 @@ def getList(request):
     users = User.objects.getList(company_id, page, num)
     data = User.objects.encoderList(users)
 
-    # 获取公司、角色信息
+    # 获取公司、店铺、角色信息
     for user in data:
         company = Company.objects.find(user['company_id'])
         user['company'] = company.name
         role = Role.objects.find(user['role_id'])
         user['role'] = role.name
+        user['shops'] = []
+        userShops = UserShop.objects.getList(user['id'])
+        for userShop in userShops:
+            print(userShop)
+            shop = Shop.objects.find(userShop.shop_id)
+            dataShop = Shop.objects.encoder(shop)
+            user['shops'].append(dataShop)
 
     response = {
         'code': 0,
