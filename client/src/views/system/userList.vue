@@ -45,6 +45,9 @@
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
+        <el-form-item label="店铺">
+          <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @change="handleShopChange" />
+        </el-form-item>
         <el-form-item v-if="dialogStatus==='create'" label="说明" prop="role">
           <div style="width: 240px">新用户注册后，默认密码为: 123456</div>
         </el-form-item>
@@ -64,6 +67,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { getUserList, addUser, setUser, delUser } from '@/api/user'
+import { addUserShop, delUserShop } from '@/api/userShop'
 import { getShopList } from '@/api/shop'
 import { getRoleList } from '@/api/role'
 
@@ -71,6 +75,8 @@ export default {
   components: { Pagination },
   data() {
     return {
+      routes: [],
+      locked: false, // 刷新店铺列表锁
       tableHeight: 600,
       list: null,
       total: 0,
@@ -84,11 +90,6 @@ export default {
         search: null
       },
       temp: {},
-      checkStrictly: false,
-      defaultProps: {
-        children: 'children',
-        label: 'title'
-      },
       dialogVisible: false,
       dialogStatus: '',
       textMap: {
@@ -192,6 +193,29 @@ export default {
       this.temp = Object.assign({}, row)
       this.temp.roleId = row.role_id
       this.temp.roleName = row.role
+
+      // 生成店铺列表
+      this.routes = []
+      for (var i=0; i<this.shopList.length; ++i) {
+        var tmp = this.shopList[i]
+        this.routes.push({
+          id: tmp.id,
+          label: tmp.name
+        })
+      }
+
+      // 生成选中列表
+      this.$nextTick(() => {
+        var checkedKeys = []
+        for (var i=0; i<this.userdata.shop.length; ++i) {
+          checkedKeys.push(this.userdata.shop[i].id)
+        }
+        this.locked = true
+        this.$refs.tree.setCheckedKeys(checkedKeys)
+        this.$nextTick(() => {
+          this.locked = false
+        })
+      })
       this.dialogStatus = 'update'
       this.dialogVisible = true
     },
@@ -206,6 +230,27 @@ export default {
         this.getUserList()
         this.dialogVisible = false
       })
+    },
+    handleShopChange(data, checked) {
+      console.log(this.locked)
+      if (this.locked) {
+        return
+      }
+      if (checked) {
+        addUserShop({
+          uid: this.userdata.user.id,
+          sid: data.id
+        }).then(() => {
+          this.getUserList()
+        })
+      } else {
+        delUserShop({
+          uid: this.userdata.user.id,
+          sid: data.id
+        }).then(() => {
+          this.getUserList()
+        })
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

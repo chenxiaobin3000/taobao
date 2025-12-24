@@ -20,8 +20,9 @@ def add(request):
 @require_POST
 def delete(request):
     post = json.loads(request.body)
-    pk = int(post.get('id'))
-    data = UserShop.objects.delete(pk)
+    user_id = int(post.get('uid'))
+    shop_id = int(post.get('sid'))
+    data = UserShop.objects.delete(user_id, shop_id)
     response = {
         'code': 0,
         'msg': 'success',

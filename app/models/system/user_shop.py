@@ -7,8 +7,8 @@ class UserShopManager(models.Manager):
     def add(self, user_id, shop_id):
         return self.create(user_id=user_id, shop_id=shop_id)
 
-    def delete(self, pk):
-        return self.get(pk=pk).delete()
+    def delete(self, user_id, shop_id):
+        return self.filter(user_id=user_id, shop_id=shop_id).delete()
 
     def find(self, pk):
         return self.get(pk=pk)
