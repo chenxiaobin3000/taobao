@@ -46,7 +46,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="店铺">
-          <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @change="handleShopChange" />
+          <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleShopChange" />
         </el-form-item>
         <el-form-item v-if="dialogStatus==='create'" label="说明" prop="role">
           <div style="width: 240px">新用户注册后，默认密码为: 123456</div>
@@ -76,7 +76,6 @@ export default {
   data() {
     return {
       routes: [],
-      locked: false, // 刷新店铺列表锁
       tableHeight: 600,
       list: null,
       total: 0,
@@ -210,11 +209,7 @@ export default {
         for (var i=0; i<this.userdata.shop.length; ++i) {
           checkedKeys.push(this.userdata.shop[i].id)
         }
-        this.locked = true
         this.$refs.tree.setCheckedKeys(checkedKeys)
-        this.$nextTick(() => {
-          this.locked = false
-        })
       })
       this.dialogStatus = 'update'
       this.dialogVisible = true
@@ -224,19 +219,15 @@ export default {
         id: this.temp.id,
         name: this.temp.name,
         phone: this.temp.phone,
-        rid: this.temp.rid
+        rid: this.temp.roleId
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getUserList()
         this.dialogVisible = false
       })
     },
-    handleShopChange(data, checked) {
-      console.log(this.locked)
-      if (this.locked) {
-        return
-      }
-      if (checked) {
+    handleShopChange(data, obj) {
+      if (obj.checkedKeys.includes(data.id)) {
         addUserShop({
           uid: this.userdata.user.id,
           sid: data.id

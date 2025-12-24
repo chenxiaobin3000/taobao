@@ -5,6 +5,8 @@ from django.forms.models import model_to_dict
 # 用户-店铺关系表
 class UserShopManager(models.Manager):
     def add(self, user_id, shop_id):
+        # 无论如何都先删除，肯定不会有重复的
+        self.filter(user_id=user_id, shop_id=shop_id).delete()
         return self.create(user_id=user_id, shop_id=shop_id)
 
     def delete(self, user_id, shop_id):
