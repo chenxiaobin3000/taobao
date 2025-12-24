@@ -8,6 +8,7 @@ import Layout from '@/layout'
 
 /* Router Modules */
 import originalRouter from './modules/original'
+import companyRouter from './modules/company'
 import systemRouter from './modules/system'
 
 /**
@@ -60,6 +61,7 @@ export const asyncRoutes = [
 
   /** when your routing map is too long, you can split it into small modules **/
   originalRouter,
+  companyRouter,
   systemRouter,
 
   // 404 page must be placed at the end !!!
