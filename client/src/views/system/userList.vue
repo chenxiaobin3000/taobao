@@ -11,14 +11,14 @@
           <span>{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="公司" width="140px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.company }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="角色" width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.role }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="店铺" width="140px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.shopList }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" width="160" class-name="small-padding fixed-width">
@@ -40,13 +40,8 @@
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="temp.phone" />
         </el-form-item>
-        <el-form-item label="公司" prop="company">
-          <el-select v-model="temp.company.id" class="filter-item" placeholder="请选择公司">
-            <el-option v-for="item in companyList" :key="item.id" :label="item.label" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="temp.role.id" class="filter-item" placeholder="请选择角色">
+        <el-form-item label="角色" prop="roleName">
+          <el-select v-model="temp.roleId" class="filter-item" placeholder="请选择角色">
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
@@ -69,7 +64,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { getUserList, addUser, setUser, delUser } from '@/api/user'
-import { getCompanyList } from '@/api/company'
+import { getShopList } from '@/api/shop'
 import { getRoleList } from '@/api/role'
 
 export default {
@@ -80,9 +75,8 @@ export default {
       list: null,
       total: 0,
       loading: false,
-      companyList: [], // 公司列表
       roleList: null, // 本公司所有角色列表
-      oldRole: '', // 保存修改界面的旧角色id
+      shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
         page: 1,
@@ -90,6 +84,11 @@ export default {
         search: null
       },
       temp: {},
+      checkStrictly: false,
+      defaultProps: {
+        children: 'children',
+        label: 'title'
+      },
       dialogVisible: false,
       dialogStatus: '',
       textMap: {
@@ -122,9 +121,9 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = this.userdata.user.company_id
+    this.listQuery.id = this.userdata.company.id
     this.resetTemp()
-    this.getCompanyList()
+    this.getShopList()
   },
   methods: {
     resetTemp() {
@@ -132,8 +131,8 @@ export default {
         id: 0,
         name: '',
         phone: '',
-        company: { id: null, name: '' },
-        role: { id: null, name: '' }
+        roleId: 0,
+        roleName: ''
       }
     },
     getUserList() {
@@ -143,42 +142,45 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list
-        this.list.forEach(v => {
-          if (v.role == null) {
-            v.role = { id: 0, name: '无' }
+        // 展开店铺名称
+        for (var i = 0; i < this.list.length; ++i) {
+          var tmp = this.list[i]
+          tmp.shopList = ''
+          for (var j = 0; j < tmp.shops.length; ++j) {
+            tmp.shopList = tmp.shopList + tmp.shops[j].name + ', '
           }
-          if (v.role == null) {
-            v.role = { id: 0, name: '无' }
-          }
-        })
+        }
         this.loading = false
       }).catch(error => {
         this.loading = false
         Promise.reject(error)
       })
     },
-    getCompanyList() {
-      getCompanyList({
-        id: this.userdata.user.id
+    getShopList() {
+      getShopList({
+        id: this.userdata.company.id,
+        page: 1,
+        num: 1000
       }).then(response => {
-        this.companyList = response.data.data.companyList
+        this.shopList = response.data.data.list
         this.getRoleList()
       })
     },
     getRoleList() {
       getRoleList({
-        id: this.userdata.user.id
+        id: this.userdata.company.id,
+        page: 1,
+        num: 1000
       }).then(response => {
-        this.roleList = response.data.data.roles
+        this.roleList = response.data.data.list
         this.getUserList()
       })
     },
     createData() {
       addUser({
-        id: this.userdata.user.id,
-        account: this.temp.name,
+        name: this.temp.name,
         phone: this.temp.phone,
-        cid: this.temp.company.id,
+        cid: this.userdata.company.id,
         rid: this.temp.role.id
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
@@ -188,16 +190,17 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.oldRole = this.temp.role.id
+      this.temp.roleId = row.role_id
+      this.temp.roleName = row.role
       this.dialogStatus = 'update'
       this.dialogVisible = true
     },
     updateData() {
       setUser({
-        id: this.userdata.user.id,
-        uid: this.temp.id,
+        id: this.temp.id,
         name: this.temp.name,
-        phone: this.temp.phone
+        phone: this.temp.phone,
+        rid: this.temp.rid
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getUserList()
@@ -211,8 +214,7 @@ export default {
         type: 'warning'
       }).then(() => {
         delUser({
-          id: this.userdata.user.id,
-          uid: row.id
+          id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getUserList()

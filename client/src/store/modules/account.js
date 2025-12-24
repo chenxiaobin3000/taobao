@@ -50,7 +50,7 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getUserInfo({ id: state.id }).then(response => {
-        const { user, perms, market } = response.data.data
+        const { user, perms, company, market, shop } = response.data.data
         // roles must be a non-empty array
         if (!perms || perms.length <= 0) {
           reject('账号权限被移除，无法登录，请联系系统管理员')
@@ -58,7 +58,9 @@ const actions = {
         commit('SET_ROLES', perms)
         commit('SET_USERDATA', {
           user: user,
-          market: market
+          company: company,
+          market: market,
+          shop: shop
         })
         resolve({
           name: user.name,

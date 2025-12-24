@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from app.models.system.user import User
 from app.models.system.company import Company
 from app.models.system.company_market import CompanyMarket
+from app.models.system.market import Market
 from app.models.system.shop import Shop
 from app.models.system.user_shop import UserShop
 from app.models.system.permission import Permission
@@ -70,24 +71,41 @@ def getInfo(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     user = User.objects.find(pk)
+    dataUser = User.objects.encoder(user)
+
+    # 公司信息
+    company = Company.objects.find(user.company_id)
+    dataCompany = Company.objects.encoder(company)
 
     # 平台信息
     companyMarkets = CompanyMarket.objects.getList(user.company_id)
+    dataCM = []
+    for companyMarket in companyMarkets:
+        market = Market.objects.find(companyMarket.market_id)
+        tmp = Market.objects.encoder(market)
+        dataCM.append(tmp)
+
+    # 店铺信息
+    dataShop = []
+    userShops = UserShop.objects.getList(user.id)
+    for userShop in userShops:
+        shop = Shop.objects.find(userShop.shop_id)
+        tmp = Shop.objects.encoder(shop)
+        dataShop.append(tmp)
 
     # 权限信息
     permissions = Permission.objects.getList(user.role_id)
-
-    dataUser = User.objects.encoder(user)
-    dataCM = CompanyMarket.objects.encoderList(companyMarkets)
-    dataCM = [data['market_id'] for data in dataCM]
     dataP = Permission.objects.encoderList(permissions)
     dataP = [data['permission'] for data in dataP]
+
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'user': dataUser,
+            'company': dataCompany,
             'market': dataCM,
+            'shop': dataShop,
             'perms': dataP
         }
     }
@@ -115,16 +133,13 @@ def getList(request):
     users = User.objects.getList(company_id, page, num)
     data = User.objects.encoderList(users)
 
-    # 获取公司、店铺、角色信息
+    # 获取店铺、角色信息
     for user in data:
-        company = Company.objects.find(user['company_id'])
-        user['company'] = company.name
         role = Role.objects.find(user['role_id'])
         user['role'] = role.name
         user['shops'] = []
         userShops = UserShop.objects.getList(user['id'])
         for userShop in userShops:
-            print(userShop)
             shop = Shop.objects.find(userShop.shop_id)
             dataShop = Shop.objects.encoder(shop)
             user['shops'].append(dataShop)

@@ -19,7 +19,7 @@ export function setUser(data) {
 
 export function delUser(data) {
   return request({
-    url: `${path}/delete`,
+    url: `${path}/del`,
     method: 'post',
     data
   })

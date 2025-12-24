@@ -19,7 +19,7 @@ export function setRole(data) {
 
 export function delRole(data) {
   return request({
-    url: `${path}/delete`,
+    url: `${path}/del`,
     method: 'post',
     data
   })

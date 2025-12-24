@@ -12,8 +12,8 @@ from app.models.system.user import User
 # 初始化测试数据库
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        Market.objects.add('taobao')
-        Market.objects.add('douyin')
+        Market.objects.add('淘宝')
+        Market.objects.add('抖音')
         Company.objects.add('创想酷玩', 1)
         CompanyMarket.objects.add(1, 1)
         CompanyMarket.objects.add(1, 2)

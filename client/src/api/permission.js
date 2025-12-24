@@ -19,7 +19,7 @@ export function setPermission(data) {
 
 export function delPermission(data) {
   return request({
-    url: `${path}/delete`,
+    url: `${path}/del`,
     method: 'post',
     data
   })

@@ -19,7 +19,7 @@ export function setMarket(data) {
 
 export function delMarket(data) {
   return request({
-    url: `${path}/delete`,
+    url: `${path}/del`,
     method: 'post',
     data
   })

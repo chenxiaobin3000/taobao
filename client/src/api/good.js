@@ -19,7 +19,7 @@ export function setGood(data) {
 
 export function delGood(data) {
   return request({
-    url: `${path}/delete`,
+    url: `${path}/del`,
     method: 'post',
     data
   })

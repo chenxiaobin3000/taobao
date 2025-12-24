@@ -1,9 +1,13 @@
 <template>
   <div class="app-container">
     <br>
-    <span class="firstLine">{{ userdata.user.name }}:</span>
+    <span class="firstLine">你好，来自 ‘{{ userdata.company.name }}’ 的 {{ userdata.user.name }}！</span>
     <br><br>
-    <span class="secondLine">您好！欢迎使用管理系统，新的一天也要开心哦！</span>
+    <span class="secondLine">已授权的平台: </span>
+    <li v-for="data in userdata.market" :key="id" class="secondContext"><span class="secondLine">{{ data.name }}</span></li>
+    <br><br>
+    <span class="secondLine">管理中的店铺: </span>
+    <li v-for="data in userdata.shop" :key="id" class="secondContext"><span class="secondLine">{{ data.name }}</span></li>
   </div>
 </template>
 
@@ -32,6 +36,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    console.log(this.userdata.market)
   }
 }
 </script>
@@ -47,6 +52,11 @@ export default {
 }
 
 .secondLine {
-  padding-left: 7%;
+  padding-left: 2%;
+}
+
+.secondContext {
+  padding-left: 2%;
+  list-style: none;
 }
 </style>

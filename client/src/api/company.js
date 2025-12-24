@@ -19,7 +19,7 @@ export function setCompany(data) {
 
 export function delCompany(data) {
   return request({
-    url: `${path}/delete`,
+    url: `${path}/del`,
     method: 'post',
     data
   })

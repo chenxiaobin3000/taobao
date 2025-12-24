@@ -19,7 +19,7 @@ export function setShop(data) {
 
 export function delShop(data) {
   return request({
-    url: `${path}/delete`,
+    url: `${path}/del`,
     method: 'post',
     data
   })
