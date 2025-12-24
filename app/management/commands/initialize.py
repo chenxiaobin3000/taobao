@@ -18,11 +18,19 @@ class Command(BaseCommand):
         CompanyMarket.objects.add(1, 1)
         CompanyMarket.objects.add(1, 2)
 
+        Role.objects.add(1, '高管')
         Role.objects.add(1, '运营')
-        Permission.objects.add(1, 1000)
-        Permission.objects.add(1, 1001)
-        Permission.objects.add(1, 1002)
-        Permission.objects.add(1, 1003)
+        for i in range(1, 3):
+            Permission.objects.add(i, 1000)
+            Permission.objects.add(i, 1001)
+            Permission.objects.add(i, 2000)
+            Permission.objects.add(i, 2001)
+            Permission.objects.add(i, 2002)
+            Permission.objects.add(i, 2003)
+            Permission.objects.add(i, 2004)
+            Permission.objects.add(i, 2005)
+            Permission.objects.add(i, 2006)
+            Permission.objects.add(i, 3000)
 
         Shop.objects.add(1, 1, '德国KSTE')
         Shop.objects.add(1, 1, '挪威VER')

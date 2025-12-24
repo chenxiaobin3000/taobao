@@ -6,7 +6,7 @@ export default {
   name: 'original',
   meta: {
     title: '数据填报',
-    roles: [2000]
+    roles: [3000]
   },
   children: [/* {
     path: 'order', component: () => import('@/views/original/order'),
