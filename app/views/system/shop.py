@@ -2,6 +2,8 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from app.models.system.shop import Shop
+from app.models.system.user import User
+from app.models.system.user_shop import UserShop
 
 @require_POST
 def add(request):
@@ -35,6 +37,8 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
+    # 存在商品不能删除
+
     data = Shop.objects.delete(pk)
     response = {
         'code': 0,
@@ -47,8 +51,24 @@ def delete(request):
 def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    good = Shop.objects.find(pk)
-    data = Shop.objects.encoder(good)
+    shop = Shop.objects.find(pk)
+    data = Shop.objects.encoder(shop)
+
+    # 所有用户信息
+    users = User.objects.getList(data['company_id'], 1, 1000)
+    userDatas = User.objects.encoderList(users)
+
+    # 管理员信息
+    userShops = UserShop.objects.getListByShop(data['id'])
+    userShopDatas = UserShop.objects.encoderList(userShops)
+    for userShop in userShopDatas:
+        del userShop['id']
+        del userShop['shop_id']
+        for user in userDatas:
+            if user['id'] == userShop['user_id']:
+                userShop['name'] = user['name']
+                break
+    data['users'] = userShopDatas
     response = {
         'code': 0,
         'msg': 'success',
@@ -62,14 +82,32 @@ def getList(request):
     company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    goods = Shop.objects.getList(company_id, page, num)
-    data = Shop.objects.encoderList(goods)
+    shops = Shop.objects.getList(company_id, page, num)
+    datas = Shop.objects.encoderList(shops)
+
+    # 所有用户信息
+    users = User.objects.getList(company_id, 1, 1000)
+    userDatas = User.objects.encoderList(users)
+
+    # 管理员信息
+    for data in datas:
+        userShops = UserShop.objects.getListByShop(data['id'])
+        userShopDatas = UserShop.objects.encoderList(userShops)
+        for userShop in userShopDatas:
+            del userShop['id']
+            del userShop['shop_id']
+            for user in userDatas:
+                if user['id'] == userShop['user_id']:
+                    userShop['name'] = user['name']
+                    break
+        data['users'] = userShopDatas
+
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': len(data),
-            'list': data
+            'list': datas
         }
     }
     return JsonResponse(response)

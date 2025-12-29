@@ -62,8 +62,8 @@ def getList(request):
     company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    goods = Role.objects.getList(company_id, page, num)
-    data = Role.objects.encoderList(goods)
+    roles = Role.objects.getList(company_id, page, num)
+    data = Role.objects.encoderList(roles)
     response = {
         'code': 0,
         'msg': 'success',

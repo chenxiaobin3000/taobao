@@ -57,8 +57,8 @@ def delete(request):
 def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    good = User.objects.find(pk)
-    data = User.objects.encoder(good)
+    user = User.objects.find(pk)
+    data = User.objects.encoder(user)
     response = {
         'code': 0,
         'msg': 'success',
@@ -91,6 +91,7 @@ def getInfo(request):
     for userShop in userShops:
         shop = Shop.objects.find(userShop.shop_id)
         tmp = Shop.objects.encoder(shop)
+        del tmp['company_id']
         dataShop.append(tmp)
 
     # 权限信息
@@ -115,8 +116,8 @@ def getInfo(request):
 def getByPhone(request):
     post = json.loads(request.body)
     phone = post.get('phone')
-    good = User.objects.getByPhone(phone)
-    data = User.objects.encoder(good)
+    user = User.objects.getByPhone(phone)
+    data = User.objects.encoder(user)
     response = {
         'code': 0,
         'msg': 'success',

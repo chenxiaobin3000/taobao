@@ -18,6 +18,9 @@ class UserShopManager(models.Manager):
     def getList(self, user_id):
         return self.filter(user_id=user_id)
 
+    def getListByShop(self, shop_id):
+        return self.filter(shop_id=shop_id)
+
     def encoder(self, userShop):
         return model_to_dict(userShop, fields=['id', 'user_id', 'shop_id'])
 
