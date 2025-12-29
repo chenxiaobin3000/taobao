@@ -24,8 +24,7 @@ def set(request):
     pk = int(post.get('id'))
     name = post.get('name')
     user_id = int(post.get('uid'))
-    company = Company.objects.set(pk, name, user_id)
-    data = Company.objects.encoder(company)
+    data = Company.objects.set(pk, name, user_id)
     response = {
         'code': 0,
         'msg': 'success',
