@@ -6,6 +6,11 @@
           {{ scope.row.name }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="平台" width="160px" >
+        <template slot-scope="scope">
+          {{ scope.row.market_name }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="操作" width="220">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
@@ -19,6 +24,11 @@
       <el-form :model="temp" label-width="80px" label-position="left">
         <el-form-item label="店铺名称">
           <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item label="平台" prop="temp.market">
+          <el-select v-model="temp.marketId" class="filter-item" placeholder="请选择平台">
+            <el-option v-for="item in marketList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="管理员">
           <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleUserChange" />
@@ -75,6 +85,15 @@ export default {
     },
     create() {
       this.resetTemp()
+      // 生成用户列表
+      this.routes = []
+      for (var i=0; i<this.userList.length; ++i) {
+        var tmp = this.userList[i]
+        this.routes.push({
+          id: tmp.id,
+          label: tmp.name
+        })
+      }
       this.dialogStatus = 'create'
       this.dialogVisible = true
     }

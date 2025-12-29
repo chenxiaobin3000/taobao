@@ -3,8 +3,8 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from app.models.account import Account
 
-# 系统默认密码
-default_password = '888888'
+# 系统默认密码:888888
+default_password = '21218cca77804d2ba1922c33e0151105'
 
 @require_POST
 def register(request):

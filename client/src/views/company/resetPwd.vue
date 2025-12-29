@@ -11,14 +11,9 @@
           <span>{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="部门" width="200px" align="center">
+      <el-table-column label="角色" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.depart.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="角色" width="200px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.role.name }}</span>
+          <span>{{ row.role }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
@@ -48,7 +43,7 @@ export default {
       listQuery: {
         id: 0,
         page: 1,
-        limit: 10,
+        num: 10,
         search: null
       }
     }
@@ -69,7 +64,8 @@ export default {
     }
   },
   created() {
-    this.listQuery.id = this.$store.getters.userdata.user.id
+    this.userdata = this.$store.getters.userdata
+    this.listQuery.id = this.userdata.company.id
     this.getUserList()
   },
   methods: {
@@ -80,19 +76,6 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list
-        this.list.forEach(v => {
-          if (v.company == null) {
-            v.company = {
-              name: ''
-            }
-          }
-          if (v.role == null) {
-            v.role = {
-              id: 0,
-              name: ''
-            }
-          }
-        })
         this.loading = false
       }).catch(error => {
         this.loading = false

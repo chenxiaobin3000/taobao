@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from app.models.system.shop import Shop
 from app.models.system.user import User
 from app.models.system.user_shop import UserShop
+from app.models.system.market import Market
 
 @require_POST
 def add(request):
@@ -54,6 +55,10 @@ def get(request):
     shop = Shop.objects.find(pk)
     data = Shop.objects.encoder(shop)
 
+    # 平台信息
+    market = Market.objects.find(data['market_id'])
+    data['market_name'] = market.name
+
     # 所有用户信息
     users = User.objects.getList(data['company_id'], 1, 1000)
     userDatas = User.objects.encoderList(users)
@@ -89,8 +94,11 @@ def getList(request):
     users = User.objects.getList(company_id, 1, 1000)
     userDatas = User.objects.encoderList(users)
 
-    # 管理员信息
+    # 获取平台、管理员信息
     for data in datas:
+        market = Market.objects.find(data['market_id'])
+        data['market_name'] = market.name
+
         userShops = UserShop.objects.getListByShop(data['id'])
         userShopDatas = UserShop.objects.encoderList(userShops)
         for userShop in userShopDatas:
