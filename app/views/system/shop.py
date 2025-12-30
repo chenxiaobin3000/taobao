@@ -5,6 +5,7 @@ from app.models.system.shop import Shop
 from app.models.system.user import User
 from app.models.system.user_shop import UserShop
 from app.models.system.market import Market
+from app.models.system.good import Good
 
 @require_POST
 def add(request):
@@ -38,14 +39,28 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    # 存在商品不能删除
-
-    data = Shop.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': {}
     }
+
+    # 存在商品不能删除
+    good = Good.objects.getList(pk, 1, 1)
+    if good:
+        response['code'] = -1
+        response['msg'] = '存在商品，不能删除'
+        return JsonResponse(response)
+
+    # 存在管理员不能删除
+    shop = UserShop.objects.getListByShop(pk)
+    if shop:
+        response['code'] = -1
+        response['msg'] = '存在管理员，不能删除'
+        return JsonResponse(response)
+
+    data = Shop.objects.delete(pk)
+    response['data'] = data
     return JsonResponse(response)
 
 @require_POST

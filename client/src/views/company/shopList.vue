@@ -6,7 +6,7 @@
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="平台" width="160px" >
+      <el-table-column align="center" label="平台" width="160px">
         <template slot-scope="scope">
           {{ scope.row.market_name }}
         </template>
@@ -25,12 +25,12 @@
         <el-form-item label="店铺名称">
           <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="平台" prop="temp.market">
+        <el-form-item v-if="isNew" label="平台" prop="temp.market">
           <el-select v-model="temp.marketId" class="filter-item" placeholder="请选择平台">
             <el-option v-for="item in marketList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="管理员">
+        <el-form-item v-else label="管理员">
           <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleUserChange" />
         </el-form-item>
       </el-form>
@@ -47,6 +47,7 @@ import { mapState } from 'vuex'
 import { getShopList, addShop, delShop, setShop } from '@/api/shop'
 import { getUserList } from '@/api/user'
 import { addUserShop, delUserShop } from '@/api/userShop'
+import { getMarketList } from '@/api/market'
 
 export default {
   data() {
@@ -63,6 +64,7 @@ export default {
         num: 10,
         search: null
       },
+      isNew: false,
       temp: {},
       dialogVisible: false,
       dialogStatus: '',
@@ -85,15 +87,17 @@ export default {
     },
     create() {
       this.resetTemp()
+      this.temp.marketId = this.marketList[0].id
       // 生成用户列表
       this.routes = []
-      for (var i=0; i<this.userList.length; ++i) {
+      for (var i = 0; i < this.userList.length; ++i) {
         var tmp = this.userList[i]
         this.routes.push({
           id: tmp.id,
           label: tmp.name
         })
       }
+      this.isNew = true
       this.dialogStatus = 'create'
       this.dialogVisible = true
     }
@@ -113,6 +117,7 @@ export default {
     resetTemp() {
       this.temp = {
         id: 0,
+        marketId: 0,
         name: ''
       }
     },
@@ -136,12 +141,24 @@ export default {
         num: 1000
       }).then(response => {
         this.userList = response.data.data.list
+        this.getMarketList()
+      })
+    },
+    getMarketList() {
+      getMarketList({
+        id: this.userdata.company.id,
+        page: 1,
+        num: 1000
+      }).then(response => {
+        this.marketList = response.data.data.list
         this.getShopList()
       })
     },
     createData() {
       addShop({
-        name: this.temp.name
+        name: this.temp.name,
+        cid: this.userdata.company.id,
+        mid: this.temp.marketId
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
         this.getShopList()
@@ -155,7 +172,7 @@ export default {
 
       // 生成用户列表
       this.routes = []
-      for (var i=0; i<this.userList.length; ++i) {
+      for (var i = 0; i < this.userList.length; ++i) {
         var tmp = this.userList[i]
         this.routes.push({
           id: tmp.id,
@@ -166,20 +183,19 @@ export default {
       // 生成选中列表
       this.$nextTick(() => {
         var checkedKeys = []
-        for (var i=0; i<row.users.length; ++i) {
+        for (var i = 0; i < row.users.length; ++i) {
           checkedKeys.push(row.users[i].user_id)
         }
         this.$refs.tree.setCheckedKeys(checkedKeys)
       })
+      this.isNew = false
       this.dialogStatus = 'update'
       this.dialogVisible = true
     },
     updateData() {
       setShop({
         id: this.temp.id,
-        name: this.temp.name,
-        phone: this.temp.phone,
-        rid: this.temp.roleId
+        name: this.temp.name
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getUserList()
@@ -210,8 +226,7 @@ export default {
         type: 'warning'
       }).then(() => {
         delShop({
-          id: this.userdata.user.id,
-          rid: row.id
+          id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getRoles()

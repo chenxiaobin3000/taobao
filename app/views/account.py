@@ -39,7 +39,7 @@ def login(request):
     # 校验密码
     if (password != object.password):
         response['code'] = -1
-        response['msg'] = 'fail'
+        response['msg'] = '密码不正确'
         return JsonResponse(response)
     response['data']['id'] = object.user_id
 

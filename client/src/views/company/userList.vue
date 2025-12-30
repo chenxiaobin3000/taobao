@@ -195,7 +195,7 @@ export default {
 
       // 生成店铺列表
       this.routes = []
-      for (var i=0; i<this.shopList.length; ++i) {
+      for (var i = 0; i < this.shopList.length; ++i) {
         var tmp = this.shopList[i]
         this.routes.push({
           id: tmp.id,
@@ -206,7 +206,7 @@ export default {
       // 生成选中列表
       this.$nextTick(() => {
         var checkedKeys = []
-        for (var i=0; i<this.userdata.shop.length; ++i) {
+        for (var i = 0; i < this.userdata.shop.length; ++i) {
           checkedKeys.push(this.userdata.shop[i].id)
         }
         this.$refs.tree.setCheckedKeys(checkedKeys)
