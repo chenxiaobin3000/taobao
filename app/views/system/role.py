@@ -7,10 +7,16 @@ from app.models.system.permission import Permission
 @require_POST
 def add(request):
     post = json.loads(request.body)
-    company_id = int(post.get('cid'))
+    company_id = int(post.get('id'))
     name = post.get('name')
+    permissions = post.get('p')
     role = Role.objects.add(company_id, name)
     data = Role.objects.encoder(role)
+
+    # 添加权限
+    for p in permissions:
+        Permission.objects.add(role.id, p)
+
     response = {
         'code': 0,
         'msg': 'success',

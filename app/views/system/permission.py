@@ -7,8 +7,8 @@ from app.models.system.permission import Permission
 def add(request):
     post = json.loads(request.body)
     role_id = int(post.get('rid'))
-    permission = int(post.get('pid'))
-    permission = Permission.objects.add(role_id, permission)
+    p = int(post.get('pid'))
+    permission = Permission.objects.add(role_id, p)
     data = Permission.objects.encoder(permission)
     response = {
         'code': 0,

@@ -20,7 +20,7 @@
           <el-input v-model="temp.name" />
         </el-form-item>
         <el-form-item label="权限">
-          <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleRoleChange" />
+          <el-tree ref="tree" :data="routes" node-key="id" show-checkbox check-strictly @check="handleRoleChange" />
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
@@ -51,7 +51,6 @@ export default {
         search: null
       },
       temp: {},
-      isNew: false,
       dialogVisible: false,
       dialogStatus: '',
       textMap: {
@@ -72,7 +71,6 @@ export default {
       this.getRoleList()
     },
     create() {
-      this.isNew = true
       this.resetTemp()
       this.$nextTick(() => {
         this.$refs.tree.setCheckedKeys([])
@@ -112,10 +110,11 @@ export default {
       })
     },
     createData() {
+      var checkedKeys = this.$refs.tree.getCheckedKeys()
       addRole({
         id: this.userdata.company.id,
         name: this.temp.name,
-        p: []
+        p: checkedKeys
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
         this.getRoleList()
@@ -126,7 +125,6 @@ export default {
       this.temp = Object.assign({}, row)
       this.temp.id = row.id
       this.temp.name = row.name
-      this.isNew = false
       this.$nextTick(() => {
         this.$refs.tree.setCheckedKeys(row.p)
       })
@@ -134,10 +132,11 @@ export default {
       this.dialogVisible = true
     },
     updateData() {
+      var checkedKeys = this.$refs.tree.getCheckedKeys()
       setRole({
         id: this.temp.id,
         name: this.temp.name,
-        permissions: []
+        permissions: checkedKeys
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getRoleList()
@@ -145,24 +144,24 @@ export default {
       })
     },
     handleRoleChange(data, obj) {
-      if (this.isNew) {
-        return
+      var checkedKeys = this.$refs.tree.getCheckedKeys()
+      console.log(checkedKeys)
+      console.log(data)
+      console.log(obj)
+      // 判断是否存在子节点，子节点全选或反选
+      if (data.children) {
+        var check = false
+        if (obj.checkedKeys.includes(data.id)) {
+          check = true
+        }
       }
-      if (obj.checkedKeys.includes(data.id)) {
-        addRole({
-          uid: data.id,
-          sid: this.temp.id
-        }).then(() => {
-          this.getUserList()
-        })
-      } else {
-        delRole({
-          uid: data.id,
-          sid: this.temp.id
-        }).then(() => {
-          this.getUserList()
-        })
+
+      // 选中子节点，就选中父节点
+      var pid = parseInt(data.id / 100) * 100
+      if (!obj.checkedKeys.includes(pid)) {
+        checkedKeys.push(pid)
       }
+      this.$refs.tree.setCheckedKeys(checkedKeys)
     },
     handleDelete({ $index, row }) {
       this.$confirm('确定要删除吗?', '提示', {
