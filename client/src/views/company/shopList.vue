@@ -52,6 +52,7 @@ import { getMarketList } from '@/api/market'
 export default {
   data() {
     return {
+      userdata: {},
       routes: [],
       tableHeight: 600,
       list: null,

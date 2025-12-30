@@ -1,18 +1,24 @@
 export const MyRoleData = [{
-  path: '/', meta: { title: '首页报表', roles: [100] }
+  id: 3000, label: '数据管理',
+  children: []
 }, {
-  path: '/system', meta: { title: '系统管理', roles: [1000] },
+  id: 2000, label: '公司管理',
   children: [{
-    path: 'setPassword', meta: { title: '修改密码', roles: [1005] }
+    id: 2001, label: '公司信息'
   }, {
-    path: 'storage', meta: { title: '仓库管理', roles: [1006] }
+    id: 2002, label: '店铺管理'
   }, {
-    path: 'department', meta: { title: '部门管理', roles: [1002] }
+    id: 2003, label: '商品管理'
   }, {
-    path: 'roleList', meta: { title: '角色管理', roles: [1003] }
+    id: 2004, label: '用户管理'
   }, {
-    path: 'userList', meta: { title: '用户管理', roles: [1004] }
+    id: 2005, label: '角色管理'
   }, {
-    path: 'resetPwd', meta: { title: '重置密码', roles: [1001] }
+    id: 2006, label: '重置密码'
+  }]
+}, {
+  id: 1000, label: '系统管理',
+  children: [{
+    id: 1001, label: '修改密码'
   }]
 }]

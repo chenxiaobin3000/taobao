@@ -2,6 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from app.models.system.role import Role
+from app.models.system.permission import Permission
 
 @require_POST
 def add(request):
@@ -49,6 +50,12 @@ def get(request):
     pk = int(post.get('id'))
     role = Role.objects.find(pk)
     data = Role.objects.encoder(role)
+
+    # 获取权限信息
+    permissions = Permission.objects.getList(data['id'])
+    dataP = Permission.objects.encoderList(permissions)
+    data['p'] = [tmp['permission'] for tmp in dataP]
+
     response = {
         'code': 0,
         'msg': 'success',
@@ -64,6 +71,13 @@ def getList(request):
     num = int(post.get('num'))
     roles = Role.objects.getList(company_id, page, num)
     data = Role.objects.encoderList(roles)
+
+    # 获取权限信息
+    for role in data:
+        permissions = Permission.objects.getList(role['id'])
+        dataP = Permission.objects.encoderList(permissions)
+        role['p'] = [data['permission'] for data in dataP]
+
     response = {
         'code': 0,
         'msg': 'success',

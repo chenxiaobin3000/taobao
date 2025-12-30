@@ -75,6 +75,7 @@ export default {
   components: { Pagination },
   data() {
     return {
+      userdata: {},
       routes: [],
       tableHeight: 600,
       list: null,

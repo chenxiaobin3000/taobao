@@ -37,6 +37,7 @@ export default {
   components: { Pagination },
   data() {
     return {
+      userdata: {},
       list: null,
       total: 0,
       loading: false,
