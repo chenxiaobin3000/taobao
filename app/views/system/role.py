@@ -29,8 +29,14 @@ def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     name = post.get('name')
-    role = Role.objects.set(pk, name)
-    data = Role.objects.encoder(role)
+    permissions = post.get('p')
+    data = Role.objects.set(pk, name)
+
+    # 修改权限
+    Permission.objects.deleteByRole(pk)
+    for p in permissions:
+        Permission.objects.add(pk, p)
+
     response = {
         'code': 0,
         'msg': 'success',

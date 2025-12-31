@@ -10,6 +10,9 @@ class PermissionManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
+    def deleteByRole(self, role_id):
+        return self.filter(role_id=role_id).delete()
+    
     def getList(self, role_id):
         return self.filter(role_id=role_id)
 

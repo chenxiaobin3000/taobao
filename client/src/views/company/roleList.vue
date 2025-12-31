@@ -136,7 +136,7 @@ export default {
       setRole({
         id: this.temp.id,
         name: this.temp.name,
-        permissions: checkedKeys
+        p: checkedKeys
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getRoleList()
@@ -145,20 +145,22 @@ export default {
     },
     handleRoleChange(data, obj) {
       var checkedKeys = this.$refs.tree.getCheckedKeys()
-      console.log(checkedKeys)
-      console.log(data)
-      console.log(obj)
       // 判断是否存在子节点，子节点全选或反选
       if (data.children) {
-        var check = false
         if (obj.checkedKeys.includes(data.id)) {
-          check = true
+          for (var i = 0; i < data.children.length; ++i) {
+            checkedKeys.push(data.children[i].id)
+          }
+        } else {
+          for (var i = 0; i < data.children.length; ++i) {
+            checkedKeys = checkedKeys.filter(item => item !== data.children[i].id)
+          }
         }
       }
 
       // 选中子节点，就选中父节点
       var pid = parseInt(data.id / 100) * 100
-      if (!obj.checkedKeys.includes(pid)) {
+      if (obj.checkedKeys.includes(data.id) && !obj.checkedKeys.includes(pid)) {
         checkedKeys.push(pid)
       }
       this.$refs.tree.setCheckedKeys(checkedKeys)
