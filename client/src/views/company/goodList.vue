@@ -1,6 +1,11 @@
 <template>
   <div class="app-container">
-    <el-table v-loading="loading" :data="list" style="width: 100%;" border highlight-current-row>
+    <el-form-item label="店铺" prop="shopName">
+      <el-select v-model="temp.shopId" class="filter-item" placeholder="请选择店铺">
+        <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+    </el-form-item>
+    <el-table ref="table" v-loading="loading" :data="list" style="width: 100%;" border highlight-current-row>
       <el-table-column align="center" label="角色名称" width="220">
         <template slot-scope="scope">
           {{ scope.row.name }}
@@ -42,25 +47,23 @@ export default {
   data() {
     return {
       userdata: {},
-      routes: [],
-      list: [],
+      tableHeight: 600,
+      list: null,
+      total: 0,
       loading: false,
+      shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
-        gid: 0,
+        page: 1,
+        num: 10,
         search: null
       },
       temp: {},
-      checkStrictly: false,
-      defaultProps: {
-        children: 'children',
-        label: 'title'
-      },
       dialogVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '修改角色信息',
-        create: '新建角色'
+        update: '修改商品信息',
+        create: '新建商品'
       }
     }
   },
@@ -73,86 +76,75 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getRoles()
+      this.getGoodList()
     },
     create() {
       this.resetTemp()
-      if (this.$refs.tree) {
-        this.$refs.tree.setCheckedNodes([])
-      }
       this.dialogStatus = 'create'
       this.dialogVisible = true
     }
   },
+  mounted: function() {
+    setTimeout(() => {
+      this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 78
+    }, 1000)
+  },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = this.userdata.user.id
-    this.routes = treeGenerate.generateRoutes(MyRoleData)
-    this.getRoles()
+    this.listQuery.id = 0
+    this.resetTemp()
+    this.getShopList()
   },
   methods: {
     resetTemp() {
       this.temp = {
         id: 0,
+        gid: '',
         name: '',
-        routes: []
+        sname: '',
       }
     },
-    getRoles() {
+    getGoodList() {
       this.loading = true
-      getRoleList(
+      getGoodList(
         this.listQuery
       ).then(response => {
-        this.list = response.data.data.roles
-        this.list.forEach(role => {
-          // 角色列表没有包含权限信息
-          role.routes = null
-        })
+        this.total = response.data.data.total
+        this.list = response.data.data.list
         this.loading = false
       }).catch(error => {
         this.loading = false
         Promise.reject(error)
       })
     },
+    getShopList() {
+      getShopList({
+        id: this.userdata.company.id,
+        page: 1,
+        num: 1000
+      }).then(response => {
+        this.shopList = response.data.data.list
+        this.getGoodList()
+      })
+    },
     createData() {
-      const checkedKeys = this.$refs.tree.getCheckedKeys()
-      this.temp.routes = treeGenerate.generateTree(MyRoleData, '/', checkedKeys)
-      addRole({
-        id: this.userdata.user.id,
+      addGood({
+        id: this.temp.id,
+        gid: this.temp.gid,
         name: this.temp.name,
-        permissions: this.temp.routes
+        sname: this.temp.sname
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
-        this.getRoles()
+        this.getGoodList()
         this.dialogVisible = false
       })
     },
-    handleUpdate(scope) {
+    handleUpdate(row) {
+      this.temp = Object.assign({}, row)
+      this.temp.roleId = row.role_id
+      this.temp.roleName = row.role
       this.dialogStatus = 'update'
       this.dialogVisible = true
-      this.temp = deepClone(scope.row)
-      if (this.temp.routes) {
-        this.checkStrictly = true // 保护父子节点不相互影响
-        this.$nextTick(() => {
-          const routes = treeGenerate.filterAsyncRoutes(MyRoleData, this.temp.routes)
-          this.$refs.tree.setCheckedNodes(treeGenerate.generateArr(routes))
-          this.checkStrictly = false
-        })
-      } else {
-        getRole({
-          id: this.userdata.user.id,
-          rid: this.temp.id
-        }).then(response => {
-          this.temp.routes = response.data.data.permissions
-          scope.row.routes = this.temp.routes
-          this.checkStrictly = true // 保护父子节点不相互影响
-          this.$nextTick(() => {
-            const routes = treeGenerate.filterAsyncRoutes(MyRoleData, this.temp.routes)
-            this.$refs.tree.setCheckedNodes(treeGenerate.generateArr(routes))
-            this.checkStrictly = false
-          })
-        })
-      }
     },
     updateData() {
       const checkedKeys = this.$refs.tree.getCheckedKeys()

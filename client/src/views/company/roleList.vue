@@ -152,8 +152,8 @@ export default {
             checkedKeys.push(data.children[i].id)
           }
         } else {
-          for (var i = 0; i < data.children.length; ++i) {
-            checkedKeys = checkedKeys.filter(item => item !== data.children[i].id)
+          for (var j = 0; j < data.children.length; ++j) {
+            checkedKeys = checkedKeys.filter(item => item !== data.children[j].id)
           }
         }
       }

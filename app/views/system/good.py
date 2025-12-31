@@ -6,10 +6,11 @@ from app.models.system.good import Good
 @require_POST
 def add(request):
     post = json.loads(request.body)
-    shop_id = int(post.get('sid'))
+    shop_id = int(post.get('id'))
     good_id = int(post.get('gid'))
     name = post.get('name')
-    good = Good.objects.add(shop_id, good_id, name)
+    short_name = post.get('sname')
+    good = Good.objects.add(shop_id, good_id, name, short_name)
     data = Good.objects.encoder(good)
     response = {
         'code': 0,
@@ -22,10 +23,9 @@ def add(request):
 def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    shop_id = int(post.get('sid'))
-    good_id = int(post.get('gid'))
     name = post.get('name')
-    data = Good.objects.set(pk, shop_id, good_id, name)
+    short_name = post.get('sname')
+    data = Good.objects.set(pk, name, short_name)
     response = {
         'code': 0,
         'msg': 'success',
