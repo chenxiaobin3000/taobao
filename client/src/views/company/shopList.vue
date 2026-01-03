@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-table ref="table" v-loading="loading" :data="list" style="width: 100%;" border highlight-current-row>
+    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="店铺名称">
         <template slot-scope="scope">
           {{ scope.row.name }}
@@ -11,7 +11,7 @@
           {{ scope.row.market_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="220">
+      <el-table-column align="center" label="操作" width="160">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
@@ -19,9 +19,11 @@
       </el-table-column>
     </el-table>
 
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getUserList" />
+
     <!-- 店铺信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-width="80px" label-position="left">
+      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="店铺名称">
           <el-input v-model="temp.name" />
         </el-form-item>
@@ -34,7 +36,7 @@
           <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleUserChange" />
         </el-form-item>
       </el-form>
-      <div style="text-align:right;">
+      <div slot="footer" class="dialog-footer">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
       </div>
@@ -44,12 +46,14 @@
 
 <script>
 import { mapState } from 'vuex'
+import Pagination from '@/components/Pagination'
 import { getShopList, addShop, delShop, setShop } from '@/api/shop'
 import { getUserList } from '@/api/user'
 import { addUserShop, delUserShop } from '@/api/userShop'
 import { getMarketList } from '@/api/market'
 
 export default {
+  components: { Pagination },
   data() {
     return {
       userdata: {},

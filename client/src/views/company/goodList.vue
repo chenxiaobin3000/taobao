@@ -1,49 +1,73 @@
 <template>
   <div class="app-container">
-    <el-form-item label="店铺" prop="shopName">
-      <el-select v-model="temp.shopId" class="filter-item" placeholder="请选择店铺">
-        <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-      </el-select>
-    </el-form-item>
-    <el-table ref="table" v-loading="loading" :data="list" style="width: 100%;" border highlight-current-row>
-      <el-table-column align="center" label="角色名称" width="220">
+    <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
+      <el-form-item label="店铺:" prop="shopName">
+        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺">
+          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
+        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+      <el-table-column align="center" label="商品名称" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.sname }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="商品编码" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.code }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="完整名称">
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="220">
-        <template slot-scope="scope">
-          <el-button type="primary" size="small" @click="handleUpdate(scope)">编辑</el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope)">删除</el-button>
+      <el-table-column align="center" label="操作" width="160">
+        <template slot-scope="{row}">
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
+          <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
+
+    <!-- 商品信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-width="80px" label-position="left">
-        <el-form-item label="角色名称">
+      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
+        <el-form-item label="商品名称" prop="sname">
+          <el-input v-model="temp.sname" />
+        </el-form-item>
+        <el-form-item label="商品编码" prop="code">
+          <el-input v-model="temp.code" />
+        </el-form-item>
+        <el-form-item label="完整名称" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="权限">
-          <el-tree ref="tree" :check-strictly="checkStrictly" :data="routes" :props="defaultProps" show-checkbox node-key="path" class="permission-tree" />
-        </el-form-item>
       </el-form>
-      <div style="text-align:right;">
+      <div slot="footer" class="dialog-footer">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
       </div>
+    </el-dialog>
+
+    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
+      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import { deepClone } from '@/utils'
-import { MyRoleData } from '@/utils/role-data'
-import { treeGenerate } from '@/utils/tree'
-import { getRoleList, addRole, delRole, setRole, getRole } from '@/api/role'
+import Pagination from '@/components/Pagination'
+import UploadExcelComponent from '@/components/UploadExcel'
+import { getGoodList, addGood, delGood, setGood } from '@/api/good'
+import { getShopList } from '@/api/shop'
 
 export default {
+  components: { Pagination, UploadExcelComponent },
   data() {
     return {
       userdata: {},
@@ -51,7 +75,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
-      shopList: [], // 本公司所有店铺列表
+      goodList: [], // 本公司所有商品列表
       listQuery: {
         id: 0,
         page: 1,
@@ -60,6 +84,7 @@ export default {
       },
       temp: {},
       dialogVisible: false,
+      dialogExcelVisible: false,
       dialogStatus: '',
       textMap: {
         update: '修改商品信息',
@@ -99,9 +124,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: 0,
-        gid: '',
+        code: '',
         name: '',
-        sname: '',
+        sname: ''
       }
     },
     getGoodList() {
@@ -124,13 +149,22 @@ export default {
         num: 1000
       }).then(response => {
         this.shopList = response.data.data.list
+        this.listQuery.id = this.shopList[0].id
         this.getGoodList()
+      })
+    },
+    handleExcel() {
+      this.dialogExcelVisible = true
+    },
+    handleSuccess({ results, header }) {
+      results.forEach(v => {
+        console.log(v)
       })
     },
     createData() {
       addGood({
         id: this.temp.id,
-        gid: this.temp.gid,
+        gid: this.temp.code,
         name: this.temp.name,
         sname: this.temp.sname
       }).then(() => {
@@ -141,29 +175,23 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.temp.roleId = row.role_id
-      this.temp.roleName = row.role
+      this.temp.id = row.id
+      this.temp.code = row.code
+      this.temp.name = row.name
+      this.temp.sname = row.sname
       this.dialogStatus = 'update'
       this.dialogVisible = true
     },
     updateData() {
-      const checkedKeys = this.$refs.tree.getCheckedKeys()
-      this.temp.routes = treeGenerate.generateTree(MyRoleData, '/', checkedKeys)
-      setRole({
-        id: this.userdata.user.id,
-        rid: this.temp.id,
+      setGood({
+        id: this.temp.id,
+        code: this.temp.code,
         name: this.temp.name,
-        permissions: this.temp.routes
+        sname: this.temp.sname
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
-        this.getRoles()
+        this.getGoodList()
         this.dialogVisible = false
-      })
-      // 清除缓存路由，下次展示直接从服务器获取数据
-      this.list.forEach(role => {
-        if (role.id === this.temp.id) {
-          role.routes = null
-        }
       })
     },
     handleDelete({ $index, row }) {
@@ -172,12 +200,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delRole({
-          id: this.userdata.user.id,
-          rid: row.id
+        delGood({
+          id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getRoles()
+          this.getGoodList()
         })
       })
     }

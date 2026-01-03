@@ -1,21 +1,21 @@
 <template>
   <div class="app-container">
-    <el-table ref="table" v-loading="loading" :data="list" style="width: 100%;" border highlight-current-row>
+    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="角色名称">
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="220">
+      <el-table-column align="center" label="操作" width="160">
         <template slot-scope="{row}">
-          <el-button type="primary" size="small" @click="handleUpdate(row)">编辑</el-button>
-          <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
+          <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-width="80px" label-position="left">
+      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="角色名称">
           <el-input v-model="temp.name" />
         </el-form-item>
@@ -23,7 +23,7 @@
           <el-tree ref="tree" :data="routes" node-key="id" show-checkbox check-strictly @check="handleRoleChange" />
         </el-form-item>
       </el-form>
-      <div style="text-align:right;">
+      <div slot="footer" class="dialog-footer">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
       </div>

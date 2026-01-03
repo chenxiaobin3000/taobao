@@ -16,7 +16,7 @@
           <span>{{ row.role }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="店铺" width="140px" align="center">
+      <el-table-column label="店铺" width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.shopList }}</span>
         </template>
@@ -56,7 +56,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible = false">取消</el-button>
+        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
       </div>
     </el-dialog>

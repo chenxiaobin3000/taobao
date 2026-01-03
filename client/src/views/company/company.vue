@@ -2,10 +2,10 @@
   <div class="app-container">
     <el-form>
       <el-form-item label="公司名">
-        <el-input v-model="temp.name" style="width: 260px; margin-left: 40px;" />
+        <el-input v-model="temp.name" style="width: 300px; margin-left: 40px;" />
       </el-form-item>
       <el-form-item label="负责人" prop="owner">
-        <el-select v-model="temp.id" class="filter-item" placeholder="请选择负责人" style="width: 260px; margin-left: 40px;">
+        <el-select v-model="temp.id" class="filter-item" placeholder="请选择负责人" style="width: 160px; margin-left: 40px;">
           <el-option v-for="item in userList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
