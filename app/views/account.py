@@ -1,12 +1,14 @@
 import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.db import transaction
 from app.models.account import Account
 
 # 系统默认密码:888888
 default_password = '21218cca77804d2ba1922c33e0151105'
 
 @require_POST
+@transaction.atomic
 def register(request):
     post = json.loads(request.body)
     account = post.get('account')
@@ -25,6 +27,7 @@ def register(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def login(request):
     post = json.loads(request.body)
     account = post.get('account')
@@ -48,6 +51,7 @@ def login(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def logout(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
@@ -61,6 +65,7 @@ def logout(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def setPassword(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
@@ -74,6 +79,7 @@ def setPassword(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def resetPassword(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))

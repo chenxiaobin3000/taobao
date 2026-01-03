@@ -75,7 +75,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
-      goodList: [], // 本公司所有商品列表
+      shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
         page: 1,
@@ -157,6 +157,7 @@ export default {
       this.dialogExcelVisible = true
     },
     handleSuccess({ results, header }) {
+      console.log(header)
       results.forEach(v => {
         console.log(v)
       })

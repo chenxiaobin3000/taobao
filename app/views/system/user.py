@@ -1,6 +1,7 @@
 import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.db import transaction
 from app.models.system.user import User
 from app.models.system.company import Company
 from app.models.system.company_market import CompanyMarket
@@ -11,6 +12,7 @@ from app.models.system.permission import Permission
 from app.models.system.role import Role
 
 @require_POST
+@transaction.atomic
 def add(request):
     post = json.loads(request.body)
     name = post.get('name')
@@ -27,6 +29,7 @@ def add(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
@@ -42,6 +45,7 @@ def set(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
@@ -54,6 +58,7 @@ def delete(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
@@ -67,6 +72,7 @@ def get(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def getInfo(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
@@ -113,6 +119,7 @@ def getInfo(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def getByPhone(request):
     post = json.loads(request.body)
     phone = post.get('phone')
@@ -126,6 +133,7 @@ def getByPhone(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def getList(request):
     post = json.loads(request.body)
     company_id = int(post.get('id'))

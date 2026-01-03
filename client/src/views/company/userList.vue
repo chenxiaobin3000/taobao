@@ -144,10 +144,10 @@ export default {
         this.total = response.data.data.total
         this.list = response.data.data.list
         // 展开店铺名称
-        for (var i = 0; i < this.list.length; ++i) {
-          var tmp = this.list[i]
+        for (let i = 0; i < this.list.length; ++i) {
+          const tmp = this.list[i]
           tmp.shopList = ''
-          for (var j = 0; j < tmp.shops.length; ++j) {
+          for (let j = 0; j < tmp.shops.length; ++j) {
             tmp.shopList = tmp.shopList + tmp.shops[j].name + ', '
           }
         }
@@ -196,8 +196,8 @@ export default {
 
       // 生成店铺列表
       this.routes = []
-      for (var i = 0; i < this.shopList.length; ++i) {
-        var tmp = this.shopList[i]
+      for (let i = 0; i < this.shopList.length; ++i) {
+        const tmp = this.shopList[i]
         this.routes.push({
           id: tmp.id,
           label: tmp.name
@@ -206,8 +206,8 @@ export default {
 
       // 生成选中列表
       this.$nextTick(() => {
-        var checkedKeys = []
-        for (var i = 0; i < this.userdata.shop.length; ++i) {
+        const checkedKeys = []
+        for (let i = 0; i < this.userdata.shop.length; ++i) {
           checkedKeys.push(this.userdata.shop[i].id)
         }
         this.$refs.tree.setCheckedKeys(checkedKeys)

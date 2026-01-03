@@ -110,7 +110,7 @@ export default {
       })
     },
     createData() {
-      var checkedKeys = this.$refs.tree.getCheckedKeys()
+      const checkedKeys = this.$refs.tree.getCheckedKeys()
       addRole({
         id: this.userdata.company.id,
         name: this.temp.name,
@@ -132,7 +132,7 @@ export default {
       this.dialogVisible = true
     },
     updateData() {
-      var checkedKeys = this.$refs.tree.getCheckedKeys()
+      const checkedKeys = this.$refs.tree.getCheckedKeys()
       setRole({
         id: this.temp.id,
         name: this.temp.name,
@@ -144,22 +144,22 @@ export default {
       })
     },
     handleRoleChange(data, obj) {
-      var checkedKeys = this.$refs.tree.getCheckedKeys()
+      let checkedKeys = this.$refs.tree.getCheckedKeys()
       // 判断是否存在子节点，子节点全选或反选
       if (data.children) {
         if (obj.checkedKeys.includes(data.id)) {
-          for (var i = 0; i < data.children.length; ++i) {
+          for (let i = 0; i < data.children.length; ++i) {
             checkedKeys.push(data.children[i].id)
           }
         } else {
-          for (var j = 0; j < data.children.length; ++j) {
+          for (let j = 0; j < data.children.length; ++j) {
             checkedKeys = checkedKeys.filter(item => item !== data.children[j].id)
           }
         }
       }
 
       // 选中子节点，就选中父节点
-      var pid = parseInt(data.id / 100) * 100
+      const pid = parseInt(data.id / 100) * 100
       if (obj.checkedKeys.includes(data.id) && !obj.checkedKeys.includes(pid)) {
         checkedKeys.push(pid)
       }

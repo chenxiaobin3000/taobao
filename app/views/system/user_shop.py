@@ -1,9 +1,11 @@
 import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.db import transaction
 from app.models.system.user_shop import UserShop
 
 @require_POST
+@transaction.atomic
 def add(request):
     post = json.loads(request.body)
     user_id = int(post.get('uid'))
@@ -18,6 +20,7 @@ def add(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def delete(request):
     post = json.loads(request.body)
     user_id = int(post.get('uid'))
@@ -31,6 +34,7 @@ def delete(request):
     return JsonResponse(response)
 
 @require_POST
+@transaction.atomic
 def getList(request):
     post = json.loads(request.body)
     role_id = int(post.get('id'))

@@ -51,7 +51,7 @@ export default {
     },
     pathCompile(path) {
       const { params } = this.$route
-      var toPath = pathToRegexp.compile(path)
+      const toPath = pathToRegexp.compile(path)
       return toPath(params)
     },
     handleLink(item) {

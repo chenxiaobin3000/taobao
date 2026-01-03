@@ -95,8 +95,8 @@ export default {
       this.temp.marketId = this.marketList[0].id
       // 生成用户列表
       this.routes = []
-      for (var i = 0; i < this.userList.length; ++i) {
-        var tmp = this.userList[i]
+      for (let i = 0; i < this.userList.length; ++i) {
+        const tmp = this.userList[i]
         this.routes.push({
           id: tmp.id,
           label: tmp.name
@@ -177,8 +177,8 @@ export default {
 
       // 生成用户列表
       this.routes = []
-      for (var i = 0; i < this.userList.length; ++i) {
-        var tmp = this.userList[i]
+      for (let i = 0; i < this.userList.length; ++i) {
+        const tmp = this.userList[i]
         this.routes.push({
           id: tmp.id,
           label: tmp.name
@@ -187,8 +187,8 @@ export default {
 
       // 生成选中列表
       this.$nextTick(() => {
-        var checkedKeys = []
-        for (var i = 0; i < row.users.length; ++i) {
+        const checkedKeys = []
+        for (let i = 0; i < row.users.length; ++i) {
           checkedKeys.push(row.users[i].user_id)
         }
         this.$refs.tree.setCheckedKeys(checkedKeys)
