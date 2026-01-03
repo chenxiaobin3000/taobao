@@ -23,6 +23,24 @@ def add(request):
 
 @require_POST
 @transaction.atomic
+def addList(request):
+    post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    goods = post.get('g')
+
+    # 批量添加
+    for good in goods:
+        Good.objects.add(shop_id, good['i'], good['n'], good['sn'])
+
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': None
+    }
+    return JsonResponse(response)
+
+@require_POST
+@transaction.atomic
 def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))

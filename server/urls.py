@@ -37,6 +37,7 @@ urlpatterns = [
 
     # 商品
     path('api/good/add', good.add),
+    path('api/good/addList', good.addList),
     path('api/good/set', good.set),
     path('api/good/del', good.delete),
     path('api/good/get', good.get),

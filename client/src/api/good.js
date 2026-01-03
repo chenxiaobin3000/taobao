@@ -9,6 +9,14 @@ export function addGood(data) {
   })
 }
 
+export function addGoodList(data) {
+  return request({
+    url: `${path}/addList`,
+    method: 'post',
+    data
+  })
+}
+
 export function setGood(data) {
   return request({
     url: `${path}/set`,

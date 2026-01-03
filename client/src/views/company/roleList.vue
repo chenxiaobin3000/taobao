@@ -165,7 +165,7 @@ export default {
       }
       this.$refs.tree.setCheckedKeys(checkedKeys)
     },
-    handleDelete({ $index, row }) {
+    handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

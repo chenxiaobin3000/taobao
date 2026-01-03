@@ -111,6 +111,20 @@ export default {
     },
     create() {
       this.resetTemp()
+
+      // 默认角色
+      this.temp.roleId = this.roleList[0].id
+
+      // 生成店铺列表
+      this.routes = []
+      for (let i = 0; i < this.shopList.length; ++i) {
+        const tmp = this.shopList[i]
+        this.routes.push({
+          id: tmp.id,
+          label: tmp.name
+        })
+      }
+
       this.dialogStatus = 'create'
       this.dialogVisible = true
     }

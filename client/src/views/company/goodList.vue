@@ -11,12 +11,12 @@
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="商品名称" width="160">
         <template slot-scope="scope">
-          {{ scope.row.sname }}
+          {{ scope.row.short_name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="商品编码" width="160">
         <template slot-scope="scope">
-          {{ scope.row.code }}
+          {{ scope.row.good_id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="完整名称">
@@ -37,11 +37,11 @@
     <!-- 商品信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品名称" prop="sname">
-          <el-input v-model="temp.sname" />
+        <el-form-item label="商品编码" prop="good_id">
+          <div>{{ temp.good_id }}</div>
         </el-form-item>
-        <el-form-item label="商品编码" prop="code">
-          <el-input v-model="temp.code" />
+        <el-form-item label="商品名称" prop="short_name">
+          <el-input v-model="temp.short_name" />
         </el-form-item>
         <el-form-item label="完整名称" prop="name">
           <el-input v-model="temp.name" />
@@ -63,7 +63,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, delGood, setGood } from '@/api/good'
+import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/good'
 import { getShopList } from '@/api/shop'
 
 export default {
@@ -124,9 +124,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: 0,
-        code: '',
+        good_id: '',
         name: '',
-        sname: ''
+        short_name: ''
       }
     },
     getGoodList() {
@@ -157,17 +157,32 @@ export default {
       this.dialogExcelVisible = true
     },
     handleSuccess({ results, header }) {
-      console.log(header)
+      const sname = header[0]
+      const id = header[1]
+      const name = header[2]
+      const g = []
       results.forEach(v => {
-        console.log(v)
+        g.push({
+          i: v[id],
+          n: v[name],
+          sn: v[sname]
+        })
+      })
+      addGoodList({
+        id: this.listQuery.id,
+        g: g
+      }).then(() => {
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getGoodList()
+        this.dialogVisible = false
       })
     },
     createData() {
       addGood({
-        id: this.temp.id,
-        gid: this.temp.code,
+        id: this.listQuery.id,
+        gid: this.temp.good_id,
         name: this.temp.name,
-        sname: this.temp.sname
+        sname: this.temp.short_name
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
         this.getGoodList()
@@ -177,25 +192,24 @@ export default {
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
       this.temp.id = row.id
-      this.temp.code = row.code
+      this.temp.good_id = row.good_id
       this.temp.name = row.name
-      this.temp.sname = row.sname
+      this.temp.short_name = row.short_name
       this.dialogStatus = 'update'
       this.dialogVisible = true
     },
     updateData() {
       setGood({
         id: this.temp.id,
-        code: this.temp.code,
         name: this.temp.name,
-        sname: this.temp.sname
+        sname: this.temp.short_name
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getGoodList()
         this.dialogVisible = false
       })
     },
-    handleDelete({ $index, row }) {
+    handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
