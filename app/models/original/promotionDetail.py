@@ -4,14 +4,20 @@ from django.forms.models import model_to_dict
 
 # 推广明细表
 class PromotionDetail(models.Model):
-    order_id = models.CharField(max_length=20, db_index = True) # 订单id
-    payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
-    actual_pay = models.DecimalField(max_digits=10, decimal_places=2) # 实际付款
-    status = models.IntegerField(db_index = True) # 状态
-    create_time = models.DateTimeField(db_index = True) # 创建时间
-    name = models.CharField(max_length=60) # 商品名称
-    note = models.CharField(max_length=255) # 商品备注
-    ctime = models.DateTimeField(default = timezone.now)
+    promotion_time = models.DateTimeField(db_index=True) # 推广日期
+    product_id = models.CharField(max_length=20, db_index=True) # 商品id
+    show_num = models.IntegerField(db_index=True) # 展现量
+    click_num = models.IntegerField(db_index=True) # 点击量
+    cost = models.DecimalField(max_digits=8, decimal_places=2) # 花费
+    average_cost = models.DecimalField(max_digits=8, decimal_places=2) # 平均花费
+    thousand_cost = models.DecimalField(max_digits=8, decimal_places=2) # 千次花费
+    deal_amount = models.DecimalField(max_digits=8, decimal_places=2) # 成交金额
+    deal_num = models.IntegerField(db_index=True) # 成交笔数
+    deal_cost = models.DecimalField(max_digits=8, decimal_places=2) # 成交成本
+    shop_cart = models.IntegerField(db_index=True) # 购物车
+    favorites = models.IntegerField(db_index=True) # 收藏数
+    roi = models.DecimalField(max_digits=6, decimal_places=2) # 投产比
+    ctime = models.DateTimeField(default=timezone.now)
 
     class Meta(object):
         db_table = 't_promotion_detail'
