@@ -4,14 +4,8 @@ from django.forms.models import model_to_dict
 
 # 小额打款表
 class TransferManager(models.Manager):
-    def add(self, name, user_id):
-        return self.create(name=name, user_id=user_id)
-
-    def set(self, pk, name, user_id):
-        company = self.get(pk=pk)
-        company.name = name
-        company.user_id = user_id
-        return company.save()
+    def add(self, shop_id, user_id, order_id, amount, create_time):
+        return self.create(shop_id=shop_id, user_id=user_id, order_id=order_id, amount=amount, create_time=create_time)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,19 +13,20 @@ class TransferManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, page, num):
+    def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.filter(shop_id=shop_id)[left:right]
 
-    def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id'])
+    def encoder(self, transfer):
+        return model_to_dict(transfer, fields=['shop_id', 'user_id', 'order_id', 'amount', 'create_time'])
 
-    def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id']) for company in companys]
+    def encoderList(self, transfers):
+        return [model_to_dict(transfer, fields=['shop_id', 'user_id', 'order_id', 'amount', 'create_time']) for transfer in transfers]
     
 class Transfer(models.Model):
     objects = TransferManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     user_id = models.IntegerField(db_index=True) # 打款人
     order_id = models.CharField(max_length=20, db_index=True) # 订单id
     amount = models.DecimalField(max_digits=6, decimal_places=2) # 金额

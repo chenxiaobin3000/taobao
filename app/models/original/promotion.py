@@ -4,14 +4,8 @@ from django.forms.models import model_to_dict
 
 # 推广表
 class PromotionManager(models.Manager):
-    def add(self, name, user_id):
-        return self.create(name=name, user_id=user_id)
-
-    def set(self, pk, name, user_id):
-        company = self.get(pk=pk)
-        company.name = name
-        company.user_id = user_id
-        return company.save()
+    def add(self, shop_id, create_time, payment, promotion_note):
+        return self.create(shop_id=shop_id, create_time=create_time, payment=payment, promotion_note=promotion_note)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,19 +13,20 @@ class PromotionManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, page, num):
+    def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.filter(shop_id=shop_id)[left:right]
 
-    def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id'])
+    def encoder(self, promotion):
+        return model_to_dict(promotion, fields=['create_time', 'payment', 'promotion_note'])
 
-    def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id']) for company in companys]
+    def encoderList(self, promotions):
+        return [model_to_dict(promotion, fields=['create_time', 'payment', 'promotion_note']) for promotion in promotions]
     
 class Promotion(models.Model):
     objects = PromotionManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     create_time = models.DateField(db_index=True) # 交易日期
     payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
     promotion_note = models.CharField(max_length=1024) # 备注

@@ -4,14 +4,13 @@ from django.forms.models import model_to_dict
 
 # 退货表
 class RefundManager(models.Manager):
-    def add(self, name, user_id):
-        return self.create(name=name, user_id=user_id)
+    def add(self, shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_type, refund_status, apply_time, timeout_time, complete_time):
+        return self.create(shop_id=shop_id, refund_id=refund_id, order_id=order_id, product_id=product_id, actual_pay=actual_pay, refund_pay=refund_pay, refund_type=refund_type, refund_status=refund_status, apply_time=apply_time, timeout_time=timeout_time, complete_time=complete_time)
 
-    def set(self, pk, name, user_id):
-        company = self.get(pk=pk)
-        company.name = name
-        company.user_id = user_id
-        return company.save()
+    def set(self, pk, refund_status):
+        refund = self.get(pk=pk)
+        refund.refund_status = refund_status
+        return refund.save()
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,19 +18,20 @@ class RefundManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, page, num):
+    def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.filter(shop_id=shop_id)[left:right]
 
-    def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id'])
+    def encoder(self, refund):
+        return model_to_dict(refund, fields=['shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_type', 'refund_status', 'apply_time', 'timeout_time', 'complete_time'])
 
-    def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id']) for company in companys]
+    def encoderList(self, refunds):
+        return [model_to_dict(refund, fields=['shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_type', 'refund_status', 'apply_time', 'timeout_time', 'complete_time']) for refund in refunds]
     
 class Refund(models.Model):
     objects = RefundManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     refund_id = models.CharField(max_length=20, db_index=True) # 退款id
     order_id = models.CharField(max_length=20, db_index=True) # 订单id
     product_id = models.CharField(max_length=20, db_index=True) # 商品id

@@ -4,14 +4,8 @@ from django.forms.models import model_to_dict
 
 # 刷单表
 class FakeManager(models.Manager):
-    def add(self, name, user_id):
-        return self.create(name=name, user_id=user_id)
-
-    def set(self, pk, name, user_id):
-        company = self.get(pk=pk)
-        company.name = name
-        company.user_id = user_id
-        return company.save()
+    def add(self, shop_id, create_date, real_num, fake_amount, fake_num, commission, freight, fake_note):
+        return self.create(shop_id=shop_id, create_date=create_date, real_num=real_num, fake_amount=fake_amount, fake_num=fake_num, commission=commission, freight=freight, fake_note=fake_note)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,19 +13,20 @@ class FakeManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, page, num):
+    def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.filter(shop_id=shop_id)[left:right]
 
-    def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id'])
+    def encoder(self, fake):
+        return model_to_dict(fake, fields=['shop_id', 'create_date', 'real_num', 'fake_amount', 'fake_num', 'commission', 'freight', 'fake_note'])
 
-    def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id']) for company in companys]
+    def encoderList(self, fakes):
+        return [model_to_dict(fake, fields=['shop_id', 'create_date', 'real_num', 'fake_amount', 'fake_num', 'commission', 'freight', 'fake_note']) for fake in fakes]
     
 class Fake(models.Model):
     objects = FakeManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     create_date = models.DateField(db_index=True) # 刷单日期
     real_num = models.IntegerField() # 真实订单数
     fake_amount = models.IntegerField() # 刷单总金额

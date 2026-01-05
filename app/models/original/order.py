@@ -4,14 +4,15 @@ from django.forms.models import model_to_dict
 
 # 订单表
 class OrderManager(models.Manager):
-    def add(self, name, user_id):
-        return self.create(name=name, user_id=user_id)
+    def add(self, shop_id, order_id, payment, actual_pay, procure_pay, order_status, create_time, product_name, order_note):
+        return self.create(shop_id=shop_id, order_id=order_id, payment=payment, actual_pay=actual_pay, procure_pay=procure_pay, order_status=order_status, create_time=create_time, product_name=product_name, order_note=order_note)
 
-    def set(self, pk, name, user_id):
-        company = self.get(pk=pk)
-        company.name = name
-        company.user_id = user_id
-        return company.save()
+    def set(self, pk, procure_pay, order_status, order_note):
+        order = self.get(pk=pk)
+        order.procure_pay = procure_pay
+        order.order_status = order_status
+        order.order_note = order_note
+        return order.save()
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,19 +20,20 @@ class OrderManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, page, num):
+    def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.filter(shop_id=shop_id)[left:right]
 
-    def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id'])
+    def encoder(self, order):
+        return model_to_dict(order, fields=['order_id', 'payment', 'actual_pay', 'procure_pay', 'order_status', 'create_time', 'product_name', 'order_note'])
 
-    def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id']) for company in companys]
+    def encoderList(self, orders):
+        return [model_to_dict(order, fields=['order_id', 'payment', 'actual_pay', 'procure_pay', 'order_status', 'create_time', 'product_name', 'order_note']) for order in orders]
     
 class Order(models.Model):
     objects = OrderManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     order_id = models.CharField(max_length=20, db_index=True) # 订单id
     payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
     actual_pay = models.DecimalField(max_digits=10, decimal_places=2) # 实际付款

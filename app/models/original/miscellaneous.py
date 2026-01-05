@@ -4,14 +4,15 @@ from django.forms.models import model_to_dict
 
 # 杂项表
 class MiscellaneousManager(models.Manager):
-    def add(self, name, user_id):
-        return self.create(name=name, user_id=user_id)
+    def add(self, shop_id, create_date, user_id, project_name, amount, misc_note):
+        return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, project_name=project_name, amount=amount, misc_note=misc_note)
 
-    def set(self, pk, name, user_id):
-        company = self.get(pk=pk)
-        company.name = name
-        company.user_id = user_id
-        return company.save()
+    def set(self, pk, project_name, amount, misc_note):
+        misc = self.get(pk=pk)
+        misc.project_name = project_name
+        misc.amount = amount
+        misc.misc_note = misc_note
+        return misc.save()
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,19 +20,20 @@ class MiscellaneousManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, page, num):
+    def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.filter(shop_id=shop_id)[left:right]
 
-    def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id'])
+    def encoder(self, misc):
+        return model_to_dict(misc, fields=['create_date', 'user_id', 'project_name', 'amount', 'misc_note'])
 
-    def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id']) for company in companys]
+    def encoderList(self, miscs):
+        return [model_to_dict(misc, fields=['create_date', 'user_id', 'project_name', 'amount', 'misc_note']) for misc in miscs]
     
 class Miscellaneous(models.Model):
     objects = MiscellaneousManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     create_date = models.DateField(db_index=True) # 创建日期
     user_id = models.IntegerField(db_index=True) # 打款人
     project_name = models.CharField(max_length=32, db_index=True) # 项目名称

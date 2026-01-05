@@ -4,14 +4,8 @@ from django.forms.models import model_to_dict
 
 # 推广明细表
 class PromotionDetailManager(models.Manager):
-    def add(self, name, user_id):
-        return self.create(name=name, user_id=user_id)
-
-    def set(self, pk, name, user_id):
-        company = self.get(pk=pk)
-        company.name = name
-        company.user_id = user_id
-        return company.save()
+    def add(self, shop_id, promotion_time, product_id, show_num, click_num, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi):
+        return self.create(shop_id=shop_id, promotion_time=promotion_time, product_id=product_id, show_num=show_num, click_num=click_num, cost=cost, average_cost=average_cost, thousand_cost=thousand_cost, deal_amount=deal_amount, deal_num=deal_num, deal_cost=deal_cost, shop_cart=shop_cart, favorites=favorites, roi=roi)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,19 +13,20 @@ class PromotionDetailManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getList(self, page, num):
+    def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.filter(shop_id=shop_id)[left:right]
 
-    def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id'])
+    def encoder(self, promotion):
+        return model_to_dict(promotion, fields=['shop_id', 'promotion_time', 'product_id', 'show_num', 'click_num', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi'])
 
-    def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id']) for company in companys]
+    def encoderList(self, promotions):
+        return [model_to_dict(promotion, fields=['id', 'name', 'user_id']) for promotion in promotions]
     
 class PromotionDetail(models.Model):
     objects = PromotionDetailManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     promotion_time = models.DateTimeField(db_index=True) # 推广日期
     product_id = models.CharField(max_length=20, db_index=True) # 商品id
     show_num = models.IntegerField(db_index=True) # 展现量
