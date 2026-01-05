@@ -2,7 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
-from app.models.original.promotion import Promotion
+from app.models.original.promotion_detail import PromotionDetail
 
 @require_POST
 @transaction.atomic

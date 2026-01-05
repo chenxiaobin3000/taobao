@@ -23,7 +23,7 @@ class PromotionDetailManager(models.Manager):
 
     def encoderList(self, promotions):
         return [model_to_dict(promotion, fields=['id', 'name', 'user_id']) for promotion in promotions]
-    
+
 class PromotionDetail(models.Model):
     objects = PromotionDetailManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
