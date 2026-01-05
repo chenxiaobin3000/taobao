@@ -9,21 +9,11 @@ from app.models.original.promotion import Promotion
 def add(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    promotion_time = post.get('ptime')
-    product_id = post.get('pid')
-    show_num = post.get('payment')
-    click_num = post.get('freight')
-    cost = post.get('total')
-    average_cost = post.get('status')
-    thousand_cost = post.get('ctime')
-    deal_amount = post.get('pn')
-    deal_num = post.get('note')
-    deal_cost = post.get('note')
-    shop_cart = post.get('note')
-    favorites = post.get('note')
-    roi = post.get('roi')
-    promotion = PromotionDetail.objects.add(shop_id, promotion_time, product_id, show_num, click_num, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
-    data = PromotionDetail.objects.encoder(promotion)
+    create_time = post.get('ctime')
+    payment = post.get('payment')
+    promotion_note = post.get('note')
+    promotion = Promotion.objects.add(shop_id, create_time, payment, promotion_note)
+    data = Promotion.objects.encoder(promotion)
     response = {
         'code': 0,
         'msg': 'success',
@@ -36,7 +26,7 @@ def add(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = PromotionDetail.objects.delete(pk)
+    data = Promotion.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success',
@@ -49,8 +39,8 @@ def delete(request):
 def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    promotion = PromotionDetail.objects.find(pk)
-    data = PromotionDetail.objects.encoder(promotion)
+    promotion = Promotion.objects.find(pk)
+    data = Promotion.objects.encoder(promotion)
     response = {
         'code': 0,
         'msg': 'success',
@@ -65,8 +55,8 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    promotions = PromotionDetail.objects.getList(shop_id, page, num)
-    data = PromotionDetail.objects.encoderList(promotions)
+    promotions = Promotion.objects.getList(shop_id, page, num)
+    data = Promotion.objects.encoderList(promotions)
     response = {
         'code': 0,
         'msg': 'success',

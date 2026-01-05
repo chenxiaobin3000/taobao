@@ -2,16 +2,27 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
-from app.models.original import order
+from app.models.original.order import Order
 
 @require_POST
 @transaction.atomic
 def add(request):
     post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    order_id = post.get('oid')
+    payment = post.get('payment')
+    actual_pay = post.get('ap')
+    procure_pay = post.get('pp')
+    order_status = int(post.get('status'))
+    create_time = post.get('ctime')
+    product_name = post.get('name')
+    order_note = post.get('note')
+    order = Order.objects.add(shop_id, order_id, payment, actual_pay, procure_pay, order_status, create_time, product_name, order_note)
+    data = Order.objects.encoder(order)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
     return JsonResponse(response)
 
@@ -19,10 +30,15 @@ def add(request):
 @transaction.atomic
 def set(request):
     post = json.loads(request.body)
+    pk = int(post.get('id'))
+    procure_pay = int(post.get('pay'))
+    order_status = int(post.get('status'))
+    order_note = int(post.get('note'))
+    data = Order.objects.set(pk, procure_pay, order_status, order_note)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
     return JsonResponse(response)
 
@@ -30,10 +46,12 @@ def set(request):
 @transaction.atomic
 def delete(request):
     post = json.loads(request.body)
+    pk = int(post.get('id'))
+    data = Order.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
     return JsonResponse(response)
 
@@ -41,10 +59,13 @@ def delete(request):
 @transaction.atomic
 def get(request):
     post = json.loads(request.body)
+    pk = int(post.get('id'))
+    order = Order.objects.find(pk)
+    data = Order.objects.encoder(order)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': data
     }
     return JsonResponse(response)
 
@@ -52,9 +73,17 @@ def get(request):
 @transaction.atomic
 def getList(request):
     post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    page = int(post.get('page'))
+    num = int(post.get('num'))
+    orders = Order.objects.getList(shop_id, page, num)
+    data = Order.objects.encoderList(orders)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': {}
+        'data': {
+            'total': len(data),
+            'list': data
+        }
     }
     return JsonResponse(response)
