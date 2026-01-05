@@ -10,6 +10,7 @@ import Layout from '@/layout'
 import originalRouter from './modules/original'
 import companyRouter from './modules/company'
 import systemRouter from './modules/system'
+import middleRouter from './modules/middle'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -61,6 +62,7 @@ export const asyncRoutes = [
 
   /** when your routing map is too long, you can split it into small modules **/
   originalRouter,
+  middleRouter,
   companyRouter,
   systemRouter,
 
