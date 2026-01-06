@@ -29,6 +29,24 @@ def add(request):
 
 @require_POST
 @transaction.atomic
+def addList(request):
+    post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    purchases = post.get('p')
+
+    # 批量添加
+    for purchase in purchases:
+        Purchase.objects.add(shop_id, purchase['i'], purchase['n'], purchase['sn'])
+
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': None
+    }
+    return JsonResponse(response)
+
+@require_POST
+@transaction.atomic
 def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
@@ -47,20 +65,6 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     data = Purchase.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
-def get(request):
-    post = json.loads(request.body)
-    pk = int(post.get('id'))
-    purchase = Purchase.objects.find(pk)
-    data = Purchase.objects.encoder(purchase)
     response = {
         'code': 0,
         'msg': 'success',

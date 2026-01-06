@@ -19,12 +19,30 @@ def add(request):
     apply_time = post.get('at')
     timeout_time = post.get('tt')
     complete_time = post.get('ct')
-    transfer = Refund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_type, refund_status, apply_time, timeout_time, complete_time)
-    data = Refund.objects.encoder(transfer)
+    refund = Refund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_type, refund_status, apply_time, timeout_time, complete_time)
+    data = Refund.objects.encoder(refund)
     response = {
         'code': 0,
         'msg': 'success',
         'data': data
+    }
+    return JsonResponse(response)
+
+@require_POST
+@transaction.atomic
+def addList(request):
+    post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    refunds = post.get('r')
+
+    # 批量添加
+    for refund in refunds:
+        Refund.objects.add(shop_id, refund['i'], refund['n'], refund['sn'])
+
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': None
     }
     return JsonResponse(response)
 
@@ -48,20 +66,6 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     data = Refund.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
-def get(request):
-    post = json.loads(request.body)
-    pk = int(post.get('id'))
-    refund = Refund.objects.find(pk)
-    data = Refund.objects.encoder(refund)
     response = {
         'code': 0,
         'msg': 'success',

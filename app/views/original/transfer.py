@@ -24,24 +24,28 @@ def add(request):
 
 @require_POST
 @transaction.atomic
-def delete(request):
+def addList(request):
     post = json.loads(request.body)
-    pk = int(post.get('id'))
-    data = Transfer.objects.delete(pk)
+    shop_id = int(post.get('id'))
+    transfers = post.get('t')
+
+    # 批量添加
+    for transfer in transfers:
+        Transfer.objects.add(shop_id, transfer['i'], transfer['n'], transfer['sn'])
+
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': None
     }
     return JsonResponse(response)
 
 @require_POST
 @transaction.atomic
-def get(request):
+def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    transfer = Transfer.objects.find(pk)
-    data = Transfer.objects.encoder(transfer)
+    data = Transfer.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success',

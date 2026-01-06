@@ -41,7 +41,7 @@
           <el-input v-model="temp.phone" />
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="temp.roleId" class="filter-item" placeholder="请选择角色">
+          <el-select v-model="temp.role_id" class="filter-item" placeholder="请选择角色">
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
@@ -66,10 +66,10 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { getUserList, addUser, setUser, delUser } from '@/api/user'
-import { addUserShop, delUserShop } from '@/api/userShop'
-import { getShopList } from '@/api/shop'
-import { getRoleList } from '@/api/role'
+import { getUserList, addUser, setUser, delUser } from '@/api/system/user'
+import { addUserShop, delUserShop } from '@/api/system/userShop'
+import { getShopList } from '@/api/system/shop'
+import { getRoleList } from '@/api/system/role'
 
 export default {
   components: { Pagination },
@@ -113,7 +113,7 @@ export default {
       this.resetTemp()
 
       // 默认角色
-      this.temp.roleId = this.roleList[0].id
+      this.temp.role_id = this.roleList[0].id
 
       // 生成店铺列表
       this.routes = []
@@ -146,8 +146,7 @@ export default {
         id: 0,
         name: '',
         phone: '',
-        roleId: 0,
-        roleName: ''
+        role_id: 0
       }
     },
     getUserList() {
@@ -205,8 +204,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.temp.roleId = row.role_id
-      this.temp.roleName = row.role
 
       // 生成店铺列表
       this.routes = []
@@ -234,7 +231,7 @@ export default {
         id: this.temp.id,
         name: this.temp.name,
         phone: this.temp.phone,
-        rid: this.temp.roleId
+        rid: this.temp.role_id
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getUserList()

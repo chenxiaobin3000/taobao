@@ -1,6 +1,6 @@
 import md5 from 'js-md5'
 import { login, logout } from '@/api/account'
-import { getUserInfo } from '@/api/user'
+import { getUserInfo } from '@/api/system/user'
 import { setToken, getToken, removeToken, setUserId, getUserId, removeUserId } from '@/utils/cache'
 import { resetRouter } from '@/router'
 

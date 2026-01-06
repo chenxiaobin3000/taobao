@@ -18,8 +18,8 @@
 
 <script>
 import { mapState } from 'vuex'
-import { getUserList } from '@/api/user'
-import { setCompany } from '@/api/company'
+import { getUserList } from '@/api/system/user'
+import { setCompany } from '@/api/system/company'
 
 export default {
   data() {

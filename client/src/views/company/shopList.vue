@@ -47,10 +47,10 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { getShopList, addShop, delShop, setShop } from '@/api/shop'
-import { getUserList } from '@/api/user'
-import { addUserShop, delUserShop } from '@/api/userShop'
-import { getMarketList } from '@/api/market'
+import { getShopList, addShop, delShop, setShop } from '@/api/system/shop'
+import { getUserList } from '@/api/system/user'
+import { addUserShop, delUserShop } from '@/api/system/userShop'
+import { getMarketList } from '@/api/system/market'
 
 export default {
   components: { Pagination },
@@ -172,8 +172,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.temp.id = row.id
-      this.temp.name = row.name
 
       // 生成用户列表
       this.routes = []

@@ -1,0 +1,42 @@
+import request from '@/utils/request'
+const path = '/order'
+
+export function addOrder(data) {
+  return request({
+    url: `${path}/add`,
+    method: 'post',
+    data
+  })
+}
+
+export function addOrderList(data) {
+  return request({
+    url: `${path}/addList`,
+    method: 'post',
+    data
+  })
+}
+
+export function setOrder(data) {
+  return request({
+    url: `${path}/set`,
+    method: 'post',
+    data
+  })
+}
+
+export function delOrder(data) {
+  return request({
+    url: `${path}/del`,
+    method: 'post',
+    data
+  })
+}
+
+export function getOrderList(data) {
+  return request({
+    url: `${path}/getList`,
+    method: 'post',
+    data
+  })
+}

@@ -2,7 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
-from app.models.original.miscellaneous import Miscellaneous
+from app.models.middle.miscellaneous import Miscellaneous
 
 @require_POST
 @transaction.atomic
@@ -45,20 +45,6 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     data = Miscellaneous.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
-def get(request):
-    post = json.loads(request.body)
-    pk = int(post.get('id'))
-    misc = Miscellaneous.objects.find(pk)
-    data = Miscellaneous.objects.encoder(misc)
     response = {
         'code': 0,
         'msg': 'success',

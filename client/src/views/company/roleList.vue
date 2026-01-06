@@ -35,7 +35,7 @@
 <script>
 import { mapState } from 'vuex'
 import { MyRoleData } from '@/utils/role-data'
-import { getRoleList, addRole, delRole, setRole } from '@/api/role'
+import { getRoleList, addRole, delRole, setRole } from '@/api/system/role'
 
 export default {
   data() {
@@ -124,8 +124,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.temp.id = row.id
-      this.temp.name = row.name
       this.$nextTick(() => {
         this.$refs.tree.setCheckedKeys(row.p)
       })

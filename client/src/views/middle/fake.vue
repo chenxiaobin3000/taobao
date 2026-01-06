@@ -5,56 +5,80 @@
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
+        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="日期" width="160">
         <template slot-scope="scope">
-          {{ scope.row.short_name }}
+          {{ scope.row.create_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="真实订单数" width="160">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          {{ scope.row.order_num }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完整名称">
+      <el-table-column align="center" label="刷单订单数" width="160">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.fake_num }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="center" label="总金额" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.fake_amount }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="佣金" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.commission }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="运费" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.freight }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="备注">
+        <template slot-scope="scope">
+          {{ scope.row.fake_note }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" width="80">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
-          <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">设置</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getFakeList" />
 
     <!-- 刷单信息编辑 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
+    <el-dialog title="修改刷单信息" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码">
-          <div>{{ temp.good_id }}</div>
+        <el-form-item label="真实数据">
+          金额:<div>{{ temp.order_amount }}</div>, 订单数:<div>{{ temp.order_num }}</div>
         </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="temp.short_name" />
+        <el-form-item label="刷单总金额">
+          <el-input v-model="temp.fake_amount" />
         </el-form-item>
-        <el-form-item label="完整名称">
-          <el-input v-model="temp.name" />
+        <el-form-item label="刷单订单数">
+          <el-input v-model="temp.fake_num" />
+        </el-form-item>
+        <el-form-item label="佣金">
+          <el-input v-model="temp.commission" />x<div>{{ temp.good_id }}</div>
+        </el-form-item>
+        <el-form-item label="运费">
+          <el-input v-model="temp.freight" />x<div>{{ temp.good_id }}</div>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="temp.fake_note" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
+        <el-button type="primary" @click="updateData()">确定</el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
 </template>
@@ -62,12 +86,11 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/good'
-import { getShopList } from '@/api/shop'
+import { getFakeList, flushFake, setFake } from '@/api/middle/fake'
+import { getShopList } from '@/api/system/shop'
 
 export default {
-  components: { Pagination, UploadExcelComponent },
+  components: { Pagination },
   data() {
     return {
       userdata: {},
@@ -83,13 +106,7 @@ export default {
         search: null
       },
       temp: {},
-      dialogVisible: false,
-      dialogExcelVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
-      }
+      dialogVisible: false
     }
   },
   computed: {
@@ -100,13 +117,10 @@ export default {
   },
   watch: {
     search(newVal, oldVal) {
-      this.listQuery.search = newVal
-      this.getGoodList()
+      this.$message({ type: 'error', message: '不支持搜索!' })
     },
     create() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
+      this.$message({ type: 'error', message: '不支持新建!' })
     }
   },
   mounted: function() {
@@ -124,14 +138,16 @@ export default {
     resetTemp() {
       this.temp = {
         id: 0,
-        good_id: '',
-        name: '',
-        short_name: ''
+        fake_amount: 0,
+        fake_num: 0,
+        commission: 0,
+        freight: 0,
+        fake_note: ''
       }
     },
-    getGoodList() {
+    getFakeList() {
       this.loading = true
-      getGoodList(
+      getFakeList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -150,77 +166,33 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getGoodList()
+        this.getFakeList()
       })
     },
-    handleExcel() {
-      this.dialogExcelVisible = true
-    },
-    handleSuccess({ results, header }) {
-      const sname = header[0]
-      const id = header[1]
-      const name = header[2]
-      const g = []
-      results.forEach(v => {
-        g.push({
-          i: v[id],
-          n: v[name],
-          sn: v[sname]
-        })
-      })
-      addGoodList({
-        id: this.listQuery.id,
-        g: g
+    handleFlush() {
+      flushFake({
+        id: this.listQuery.id
       }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    createData() {
-      addGood({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
+        this.$message({ type: 'success', message: '刷新成功!' })
+        this.getFakeList()
       })
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.temp.id = row.id
-      this.temp.good_id = row.good_id
-      this.temp.name = row.name
-      this.temp.short_name = row.short_name
-      this.dialogStatus = 'update'
       this.dialogVisible = true
     },
     updateData() {
-      setGood({
+      setFake({
         id: this.temp.id,
-        name: this.temp.name,
-        sname: this.temp.short_name
+        amount: this.temp.fake_amount,
+        num: this.temp.fake_num,
+        comm: this.temp.commission,
+        freight: this.temp.freight,
+        note: this.temp.fake_note
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
-        this.getGoodList()
+        this.getFakeList()
         this.dialogVisible = false
-      })
-    },
-    handleDelete(row) {
-      this.$confirm('确定要删除吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        delGood({
-          id: row.id
-        }).then(() => {
-          this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
-        })
       })
     }
   }

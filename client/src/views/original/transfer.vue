@@ -9,49 +9,34 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="打款人" width="160">
         <template slot-scope="scope">
-          {{ scope.row.short_name }}
+          {{ scope.row.user_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="订单编码" width="160">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完整名称">
+      <el-table-column align="center" label="打款金额">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="center" label="打款时间">
+        <template slot-scope="scope">
+          {{ scope.row.create_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" width="80">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
-
-    <!-- 商品信息编辑 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码">
-          <div>{{ temp.good_id }}</div>
-        </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="temp.short_name" />
-        </el-form-item>
-        <el-form-item label="完整名称">
-          <el-input v-model="temp.name" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
-      </div>
-    </el-dialog>
 
     <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
@@ -63,8 +48,8 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/good'
-import { getShopList } from '@/api/shop'
+import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination, UploadExcelComponent },
@@ -191,10 +176,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.temp.id = row.id
-      this.temp.good_id = row.good_id
-      this.temp.name = row.name
-      this.temp.short_name = row.short_name
       this.dialogStatus = 'update'
       this.dialogVisible = true
     },

@@ -30,7 +30,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { getUserList } from '@/api/user'
+import { getUserList } from '@/api/system/user'
 import { resetPassword } from '@/api/account'
 
 export default {

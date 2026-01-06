@@ -88,8 +88,8 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/good'
-import { getShopList } from '@/api/shop'
+import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination, UploadExcelComponent },
@@ -216,10 +216,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.temp.id = row.id
-      this.temp.good_id = row.good_id
-      this.temp.name = row.name
-      this.temp.short_name = row.short_name
       this.dialogStatus = 'update'
       this.dialogVisible = true
     },

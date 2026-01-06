@@ -24,24 +24,28 @@ def add(request):
 
 @require_POST
 @transaction.atomic
-def delete(request):
+def addList(request):
     post = json.loads(request.body)
-    pk = int(post.get('id'))
-    data = Polymerize.objects.delete(pk)
+    shop_id = int(post.get('id'))
+    polymerizes = post.get('p')
+
+    # 批量添加
+    for polymerize in polymerizes:
+        Polymerize.objects.add(shop_id, polymerize['i'], polymerize['n'], polymerize['sn'])
+
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': None
     }
     return JsonResponse(response)
 
 @require_POST
 @transaction.atomic
-def get(request):
+def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    polymerize = Polymerize.objects.find(pk)
-    data = Polymerize.objects.encoder(polymerize)
+    data = Polymerize.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success',
