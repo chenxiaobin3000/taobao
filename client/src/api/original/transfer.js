@@ -1,14 +1,6 @@
 import request from '@/utils/request'
 const path = '/transfer'
 
-export function addTransfer(data) {
-  return request({
-    url: `${path}/add`,
-    method: 'post',
-    data
-  })
-}
-
 export function addTransferList(data) {
   return request({
     url: `${path}/addList`,

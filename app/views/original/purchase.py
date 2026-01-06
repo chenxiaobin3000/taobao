@@ -6,29 +6,6 @@ from app.models.original.purchase import Purchase
 
 @require_POST
 @transaction.atomic
-def add(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    purchase_id = post.get('pid')
-    order_id = post.get('oid')
-    payment = post.get('payment')
-    freight = post.get('freight')
-    total = post.get('total')
-    order_status = post.get('status')
-    create_time = post.get('ctime')
-    product_name = post.get('pn')
-    purchase_note = post.get('note')
-    purchase = Purchase.objects.add(shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
-    data = Purchase.objects.encoder(purchase)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
@@ -36,7 +13,16 @@ def addList(request):
 
     # 批量添加
     for purchase in purchases:
-        Purchase.objects.add(shop_id, purchase['i'], purchase['n'], purchase['sn'])
+        purchase_id = purchase['pid']
+        order_id = purchase['oid']
+        payment = purchase['payment']
+        freight = purchase['freight']
+        total = purchase['total']
+        order_status = purchase['status']
+        create_time = purchase['ctime']
+        product_name = purchase['pn']
+        purchase_note = purchase['note']
+        Purchase.objects.add(shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
     response = {
         'code': 0,

@@ -6,23 +6,6 @@ from app.models.original.promotion import Promotion
 
 @require_POST
 @transaction.atomic
-def add(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    create_date = post.get('cdate')
-    payment = post.get('payment')
-    promotion_note = post.get('note')
-    promotion = Promotion.objects.add(shop_id, create_date, payment, promotion_note)
-    data = Promotion.objects.encoder(promotion)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
@@ -30,7 +13,10 @@ def addList(request):
 
     # 批量添加
     for promotion in promotions:
-        Promotion.objects.add(shop_id, promotion['i'], promotion['n'], promotion['sn'])
+        create_date = promotion['cdate']
+        payment = promotion['payment']
+        promotion_note = promotion['note']
+        Promotion.objects.add(shop_id, create_date, payment, promotion_note)
 
     response = {
         'code': 0,

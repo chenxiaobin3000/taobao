@@ -6,30 +6,6 @@ from app.models.original.refund import Refund
 
 @require_POST
 @transaction.atomic
-def add(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    refund_id = post.get('uid')
-    order_id = post.get('oid')
-    product_id = post.get('pid')
-    actual_pay = post.get('ap')
-    refund_pay = post.get('rp')
-    refund_type = post.get('rt')
-    refund_status = post.get('rs')
-    apply_time = post.get('at')
-    timeout_time = post.get('tt')
-    complete_time = post.get('ct')
-    refund = Refund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_type, refund_status, apply_time, timeout_time, complete_time)
-    data = Refund.objects.encoder(refund)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
@@ -37,7 +13,17 @@ def addList(request):
 
     # 批量添加
     for refund in refunds:
-        Refund.objects.add(shop_id, refund['i'], refund['n'], refund['sn'])
+        refund_id = refund['uid']
+        order_id = refund['oid']
+        product_id = refund['pid']
+        actual_pay = refund['ap']
+        refund_pay = refund['rp']
+        refund_type = refund['rt']
+        refund_status = refund['rs']
+        apply_time = refund['at']
+        timeout_time = refund['tt']
+        complete_time = refund['ct']
+        Refund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_type, refund_status, apply_time, timeout_time, complete_time)
 
     response = {
         'code': 0,

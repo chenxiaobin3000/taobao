@@ -1,14 +1,6 @@
 import request from '@/utils/request'
 const path = '/polymerize'
 
-export function addPolymerize(data) {
-  return request({
-    url: `${path}/add`,
-    method: 'post',
-    data
-  })
-}
-
 export function addPolymerizeList(data) {
   return request({
     url: `${path}/addList`,

@@ -1,14 +1,6 @@
 import request from '@/utils/request'
 const path = '/deduction'
 
-export function addDeduction(data) {
-  return request({
-    url: `${path}/add`,
-    method: 'post',
-    data
-  })
-}
-
 export function addDeductionList(data) {
   return request({
     url: `${path}/addList`,

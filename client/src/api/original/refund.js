@@ -1,14 +1,6 @@
 import request from '@/utils/request'
 const path = '/refund'
 
-export function addRefund(data) {
-  return request({
-    url: `${path}/add`,
-    method: 'post',
-    data
-  })
-}
-
 export function addRefundList(data) {
   return request({
     url: `${path}/addList`,

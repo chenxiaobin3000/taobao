@@ -6,24 +6,6 @@ from app.models.original.transfer import Transfer
 
 @require_POST
 @transaction.atomic
-def add(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    user_id = int(post.get('uid'))
-    order_id = post.get('oid')
-    amount = post.get('amount')
-    create_time = post.get('ctime')
-    transfer = Transfer.objects.add(shop_id, user_id, order_id, amount, create_time)
-    data = Transfer.objects.encoder(transfer)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
@@ -31,7 +13,11 @@ def addList(request):
 
     # 批量添加
     for transfer in transfers:
-        Transfer.objects.add(shop_id, transfer['i'], transfer['n'], transfer['sn'])
+        user_id = int(transfer['uid'])
+        order_id = transfer['oid']
+        amount = transfer['amount']
+        create_time = transfer['ctime']
+        Transfer.objects.add(shop_id, user_id, order_id, amount, create_time)
 
     response = {
         'code': 0,

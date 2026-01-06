@@ -1,14 +1,6 @@
 import request from '@/utils/request'
 const path = '/order'
 
-export function addOrder(data) {
-  return request({
-    url: `${path}/add`,
-    method: 'post',
-    data
-  })
-}
-
 export function addOrderList(data) {
   return request({
     url: `${path}/addList`,
