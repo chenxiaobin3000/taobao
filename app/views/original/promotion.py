@@ -9,10 +9,10 @@ from app.models.original.promotion import Promotion
 def add(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    create_time = post.get('ctime')
+    create_date = post.get('cdate')
     payment = post.get('payment')
     promotion_note = post.get('note')
-    promotion = Promotion.objects.add(shop_id, create_time, payment, promotion_note)
+    promotion = Promotion.objects.add(shop_id, create_date, payment, promotion_note)
     data = Promotion.objects.encoder(promotion)
     response = {
         'code': 0,

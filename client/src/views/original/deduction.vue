@@ -24,36 +24,16 @@
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="center" label="操作" width="80">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getDeductionList" />
 
-    <!-- 扣费信息编辑 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码">
-          <div>{{ temp.good_id }}</div>
-        </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="temp.short_name" />
-        </el-form-item>
-        <el-form-item label="完整名称">
-          <el-input v-model="temp.name" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
+    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -63,7 +43,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getDeductionList, addDeduction, addDeductionList, delDeduction } from '@/api/original/deduction'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -82,14 +62,7 @@ export default {
         num: 10,
         search: null
       },
-      temp: {},
       dialogVisible: false,
-      dialogExcelVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
-      }
     }
   },
   computed: {
@@ -101,12 +74,10 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getGoodList()
+      this.getDeductionList()
     },
     create() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
+      this.$message({ type: 'error', message: '不支持新建!' })
     }
   },
   mounted: function() {
@@ -129,9 +100,9 @@ export default {
         short_name: ''
       }
     },
-    getGoodList() {
+    getDeductionList() {
       this.loading = true
-      getGoodList(
+      getDeductionList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -150,7 +121,7 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getGoodList()
+        this.getDeductionList()
       })
     },
     handleExcel() {
@@ -168,24 +139,24 @@ export default {
           sn: v[sname]
         })
       })
-      addGoodList({
+      addDeductionList({
         id: this.listQuery.id,
         g: g
       }).then(() => {
         this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
+        this.getDeductionList()
         this.dialogVisible = false
       })
     },
     createData() {
-      addGood({
+      addDeduction({
         id: this.listQuery.id,
         gid: this.temp.good_id,
         name: this.temp.name,
         sname: this.temp.short_name
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
-        this.getGoodList()
+        this.getDeductionList()
         this.dialogVisible = false
       })
     },
@@ -195,13 +166,13 @@ export default {
       this.dialogVisible = true
     },
     updateData() {
-      setGood({
+      setDeduction({
         id: this.temp.id,
         name: this.temp.name,
         sname: this.temp.short_name
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
-        this.getGoodList()
+        this.getDeductionList()
         this.dialogVisible = false
       })
     },
@@ -211,11 +182,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGood({
+        delDeduction({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
+          this.getDeductionList()
         })
       })
     }

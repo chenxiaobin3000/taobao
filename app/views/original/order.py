@@ -6,28 +6,6 @@ from app.models.original.order import Order
 
 @require_POST
 @transaction.atomic
-def add(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    order_id = post.get('oid')
-    payment = post.get('payment')
-    actual_pay = post.get('ap')
-    procure_pay = post.get('pp')
-    order_status = int(post.get('status'))
-    create_time = post.get('ctime')
-    product_name = post.get('name')
-    order_note = post.get('note')
-    order = Order.objects.add(shop_id, order_id, payment, actual_pay, procure_pay, order_status, create_time, product_name, order_note)
-    data = Order.objects.encoder(order)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
@@ -35,7 +13,15 @@ def addList(request):
 
     # 批量添加
     for order in orders:
-        Order.objects.add(shop_id, order['i'], order['n'], order['sn'])
+        order_id = order['oid']
+        payment = order['payment']
+        actual_pay = order['ap']
+        procure_pay = order['pp']
+        order_status = int(order['status'])
+        create_time = order['ctime']
+        product_name = order['name']
+        order_note = order['note']
+        Order.objects.add(shop_id, order_id, payment, actual_pay, procure_pay, order_status, create_time, product_name, order_note)
 
     response = {
         'code': 0,

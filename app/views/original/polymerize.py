@@ -6,24 +6,6 @@ from app.models.original.polymerize import Polymerize
 
 @require_POST
 @transaction.atomic
-def add(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    order_id = post.get('oid')
-    amount = post.get('amount')
-    amount_type = int(post.get('atype'))
-    create_time = post.get('ctime')
-    polymerize = Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time)
-    data = Polymerize.objects.encoder(polymerize)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
@@ -31,7 +13,11 @@ def addList(request):
 
     # 批量添加
     for polymerize in polymerizes:
-        Polymerize.objects.add(shop_id, polymerize['i'], polymerize['n'], polymerize['sn'])
+        order_id = polymerize['oid']
+        amount = polymerize['amount']
+        amount_type = int(polymerize['atype'])
+        create_time = polymerize['ctime']
+        Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time)
 
     response = {
         'code': 0,

@@ -4,8 +4,8 @@ from django.forms.models import model_to_dict
 
 # 推广表
 class PromotionManager(models.Manager):
-    def add(self, shop_id, create_time, payment, promotion_note):
-        return self.create(shop_id=shop_id, create_time=create_time, payment=payment, promotion_note=promotion_note)
+    def add(self, shop_id, create_date, payment, promotion_note):
+        return self.create(shop_id=shop_id, create_date=create_date, payment=payment, promotion_note=promotion_note)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -19,15 +19,15 @@ class PromotionManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, promotion):
-        return model_to_dict(promotion, fields=['create_time', 'payment', 'promotion_note'])
+        return model_to_dict(promotion, fields=['create_date', 'payment', 'promotion_note'])
 
     def encoderList(self, promotions):
-        return [model_to_dict(promotion, fields=['create_time', 'payment', 'promotion_note']) for promotion in promotions]
+        return [model_to_dict(promotion, fields=['create_date', 'payment', 'promotion_note']) for promotion in promotions]
     
 class Promotion(models.Model):
     objects = PromotionManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
-    create_time = models.DateField(db_index=True) # 交易日期
+    create_date = models.DateField(db_index=True) # 交易日期
     payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
     promotion_note = models.CharField(max_length=1024) # 备注
     ctime = models.DateTimeField(default=timezone.now)

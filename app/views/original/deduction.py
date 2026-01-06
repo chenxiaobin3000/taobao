@@ -6,24 +6,6 @@ from app.models.original.deduction import Deduction
 
 @require_POST
 @transaction.atomic
-def add(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    order_id = post.get('oid')
-    amount = post.get('amount')
-    amount_type = int(post.get('atype'))
-    create_time = post.get('ctime')
-    deduction = Deduction.objects.add(shop_id, order_id, amount, amount_type, create_time)
-    data = Deduction.objects.encoder(deduction)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
-    }
-    return JsonResponse(response)
-
-@require_POST
-@transaction.atomic
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
@@ -31,7 +13,11 @@ def addList(request):
 
     # 批量添加
     for deduction in deductions:
-        Deduction.objects.add(shop_id, deduction['i'], deduction['n'], deduction['sn'])
+        order_id = deduction['oid']
+        amount = deduction['amount']
+        amount_type = int(deduction['atype'])
+        create_time = deduction['ctime']
+        deduction = Deduction.objects.add(shop_id, order_id, amount, amount_type, create_time)
 
     response = {
         'code': 0,

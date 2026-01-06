@@ -9,19 +9,29 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="项目名称">
         <template slot-scope="scope">
-          {{ scope.row.short_name }}
+          {{ scope.row.project_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="金额" width="160px">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完整名称">
+      <el-table-column align="center" label="负责人" width="160px">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.user_id }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="备注" width="160px">
+        <template slot-scope="scope">
+          {{ scope.row.misc_note }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="日期" width="160px">
+        <template slot-scope="scope">
+          {{ scope.row.create_date }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="160">
@@ -32,19 +42,27 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getUserList" />
 
     <!-- 杂项信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码">
-          <div>{{ temp.good_id }}</div>
+        <el-form-item label="项目名称">
+          <el-input v-model="temp.project_name" />
         </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="temp.short_name" />
+        <el-form-item label="金额">
+          <el-input v-model="temp.amount" />
         </el-form-item>
-        <el-form-item label="完整名称">
-          <el-input v-model="temp.name" />
+        <el-form-item label="负责人">
+          <el-select v-model="temp.user_id" class="filter-item" placeholder="请选择负责人">
+            <el-option v-for="item in userList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="temp.misc_note" />
+        </el-form-item>
+        <el-form-item label="日期">
+          <div>{{ temp.create_date }}</div>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -52,22 +70,18 @@
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
       </div>
     </el-dialog>
-
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
 import { getShopList } from '@/api/system/shop'
+import { getUserList } from '@/api/system/user'
+import { getMiscList, addMisc, setMisc, delMisc } from '@/api/middle/miscellaneous'
 
 export default {
-  components: { Pagination, UploadExcelComponent },
+  components: { Pagination },
   data() {
     return {
       userdata: {},
@@ -75,7 +89,8 @@ export default {
       list: null,
       total: 0,
       loading: false,
-      shopList: [], // 本公司所有店铺列表
+      shopList: null, // 本公司所有店铺列表
+      userList: null, // 本公司所有用户列表
       listQuery: {
         id: 0,
         page: 1,
@@ -84,11 +99,10 @@ export default {
       },
       temp: {},
       dialogVisible: false,
-      dialogExcelVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
+        update: '修改杂项信息',
+        create: '新增杂项'
       }
     }
   },
@@ -101,10 +115,11 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getGoodList()
+      this.getShopList()
     },
     create() {
       this.resetTemp()
+      this.temp.user_id = this.userList[0].id
       this.dialogStatus = 'create'
       this.dialogVisible = true
     }
@@ -124,14 +139,13 @@ export default {
     resetTemp() {
       this.temp = {
         id: 0,
-        good_id: '',
-        name: '',
-        short_name: ''
+        marketId: 0,
+        name: ''
       }
     },
-    getGoodList() {
+    getMiscList() {
       this.loading = true
-      getGoodList(
+      getMiscList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -150,42 +164,27 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getGoodList()
+        this.getUserList()
       })
     },
-    handleExcel() {
-      this.dialogExcelVisible = true
-    },
-    handleSuccess({ results, header }) {
-      const sname = header[0]
-      const id = header[1]
-      const name = header[2]
-      const g = []
-      results.forEach(v => {
-        g.push({
-          i: v[id],
-          n: v[name],
-          sn: v[sname]
-        })
-      })
-      addGoodList({
-        id: this.listQuery.id,
-        g: g
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
+    getUserList() {
+      getUserList({
+        id: this.userdata.company.id,
+        page: 1,
+        num: 1000
+      }).then(response => {
+        this.userList = response.data.data.list
+        this.getMiscList()
       })
     },
     createData() {
-      addGood({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
+      addMisc({
         name: this.temp.name,
-        sname: this.temp.short_name
+        cid: this.userdata.company.id,
+        mid: this.temp.marketId
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
-        this.getGoodList()
+        this.getShopList()
         this.dialogVisible = false
       })
     },
@@ -195,13 +194,12 @@ export default {
       this.dialogVisible = true
     },
     updateData() {
-      setGood({
+      setMisc({
         id: this.temp.id,
-        name: this.temp.name,
-        sname: this.temp.short_name
+        name: this.temp.name
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
-        this.getGoodList()
+        this.getUserList()
         this.dialogVisible = false
       })
     },
@@ -211,11 +209,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGood({
+        delMisc({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
+          this.getRoles()
         })
       })
     }
