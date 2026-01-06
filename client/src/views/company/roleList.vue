@@ -14,6 +14,7 @@
       </el-table-column>
     </el-table>
 
+    <!-- 角色信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="角色名称">

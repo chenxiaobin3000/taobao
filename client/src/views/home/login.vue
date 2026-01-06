@@ -10,14 +10,7 @@
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
-        <el-input
-          ref="account"
-          v-model="loginForm.account"
-          placeholder="请输入账号"
-          type="text"
-          tabindex="1"
-          autocomplete="on"
-        />
+        <el-input ref="account" v-model="loginForm.account" placeholder="请输入账号" type="text" tabindex="1" autocomplete="on" />
       </el-form-item>
 
       <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
@@ -25,17 +18,7 @@
           <span class="svg-container">
             <svg-icon icon-class="password" />
           </span>
-          <el-input
-            :key="passwordType"
-            ref="password"
-            v-model="loginForm.password"
-            :type="passwordType"
-            placeholder="请输入密码"
-            tabindex="2"
-            autocomplete="on"
-            @keyup.native="checkCapslock"
-            @blur="capsTooltip = false"
-          />
+          <el-input :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType" placeholder="请输入密码" tabindex="2" autocomplete="on" @keyup.native="checkCapslock" @blur="capsTooltip = false" />
           <span class="show-pwd" @click="showPwd">
             <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
           </span>

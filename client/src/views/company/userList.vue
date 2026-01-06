@@ -34,13 +34,13 @@
     <!-- 用户信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="用户名" prop="name">
+        <el-form-item label="用户名">
           <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
+        <el-form-item label="手机号">
           <el-input v-model="temp.phone" />
         </el-form-item>
-        <el-form-item label="角色" prop="roleName">
+        <el-form-item label="角色">
           <el-select v-model="temp.roleId" class="filter-item" placeholder="请选择角色">
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
@@ -48,10 +48,10 @@
         <el-form-item label="店铺">
           <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleShopChange" />
         </el-form-item>
-        <el-form-item v-if="dialogStatus==='create'" label="说明" prop="role">
+        <el-form-item v-if="dialogStatus==='create'" label="说明">
           <div style="width: 240px">新用户注册后，默认密码为: 123456</div>
         </el-form-item>
-        <el-form-item v-else label="说明" prop="role">
+        <el-form-item v-else label="说明">
           <div style="width: 220px">修改用户名只影响系统内部显示，登陆账号不会变化</div>
         </el-form-item>
       </el-form>

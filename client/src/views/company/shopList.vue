@@ -27,7 +27,7 @@
         <el-form-item label="店铺名称">
           <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item v-if="isNew" label="平台" prop="temp.market">
+        <el-form-item v-if="isNew" label="平台">
           <el-select v-model="temp.marketId" class="filter-item" placeholder="请选择平台">
             <el-option v-for="item in marketList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>

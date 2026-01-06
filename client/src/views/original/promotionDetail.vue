@@ -37,13 +37,13 @@
     <!-- 商品信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码" prop="good_id">
+        <el-form-item label="商品编码">
           <div>{{ temp.good_id }}</div>
         </el-form-item>
-        <el-form-item label="商品名称" prop="short_name">
+        <el-form-item label="商品名称">
           <el-input v-model="temp.short_name" />
         </el-form-item>
-        <el-form-item label="完整名称" prop="name">
+        <el-form-item label="完整名称">
           <el-input v-model="temp.name" />
         </el-form-item>
       </el-form>

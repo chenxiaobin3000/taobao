@@ -40,8 +40,8 @@ class Order(models.Model):
     procure_pay = models.DecimalField(max_digits=10, decimal_places=2) # 采购付款
     order_status = models.IntegerField(db_index=True) # 状态
     create_time = models.DateTimeField(db_index=True) # 创建时间
-    product_name = models.CharField(max_length=1024) # 商品名称
-    order_note = models.CharField(max_length=1024) # 订单备注
+    product_name = models.CharField(max_length=256) # 商品名称
+    order_note = models.CharField(max_length=256) # 订单备注
     ctime = models.DateTimeField(default=timezone.now)
 
     class Meta(object):

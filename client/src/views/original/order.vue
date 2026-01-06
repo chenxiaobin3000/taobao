@@ -9,19 +9,44 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="订单编码" width="160">
         <template slot-scope="scope">
-          {{ scope.row.short_name }}
+          {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="应付" width="160">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          {{ scope.row.payment }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完整名称">
+      <el-table-column align="center" label="实付">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.actual_pay }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="采购">
+        <template slot-scope="scope">
+          {{ scope.row.procure_pay }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="状态">
+        <template slot-scope="scope">
+          {{ scope.row.order_status }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="创建时间">
+        <template slot-scope="scope">
+          {{ scope.row.create_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="商品id">
+        <template slot-scope="scope">
+          {{ scope.row.product_name }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="备注">
+        <template slot-scope="scope">
+          {{ scope.row.order_note }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="160">
@@ -34,17 +59,17 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
 
-    <!-- 商品信息编辑 -->
+    <!-- 订单信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码" prop="good_id">
-          <div>{{ temp.good_id }}</div>
+        <el-form-item label="采购" prop="procure_pay">
+          <el-input v-model="temp.procure_pay" />
         </el-form-item>
-        <el-form-item label="商品名称" prop="short_name">
-          <el-input v-model="temp.short_name" />
+        <el-form-item label="状态" prop="order_status">
+          <el-input v-model="temp.order_status" />
         </el-form-item>
-        <el-form-item label="完整名称" prop="name">
-          <el-input v-model="temp.name" />
+        <el-form-item label="备注" prop="order_note">
+          <el-input v-model="temp.order_note" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
