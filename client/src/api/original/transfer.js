@@ -9,14 +9,6 @@ export function addTransferList(data) {
   })
 }
 
-export function setTransfer(data) {
-  return request({
-    url: `${path}/set`,
-    method: 'post',
-    data
-  })
-}
-
 export function delTransfer(data) {
   return request({
     url: `${path}/del`,
