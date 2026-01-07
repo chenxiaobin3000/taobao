@@ -26,10 +26,10 @@ class MiscellaneousManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, misc):
-        return model_to_dict(misc, fields=['create_date', 'user_id', 'project_name', 'amount', 'misc_note'])
+        return model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note'])
 
     def encoderList(self, miscs):
-        return [model_to_dict(misc, fields=['create_date', 'user_id', 'project_name', 'amount', 'misc_note']) for misc in miscs]
+        return [model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note']) for misc in miscs]
     
 class Miscellaneous(models.Model):
     objects = MiscellaneousManager()

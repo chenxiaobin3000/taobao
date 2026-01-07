@@ -26,10 +26,10 @@ class OrderManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, order):
-        return model_to_dict(order, fields=['order_id', 'payment', 'actual_pay', 'procure_pay', 'order_status', 'create_time', 'product_name', 'order_note'])
+        return model_to_dict(order, fields=['id', 'order_id', 'payment', 'actual_pay', 'procure_pay', 'order_status', 'create_time', 'product_name', 'order_note'])
 
     def encoderList(self, orders):
-        return [model_to_dict(order, fields=['order_id', 'payment', 'actual_pay', 'procure_pay', 'order_status', 'create_time', 'product_name', 'order_note']) for order in orders]
+        return [model_to_dict(order, fields=['id', 'order_id', 'payment', 'actual_pay', 'procure_pay', 'order_status', 'create_time', 'product_name', 'order_note']) for order in orders]
     
 class Order(models.Model):
     objects = OrderManager()

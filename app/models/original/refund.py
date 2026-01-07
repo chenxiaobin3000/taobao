@@ -24,10 +24,10 @@ class RefundManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, refund):
-        return model_to_dict(refund, fields=['shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_type', 'refund_status', 'apply_time', 'timeout_time', 'complete_time'])
+        return model_to_dict(refund, fields=['id', 'shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_type', 'refund_status', 'apply_time', 'timeout_time', 'complete_time'])
 
     def encoderList(self, refunds):
-        return [model_to_dict(refund, fields=['shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_type', 'refund_status', 'apply_time', 'timeout_time', 'complete_time']) for refund in refunds]
+        return [model_to_dict(refund, fields=['id', 'shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_type', 'refund_status', 'apply_time', 'timeout_time', 'complete_time']) for refund in refunds]
     
 class Refund(models.Model):
     objects = RefundManager()

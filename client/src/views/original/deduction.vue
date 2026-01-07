@@ -43,7 +43,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getDeductionList, addDeduction, addDeductionList, delDeduction } from '@/api/original/deduction'
+import { getDeductionList, addDeductionList, delDeduction } from '@/api/original/deduction'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -62,7 +62,7 @@ export default {
         num: 10,
         search: null
       },
-      dialogVisible: false,
+      dialogVisible: false
     }
   },
   computed: {
@@ -144,34 +144,6 @@ export default {
         g: g
       }).then(() => {
         this.$message({ type: 'success', message: '导入成功!' })
-        this.getDeductionList()
-        this.dialogVisible = false
-      })
-    },
-    createData() {
-      addDeduction({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
-        this.getDeductionList()
-        this.dialogVisible = false
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
-      this.dialogVisible = true
-    },
-    updateData() {
-      setDeduction({
-        id: this.temp.id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '修改成功!' })
         this.getDeductionList()
         this.dialogVisible = false
       })

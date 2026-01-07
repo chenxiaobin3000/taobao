@@ -2,6 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
+from app.json_encoder import MyJSONEncoder
 from app.models.account import Account
 
 # 系统默认密码:888888
@@ -24,7 +25,7 @@ def register(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -43,12 +44,12 @@ def login(request):
     if (password != object.password):
         response['code'] = -1
         response['msg'] = '密码不正确'
-        return JsonResponse(response)
+        return JsonResponse(response, encoder=MyJSONEncoder)
     response['data']['id'] = object.user_id
 
     # 刷新session信息
     # response['data']['token'] = ''
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -62,7 +63,7 @@ def logout(request):
         'msg': 'success',
         'data': {}
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -76,7 +77,7 @@ def setPassword(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -89,4 +90,4 @@ def resetPassword(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)

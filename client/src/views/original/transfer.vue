@@ -11,7 +11,12 @@
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="打款人" width="160">
         <template slot-scope="scope">
-          {{ scope.row.user_id }}
+          {{ scope.row.user_name }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="收款人" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.payee_name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="订单编码" width="160">
@@ -19,14 +24,19 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款金额">
+      <el-table-column align="center" label="打款金额" width="160">
         <template slot-scope="scope">
           {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款时间">
+      <el-table-column align="center" label="打款时间" width="160">
         <template slot-scope="scope">
           {{ scope.row.create_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="打款时间">
+        <template slot-scope="scope">
+          {{ scope.row.transfer_note }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="80">
@@ -36,9 +46,9 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getTransferList" />
 
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
+    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -48,7 +58,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getTransferList, addTransferList, delTransfer } from '@/api/original/transfer'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -67,14 +77,7 @@ export default {
         num: 10,
         search: null
       },
-      temp: {},
-      dialogVisible: false,
-      dialogExcelVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
-      }
+      dialogVisible: false
     }
   },
   computed: {
@@ -86,12 +89,10 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getGoodList()
+      this.getTransferList()
     },
     create() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
+      this.$message({ type: 'error', message: '不支持新建!' })
     }
   },
   mounted: function() {
@@ -102,21 +103,12 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
-    this.resetTemp()
     this.getShopList()
   },
   methods: {
-    resetTemp() {
-      this.temp = {
-        id: 0,
-        good_id: '',
-        name: '',
-        short_name: ''
-      }
-    },
-    getGoodList() {
+    getTransferList() {
       this.loading = true
-      getGoodList(
+      getTransferList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -135,58 +127,43 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getGoodList()
+        this.getTransferList()
       })
     },
     handleExcel() {
-      this.dialogExcelVisible = true
-    },
-    handleSuccess({ results, header }) {
-      const sname = header[0]
-      const id = header[1]
-      const name = header[2]
-      const g = []
-      results.forEach(v => {
-        g.push({
-          i: v[id],
-          n: v[name],
-          sn: v[sname]
-        })
-      })
-      addGoodList({
-        id: this.listQuery.id,
-        g: g
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    createData() {
-      addGood({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
       this.dialogVisible = true
     },
-    updateData() {
-      setGood({
-        id: this.temp.id,
-        name: this.temp.name,
-        sname: this.temp.short_name
+    handleSuccess({ results, header }) {
+      const user_name = header[0]
+      const payee_name = header[1]
+      const order_id = header[7]
+      const amount = header[4]
+      const create_time = header[5]
+      const transfer_note = header[9]
+      const t = []
+      results.forEach(v => {
+        const date = new Date((v[create_time] - 2) * 24 * 3600000 + 1 - 8 * 3600000)
+        const Y = (date.getFullYear() - 70) + '-'
+        const M = (date.getMonth() + 1) + '-'
+        const D = date.getDate() + ' '
+        const h = date.getHours() + ':'
+        const m = date.getMinutes() + ':'
+        const s = date.getSeconds()
+        t.push({
+          n: v[user_name],
+          p: v[payee_name],
+          o: v[order_id],
+          a: v[amount],
+          c: Y + M + D + h + m + s,
+          tn: v[transfer_note]
+        })
+      })
+      addTransferList({
+        id: this.listQuery.id,
+        t: t
       }).then(() => {
-        this.$message({ type: 'success', message: '修改成功!' })
-        this.getGoodList()
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getTransferList()
         this.dialogVisible = false
       })
     },
@@ -196,11 +173,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGood({
+        delTransfer({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
+          this.getTransferList()
         })
       })
     }

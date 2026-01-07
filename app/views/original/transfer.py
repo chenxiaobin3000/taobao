@@ -2,6 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
+from app.json_encoder import MyJSONEncoder
 from app.models.original.transfer import Transfer
 
 @require_POST
@@ -13,18 +14,20 @@ def addList(request):
 
     # 批量添加
     for transfer in transfers:
-        user_id = int(transfer['uid'])
-        order_id = transfer['oid']
-        amount = transfer['amount']
-        create_time = transfer['ctime']
-        Transfer.objects.add(shop_id, user_id, order_id, amount, create_time)
+        user_name = transfer['n']
+        payee_name = transfer['p']
+        order_id = transfer['o']
+        amount = transfer['a']
+        create_time = transfer['c']
+        transfer_note= transfer['tn']
+        Transfer.objects.add(shop_id, user_name, payee_name, order_id, amount, create_time, transfer_note)
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': None
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -37,7 +40,7 @@ def delete(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -48,6 +51,7 @@ def getList(request):
     num = int(post.get('num'))
     transfers = Transfer.objects.getList(shop_id, page, num)
     data = Transfer.objects.encoderList(transfers)
+    print(data)
     response = {
         'code': 0,
         'msg': 'success',
@@ -56,4 +60,4 @@ def getList(request):
             'list': data
         }
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)

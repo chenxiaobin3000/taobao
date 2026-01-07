@@ -19,10 +19,10 @@ class DeductionManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, deduction):
-        return model_to_dict(deduction, fields=['order_id', 'amount', 'amount_type', 'create_time'])
+        return model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time'])
 
     def encoderList(self, deductions):
-        return [model_to_dict(deduction, fields=['order_id', 'amount', 'amount_type', 'create_time']) for deduction in deductions]
+        return [model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time']) for deduction in deductions]
     
 class Deduction(models.Model):
     objects = DeductionManager()

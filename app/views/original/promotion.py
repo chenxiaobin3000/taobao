@@ -2,6 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
+from app.json_encoder import MyJSONEncoder
 from app.models.original.promotion import Promotion
 
 @require_POST
@@ -23,7 +24,7 @@ def addList(request):
         'msg': 'success',
         'data': None
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -36,7 +37,7 @@ def delete(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -55,4 +56,4 @@ def getList(request):
             'list': data
         }
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)

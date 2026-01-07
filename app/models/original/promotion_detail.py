@@ -19,10 +19,10 @@ class PromotionDetailManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, promotion):
-        return model_to_dict(promotion, fields=['shop_id', 'promotion_time', 'product_id', 'show_num', 'click_num', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi'])
+        return model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_time', 'product_id', 'show_num', 'click_num', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi'])
 
     def encoderList(self, promotions):
-        return [model_to_dict(promotion, fields=['id', 'name', 'user_id']) for promotion in promotions]
+        return [model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_time', 'product_id', 'show_num', 'click_num', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi']) for promotion in promotions]
 
 class PromotionDetail(models.Model):
     objects = PromotionDetailManager()

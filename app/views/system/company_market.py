@@ -2,6 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
+from app.json_encoder import MyJSONEncoder
 from app.models.system.company_market import CompanyMarket
 
 @require_POST
@@ -17,7 +18,7 @@ def add(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -30,7 +31,7 @@ def delete(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -49,4 +50,4 @@ def getList(request):
             'list': data
         }
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)

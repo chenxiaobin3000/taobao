@@ -2,6 +2,7 @@ import json
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
+from app.json_encoder import MyJSONEncoder
 from app.models.system.shop import Shop
 from app.models.system.user import User
 from app.models.system.user_shop import UserShop
@@ -22,7 +23,7 @@ def add(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -36,7 +37,7 @@ def set(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -54,18 +55,18 @@ def delete(request):
     if good:
         response['code'] = -1
         response['msg'] = '存在商品，不能删除'
-        return JsonResponse(response)
+        return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 存在管理员不能删除
     shop = UserShop.objects.getListByShop(pk)
     if shop:
         response['code'] = -1
         response['msg'] = '存在管理员，不能删除'
-        return JsonResponse(response)
+        return JsonResponse(response, encoder=MyJSONEncoder)
 
     data = Shop.objects.delete(pk)
     response['data'] = data
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -99,7 +100,7 @@ def get(request):
         'msg': 'success',
         'data': data
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
 @transaction.atomic
@@ -139,4 +140,4 @@ def getList(request):
             'list': datas
         }
     }
-    return JsonResponse(response)
+    return JsonResponse(response, encoder=MyJSONEncoder)

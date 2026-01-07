@@ -19,10 +19,10 @@ class PolymerizeManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, polymerize):
-        return model_to_dict(polymerize, fields=['order_id', 'amount', 'amount_type', 'create_time'])
+        return model_to_dict(polymerize, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time'])
 
     def encoderList(self, polymerizes):
-        return [model_to_dict(polymerize, fields=['order_id', 'amount', 'amount_type', 'create_time']) for polymerize in polymerizes]
+        return [model_to_dict(polymerize, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time']) for polymerize in polymerizes]
     
     
 class Polymerize(models.Model):
