@@ -51,7 +51,6 @@ def getList(request):
     num = int(post.get('num'))
     transfers = Transfer.objects.getList(shop_id, page, num)
     data = Transfer.objects.encoderList(transfers)
-    print(data)
     response = {
         'code': 0,
         'msg': 'success',

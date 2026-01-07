@@ -34,7 +34,7 @@
           {{ scope.row.create_time }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款时间">
+      <el-table-column align="center" label="备注">
         <template slot-scope="scope">
           {{ scope.row.transfer_note }}
         </template>
