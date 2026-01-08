@@ -13,6 +13,9 @@ class TransferManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
+    def getByCTime(self, shop_id, create_time):
+        return self.filter(shop_id=shop_id, create_time=create_time).first()
+
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num

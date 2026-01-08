@@ -20,6 +20,8 @@ def addList(request):
         amount = transfer['a']
         create_time = transfer['c']
         transfer_note= transfer['tn']
+        if Transfer.objects.getByCTime(shop_id, create_time):
+            continue
         Transfer.objects.add(shop_id, user_name, payee_name, order_id, amount, create_time, transfer_note)
 
     response = {
