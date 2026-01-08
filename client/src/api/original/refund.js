@@ -9,14 +9,6 @@ export function addRefundList(data) {
   })
 }
 
-export function setRefund(data) {
-  return request({
-    url: `${path}/set`,
-    method: 'post',
-    data
-  })
-}
-
 export function delRefund(data) {
   return request({
     url: `${path}/del`,

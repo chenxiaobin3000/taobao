@@ -2,14 +2,14 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺">
+        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="打款人" width="160">
+      <el-table-column align="center" label="打款人" width="80">
         <template slot-scope="scope">
           {{ scope.row.user_name }}
         </template>
@@ -24,7 +24,7 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款金额" width="160">
+      <el-table-column align="center" label="打款金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.amount }}
         </template>
@@ -58,6 +58,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
+import { xlsx_date_str } from '@/utils/xlsx'
 import { getTransferList, addTransferList, delTransfer } from '@/api/original/transfer'
 import { getShopList } from '@/api/system/shop'
 
@@ -130,6 +131,9 @@ export default {
         this.getTransferList()
       })
     },
+    handleChange() {
+      this.getTransferList()
+    },
     handleExcel() {
       this.dialogVisible = true
     },
@@ -142,19 +146,12 @@ export default {
       const transfer_note = header[9]
       const t = []
       results.forEach(v => {
-        const date = new Date((v[create_time] - 2) * 24 * 3600000 + 1 - 8 * 3600000)
-        const Y = (date.getFullYear() - 70) + '-'
-        const M = (date.getMonth() + 1) + '-'
-        const D = date.getDate() + ' '
-        const h = date.getHours() + ':'
-        const m = date.getMinutes() + ':'
-        const s = date.getSeconds()
         t.push({
           n: v[user_name],
           p: v[payee_name],
           o: v[order_id],
           a: v[amount],
-          c: Y + M + D + h + m + s,
+          c: xlsx_date_str(v[create_time]),
           tn: v[transfer_note]
         })
       })

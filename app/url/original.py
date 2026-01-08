@@ -9,7 +9,6 @@ url_original = [
 
     # 订单
     path('api/order/addList', order.addList),
-    path('api/order/set', order.set),
     path('api/order/del', order.delete),
     path('api/order/getList', order.getList),
 
@@ -30,13 +29,11 @@ url_original = [
 
     # 采购
     path('api/purchase/addList', purchase.addList),
-    path('api/purchase/set', purchase.set),
     path('api/purchase/del', purchase.delete),
     path('api/purchase/getList', purchase.getList),
 
     # 退货
     path('api/refund/addList', refund.addList),
-    path('api/refund/set', refund.set),
     path('api/refund/del', refund.delete),
     path('api/refund/getList', refund.getList),
 

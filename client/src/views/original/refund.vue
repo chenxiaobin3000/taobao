@@ -2,58 +2,73 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺">
+        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="订单编码" width="160">
         <template slot-scope="scope">
-          {{ scope.row.short_name }}
+          {{ scope.row.order_id }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="退款编码" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.refund_id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="商品编码" width="160">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          {{ scope.row.product_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完整名称">
+      <el-table-column align="center" label="实付" width="80">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.actual_pay }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="center" label="退款" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_pay }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="退货类型" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_type }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="退款状态" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_status }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="申请时间" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.apply_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="超时时间" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.timeout_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="完结时间">
+        <template slot-scope="scope">
+          {{ scope.row.complete_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" width="80">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getGoodList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getRefundList" />
 
-    <!-- 商品信息编辑 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码">
-          <div>{{ temp.good_id }}</div>
-        </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="temp.short_name" />
-        </el-form-item>
-        <el-form-item label="完整名称">
-          <el-input v-model="temp.name" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
+    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -63,7 +78,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getRefundList, addRefundList, delRefund } from '@/api/original/refund'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -82,14 +97,7 @@ export default {
         num: 10,
         search: null
       },
-      temp: {},
-      dialogVisible: false,
-      dialogExcelVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
-      }
+      dialogVisible: false
     }
   },
   computed: {
@@ -101,12 +109,10 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getGoodList()
+      this.getRefundList()
     },
     create() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
+      this.$message({ type: 'error', message: '不支持新建!' })
     }
   },
   mounted: function() {
@@ -117,21 +123,12 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
-    this.resetTemp()
     this.getShopList()
   },
   methods: {
-    resetTemp() {
-      this.temp = {
-        id: 0,
-        good_id: '',
-        name: '',
-        short_name: ''
-      }
-    },
-    getGoodList() {
+    getRefundList() {
       this.loading = true
-      getGoodList(
+      getRefundList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -150,58 +147,47 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getGoodList()
+        this.getRefundList()
       })
+    },
+    handleChange() {
+      this.getRefundList()
     },
     handleExcel() {
-      this.dialogExcelVisible = true
-    },
-    handleSuccess({ results, header }) {
-      const sname = header[0]
-      const id = header[1]
-      const name = header[2]
-      const g = []
-      results.forEach(v => {
-        g.push({
-          i: v[id],
-          n: v[name],
-          sn: v[sname]
-        })
-      })
-      addGoodList({
-        id: this.listQuery.id,
-        g: g
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    createData() {
-      addGood({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
       this.dialogVisible = true
     },
-    updateData() {
-      setGood({
-        id: this.temp.id,
-        name: this.temp.name,
-        sname: this.temp.short_name
+    handleSuccess({ results, header }) {
+      const refund_id = header[1]
+      const order_id = header[0]
+      const product_id = header[4]
+      const actual_pay = header[7]
+      const refund_pay = header[9]
+      const refund_type = header[11]
+      const refund_status = header[14]
+      const apply_time = header[12]
+      const timeout_time = header[13]
+      const complete_time = header[6]
+      const r = []
+      results.forEach(v => {
+        r.push({
+          uid: v[refund_id],
+          oid: v[order_id],
+          pid: v[product_id],
+          ap: v[actual_pay],
+          rp: v[refund_pay],
+          rt: v[refund_type],
+          rs: v[refund_status],
+          at: v[apply_time],
+          tt: v[timeout_time],
+          ct: v[complete_time]
+        })
+      })
+      addRefundList({
+        id: this.listQuery.id,
+        r: r
       }).then(() => {
-        this.$message({ type: 'success', message: '修改成功!' })
-        this.getGoodList()
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getRefundList()
         this.dialogVisible = false
       })
     },
@@ -211,11 +197,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGood({
+        delRefund({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
+          this.getRefundList()
         })
       })
     }
