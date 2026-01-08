@@ -7,16 +7,14 @@ class RefundManager(models.Manager):
     def add(self, shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_type, refund_status, apply_time, timeout_time, complete_time):
         return self.create(shop_id=shop_id, refund_id=refund_id, order_id=order_id, product_id=product_id, actual_pay=actual_pay, refund_pay=refund_pay, refund_type=refund_type, refund_status=refund_status, apply_time=apply_time, timeout_time=timeout_time, complete_time=complete_time)
 
-    def set(self, pk, refund_status):
-        refund = self.get(pk=pk)
-        refund.refund_status = refund_status
-        return refund.save()
-
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
     def find(self, pk):
         return self.get(pk=pk)
+
+    def getByOIdAndTime(self, shop_id, order_id, apply_time):
+        return self.filter(shop_id=shop_id, order_id=order_id, apply_time=apply_time).first()
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
