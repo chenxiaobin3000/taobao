@@ -19,7 +19,7 @@
           {{ scope.row.refund_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="商品编码" width="120">
         <template slot-scope="scope">
           {{ scope.row.product_id }}
         </template>
@@ -36,12 +36,12 @@
       </el-table-column>
       <el-table-column align="center" label="退货类型" width="80">
         <template slot-scope="scope">
-          {{ scope.row.refund_type }}
+          {{ num2type(scope.row.refund_type) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="退款状态" width="80">
+      <el-table-column align="center" label="退款状态">
         <template slot-scope="scope">
-          {{ scope.row.refund_status }}
+          {{ num2status(scope.row.refund_status) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="申请时间" width="160">
@@ -51,12 +51,12 @@
       </el-table-column>
       <el-table-column align="center" label="超时时间" width="160">
         <template slot-scope="scope">
-          {{ scope.row.timeout_time }}
+          {{ scope.row.timeout_time === NoneTime ? '' : scope.row.timeout_time }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完结时间">
+      <el-table-column align="center" label="完结时间" width="160">
         <template slot-scope="scope">
-          {{ scope.row.complete_time }}
+          {{ scope.row.complete_time === NoneTime ? '' : scope.row.complete_time }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="80">
@@ -78,7 +78,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { RefundStatus, RefundType } from '@/utils/const'
+import { NoneTime, RefundStatus, RefundType } from '@/utils/const'
 import { getRefundList, addRefundList, delRefund } from '@/api/original/refund'
 import { getShopList } from '@/api/system/shop'
 
@@ -98,7 +98,8 @@ export default {
         num: 10,
         search: null
       },
-      dialogVisible: false
+      dialogVisible: false,
+      NoneTime: NoneTime
     }
   },
   computed: {
@@ -151,6 +152,12 @@ export default {
         this.getRefundList()
       })
     },
+    num2type(num) {
+      return RefundType.num2text(num)
+    },
+    num2status(num) {
+      return RefundStatus.num2text(num)
+    },
     handleChange() {
       this.getRefundList()
     },
@@ -176,21 +183,37 @@ export default {
           pid: v[product_id],
           ap: v[actual_pay],
           rp: v[refund_pay],
-          rt: v[refund_type],
-          rs: v[refund_status],
+          rt: RefundType.text2num(v[refund_type]),
+          rs: RefundStatus.text2num(v[refund_status]),
           at: v[apply_time],
-          tt: v[timeout_time],
-          ct: v[complete_time]
+          tt: v[timeout_time] === '' ? NoneTime : v[timeout_time],
+          ct: v[complete_time] === '' ? NoneTime : v[complete_time]
         })
       })
-      addRefundList({
-        id: this.listQuery.id,
-        r: r
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getRefundList()
-        this.dialogVisible = false
-      })
+      let length = r.length
+      if (length > 100) {
+        length = parseInt(length / 100)
+        for (let i = 0; i < length; ++i) {
+          console.log(r.slice(i * 100, (i + 1) * 100))
+          addRefundList({
+            id: this.listQuery.id,
+            r: r.slice(i * 100, (i + 1) * 100)
+          }).then(() => {
+            this.$message({ type: 'success', message: '导入成功!' })
+            this.getRefundList()
+            this.dialogVisible = false
+          })
+        }
+      } else {
+        addRefundList({
+          id: this.listQuery.id,
+          r: r
+        }).then(() => {
+          this.$message({ type: 'success', message: '导入成功!' })
+          this.getRefundList()
+          this.dialogVisible = false
+        })
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
