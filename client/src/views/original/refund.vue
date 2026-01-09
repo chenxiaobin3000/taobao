@@ -78,6 +78,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
+import { RefundStatus, RefundType } from '@/utils/const'
 import { getRefundList, addRefundList, delRefund } from '@/api/original/refund'
 import { getShopList } from '@/api/system/shop'
 
