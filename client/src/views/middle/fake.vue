@@ -51,7 +51,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getFakeList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getFakeList" />
 
     <!-- 刷单信息编辑 -->
     <el-dialog title="修改刷单信息" :visible.sync="dialogVisible">

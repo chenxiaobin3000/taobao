@@ -19,7 +19,7 @@ class PromotionManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id)[left:right]
+        return self.filter(shop_id=shop_id).order_by('-create_date')[left:right]
 
     def encoder(self, promotion):
         return model_to_dict(promotion, fields=['id', 'create_date', 'payment', 'promotion_note'])

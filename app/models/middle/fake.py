@@ -28,7 +28,7 @@ class FakeManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id)[left:right]
+        return self.filter(shop_id=shop_id).order_by('-ctime')[left:right]
 
     def encoder(self, fake):
         return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note'])

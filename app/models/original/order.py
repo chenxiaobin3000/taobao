@@ -26,7 +26,7 @@ class OrderManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id)[left:right]
+        return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, order):
         return model_to_dict(order, fields=['id', 'order_id', 'payment', 'actual_pay', 'procure_pay', 'order_status', 'create_time', 'product_name', 'order_note'])

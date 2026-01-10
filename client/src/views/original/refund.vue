@@ -66,7 +66,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getRefundList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getRefundList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
@@ -79,6 +79,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { NoneTime, RefundStatus, RefundType } from '@/utils/const'
+import { sleep } from '@/utils/sleep'
 import { getRefundList, addRefundList, delRefund } from '@/api/original/refund'
 import { getShopList } from '@/api/system/shop'
 
@@ -164,7 +165,7 @@ export default {
     handleExcel() {
       this.dialogVisible = true
     },
-    handleSuccess({ results, header }) {
+    async handleSuccess({ results, header }) {
       const refund_id = header[1]
       const order_id = header[0]
       const product_id = header[4]
@@ -191,19 +192,22 @@ export default {
         })
       })
       let length = r.length
-      if (length > 100) {
-        length = parseInt(length / 100)
-        for (let i = 0; i < length; ++i) {
-          console.log(r.slice(i * 100, (i + 1) * 100))
+      if (length > 1000) {
+        length = parseInt(length / 1000)
+        for (let i = 0; i <= length; ++i) {
           addRefundList({
             id: this.listQuery.id,
-            r: r.slice(i * 100, (i + 1) * 100)
+            r: r.slice(i * 1000, (i + 1) * 1000)
           }).then(() => {
-            this.$message({ type: 'success', message: '导入成功!' })
-            this.getRefundList()
-            this.dialogVisible = false
+            if (i === length) {
+              this.$message({ type: 'success', message: '导入成功!' })
+              this.getRefundList()
+              this.dialogVisible = false
+            } else {
+              this.$message({ type: 'success', message: '正在导入!' })
+            }
           })
-          break
+          await sleep(1000)
         }
       } else {
         addRefundList({

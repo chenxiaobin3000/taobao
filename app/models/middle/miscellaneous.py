@@ -26,7 +26,7 @@ class MiscellaneousManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id)[left:right]
+        return self.filter(shop_id=shop_id).order_by('-ctime')[left:right]
 
     def encoder(self, misc):
         return model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note'])

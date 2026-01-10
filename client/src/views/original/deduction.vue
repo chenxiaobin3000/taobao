@@ -31,7 +31,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getDeductionList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getDeductionList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />

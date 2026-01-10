@@ -24,7 +24,7 @@ class PurchaseManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id)[left:right]
+        return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, purchase):
         return model_to_dict(purchase, fields=['id', 'shop_id', 'purchase_id', 'order_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note'])

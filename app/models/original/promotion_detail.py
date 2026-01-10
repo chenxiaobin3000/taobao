@@ -19,7 +19,7 @@ class PromotionDetailManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id)[left:right]
+        return self.filter(shop_id=shop_id).order_by('-promotion_time')[left:right]
 
     def encoder(self, promotion):
         return model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_time', 'product_id', 'show_num', 'click_num', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi'])
