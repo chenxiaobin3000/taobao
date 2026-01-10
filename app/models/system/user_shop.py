@@ -15,6 +15,9 @@ class UserShopManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
+    def total(self):
+        return self.all().count()
+
     def getList(self, user_id):
         return self.filter(user_id=user_id)
 

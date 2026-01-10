@@ -16,6 +16,9 @@ class RefundManager(models.Manager):
     def getByOIdAndTime(self, shop_id, order_id, apply_time):
         return self.filter(shop_id=shop_id, order_id=order_id, apply_time=apply_time).first()
 
+    def total(self):
+        return self.all().count()
+
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num

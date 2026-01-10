@@ -56,13 +56,14 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
+    total = PromotionDetail.objects.total()
     promotions = PromotionDetail.objects.getList(shop_id, page, num)
     data = PromotionDetail.objects.encoderList(promotions)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': len(data),
+            'total': total,
             'list': data
         }
     }

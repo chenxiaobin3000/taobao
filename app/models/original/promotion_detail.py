@@ -13,6 +13,9 @@ class PromotionDetailManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
+    def total(self):
+        return self.all().count()
+
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num

@@ -66,13 +66,14 @@ def getList(request):
     post = json.loads(request.body)
     page = int(post.get('page'))
     num = int(post.get('num'))
+    total = Market.objects.total()
     markets = Market.objects.getList(page, num)
     data = Market.objects.encoderList(markets)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': len(data),
+            'total': total,
             'list': data
         }
     }

@@ -109,6 +109,7 @@ def getList(request):
     company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
+    total = Shop.objects.total()
     shops = Shop.objects.getList(company_id, page, num)
     datas = Shop.objects.encoderList(shops)
 
@@ -136,7 +137,7 @@ def getList(request):
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': len(data),
+            'total': total,
             'list': datas
         }
     }

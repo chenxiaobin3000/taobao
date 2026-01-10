@@ -47,13 +47,14 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
+    total = Deduction.objects.total()
     deductions = Deduction.objects.getList(shop_id, page, num)
     data = Deduction.objects.encoderList(deductions)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': len(data),
+            'total': total,
             'list': data
         }
     }

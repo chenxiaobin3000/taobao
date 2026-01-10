@@ -40,13 +40,14 @@ def getList(request):
     company_id = int(post.get('cid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
+    total = CompanyMarket.objects.total()
     cms = CompanyMarket.objects.getList(company_id, page, num)
     data = CompanyMarket.objects.encoderList(cms)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': len(data),
+            'total': total,
             'list': data
         }
     }

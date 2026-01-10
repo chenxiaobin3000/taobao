@@ -40,13 +40,14 @@ def getList(request):
     role_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
+    total = Permission.objects.total()
     permissions = Permission.objects.getList(role_id, page, num)
     data = Permission.objects.encoderList(permissions)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': len(data),
+            'total': total,
             'list': data
         }
     }

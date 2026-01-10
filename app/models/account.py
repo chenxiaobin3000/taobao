@@ -21,6 +21,9 @@ class AccountManager(models.Manager):
     def getByAccount(self, account):
         return self.filter(account=account).first()
 
+    def total(self):
+        return self.all().count()
+
     def getList(self, user_id, page, num):
         left = (page - 1) * num
         right = page * num

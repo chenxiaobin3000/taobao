@@ -203,6 +203,7 @@ export default {
             this.getRefundList()
             this.dialogVisible = false
           })
+          break
         }
       } else {
         addRefundList({
