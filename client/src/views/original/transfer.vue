@@ -58,6 +58,8 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
+import { ImportCount, ImportSpan } from '@/utils/const'
+import { sleep } from '@/utils/sleep'
 import { xlsx_date_str } from '@/utils/xlsx'
 import { getTransferList, addTransferList, delTransfer } from '@/api/original/transfer'
 import { getShopList } from '@/api/system/shop'
@@ -137,7 +139,7 @@ export default {
     handleExcel() {
       this.dialogVisible = true
     },
-    handleSuccess({ results, header }) {
+    async handleSuccess({ results, header }) {
       const user_name = header[0]
       const payee_name = header[1]
       const order_id = header[7]
@@ -155,14 +157,34 @@ export default {
           tn: v[transfer_note]
         })
       })
-      addTransferList({
-        id: this.listQuery.id,
-        t: t
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getTransferList()
-        this.dialogVisible = false
-      })
+      let length = t.length
+      if (length > ImportCount) {
+        length = parseInt(length / ImportCount)
+        for (let i = 0; i <= length; ++i) {
+          addTransferList({
+            id: this.listQuery.id,
+            t: t.slice(i * ImportCount, (i + 1) * ImportCount)
+          }).then(() => {
+            if (i === length) {
+              this.$message({ type: 'success', message: '导入成功!' })
+              this.getRefundList()
+              this.dialogVisible = false
+            } else {
+              this.$message({ type: 'success', message: '正在导入!' })
+            }
+          })
+          await sleep(ImportSpan)
+        }
+      } else {
+        addTransferList({
+          id: this.listQuery.id,
+          t: t
+        }).then(() => {
+          this.$message({ type: 'success', message: '导入成功!' })
+          this.getRefundList()
+          this.dialogVisible = false
+        })
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

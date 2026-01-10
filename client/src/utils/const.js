@@ -1,6 +1,12 @@
 // 默认空时间
 export const NoneTime = '2000-01-01 00:00:00'
 
+// 批次导入数量
+export const ImportCount = 1000
+
+// 导入间隔时间
+export const ImportSpan = 1000
+
 // 扣款状态
 export const DeductionType = {
   // 有订单信息

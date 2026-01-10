@@ -78,7 +78,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { NoneTime, RefundStatus, RefundType } from '@/utils/const'
+import { NoneTime, ImportCount, ImportSpan, RefundStatus, RefundType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
 import { getRefundList, addRefundList, delRefund } from '@/api/original/refund'
 import { getShopList } from '@/api/system/shop'
@@ -192,12 +192,12 @@ export default {
         })
       })
       let length = r.length
-      if (length > 1000) {
-        length = parseInt(length / 1000)
+      if (length > ImportCount) {
+        length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {
           addRefundList({
             id: this.listQuery.id,
-            r: r.slice(i * 1000, (i + 1) * 1000)
+            r: r.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
@@ -207,7 +207,7 @@ export default {
               this.$message({ type: 'success', message: '正在导入!' })
             }
           })
-          await sleep(1000)
+          await sleep(ImportSpan)
         }
       } else {
         addRefundList({
