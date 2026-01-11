@@ -14,18 +14,18 @@ def addList(request):
 
     # 批量添加
     for polymerize in polymerizes:
-        promotion_time = polymerize['ptime']
-        product_id = polymerize['pid']
-        show_num = polymerize['payment']
-        click_num = polymerize['freight']
-        cost = polymerize['total']
-        average_cost = polymerize['status']
-        thousand_cost = polymerize['ctime']
-        deal_amount = polymerize['pn']
-        deal_num = polymerize['note']
-        deal_cost = polymerize['note']
-        shop_cart = polymerize['note']
-        favorites = polymerize['note']
+        promotion_time = polymerize['pt']
+        product_id = polymerize['pi']
+        show_num = polymerize['sn']
+        click_num = polymerize['cn']
+        cost = polymerize['co']
+        average_cost = polymerize['ac']
+        thousand_cost = polymerize['tc']
+        deal_amount = polymerize['da']
+        deal_num = polymerize['dn']
+        deal_cost = polymerize['dc']
+        shop_cart = polymerize['sc']
+        favorites = polymerize['fa']
         roi = polymerize['roi']
         PromotionDetail.objects.add(shop_id, promotion_time, product_id, show_num, click_num, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
 

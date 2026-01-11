@@ -2,58 +2,88 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺">
+        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="推广日期" width="160">
         <template slot-scope="scope">
-          {{ scope.row.short_name }}
+          {{ scope.row.promotion_time }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="商品编码" width="160">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          {{ scope.row.product_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完整名称">
+      <el-table-column align="center" label="展现量" width="120">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.show_num }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="center" label="点击量" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.click_num }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="花费" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.cost }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="平均花费" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.average_cost }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="千次花费" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.thousand_cost }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="成交金额" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.deal_amount }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="成交笔数" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.deal_num }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="成交成本" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.deal_cost}}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="购物车" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.shop_cart }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="收藏数" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.favorites }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="投产比" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.roi }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" width="80">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getGoodList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getPromotionDetailList" />
 
-    <!-- 商品信息编辑 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码">
-          <div>{{ temp.good_id }}</div>
-        </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="temp.short_name" />
-        </el-form-item>
-        <el-form-item label="完整名称">
-          <el-input v-model="temp.name" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
+    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -63,7 +93,9 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { ImportCount, ImportSpan } from '@/utils/const'
+import { sleep } from '@/utils/sleep'
+import { getPromotionDetailList, addPromotionDetailList, delPromotionDetail } from '@/api/original/PromotionDetail'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -82,14 +114,7 @@ export default {
         num: 10,
         search: null
       },
-      temp: {},
-      dialogVisible: false,
-      dialogExcelVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
-      }
+      dialogVisible: false
     }
   },
   computed: {
@@ -101,12 +126,10 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getGoodList()
+      this.getPromotionDetailList()
     },
     create() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
+      this.$message({ type: 'error', message: '不支持新建!' })
     }
   },
   mounted: function() {
@@ -117,21 +140,12 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
-    this.resetTemp()
     this.getShopList()
   },
   methods: {
-    resetTemp() {
-      this.temp = {
-        id: 0,
-        good_id: '',
-        name: '',
-        short_name: ''
-      }
-    },
-    getGoodList() {
+    getPromotionDetailList() {
       this.loading = true
-      getGoodList(
+      getPromotionDetailList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -150,60 +164,75 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getGoodList()
+        this.getPromotionDetailList()
       })
+    },
+    handleChange() {
+      this.getPromotionDetailList()
     },
     handleExcel() {
-      this.dialogExcelVisible = true
-    },
-    handleSuccess({ results, header }) {
-      const sname = header[0]
-      const id = header[1]
-      const name = header[2]
-      const g = []
-      results.forEach(v => {
-        g.push({
-          i: v[id],
-          n: v[name],
-          sn: v[sname]
-        })
-      })
-      addGoodList({
-        id: this.listQuery.id,
-        g: g
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    createData() {
-      addGood({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
       this.dialogVisible = true
     },
-    updateData() {
-      setGood({
-        id: this.temp.id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '修改成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
+    async handleSuccess({ results, header }) {
+      const promotion_time = header[1]
+      const product_id = header[0]
+      const show_num = header[4]
+      const click_num = header[7]
+      const cost = header[9]
+      const average_cost = header[11]
+      const thousand_cost = header[14]
+      const deal_amount = header[12]
+      const deal_num = header[13]
+      const deal_cost = header[6]
+      const shop_cart = header[6]
+      const favorites = header[6]
+      const roi = header[6]
+      const p = []
+      results.forEach(v => {
+        p.push({
+          pt: v[promotion_time],
+          pi: v[product_id],
+          sn: v[show_num],
+          cn: v[click_num],
+          co: v[cost],
+          ac: v[average_cost],
+          tc: v[thousand_cost],
+          da: v[deal_amount],
+          dn: v[deal_num],
+          dc: v[deal_cost],
+          sc: v[shop_cart],
+          fa: v[favorites],
+          roi: v[roi]
+        })
       })
+      let length = r.length
+      if (length > ImportCount) {
+        length = parseInt(length / ImportCount)
+        for (let i = 0; i <= length; ++i) {
+          addPromotionDetailList({
+            id: this.listQuery.id,
+            p: p.slice(i * ImportCount, (i + 1) * ImportCount)
+          }).then(() => {
+            if (i === length) {
+              this.$message({ type: 'success', message: '导入成功!' })
+              this.getPromotionDetailList()
+              this.dialogVisible = false
+            } else {
+              this.$message({ type: 'success', message: '正在导入!' })
+            }
+          })
+          await sleep(ImportSpan)
+        }
+      } else {
+        addPromotionDetailList({
+          id: this.listQuery.id,
+          p: p
+        }).then(() => {
+          this.$message({ type: 'success', message: '导入成功!' })
+          this.getPromotionDetailList()
+          this.dialogVisible = false
+        })
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
@@ -211,11 +240,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGood({
+        delPromotionDetail({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
+          this.getPromotionDetailList()
         })
       })
     }

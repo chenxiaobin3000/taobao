@@ -9,19 +9,24 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="交易日期">
+      <el-table-column align="center" label="交易日期" width="160">
         <template slot-scope="scope">
-          {{ scope.row.order_id }}
+          {{ scope.row.create_date }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="金额" width="80">
         <template slot-scope="scope">
-          {{ scope.row.Promotion_id }}
+          {{ scope.row.payment }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="类型" width="160">
         <template slot-scope="scope">
-          {{ num2type(scope.row.Promotion_type) }}
+          {{ num2type(scope.row.promotion_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="备注">
+        <template slot-scope="scope">
+          {{ scope.row.promotion_note }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="80">
@@ -133,9 +138,10 @@ export default {
       const p = []
       results.forEach(v => {
         p.push({
-          uid: v[Promotion_id],
-          oid: v[order_id],
-          rt: PromotionType.text2num(v[Promotion_type])
+          d: v[create_date],
+          p: v[payment],
+          t: PromotionType.text2num(v[promotion_note]),
+          n: v[promotion_note]
         })
       })
       let length = r.length

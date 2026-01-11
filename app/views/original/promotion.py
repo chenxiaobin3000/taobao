@@ -14,10 +14,11 @@ def addList(request):
 
     # 批量添加
     for promotion in promotions:
-        create_date = promotion['cdate']
-        payment = promotion['payment']
-        promotion_note = promotion['note']
-        Promotion.objects.add(shop_id, create_date, payment, promotion_note)
+        create_date = promotion['d']
+        payment = promotion['p']
+        promotion_type = promotion['t']
+        promotion_note = promotion['n']
+        Promotion.objects.add(shop_id, create_date, payment, promotion_type, promotion_note)
 
     response = {
         'code': 0,
