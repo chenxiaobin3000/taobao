@@ -75,6 +75,32 @@ export const OrderStatus = {
   }
 }
 
+// 推广类型
+export const PromotionType = {
+  CAR: 1, // 直通车
+  WHOLE: 2, // 全站
+  OTHER: 3, // 异常
+
+  text2num(text) {
+    if (text.indexOf('直通车') !== -1) {
+      return this.CAR
+    } else if (text.indexOf('全站') !== -1) {
+      return this.WHOLE
+    } else { // 异常
+      return this.OTHER
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.CAR:
+        return '直通车'
+      case this.WHOLE:
+        return '全站'
+    }
+    return '异常'
+  }
+}
+
 // # 退货状态
 export const RefundStatus = {
   SUCCESS: 1, // 退款成功

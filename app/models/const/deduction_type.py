@@ -1,4 +1,4 @@
-# 扣款状态
+# 扣款类型
 class DeductionType:
     def __setattr__(self, name, value):
         raise AttributeError("Cannot modify constant attribute.")

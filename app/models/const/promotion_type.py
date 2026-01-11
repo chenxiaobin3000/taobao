@@ -1,8 +1,8 @@
-# 退款类型
-class RefundType:
+# 推广类型
+class PromotionType:
     def __setattr__(self, name, value):
         raise AttributeError("Cannot modify constant attribute.")
  
-    REFUND = 1 # 仅退款
-    RETURN = 2 # 退货退款
+    CAR = 1 # 直通车
+    WHOLE = 2 # 全站
     OTHER = 3  # 异常
