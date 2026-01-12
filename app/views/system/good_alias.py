@@ -10,8 +10,8 @@ from app.models.system.good_alias import GoodAlias
 def add(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    good_id = int(post.get('gid'))
-    name = int(post.get('name'))
+    good_id = post.get('gid')
+    name = post.get('name')
     good = GoodAlias.objects.add(shop_id, good_id, name)
     data = GoodAlias.objects.encoder(good)
     response = {
@@ -36,10 +36,25 @@ def delete(request):
 
 @require_POST
 @transaction.atomic
+def deleteById(request):
+    post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    good_id = post.get('gid')
+    data = GoodAlias.objects.deleteById(shop_id, good_id)
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': data
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
 def getById(request):
     post = json.loads(request.body)
-    pk = int(post.get('id'))
-    goods = GoodAlias.objects.getById(pk)
+    shop_id = int(post.get('id'))
+    good_id = post.get('gid')
+    goods = GoodAlias.objects.getById(shop_id, good_id)
     data = GoodAlias.objects.encoderList(goods)
     response = {
         'code': 0,

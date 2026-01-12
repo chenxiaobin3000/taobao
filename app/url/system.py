@@ -27,6 +27,7 @@ url_system = [
     path('api/good_alias/getById', good_alias.getById),
     path('api/good_alias/getByName', good_alias.getByName),
     path('api/good_alias/del', good_alias.delete),
+    path('api/good_alias/delById', good_alias.deleteById),
     path('api/good_alias/getList', good_alias.getList),
 
     # 平台

@@ -47,10 +47,14 @@
           <el-input v-model="temp.name" />
         </el-form-item>
         <el-form-item label="添加别名">
-          <el-input v-model="temp.short_name" />
+          <el-input v-model="temp.alias" style="width:80%" />
+          <el-button type="primary" size="mini" style="float:right;width:18%" @click="addGoodAlias(temp.good_id)">新增</el-button>
         </el-form-item>
-        <el-form-item label="完整名称">
-          <div>已有别名：</div>
+        <el-form-item v-for="item in goodAliasList" :key="item.id" label="别名">
+          <div>
+            {{ item.name }}
+            <el-button type="danger" size="mini" style="float:right" @click="delGoodAlias(item.id, temp.good_id)">删除</el-button>
+          </div>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -70,6 +74,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/good_alias'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -82,6 +87,7 @@ export default {
       total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
+      goodAliasList: [], // 商品所有别名列表
       listQuery: {
         id: 0,
         page: 1,
@@ -125,7 +131,8 @@ export default {
         id: 0,
         good_id: '',
         name: '',
-        short_name: ''
+        short_name: '',
+        alias: ''
       }
     },
     getGoodList() {
@@ -178,7 +185,13 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.dialogVisible = true
+      getGoodAliasById({
+        id: this.listQuery.id,
+        gid: row.good_id
+      }).then(response => {
+        this.goodAliasList = response.data.data
+        this.dialogVisible = true
+      })
     },
     updateData() {
       setGood({
@@ -191,17 +204,50 @@ export default {
         this.dialogVisible = false
       })
     },
+    addGoodAlias(good_id) {
+      addGoodAlias({
+        id: this.listQuery.id,
+        gid: this.temp.good_id,
+        name: this.temp.alias
+      }).then(() => {
+        getGoodAliasById({
+          id: this.listQuery.id,
+          gid: good_id
+        }).then(response => {
+          this.$message({ type: 'success', message: '新增成功!' })
+          this.goodAliasList = response.data.data
+        })
+      })
+    },
+    delGoodAlias(id, good_id) {
+      delGoodAlias({
+        id: id
+      }).then(() => {
+        getGoodAliasById({
+          id: this.listQuery.id,
+          gid: good_id
+        }).then(response => {
+          this.$message({ type: 'success', message: '删除成功!' })
+          this.goodAliasList = response.data.data
+        })
+      })
+    },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGood({
-          id: row.id
+        delGoodAliasById({
+          id: this.listQuery.id,
+          gid: row.good_id
         }).then(() => {
-          this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
+          delGood({
+            id: row.id
+          }).then(() => {
+            this.$message({ type: 'success', message: '删除成功!' })
+            this.getGoodList()
+          })
         })
       })
     }

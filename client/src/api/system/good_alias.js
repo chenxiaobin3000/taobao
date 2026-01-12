@@ -25,7 +25,7 @@ export function getGoodAliasByName(data) {
   })
 }
 
-export function delGood(data) {
+export function delGoodAlias(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -33,7 +33,15 @@ export function delGood(data) {
   })
 }
 
-export function getGoodList(data) {
+export function delGoodAliasById(data) {
+  return request({
+    url: `${path}/delById`,
+    method: 'post',
+    data
+  })
+}
+
+export function getGoodAliasList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

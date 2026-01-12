@@ -10,6 +10,9 @@ class GoodAliasManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
+    def deleteById(self, shop_id, good_id):
+        return self.filter(shop_id=shop_id, good_id=good_id).delete()
+
     def find(self, pk):
         return self.get(pk=pk)
 
