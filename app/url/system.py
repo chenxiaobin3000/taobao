@@ -1,6 +1,6 @@
 from django.urls import path
 from app.views import account
-from app.views.system import company, good, market, permission, role, shop, user, user_shop
+from app.views.system import company, good, good_alias, market, permission, role, shop, user, user_shop
 
 url_system = [
     # 账号
@@ -14,16 +14,20 @@ url_system = [
     path('api/company/add', company.add),
     path('api/company/set', company.set),
     path('api/company/del', company.delete),
-    path('api/company/get', company.get),
     path('api/company/getList', company.getList),
 
     # 商品
-    path('api/good/add', good.add),
     path('api/good/addList', good.addList),
     path('api/good/set', good.set),
     path('api/good/del', good.delete),
-    path('api/good/get', good.get),
     path('api/good/getList', good.getList),
+
+    # 商品别名
+    path('api/good_alias/add', good_alias.add),
+    path('api/good_alias/getById', good_alias.getById),
+    path('api/good_alias/getByName', good_alias.getByName),
+    path('api/good_alias/del', good_alias.delete),
+    path('api/good_alias/getList', good_alias.getList),
 
     # 平台
     path('api/market/add', market.add),

@@ -13,6 +13,9 @@ class PromotionManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
+    def getByCDate(self, shop_id, create_date, promotion_type):
+        return self.filter(shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first()
+
     def total(self):
         return self.all().count()
 

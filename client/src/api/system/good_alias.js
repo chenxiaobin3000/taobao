@@ -1,17 +1,25 @@
 import request from '@/utils/request'
-const path = '/good'
+const path = '/good_alias'
 
-export function addGoodList(data) {
+export function addGoodAlias(data) {
   return request({
-    url: `${path}/addList`,
+    url: `${path}/add`,
     method: 'post',
     data
   })
 }
 
-export function setGood(data) {
+export function getGoodAliasById(data) {
   return request({
-    url: `${path}/set`,
+    url: `${path}/getById`,
+    method: 'post',
+    data
+  })
+}
+
+export function getGoodAliasByName(data) {
+  return request({
+    url: `${path}/getByName`,
     method: 'post',
     data
   })

@@ -36,9 +36,9 @@ class GoodManager(models.Manager):
 class Good(models.Model):
     objects = GoodManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
-    good_id = models.CharField(max_length = 10, db_index = True, unique = True) # 商品id
-    name = models.CharField(max_length = 60, db_index = True, unique = True)
-    short_name = models.CharField(max_length = 16, db_index = True, unique = True)
+    good_id = models.CharField(max_length = 10, db_index = True) # 商品id
+    name = models.CharField(max_length = 60, db_index = True) # 商品名称
+    short_name = models.CharField(max_length = 16, db_index = True) # 商品短名
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):

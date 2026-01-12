@@ -56,7 +56,7 @@
       </el-table-column>
       <el-table-column align="center" label="成交成本" width="160">
         <template slot-scope="scope">
-          {{ scope.row.deal_cost}}
+          {{ scope.row.deal_cost }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="购物车" width="160">
@@ -95,7 +95,7 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { getPromotionDetailList, addPromotionDetailList, delPromotionDetail } from '@/api/original/PromotionDetail'
+import { getPromotionDetailList, addPromotionDetailList, delPromotionDetail } from '@/api/original/promotion_detail'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -205,7 +205,7 @@ export default {
           roi: v[roi]
         })
       })
-      let length = r.length
+      let length = p.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {

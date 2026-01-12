@@ -35,7 +35,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getGoodList" />
 
     <!-- 商品信息编辑 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
+    <el-dialog title="修改商品信息" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="商品编码">
           <div>{{ temp.good_id }}</div>
@@ -46,10 +46,16 @@
         <el-form-item label="完整名称">
           <el-input v-model="temp.name" />
         </el-form-item>
+        <el-form-item label="添加别名">
+          <el-input v-model="temp.short_name" />
+        </el-form-item>
+        <el-form-item label="完整名称">
+          <div>已有别名：</div>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
+        <el-button type="primary" @click="updateData()">确定</el-button>
       </div>
     </el-dialog>
 
@@ -63,7 +69,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -84,12 +90,7 @@ export default {
       },
       temp: {},
       dialogVisible: false,
-      dialogExcelVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
-      }
+      dialogExcelVisible: false
     }
   },
   computed: {
@@ -175,21 +176,8 @@ export default {
         this.dialogVisible = false
       })
     },
-    createData() {
-      addGood({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
       this.dialogVisible = true
     },
     updateData() {

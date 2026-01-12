@@ -18,6 +18,8 @@ def addList(request):
         payment = promotion['p']
         promotion_type = promotion['t']
         promotion_note = promotion['n']
+        if Promotion.objects.getByCDate(shop_id, create_date, promotion_type):
+            continue
         Promotion.objects.add(shop_id, create_date, payment, promotion_type, promotion_note)
 
     response = {

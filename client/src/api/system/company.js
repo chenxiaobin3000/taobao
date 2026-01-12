@@ -25,14 +25,6 @@ export function delCompany(data) {
   })
 }
 
-export function getCompany(data) {
-  return request({
-    url: `${path}/get`,
-    method: 'post',
-    data
-  })
-}
-
 export function getCompanyList(data) {
   return request({
     url: `${path}/getList`,

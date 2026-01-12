@@ -50,6 +50,7 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan, PromotionType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
+import { xlsx_date_str } from '@/utils/xlsx'
 import { getPromotionList, addPromotionList, delPromotion } from '@/api/original/promotion'
 import { getShopList } from '@/api/system/shop'
 
@@ -132,19 +133,23 @@ export default {
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
+      const output = header[2]
       const create_date = header[1]
-      const payment = header[0]
-      const promotion_note = header[4]
+      const payment = header[4]
+      const promotion_note = header[6]
       const p = []
       results.forEach(v => {
-        p.push({
-          d: v[create_date],
-          p: v[payment],
-          t: PromotionType.text2num(v[promotion_note]),
-          n: v[promotion_note]
-        })
+        console.log(v)
+        if (v[output] === '支出') {
+          p.push({
+            d: xlsx_date_str(v[create_date]),
+            p: v[payment],
+            t: PromotionType.text2num(v[promotion_note]),
+            n: v[promotion_note]
+          })
+        }
       })
-      let length = r.length
+      let length = p.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {

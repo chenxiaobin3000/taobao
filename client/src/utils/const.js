@@ -79,13 +79,16 @@ export const OrderStatus = {
 export const PromotionType = {
   CAR: 1, // 直通车
   WHOLE: 2, // 全站
-  OTHER: 3, // 异常
+  PEOPLE: 3, // 人群
+  OTHER: 4, // 异常
 
   text2num(text) {
-    if (text.indexOf('直通车') !== -1) {
+    if (text.indexOf('现金消耗扣款') !== -1) {
       return this.CAR
-    } else if (text.indexOf('全站') !== -1) {
+    } else if (text.indexOf('全站推消耗扣款') !== -1) {
       return this.WHOLE
+    } else if (text.indexOf('人群超市订单') !== -1) {
+      return this.PEOPLE
     } else { // 异常
       return this.OTHER
     }
@@ -96,6 +99,8 @@ export const PromotionType = {
         return '直通车'
       case this.WHOLE:
         return '全站'
+      case this.PEOPLE:
+        return '人群'
     }
     return '异常'
   }

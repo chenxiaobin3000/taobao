@@ -5,4 +5,5 @@ class PromotionType:
  
     CAR = 1 # 直通车
     WHOLE = 2 # 全站
-    OTHER = 3  # 异常
+    PEOPLE = 3 # 人群
+    OTHER = 4 # 异常

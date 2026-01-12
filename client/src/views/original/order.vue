@@ -88,7 +88,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGood, addGoodList, delGood, setGood } from '@/api/system/good'
+import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -198,18 +198,6 @@ export default {
         g: g
       }).then(() => {
         this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    createData() {
-      addGood({
-        id: this.listQuery.id,
-        gid: this.temp.good_id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
         this.getGoodList()
         this.dialogVisible = false
       })
