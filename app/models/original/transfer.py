@@ -38,7 +38,7 @@ class Transfer(models.Model):
     order_id = models.CharField(max_length=20, db_index=True) # 订单id
     amount = models.DecimalField(max_digits=6, decimal_places=2) # 金额
     create_time = models.DateTimeField(db_index=True) # 创建时间
-    transfer_note = models.CharField(max_length=20, db_index=True) # 备注
+    transfer_note = models.CharField(max_length=64) # 备注
     ctime = models.DateTimeField(default=timezone.now)
 
     class Meta(object):

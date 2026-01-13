@@ -139,7 +139,6 @@ export default {
       const promotion_note = header[6]
       const p = []
       results.forEach(v => {
-        console.log(v)
         if (v[output] === '支出') {
           p.push({
             d: xlsx_date_str(v[create_date]),

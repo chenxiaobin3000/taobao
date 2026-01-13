@@ -36,7 +36,7 @@ class Promotion(models.Model):
     create_date = models.DateField(db_index=True) # 交易日期
     payment = models.DecimalField(max_digits=10, decimal_places=2) # 金额
     promotion_type = models.IntegerField(db_index = True) # 类型
-    promotion_note = models.CharField(max_length=128) # 备注
+    promotion_note = models.CharField(max_length=64) # 备注
     ctime = models.DateTimeField(default=timezone.now)
 
     class Meta(object):

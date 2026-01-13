@@ -213,7 +213,6 @@ export default {
           roi: v[roi] ? v[roi] : 0
         })
       })
-      console.log(p)
       let length = p.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)

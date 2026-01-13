@@ -2,58 +2,48 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺">
+        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="订单编号" width="160">
         <template slot-scope="scope">
-          {{ scope.row.short_name }}
+          {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="类型" width="80">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          {{ num2type(scope.row.amount_type) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="完整名称">
+      <el-table-column align="center" label="金额" width="80">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="center" label="时间" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.create_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="备注">
+        <template slot-scope="scope">
+          {{ scope.row.polymerize_note }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" width="80">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getGoodList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getPolymerizeList" />
 
-    <!-- 商品信息编辑 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="商品编码">
-          <div>{{ temp.good_id }}</div>
-        </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="temp.short_name" />
-        </el-form-item>
-        <el-form-item label="完整名称">
-          <el-input v-model="temp.name" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
+    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -63,7 +53,10 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
+import { ImportCount, ImportSpan, PolymerizeType } from '@/utils/const'
+import { sleep } from '@/utils/sleep'
+import { xlsx_time_str } from '@/utils/xlsx'
+import { getPolymerizeList, addPolymerizeList, delPolymerize } from '@/api/original/polymerize'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -82,14 +75,7 @@ export default {
         num: 10,
         search: null
       },
-      temp: {},
-      dialogVisible: false,
-      dialogExcelVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改商品信息',
-        create: '新建商品'
-      }
+      dialogVisible: false
     }
   },
   computed: {
@@ -101,12 +87,10 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getGoodList()
+      this.getPolymerizeList()
     },
     create() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
+      this.$message({ type: 'error', message: '不支持新建!' })
     }
   },
   mounted: function() {
@@ -117,21 +101,12 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
-    this.resetTemp()
     this.getShopList()
   },
   methods: {
-    resetTemp() {
-      this.temp = {
-        id: 0,
-        good_id: '',
-        name: '',
-        short_name: ''
-      }
-    },
-    getGoodList() {
+    getPolymerizeList() {
       this.loading = true
-      getGoodList(
+      getPolymerizeList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -150,48 +125,63 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getGoodList()
+        this.getPolymerizeList()
       })
+    },
+    num2type(num) {
+      return PolymerizeType.num2text(num)
+    },
+    handleChange() {
+      this.getPolymerizeList()
     },
     handleExcel() {
-      this.dialogExcelVisible = true
-    },
-    handleSuccess({ results, header }) {
-      const sname = header[0]
-      const id = header[1]
-      const name = header[2]
-      const g = []
-      results.forEach(v => {
-        g.push({
-          i: v[id],
-          n: v[name],
-          sn: v[sname]
-        })
-      })
-      addGoodList({
-        id: this.listQuery.id,
-        g: g
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
       this.dialogVisible = true
     },
-    updateData() {
-      setGood({
-        id: this.temp.id,
-        name: this.temp.name,
-        sname: this.temp.short_name
-      }).then(() => {
-        this.$message({ type: 'success', message: '修改成功!' })
-        this.getGoodList()
-        this.dialogVisible = false
+    async handleSuccess({ results, header }) {
+      const order_id = header[2]
+      const amount = header[5]
+      const create_time = header[0]
+      const polymerize_note = header[7]
+      const t = []
+      results.forEach(v => {
+        if (v[amount] > 0) {
+          t.push({
+            o: v[order_id],
+            a: v[amount],
+            t: PolymerizeType.text2num(v[polymerize_note]),
+            c: xlsx_time_str(v[create_time]),
+            n: v[polymerize_note]
+          })
+        }
       })
+      let length = t.length
+      if (length > ImportCount) {
+        length = parseInt(length / ImportCount)
+        for (let i = 0; i <= length; ++i) {
+          addPolymerizeList({
+            id: this.listQuery.id,
+            t: t.slice(i * ImportCount, (i + 1) * ImportCount)
+          }).then(() => {
+            if (i === length) {
+              this.$message({ type: 'success', message: '导入成功!' })
+              this.getRefundList()
+              this.dialogVisible = false
+            } else {
+              this.$message({ type: 'success', message: '正在导入!' })
+            }
+          })
+          await sleep(ImportSpan)
+        }
+      } else {
+        addPolymerizeList({
+          id: this.listQuery.id,
+          t: t
+        }).then(() => {
+          this.$message({ type: 'success', message: '导入成功!' })
+          this.getRefundList()
+          this.dialogVisible = false
+        })
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
@@ -199,11 +189,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGood({
+        delPolymerize({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getGoodList()
+          this.getPolymerizeList()
         })
       })
     }
