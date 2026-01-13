@@ -19,6 +19,12 @@ class GoodManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
+    def getById(self, shop_id, good_id):
+        return self.filter(shop_id=shop_id, good_id=good_id).first()
+
+    def getByName(self, shop_id, name):
+        return self.filter(shop_id=shop_id, name=name).first()
+
     def total(self):
         return self.all().count()
 
@@ -38,7 +44,7 @@ class Good(models.Model):
     shop_id = models.IntegerField(db_index = True) # 店铺id
     good_id = models.CharField(max_length = 10, db_index = True) # 商品id
     name = models.CharField(max_length = 60, db_index = True) # 商品名称
-    short_name = models.CharField(max_length = 16, db_index = True) # 商品短名
+    short_name = models.CharField(max_length = 16) # 商品短名
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):

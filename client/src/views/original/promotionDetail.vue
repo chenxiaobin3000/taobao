@@ -11,12 +11,12 @@
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="推广日期" width="160">
         <template slot-scope="scope">
-          {{ scope.row.promotion_time }}
+          {{ scope.row.promotion_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="商品名称" width="160">
         <template slot-scope="scope">
-          {{ scope.row.product_id }}
+          {{ scope.row.good_name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="展现量" width="120">
@@ -174,24 +174,24 @@ export default {
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
-      const promotion_time = header[1]
-      const product_id = header[0]
+      const promotion_date = header[0]
+      const good_id = header[1]
       const show_num = header[4]
-      const click_num = header[7]
-      const cost = header[9]
-      const average_cost = header[11]
-      const thousand_cost = header[14]
-      const deal_amount = header[12]
-      const deal_num = header[13]
-      const deal_cost = header[6]
-      const shop_cart = header[6]
-      const favorites = header[6]
-      const roi = header[6]
+      const click_num = header[5]
+      const cost = header[6]
+      const average_cost = header[8]
+      const thousand_cost = header[9]
+      const deal_amount = header[18]
+      const deal_num = header[19]
+      const deal_cost = header[25]
+      const shop_cart = header[26]
+      const favorites = header[30]
+      const roi = header[23]
       const p = []
       results.forEach(v => {
         p.push({
-          pt: v[promotion_time],
-          pi: v[product_id],
+          pd: v[promotion_date],
+          id: v[good_id],
           sn: v[show_num],
           cn: v[click_num],
           co: v[cost],
@@ -205,6 +205,7 @@ export default {
           roi: v[roi]
         })
       })
+      console.log(p)
       let length = p.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)

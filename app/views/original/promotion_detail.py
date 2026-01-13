@@ -11,29 +11,33 @@ def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     polymerizes = post.get('p')
-
-    # 批量添加
-    for polymerize in polymerizes:
-        promotion_time = polymerize['pt']
-        product_id = polymerize['pi']
-        show_num = polymerize['sn']
-        click_num = polymerize['cn']
-        cost = polymerize['co']
-        average_cost = polymerize['ac']
-        thousand_cost = polymerize['tc']
-        deal_amount = polymerize['da']
-        deal_num = polymerize['dn']
-        deal_cost = polymerize['dc']
-        shop_cart = polymerize['sc']
-        favorites = polymerize['fa']
-        roi = polymerize['roi']
-        PromotionDetail.objects.add(shop_id, promotion_time, product_id, show_num, click_num, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
-
     response = {
         'code': 0,
         'msg': 'success',
         'data': None
     }
+
+    # 批量添加
+    for polymerize in polymerizes:
+        promotion_date = polymerize['pd']
+        good_id = polymerize['id']
+        show_num = int(polymerize['sn'])
+        click_num = int(polymerize['cn'])
+        cost = polymerize['co']
+        average_cost = polymerize['ac']
+        thousand_cost = polymerize['tc']
+        deal_amount = polymerize['da']
+        deal_num = int(polymerize['dn'])
+        deal_cost = polymerize['dc']
+        shop_cart = int(polymerize['sc'])
+        favorites = int(polymerize['fa'])
+        roi = polymerize['roi']
+
+        # 不存在就插入
+        find_object = PromotionDetail.objects.getByIdAndDate(shop_id, promotion_date, good_id)
+        if not find_object:
+            PromotionDetail.objects.add(shop_id, promotion_date, good_id, show_num, click_num, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
+
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -58,13 +62,19 @@ def getList(request):
     num = int(post.get('num'))
     total = PromotionDetail.objects.total()
     promotions = PromotionDetail.objects.getList(shop_id, page, num)
-    data = PromotionDetail.objects.encoderList(promotions)
+    datas = PromotionDetail.objects.encoderList(promotions)
+
+    # 商品信息
+    for data in datas:
+        good = Good.objects.getById(shop_id, data.good_id)
+        data['good_name'] = good.short_name
+
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
