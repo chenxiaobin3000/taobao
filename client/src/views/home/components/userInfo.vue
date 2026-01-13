@@ -4,12 +4,12 @@
     <span class="firstLine">你好，来自 ‘{{ userdata.company.name }}’ 的 {{ userdata.user.name }}！</span>
     <br><br>
     <span class="secondLine">已授权的平台: </span>
-    <li v-for="data in userdata.market" :key="data.id" class="secondContext">
+    <li v-for="data in userdata.market" :key="'F'+data.id" class="secondContext">
       <span class="secondLine">{{ data.name }}</span>
     </li>
     <br><br>
     <span class="secondLine">管理中的店铺: </span>
-    <li v-for="data in userdata.shop" :key="data.id" class="secondContext">
+    <li v-for="data in userdata.shop" :key="'S'+data.id" class="secondContext">
       <span class="secondLine">{{ data.name }}</span>
     </li>
   </div>

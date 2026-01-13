@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.original.promotion_detail import PromotionDetail
+from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic
@@ -23,6 +24,7 @@ def addList(request):
         good_id = polymerize['id']
         show_num = int(polymerize['sn'])
         click_num = int(polymerize['cn'])
+        click_rate = polymerize['cr']
         cost = polymerize['co']
         average_cost = polymerize['ac']
         thousand_cost = polymerize['tc']
@@ -36,7 +38,7 @@ def addList(request):
         # 不存在就插入
         find_object = PromotionDetail.objects.getByIdAndDate(shop_id, promotion_date, good_id)
         if not find_object:
-            PromotionDetail.objects.add(shop_id, promotion_date, good_id, show_num, click_num, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
+            PromotionDetail.objects.add(shop_id, promotion_date, good_id, show_num, click_num, click_rate, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -66,8 +68,11 @@ def getList(request):
 
     # 商品信息
     for data in datas:
-        good = Good.objects.getById(shop_id, data.good_id)
-        data['good_name'] = good.short_name
+        good = Good.objects.getById(shop_id, data['good_id'])
+        if good:
+            data['good_name'] = good.short_name
+        else:
+            data['good_name'] = ''
 
     response = {
         'code': 0,

@@ -9,17 +9,37 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="推广日期" width="160">
+      <el-table-column align="center" label="推广日期" width="120">
         <template slot-scope="scope">
           {{ scope.row.promotion_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="商品名称">
         <template slot-scope="scope">
           {{ scope.row.good_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="展现量" width="120">
+      <el-table-column align="center" label="花费" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.cost }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="投产比" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.roi }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="成交金额" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.deal_amount }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="成交笔数" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.deal_num }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="展现量" width="80">
         <template slot-scope="scope">
           {{ scope.row.show_num }}
         </template>
@@ -29,9 +49,9 @@
           {{ scope.row.click_num }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="花费" width="80">
+      <el-table-column align="center" label="点击率" width="80">
         <template slot-scope="scope">
-          {{ scope.row.cost }}
+          {{ scope.row.click_rate }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="平均花费" width="80">
@@ -44,34 +64,19 @@
           {{ scope.row.thousand_cost }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="成交金额" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.deal_amount }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="成交笔数" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.deal_num }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="成交成本" width="160">
+      <el-table-column align="center" label="成交成本" width="80">
         <template slot-scope="scope">
           {{ scope.row.deal_cost }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="购物车" width="160">
+      <el-table-column align="center" label="购物车" width="80">
         <template slot-scope="scope">
           {{ scope.row.shop_cart }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="收藏数" width="160">
+      <el-table-column align="center" label="收藏数" width="80">
         <template slot-scope="scope">
           {{ scope.row.favorites }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="投产比" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.roi }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="80">
@@ -95,6 +100,7 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
+import { xlsx_date_str } from '@/utils/xlsx'
 import { getPromotionDetailList, addPromotionDetailList, delPromotionDetail } from '@/api/original/promotion_detail'
 import { getShopList } from '@/api/system/shop'
 
@@ -178,6 +184,7 @@ export default {
       const good_id = header[1]
       const show_num = header[4]
       const click_num = header[5]
+      const click_rate = header[7]
       const cost = header[6]
       const average_cost = header[8]
       const thousand_cost = header[9]
@@ -190,19 +197,20 @@ export default {
       const p = []
       results.forEach(v => {
         p.push({
-          pd: v[promotion_date],
+          pd: xlsx_date_str(v[promotion_date]),
           id: v[good_id],
-          sn: v[show_num],
-          cn: v[click_num],
-          co: v[cost],
-          ac: v[average_cost],
-          tc: v[thousand_cost],
-          da: v[deal_amount],
-          dn: v[deal_num],
-          dc: v[deal_cost],
-          sc: v[shop_cart],
-          fa: v[favorites],
-          roi: v[roi]
+          sn: v[show_num] ? v[show_num] : 0,
+          cn: v[click_num] ? v[click_num] : 0,
+          cr: v[click_rate] ? v[click_rate] : 0,
+          co: v[cost] ? v[cost] : 0,
+          ac: v[average_cost] ? v[average_cost] : 0,
+          tc: v[thousand_cost] ? v[thousand_cost] : 0,
+          da: v[deal_amount] ? v[deal_amount] : 0,
+          dn: v[deal_num] ? v[deal_num] : 0,
+          dc: v[deal_cost] ? v[deal_cost] : 0,
+          sc: v[shop_cart] ? v[shop_cart] : 0,
+          fa: v[favorites] ? v[favorites] : 0,
+          roi: v[roi] ? v[roi] : 0
         })
       })
       console.log(p)
