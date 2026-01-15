@@ -53,9 +53,8 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan, PolymerizeType } from '@/utils/const'
+import { ImportCount, ImportSpan, DeductionType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { xlsx_time_str } from '@/utils/xlsx'
 import { getPolymerizeList, addPolymerizeList, delPolymerize } from '@/api/original/polymerize'
 import { getShopList } from '@/api/system/shop'
 
@@ -129,7 +128,7 @@ export default {
       })
     },
     num2type(num) {
-      return PolymerizeType.num2text(num)
+      return DeductionType.num2text(num)
     },
     handleChange() {
       this.getPolymerizeList()
@@ -142,29 +141,33 @@ export default {
       const amount = header[5]
       const create_time = header[0]
       const polymerize_note = header[7]
-      const t = []
+      const p = []
       results.forEach(v => {
         if (v[amount] > 0) {
-          t.push({
+          const parse = DeductionType.text2num(v[polymerize_note])
+          if (parse[1] !== v[order_id]) {
+            this.$message({ type: 'error', message: '校验异常!' })
+          }
+          p.push({
             o: v[order_id],
             a: v[amount],
-            t: PolymerizeType.text2num(v[polymerize_note]),
-            c: xlsx_time_str(v[create_time]),
+            t: parse[0],
+            c: v[create_time],
             n: v[polymerize_note]
           })
         }
       })
-      let length = t.length
+      let length = p.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {
           addPolymerizeList({
             id: this.listQuery.id,
-            t: t.slice(i * ImportCount, (i + 1) * ImportCount)
+            p: p.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
-              this.getRefundList()
+              this.getPolymerizeList()
               this.dialogVisible = false
             } else {
               this.$message({ type: 'success', message: '正在导入!' })
@@ -175,10 +178,10 @@ export default {
       } else {
         addPolymerizeList({
           id: this.listQuery.id,
-          t: t
+          p: p
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })
-          this.getRefundList()
+          this.getPolymerizeList()
           this.dialogVisible = false
         })
       }

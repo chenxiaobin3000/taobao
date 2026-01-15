@@ -14,11 +14,14 @@ def addList(request):
 
     # 批量添加
     for polymerize in polymerizes:
-        order_id = polymerize['oid']
-        amount = polymerize['amount']
-        amount_type = int(polymerize['atype'])
-        create_time = polymerize['ctime']
-        Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time)
+        order_id = polymerize['o']
+        amount = polymerize['a']
+        amount_type = int(polymerize['t'])
+        create_time = polymerize['c']
+        polymerize_note = polymerize['n']
+        if Polymerize.objects.getByCTime(shop_id, order_id, create_time):
+            continue
+        Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
 
     response = {
         'code': 0,
