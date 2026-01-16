@@ -9,34 +9,29 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="打款人" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.user_name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="收款人" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.payee_name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="订单编码" width="160">
+      <el-table-column align="center" label="订单编号" width="160">
         <template slot-scope="scope">
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款金额" width="80">
+      <el-table-column align="center" label="类型" width="80">
+        <template slot-scope="scope">
+          {{ num2type(scope.row.amount_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款时间" width="160">
+      <el-table-column align="center" label="时间" width="160">
         <template slot-scope="scope">
           {{ scope.row.create_time }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注">
         <template slot-scope="scope">
-          {{ scope.row.transfer_note }}
+          {{ scope.row.deduction_note }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="80">
@@ -46,7 +41,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getTransferList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getDeductionList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
@@ -58,10 +53,9 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan } from '@/utils/const'
+import { ImportCount, ImportSpan, DeductionType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { xlsx_time_str } from '@/utils/xlsx'
-import { getTransferList, addTransferList, delTransfer } from '@/api/original/transfer'
+import { getDeductionList, addDeductionList, delDeduction } from '@/api/original/deduction'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -92,7 +86,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getTransferList()
+      this.getDeductionList()
     },
     create() {
       this.$message({ type: 'error', message: '不支持新建!' })
@@ -109,9 +103,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getTransferList() {
+    getDeductionList() {
       this.loading = true
-      getTransferList(
+      getDeductionList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -130,44 +124,48 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getTransferList()
+        this.getDeductionList()
       })
     },
+    num2type(num) {
+      return DeductionType.num2text(num)
+    },
     handleChange() {
-      this.getTransferList()
+      this.getDeductionList()
     },
     handleExcel() {
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
-      const user_name = header[0]
-      const payee_name = header[1]
-      const order_id = header[7]
-      const amount = header[4]
-      const create_time = header[5]
-      const transfer_note = header[9]
-      const t = []
+      const order_id = header[4]
+      const order_id2 = header[17]
+      const amount = header[7]
+      const create_time = header[1]
+      const deduction_note = header[16]
+      const d = []
       results.forEach(v => {
-        t.push({
-          n: v[user_name],
-          p: v[payee_name],
-          o: v[order_id],
-          a: v[amount],
-          c: xlsx_time_str(v[create_time]),
-          tn: v[transfer_note]
-        })
+        if (v[amount] > 0) {
+          const parse = DeductionType.text2num(v[deduction_note])
+          d.push({
+            o: v[order_id] ? v[order_id] : v[order_id2],
+            a: v[amount],
+            t: parse[0],
+            c: v[create_time],
+            n: v[deduction_note]
+          })
+        }
       })
-      let length = t.length
+      let length = d.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {
-          addTransferList({
+          addDeductionList({
             id: this.listQuery.id,
-            t: t.slice(i * ImportCount, (i + 1) * ImportCount)
+            d: d.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
-              this.getRefundList()
+              this.getDeductionList()
               this.dialogVisible = false
             } else {
               this.$message({ type: 'success', message: '正在导入!' })
@@ -176,12 +174,12 @@ export default {
           await sleep(ImportSpan)
         }
       } else {
-        addTransferList({
+        addDeductionList({
           id: this.listQuery.id,
-          t: t
+          d: d
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })
-          this.getRefundList()
+          this.getDeductionList()
           this.dialogVisible = false
         })
       }
@@ -192,11 +190,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delTransfer({
+        delDeduction({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getTransferList()
+          this.getDeductionList()
         })
       })
     }
