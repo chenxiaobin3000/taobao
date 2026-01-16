@@ -21,6 +21,7 @@ export const DeductionType = {
   KUA_JING_ZENG_ZHI: 9, // 淘宝天猫跨境服务增值费
   KUA_JING_DA_JIAN: 10, // 出海增长计划中大件跨境服务增值费
   TAO_TE: 11, // 淘特营销推广服务费
+  XIAN_SHI: 12, // 限时红包代商家垫付扣回
 
   // 无订单信息
   GONG_YI: 100, // 公益宝贝捐赠
@@ -39,43 +40,45 @@ export const DeductionType = {
     if (text.indexOf('基础软件服务费') !== -1) {
       return [this.FU_WU_FEI, this.match(text, '(', ')')]
     } else if (text.indexOf('品牌新享') !== -1) {
-      return this.XIN_XIANG
+      return [this.XIN_XIANG, this.match(text, '(', ')')]
     } else if (text.indexOf('淘宝新客礼金技术服务费') !== -1) {
-      return this.XIN_KE
+      return [this.XIN_KE, this.match(text, '(', ')')]
     } else if (text.indexOf('消费者体验提升计划服务费') !== -1) {
-      return this.TI_YAN
+      return [this.TI_YAN, this.match(text, '(', ')')]
     } else if (text.indexOf('淘金币软件服务费') !== -1) {
-      return this.TAO_JIN_BI
+      return [this.TAO_JIN_BI, this.match(text, '(', ')')]
     } else if (text.indexOf('先用后付技术服务费()') !== -1) {
-      return this.XIAN_YONG_HOU_FU
+      return [this.XIAN_YONG_HOU_FU, this.match(text, '(', ')')]
     } else if (text.indexOf('先用后付技术服务费-') !== -1) {
-      return this.XIAN_YONG_TIAO_ZHANG
+      return [this.XIAN_YONG_TIAO_ZHANG, this.match(text, '(', ')')]
     } else if (text.indexOf('淘宝天猫跨境服务基础费') !== -1) {
-      return this.KUA_JING_JI_CHU
+      return [this.KUA_JING_JI_CHU, this.match(text, '(', ')')]
     } else if (text.indexOf('淘宝天猫跨境服务增值费') !== -1) {
-      return this.KUA_JING_ZENG_ZHI
+      return [this.KUA_JING_ZENG_ZHI, this.match(text, '(', ')')]
     } else if (text.indexOf('出海增长计划中大件跨境服务增值费') !== -1) {
-      return this.KUA_JING_DA_JIAN
+      return [this.KUA_JING_DA_JIAN, this.match(text, '(', ')')]
     } else if (text.indexOf('淘特营销推广服务费') !== -1) {
-      return this.TAO_TE
+      return [this.TAO_TE, this.match(text, '(', ')')]
+    } else if (text.indexOf('限时红包代商家垫付扣回') !== -1) {
+      return [this.XIAN_SHI, this.match(text, '(', ')')]
     } else if (text.indexOf('公益宝贝捐赠') !== -1) {
-      return this.GONG_YI
+      return [this.GONG_YI, '']
     } else if (text.indexOf('卖家延迟发货赔付红包') !== -1) {
-      return this.YAN_CHI_FA_HUO
+      return [this.YAN_CHI_FA_HUO, '']
     } else if (text.indexOf('虚假发货赔付红包') !== -1) {
-      return this.XU_JIA_FA_HUO
+      return [this.XU_JIA_FA_HUO, '']
     } else if (text.indexOf('淘宝物流轨迹异常红包') !== -1) {
-      return this.WU_LIU_YI_CHANG
+      return [this.WU_LIU_YI_CHANG, '']
     } else if (text.indexOf('淘宝缺货赔付红包') !== -1) {
-      return this.QUE_HUO
+      return [this.QUE_HUO, '']
     } else if (text.indexOf('花呗分期免息营销') !== -1) {
-      return this.HUA_BEI
+      return [this.HUA_BEI, '']
     } else if (text.indexOf('退款') !== -1) {
-      return this.TUI_KUAN
+      return [this.TUI_KUAN, this.match(text, '{', '}')]
     } else if (text.indexOf('转账') !== -1) {
-      return this.ZHUAN_ZHANG
+      return [this.ZHUAN_ZHANG, '']
     } else { // 异常
-      return this.OTHER
+      return [this.OTHER, '']
     }
   },
   num2text(num) {
@@ -102,6 +105,8 @@ export const DeductionType = {
         return '出海大件服务费'
       case this.TAO_TE:
         return '淘特服务费'
+      case this.XIAN_SHI:
+        return '限时红包'
 
       case this.GONG_YI:
         return '公益宝贝捐赠'
@@ -119,7 +124,7 @@ export const DeductionType = {
       case this.TUI_KUAN:
         return '退款'
       case this.ZHUAN_ZHANG:
-        return this.ZHUAN_ZHANG
+        return '转账'
     }
     return '异常'
   },

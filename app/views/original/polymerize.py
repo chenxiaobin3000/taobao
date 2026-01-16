@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.original.polymerize import Polymerize
+from app.models.original.polymerize_discard import PolymerizeDiscard
+from app.models.const.deduction_type import DeductionType
 
 @require_POST
 @transaction.atomic
@@ -11,6 +13,11 @@ def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     polymerizes = post.get('p')
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': None
+    }
 
     # 批量添加
     for polymerize in polymerizes:
@@ -19,15 +26,23 @@ def addList(request):
         amount_type = int(polymerize['t'])
         create_time = polymerize['c']
         polymerize_note = polymerize['n']
-        if Polymerize.objects.getByCTime(shop_id, order_id, create_time):
-            continue
-        Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': None
-    }
+        # 未知数据类型返回失败
+        if DeductionType.OTHER == amount_type:
+            response['code'] = -1
+            response['msg'] = '异常数据'
+            return JsonResponse(response, encoder=MyJSONEncoder)
+        
+        # 不处理的数据放废弃表
+        if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
+            if PolymerizeDiscard.objects.getByCTime(shop_id, order_id, create_time):
+                continue
+            PolymerizeDiscard.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+        else:
+            if Polymerize.objects.getByCTime(shop_id, order_id, create_time):
+                continue
+            Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST

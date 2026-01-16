@@ -145,9 +145,6 @@ export default {
       results.forEach(v => {
         if (v[amount] > 0) {
           const parse = DeductionType.text2num(v[polymerize_note])
-          if (parse[1] !== v[order_id]) {
-            this.$message({ type: 'error', message: '校验异常!' })
-          }
           p.push({
             o: v[order_id],
             a: v[amount],

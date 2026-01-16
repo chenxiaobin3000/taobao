@@ -15,6 +15,7 @@ class DeductionType:
     KUA_JING_ZENG_ZHI = 9  # 淘宝天猫跨境服务增值费
     KUA_JING_DA_JIAN = 10  # 出海增长计划中大件跨境服务增值费
     TAO_TE = 11  # 淘特营销推广服务费
+    XIAN_SHI = 12 # 限时红包代商家垫付扣回
 
     # 无订单信息
     GONG_YI = 100  # 公益宝贝捐赠
@@ -25,4 +26,6 @@ class DeductionType:
     HUA_BEI = 105  # 花呗分期免息营销
 
     # 不处理
-    ZHUANGZHANG = 200 # 转账
+    TUI_KUAN = 200 # 转账
+    ZHUAN_ZHANG = 201 # 退款
+    OTHER = 1000 # 异常
