@@ -9,74 +9,34 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="推广日期" width="120">
+      <el-table-column align="center" label="打款人" width="80">
         <template slot-scope="scope">
-          {{ scope.row.promotion_date }}
+          {{ scope.row.user_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品名称">
+      <el-table-column align="center" label="收款人" width="160">
         <template slot-scope="scope">
-          {{ scope.row.good_name }}
+          {{ scope.row.payee_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="花费" width="80">
+      <el-table-column align="center" label="订单编码" width="160">
         <template slot-scope="scope">
-          {{ scope.row.cost }}
+          {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="投产比" width="80">
+      <el-table-column align="center" label="打款金额" width="80">
         <template slot-scope="scope">
-          {{ scope.row.roi }}
+          {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="成交金额" width="80">
+      <el-table-column align="center" label="打款时间" width="160">
         <template slot-scope="scope">
-          {{ scope.row.deal_amount }}
+          {{ scope.row.create_time }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="成交笔数" width="80">
+      <el-table-column align="center" label="备注">
         <template slot-scope="scope">
-          {{ scope.row.deal_num }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="展现量" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.show_num }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="点击量" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.click_num }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="点击率" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.click_rate }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="平均花费" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.average_cost }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="千次花费" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.thousand_cost }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="成交成本" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.deal_cost }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="购物车" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.shop_cart }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="收藏数" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.favorites }}
+          {{ scope.row.transfer_note }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="80">
@@ -86,7 +46,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getPromotionDetailList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getTransferList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
@@ -100,8 +60,8 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { xlsx_date_str } from '@/utils/xlsx'
-import { getPromotionDetailList, addPromotionDetailList, delPromotionDetail } from '@/api/original/promotionDetail'
+import { xlsx_time_str } from '@/utils/xlsx'
+import { getTransferList, addTransferList, delTransfer } from '@/api/original/transfer'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -132,7 +92,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getPromotionDetailList()
+      this.getTransferList()
     },
     create() {
       this.$message({ type: 'error', message: '不支持新建!' })
@@ -149,9 +109,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getPromotionDetailList() {
+    getTransferList() {
       this.loading = true
-      getPromotionDetailList(
+      getTransferList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -170,60 +130,44 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getPromotionDetailList()
+        this.getTransferList()
       })
     },
     handleChange() {
-      this.getPromotionDetailList()
+      this.getTransferList()
     },
     handleExcel() {
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
-      const promotion_date = header[0]
-      const good_id = header[1]
-      const show_num = header[4]
-      const click_num = header[5]
-      const click_rate = header[7]
-      const cost = header[6]
-      const average_cost = header[8]
-      const thousand_cost = header[9]
-      const deal_amount = header[18]
-      const deal_num = header[19]
-      const deal_cost = header[25]
-      const shop_cart = header[26]
-      const favorites = header[30]
-      const roi = header[23]
-      const p = []
+      const user_name = header[0]
+      const payee_name = header[1]
+      const order_id = header[7]
+      const amount = header[4]
+      const create_time = header[5]
+      const transfer_note = header[9]
+      const t = []
       results.forEach(v => {
-        p.push({
-          pd: xlsx_date_str(v[promotion_date]),
-          id: v[good_id],
-          sn: v[show_num] ? v[show_num] : 0,
-          cn: v[click_num] ? v[click_num] : 0,
-          cr: v[click_rate] ? v[click_rate] : 0,
-          co: v[cost] ? v[cost] : 0,
-          ac: v[average_cost] ? v[average_cost] : 0,
-          tc: v[thousand_cost] ? v[thousand_cost] : 0,
-          da: v[deal_amount] ? v[deal_amount] : 0,
-          dn: v[deal_num] ? v[deal_num] : 0,
-          dc: v[deal_cost] ? v[deal_cost] : 0,
-          sc: v[shop_cart] ? v[shop_cart] : 0,
-          fa: v[favorites] ? v[favorites] : 0,
-          roi: v[roi] ? v[roi] : 0
+        t.push({
+          n: v[user_name],
+          p: v[payee_name],
+          o: v[order_id],
+          a: v[amount],
+          c: xlsx_time_str(v[create_time]),
+          tn: v[transfer_note]
         })
       })
-      let length = p.length
+      let length = t.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {
-          addPromotionDetailList({
+          addTransferList({
             id: this.listQuery.id,
-            p: p.slice(i * ImportCount, (i + 1) * ImportCount)
+            t: t.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
-              this.getPromotionDetailList()
+              this.getRefundList()
               this.dialogVisible = false
             } else {
               this.$message({ type: 'success', message: '正在导入!' })
@@ -232,12 +176,12 @@ export default {
           await sleep(ImportSpan)
         }
       } else {
-        addPromotionDetailList({
+        addTransferList({
           id: this.listQuery.id,
-          p: p
+          t: t
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })
-          this.getPromotionDetailList()
+          this.getRefundList()
           this.dialogVisible = false
         })
       }
@@ -248,11 +192,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delPromotionDetail({
+        delTransfer({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getPromotionDetailList()
+          this.getTransferList()
         })
       })
     }

@@ -1,6 +1,24 @@
 export const MyRoleData = [{
   id: 3000, label: '数据管理',
-  children: []
+  children: [{
+    id: 3001, label: '订单管理'
+  }, {
+    id: 3002, label: '推广管理'
+  }, {
+    id: 3003, label: '推广明细'
+  }, {
+    id: 3004, label: '扣费管理'
+  }, {
+    id: 3005, label: '扣费废弃'
+  }, {
+    id: 3006, label: '聚合管理'
+  }, {
+    id: 3007, label: '聚合废弃'
+  }, {
+    id: 3008, label: '退货管理'
+  }, {
+    id: 3009, label: '小额打款'
+  }]
 }, {
   id: 2000, label: '公司管理',
   children: [{
