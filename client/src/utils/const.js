@@ -1,6 +1,9 @@
 // 默认空时间
 export const NoneTime = '2000-01-01 00:00:00'
 
+// 默认空订单
+export const DefaultOrder = '0000000000000000000'
+
 // 批次导入数量
 export const ImportCount = 1000
 
@@ -11,7 +14,7 @@ export const ImportSpan = 1000
 export const DeductionType = {
   // 有订单信息
   FU_WU_FEI: 1, // 基础软件服务费
-  XIN_XIANG: 2, // 品牌新享
+  XIN_XIANG: 2, // 品牌新享淘宝新客营销
   XIN_KE: 3, // 淘宝新客礼金技术服务费
   TI_YAN: 4, // 消费者体验提升计划服务费
   TAO_JIN_BI: 5, // 淘金币软件服务费
@@ -22,6 +25,8 @@ export const DeductionType = {
   KUA_JING_DA_JIAN: 10, // 出海增长计划中大件跨境服务增值费
   TAO_TE: 11, // 淘特营销推广服务费
   XIAN_SHI: 12, // 限时红包代商家垫付扣回
+  XIN_PIN: 13, // 品牌新享淘宝新品营销
+  XIN_XIANG_FU_WU: 14, // 品牌新享-淘宝营销托管
 
   // 无订单信息
   GONG_YI: 100, // 公益宝贝捐赠
@@ -34,51 +39,61 @@ export const DeductionType = {
   // 不处理
   TUI_KUAN: 200, // 退款
   ZHUAN_ZHANG: 201, // 转账
+  BAO_ZHENG_JIN: 202, // 淘宝消费者保证金
+  DA_KUAN: 203, // 支付宝转账小额打款
   OTHER: 1000, // 异常
 
   text2num(text) {
     if (text.indexOf('基础软件服务费') !== -1) {
-      return [this.FU_WU_FEI, this.match(text, '(', ')')]
-    } else if (text.indexOf('品牌新享') !== -1) {
-      return [this.XIN_XIANG, this.match(text, '(', ')')]
+      return this.FU_WU_FEI
+    } else if (text.indexOf('品牌新享淘宝新客营销') !== -1) {
+      return this.XIN_XIANG
     } else if (text.indexOf('淘宝新客礼金技术服务费') !== -1) {
-      return [this.XIN_KE, this.match(text, '(', ')')]
+      return this.XIN_KE
     } else if (text.indexOf('消费者体验提升计划服务费') !== -1) {
-      return [this.TI_YAN, this.match(text, '(', ')')]
+      return this.TI_YAN
     } else if (text.indexOf('淘金币软件服务费') !== -1) {
-      return [this.TAO_JIN_BI, this.match(text, '(', ')')]
-    } else if (text.indexOf('先用后付技术服务费()') !== -1) {
-      return [this.XIAN_YONG_HOU_FU, this.match(text, '(', ')')]
+      return this.TAO_JIN_BI
+    } else if (text.indexOf('先用后付技术服务费(') !== -1) {
+      return this.XIAN_YONG_HOU_FU
     } else if (text.indexOf('先用后付技术服务费-') !== -1) {
-      return [this.XIAN_YONG_TIAO_ZHANG, this.match(text, '(', ')')]
+      return this.XIAN_YONG_TIAO_ZHANG
     } else if (text.indexOf('淘宝天猫跨境服务基础费') !== -1) {
-      return [this.KUA_JING_JI_CHU, this.match(text, '(', ')')]
+      return this.KUA_JING_JI_CHU
     } else if (text.indexOf('淘宝天猫跨境服务增值费') !== -1) {
-      return [this.KUA_JING_ZENG_ZHI, this.match(text, '(', ')')]
+      return this.KUA_JING_ZENG_ZHI
     } else if (text.indexOf('出海增长计划中大件跨境服务增值费') !== -1) {
-      return [this.KUA_JING_DA_JIAN, this.match(text, '(', ')')]
+      return this.KUA_JING_DA_JIAN
     } else if (text.indexOf('淘特营销推广服务费') !== -1) {
-      return [this.TAO_TE, this.match(text, '(', ')')]
+      return this.TAO_TE
     } else if (text.indexOf('限时红包代商家垫付扣回') !== -1) {
-      return [this.XIAN_SHI, this.match(text, '(', ')')]
+      return this.XIAN_SHI
+    } else if (text.indexOf('品牌新享淘宝新品营销') !== -1) {
+      return this.XIN_PIN
+    } else if (text.indexOf('品牌新享-淘宝营销托管') !== -1) {
+      return this.XIN_XIANG_FU_WU
     } else if (text.indexOf('公益宝贝捐赠') !== -1) {
-      return [this.GONG_YI, '']
+      return this.GONG_YI
     } else if (text.indexOf('卖家延迟发货赔付红包') !== -1) {
-      return [this.YAN_CHI_FA_HUO, '']
+      return this.YAN_CHI_FA_HUO
     } else if (text.indexOf('虚假发货赔付红包') !== -1) {
-      return [this.XU_JIA_FA_HUO, '']
+      return this.XU_JIA_FA_HUO
     } else if (text.indexOf('淘宝物流轨迹异常红包') !== -1) {
-      return [this.WU_LIU_YI_CHANG, '']
+      return this.WU_LIU_YI_CHANG
     } else if (text.indexOf('淘宝缺货赔付红包') !== -1) {
-      return [this.QUE_HUO, '']
+      return this.QUE_HUO
     } else if (text.indexOf('花呗分期免息营销') !== -1) {
-      return [this.HUA_BEI, '']
+      return this.HUA_BEI
     } else if (text.indexOf('退款') !== -1) {
-      return [this.TUI_KUAN, this.match(text, '{', '}')]
+      return this.TUI_KUAN
+    } else if (text.indexOf('支付宝转账小额打款') !== -1) { // 要在转账之前
+      return this.DA_KUAN
     } else if (text.indexOf('转账') !== -1) {
-      return [this.ZHUAN_ZHANG, '']
+      return this.ZHUAN_ZHANG
+    } else if (text.indexOf('淘宝消费者保证金') !== -1) {
+      return this.BAO_ZHENG_JIN
     } else { // 异常
-      return [this.OTHER, '']
+      return this.OTHER
     }
   },
   num2text(num) {
@@ -107,6 +122,10 @@ export const DeductionType = {
         return '淘特服务费'
       case this.XIAN_SHI:
         return '限时红包'
+      case this.XIN_PIN:
+        return '新品礼金'
+      case this.XIN_XIANG_FU_WU:
+        return '新享服务费'
 
       case this.GONG_YI:
         return '公益宝贝捐赠'
@@ -125,19 +144,12 @@ export const DeductionType = {
         return '退款'
       case this.ZHUAN_ZHANG:
         return '转账'
+      case this.BAO_ZHENG_JIN:
+        return '保证金'
+      case this.DA_KUAN:
+        return '小额打款'
     }
     return '异常'
-  },
-  match(text, symbol1, symbol2) {
-    const first = text.indexOf(symbol1)
-    if (first === -1) {
-      return ''
-    }
-    const second = text.indexOf(symbol2, first + 1)
-    if (second === -1) {
-      return ''
-    }
-    return text.slice(first + 1, second)
   }
 }
 

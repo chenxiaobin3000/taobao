@@ -143,17 +143,24 @@ export default {
       const polymerize_note = header[7]
       const p = []
       results.forEach(v => {
-        if (v[amount] > 0) {
-          const parse = DeductionType.text2num(v[polymerize_note])
+        if (v[amount] > 0 && v[polymerize_note].length > 4) {
           p.push({
             o: v[order_id],
             a: v[amount],
-            t: parse[0],
+            t: DeductionType.text2num(v[polymerize_note]),
             c: v[create_time],
             n: v[polymerize_note]
           })
         }
       })
+      // 预校验数据
+      for (let i = 0; i < p.length; ++i) {
+        if (p[i].t === DeductionType.OTHER || p[i].o.length !== 19) {
+          this.$message({ type: 'error', message: '异常数据!' })
+          console.log(p[i])
+          return
+        }
+      }
       let length = p.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)

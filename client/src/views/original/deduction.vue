@@ -53,7 +53,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan, DeductionType } from '@/utils/const'
+import { DefaultOrder, ImportCount, ImportSpan, DeductionType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
 import { getDeductionList, addDeductionList, delDeduction } from '@/api/original/deduction'
 import { getShopList } from '@/api/system/shop'
@@ -144,17 +144,58 @@ export default {
       const deduction_note = header[16]
       const d = []
       results.forEach(v => {
-        if (v[amount] > 0) {
-          const parse = DeductionType.text2num(v[deduction_note])
+        if (v[amount] > 0 && v[deduction_note].length > 4) {
+          const note = v[deduction_note]
+          const type = DeductionType.text2num(note)
+          let oid = v[order_id] ? v[order_id].substring(5) : v[order_id2]
+          // 订单号修正
+          if (oid.length !== 19) {
+            // 尝试第二个订单号
+            if (v[order_id2].length === 19) {
+              oid = v[order_id2]
+            } else {
+              // 尝试从备注()抓取订单号
+              const first = note.indexOf('(') + 1
+              const second = note.indexOf(')')
+              if (first !== -1 && second !== -1 && second - first === 19) {
+                oid = note.substring(first, second)
+              }
+            }
+          }
+          // 没有订单编号的，用默认编号
+          let first = 0
+          switch (type) {
+            case DeductionType.YAN_CHI_FA_HUO:
+            case DeductionType.XU_JIA_FA_HUO:
+            case DeductionType.WU_LIU_YI_CHANG:
+              oid = DefaultOrder
+              break
+            case DeductionType.DA_KUAN:
+              // 尝试从备注<关联订单号：>抓取订单号
+              first = note.indexOf('关联订单号：')
+              if (first !== -1) {
+                oid = note.substring(first + 6)
+              } else {
+                oid = DefaultOrder
+              }
+          }
           d.push({
-            o: v[order_id] ? v[order_id] : v[order_id2],
+            o: oid,
             a: v[amount],
-            t: parse[0],
+            t: type,
             c: v[create_time],
-            n: v[deduction_note]
+            n: note
           })
         }
       })
+      // 预校验数据
+      for (let i = 0; i < d.length; ++i) {
+        if (d[i].t === DeductionType.OTHER || d[i].o.length !== 19) {
+          this.$message({ type: 'error', message: '异常数据!' })
+          console.log(d[i])
+          return
+        }
+      }
       let length = d.length
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
