@@ -153,6 +153,32 @@ export const DeductionType = {
   }
 }
 
+// 商品状态
+export const GoodType = {
+  NORMAL: 1, // 普通商品
+  GIFT: 2, // 赠品
+  OTHER: 3, // 异常
+
+  text2num(text) {
+    if (text === '普通商品') {
+      return this.NORMAL
+    } else if (text === '赠品') {
+      return this.GIFT
+    } else { // 异常
+      return this.OTHER
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.NORMAL:
+        return '普通商品'
+      case this.GIFT:
+        return '赠品'
+    }
+    return '异常'
+  }
+}
+
 // 订单状态
 export const OrderStatus = {
   SUCCESS: 1, // 交易成功

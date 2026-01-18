@@ -4,8 +4,8 @@ from django.forms.models import model_to_dict
 
 # 商品表
 class GoodManager(models.Manager):
-    def add(self, shop_id, good_id, name, short_name):
-        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name)
+    def add(self, shop_id, good_id, name, short_name, good_type):
+        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name, good_type=good_type)
 
     def set(self, pk, name, short_name):
         good = self.get(pk=pk)
@@ -34,10 +34,10 @@ class GoodManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, good):
-        return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name'])
+        return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type'])
 
     def encoderList(self, goods):
-        return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name']) for good in goods]
+        return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type']) for good in goods]
 
 class Good(models.Model):
     objects = GoodManager()
@@ -45,6 +45,7 @@ class Good(models.Model):
     good_id = models.CharField(max_length = 10, db_index = True) # 商品id
     name = models.CharField(max_length = 60, db_index = True) # 商品名称
     short_name = models.CharField(max_length = 16) # 商品短名
+    good_type = models.IntegerField(db_index = True) # 商品类型
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):

@@ -14,36 +14,29 @@ def addList(request):
 
     # 批量添加
     for order in orders:
-        order_id = order['oid']
-        payment = order['payment']
-        actual_pay = order['ap']
-        procure_pay = order['pp']
-        order_status = int(order['status'])
-        create_time = order['ctime']
-        product_name = order['name']
-        order_note = order['note']
-        Order.objects.add(shop_id, order_id, payment, actual_pay, procure_pay, order_status, create_time, product_name, order_note)
+        order_id = order['id']
+        payment = order['pa']
+        procure = order['pr']
+        order_status = int(order['st'])
+        create_time = order['ct']
+        product_name = order['na']
+        order_note = order['no']
+
+        # 已存在更新状态
+        find_object = Order.objects.getById(shop_id, order_id)
+        if find_object:
+            find_object.order_status = order_status
+            find_object.order_note = order_note
+            find_object.save()
+        else:
+            # 转换商品id
+            good_ids = ''
+            Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, order_note)
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': None
-    }
-    return JsonResponse(response, encoder=MyJSONEncoder)
-
-@require_POST
-@transaction.atomic
-def set(request):
-    post = json.loads(request.body)
-    pk = int(post.get('id'))
-    procure_pay = int(post.get('pay'))
-    order_status = int(post.get('status'))
-    order_note = int(post.get('note'))
-    data = Order.objects.set(pk, procure_pay, order_status, order_note)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': data
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -70,6 +63,9 @@ def getList(request):
     total = Order.objects.total()
     orders = Order.objects.getList(shop_id, page, num)
     data = Order.objects.encoderList(orders)
+
+    # 商品id转换商品名称
+
     response = {
         'code': 0,
         'msg': 'success',

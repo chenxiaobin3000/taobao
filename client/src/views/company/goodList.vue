@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺">
+        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
@@ -12,6 +12,11 @@
       <el-table-column align="center" label="商品名称" width="160">
         <template slot-scope="scope">
           {{ scope.row.short_name }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="商品类型" width="80">
+        <template slot-scope="scope">
+          {{ num2type(scope.row.good_type) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="商品编码" width="160">
@@ -39,6 +44,9 @@
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="商品编码">
           <div>{{ temp.good_id }}</div>
+        </el-form-item>
+        <el-form-item label="商品类型">
+          <div>{{ num2type(temp.good_type) }}</div>
         </el-form-item>
         <el-form-item label="商品名称">
           <el-input v-model="temp.short_name" />
@@ -73,6 +81,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
+import { GoodType } from '@/utils/const'
 import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
 import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/good_alias'
 import { getShopList } from '@/api/system/shop'
@@ -159,19 +168,27 @@ export default {
         this.getGoodList()
       })
     },
+    num2type(num) {
+      return GoodType.num2text(num)
+    },
+    handleChange() {
+      this.getGoodList()
+    },
     handleExcel() {
       this.dialogExcelVisible = true
     },
     handleSuccess({ results, header }) {
       const sname = header[0]
       const id = header[1]
-      const name = header[2]
+      const type = header[2]
+      const name = header[3]
       const g = []
       results.forEach(v => {
         g.push({
           i: v[id],
           n: v[name],
-          sn: v[sname]
+          sn: v[sname],
+          t: v[type]
         })
       })
       addGoodList({

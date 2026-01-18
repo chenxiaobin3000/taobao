@@ -11,16 +11,22 @@ def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     goods = post.get('g')
-
-    # 批量添加
-    for good in goods:
-        Good.objects.add(shop_id, good['i'], good['n'], good['sn'])
-
     response = {
         'code': 0,
         'msg': 'success',
         'data': None
     }
+
+    # 批量添加
+    for good in goods:
+        find_object = Good.objects.getById(shop_id, good['i'])
+        if find_object:
+            find_object.name = good['n']
+            find_object.short_name = good['sn']
+            find_object.good_type = good['t']
+        else:
+            Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'])
+
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
