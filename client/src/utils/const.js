@@ -155,15 +155,18 @@ export const DeductionType = {
 
 // 商品状态
 export const GoodType = {
-  NORMAL: 1, // 普通商品
+  NORMAL: 1, // 商品
   GIFT: 2, // 赠品
-  OTHER: 3, // 异常
+  SUPPLEMENT: 3, // 补差价
+  OTHER: 4, // 异常
 
   text2num(text) {
-    if (text === '普通商品') {
+    if (text === '商品') {
       return this.NORMAL
     } else if (text === '赠品') {
       return this.GIFT
+    } else if (text === '补差价') {
+      return this.SUPPLEMENT
     } else { // 异常
       return this.OTHER
     }
@@ -171,9 +174,11 @@ export const GoodType = {
   num2text(num) {
     switch (num) {
       case this.NORMAL:
-        return '普通商品'
+        return '商品'
       case this.GIFT:
         return '赠品'
+      case this.SUPPLEMENT:
+        return '补差价'
     }
     return '异常'
   }
