@@ -167,7 +167,7 @@ export default {
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
-              this.getRefundList()
+              this.getTransferList()
               this.dialogVisible = false
             } else {
               this.$message({ type: 'success', message: '正在导入!' })
@@ -181,7 +181,7 @@ export default {
           t: t
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })
-          this.getRefundList()
+          this.getTransferList()
           this.dialogVisible = false
         })
       }

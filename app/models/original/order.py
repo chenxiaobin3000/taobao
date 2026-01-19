@@ -4,8 +4,8 @@ from django.forms.models import model_to_dict
 
 # 订单表
 class OrderManager(models.Manager):
-    def add(self, shop_id, order_id, payment, procure, order_status, create_time, good_ids, order_note):
-        return self.create(shop_id=shop_id, order_id=order_id, payment=payment, procure=procure, order_status=order_status, create_time=create_time, good_ids=good_ids, order_note=order_note)
+    def add(self, shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note):
+        return self.create(shop_id=shop_id, order_id=order_id, payment=payment, procure=procure, order_status=order_status, create_time=create_time, good_ids=good_ids, procure_ids=procure_ids, order_note=order_note)
 
     def set(self, pk, procure, order_status, order_note):
         order = self.get(pk=pk)
@@ -32,10 +32,10 @@ class OrderManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, order):
-        return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'order_note'])
+        return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'])
 
     def encoderList(self, orders):
-        return [model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'order_note']) for order in orders]
+        return [model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note']) for order in orders]
     
 class Order(models.Model):
     objects = OrderManager()
@@ -45,7 +45,8 @@ class Order(models.Model):
     procure = models.DecimalField(max_digits=10, decimal_places=2) # 采购金额
     order_status = models.IntegerField(db_index=True) # 状态
     create_time = models.DateTimeField(db_index=True) # 创建时间
-    good_ids = models.CharField(max_length=256) # 商品id列表
+    good_ids = models.CharField(max_length=256) # 商品id列表，|分割
+    procure_ids = models.CharField(max_length=256) # 采购订单号，|分割
     order_note = models.CharField(max_length=256) # 订单备注
     ctime = models.DateTimeField(default=timezone.now)
 

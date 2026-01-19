@@ -9,14 +9,6 @@ export function addOrderList(data) {
   })
 }
 
-export function setOrder(data) {
-  return request({
-    url: `${path}/set`,
-    method: 'post',
-    data
-  })
-}
-
 export function delOrder(data) {
   return request({
     url: `${path}/del`,

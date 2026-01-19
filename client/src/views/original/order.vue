@@ -21,7 +21,12 @@
       </el-table-column>
       <el-table-column align="center" label="采购金额" width="80">
         <template slot-scope="scope">
-          {{ scope.row.actual_pay }}
+          {{ scope.row.procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="订单状态" width="80">
+        <template slot-scope="scope">
+          {{ num2type(scope.row.order_status) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="时间" width="160">
@@ -46,7 +51,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getTransferList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getOrderList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
@@ -58,10 +63,9 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan } from '@/utils/const'
+import { ImportCount, ImportSpan, OrderStatus } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { xlsx_time_str } from '@/utils/xlsx'
-import { getTransferList, addTransferList, delTransfer } from '@/api/original/transfer'
+import { getOrderList, addOrderList, delOrder } from '@/api/original/order'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -80,6 +84,7 @@ export default {
         num: 10,
         search: null
       },
+      temp: {},
       dialogVisible: false
     }
   },
@@ -92,7 +97,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getTransferList()
+      this.getOrderList()
     },
     create() {
       this.$message({ type: 'error', message: '不支持新建!' })
@@ -106,12 +111,23 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
+    this.resetTemp()
     this.getShopList()
   },
   methods: {
-    getTransferList() {
+    resetTemp() {
+      this.temp = {
+        order_id: 0,
+        payment: 0,
+        procure: 0,
+        create_time: '',
+        good_names: '',
+        order_note: ''
+      }
+    },
+    getOrderList() {
       this.loading = true
-      getTransferList(
+      getOrderList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -130,44 +146,61 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getTransferList()
+        this.getOrderList()
       })
     },
+    num2type(num) {
+      return OrderStatus.num2text(num)
+    },
     handleChange() {
-      this.getTransferList()
+      this.getOrderList()
     },
     handleExcel() {
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
-      const user_name = header[0]
-      const payee_name = header[1]
-      const order_id = header[7]
-      const amount = header[4]
-      const create_time = header[5]
-      const transfer_note = header[9]
-      const t = []
+      const order_id = header[0]
+      const payment = header[6]
+      const order_status = header[2]
+      const create_time = header[3]
+      const product_name = header[4]
+      const order_note = header[5]
+      const o = []
       results.forEach(v => {
-        t.push({
-          n: v[user_name],
-          p: v[payee_name],
-          o: v[order_id],
-          a: v[amount],
-          c: xlsx_time_str(v[create_time]),
-          tn: v[transfer_note]
+        console.log(v)
+        o.push({
+          id: v[order_id],
+          pa: v[payment],
+          pr: 0,
+          st: OrderStatus.text2num(v[order_status]),
+          ct: v[create_time],
+          na: v[product_name],
+          pi: '',
+          no: v[order_note]
         })
       })
-      let length = t.length
+      // 提取采购价
+      let length = o.length
+      for (let i = 0; i < length; ++i) {
+        const ext = this.extract(o[i].no)
+        if (!ext[0]) {
+          this.$message({ type: 'error', message: '数据异常!' })
+          console.log(o[i])
+          return
+        }
+        o[i].pr = ext[1]
+        o[i].pi = ext[2]
+      }
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {
-          addTransferList({
+          addOrderList({
             id: this.listQuery.id,
-            t: t.slice(i * ImportCount, (i + 1) * ImportCount)
+            o: o.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
-              this.getRefundList()
+              this.getOrderList()
               this.dialogVisible = false
             } else {
               this.$message({ type: 'success', message: '正在导入!' })
@@ -176,12 +209,12 @@ export default {
           await sleep(ImportSpan)
         }
       } else {
-        addTransferList({
+        addOrderList({
           id: this.listQuery.id,
-          t: t
+          o: o
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })
-          this.getRefundList()
+          this.getOrderList()
           this.dialogVisible = false
         })
       }
@@ -192,13 +225,66 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delTransfer({
+        delOrder({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getTransferList()
+          this.getOrderList()
         })
       })
+    },
+    // 从备注提取采购金额和订单号
+    extract(note) {
+      const ret = [true, -1, '']
+      // 按竖线分割
+      const notes = note.split('|')
+      for (let i = 0; i < notes.length; ++i) {
+        const data = notes[i].trim()
+        // 长度小于订单编号的忽略
+        if (data.length < 20) {
+          continue
+        }
+        // 查找订单编号
+        const first = data.indexOf(':')
+        if (first === -1) {
+          // 是首行就报错
+          if (i === 0) {
+            console.log('没有找到账号信息')
+            ret[0] = false
+            return ret
+          } else {
+            // 人工填写数据
+            const second = data.indexOf('-')
+            if (second !== 19) {
+              console.log('人工补填格式异常')
+              ret[0] = false
+              return ret
+            }
+            ret[2] = ret[2] + '|' + data.substring(0, second)
+          }
+        } else {
+          const second = data.indexOf('-采购价:', first + 1)
+          if (second === -1 || second - first !== 20) {
+            console.log('没有找到-采购价:')
+            ret[0] = false
+            return ret
+          }
+          if (i === 0) {
+            // 查找采购价
+            const third = data.indexOf('元-利润:0元', second + 5)
+            if (first === -1) {
+              console.log('没有人工校验0元')
+              ret[0] = false
+              return ret
+            }
+            ret[1] = data.substring(second + 5, third)
+            ret[2] = data.substring(first + 1, second)
+          } else {
+            ret[2] = ret[2] + '|' + data.substring(first + 1, second)
+          }
+        }
+      }
+      return ret
     }
   }
 }
