@@ -19,8 +19,10 @@ def addList(request):
         product_id = refund['pid']
         actual_pay = refund['ap']
         refund_pay = refund['rp']
+        refund_platform = refund['rl']
         refund_type = refund['rt']
         refund_status = refund['rs']
+        pay_time = refund['pt']
         apply_time = refund['at']
         timeout_time = refund['tt']
         complete_time = refund['ct']
@@ -28,17 +30,18 @@ def addList(request):
         # 已存在更新状态
         find_object = Refund.objects.getByIdAndTime(shop_id, order_id, apply_time)
         if find_object:
-            if find_object.product_id != product_id or find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
+            if find_object.product_id != product_id or find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_platform != refund_platform or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
                 find_object.product_id = product_id
                 find_object.actual_pay = actual_pay
                 find_object.refund_pay = refund_pay
+                find_object.refund_platform = refund_platform
                 find_object.refund_type = refund_type
                 find_object.refund_status = refund_status
                 find_object.timeout_time = timeout_time
                 find_object.complete_time = complete_time
                 find_object.save()
         else:
-            Refund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_type, refund_status, apply_time, timeout_time, complete_time)
+            Refund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, pay_time, apply_time, timeout_time, complete_time)
 
     response = {
         'code': 0,

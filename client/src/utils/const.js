@@ -311,13 +311,16 @@ export const RefundStatus = {
 export const RefundType = {
   REFUND: 1, // 仅退款
   RETURN: 2, // 退货退款
-  OTHER: 3, // 异常
+  EXCHANGE: 3, // 换货
+  OTHER: 4, // 异常
 
   text2num(text) {
     if (text === '退款') {
       return this.REFUND
     } else if (text === '退货退款') {
       return this.RETURN
+    } else if (text === '换货') {
+      return this.EXCHANGE
     } else { // 异常
       return this.OTHER
     }
@@ -328,6 +331,8 @@ export const RefundType = {
         return '仅退款'
       case this.RETURN:
         return '退货退款'
+      case this.EXCHANGE:
+        return '换货'
     }
     return '异常'
   }

@@ -168,14 +168,16 @@ export default {
     async handleSuccess({ results, header }) {
       const refund_id = header[1]
       const order_id = header[0]
-      const product_id = header[4]
-      const actual_pay = header[7]
-      const refund_pay = header[9]
-      const refund_type = header[11]
-      const refund_status = header[14]
-      const apply_time = header[12]
-      const timeout_time = header[13]
-      const complete_time = header[6]
+      const product_id = header[9]
+      const actual_pay = header[4]
+      const refund_pay = header[10]
+      const refund_platform = header[11]
+      const refund_type = header[8]
+      const refund_status = header[7]
+      const pay_time = header[2]
+      const apply_time = header[5]
+      const timeout_time = header[6]
+      const complete_time = header[3]
       const r = []
       results.forEach(v => {
         r.push({
@@ -184,8 +186,10 @@ export default {
           pid: v[product_id],
           ap: v[actual_pay],
           rp: v[refund_pay],
+          rl: v[refund_platform],
           rt: RefundType.text2num(v[refund_type]),
           rs: RefundStatus.text2num(v[refund_status]),
+          pt: v[pay_time],
           at: v[apply_time],
           tt: v[timeout_time] === '' ? NoneTime : v[timeout_time],
           ct: v[complete_time] === '' ? NoneTime : v[complete_time]
