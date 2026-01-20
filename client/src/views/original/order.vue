@@ -167,7 +167,6 @@ export default {
       const order_note = header[5]
       const o = []
       results.forEach(v => {
-        console.log(v)
         o.push({
           id: v[order_id],
           pa: v[payment],
@@ -236,27 +235,37 @@ export default {
     // 从备注提取采购金额和订单号
     extract(note) {
       const ret = [true, -1, '']
+      // 校验人工审核
+      if (note.split('-').length > 3 && note.indexOf('元-利润:0元') === -1) {
+        console.log('未经人工校验:' + note)
+        ret[0] = false
+        return ret
+      }
       // 按竖线分割
       const notes = note.split('|')
       for (let i = 0; i < notes.length; ++i) {
         const data = notes[i].trim()
-        // 长度小于订单编号的忽略
+        // 忽略长度小于订单编号的数据
         if (data.length < 20) {
           continue
         }
-        // 查找订单编号
+        // 忽略自动售后
+        if (data.indexOf('1688自动售后') !== -1) {
+          continue
+        }
+        // 按标准格式查找: tb:id-采购价:0元-利润:0元 |
         const first = data.indexOf(':')
         if (first === -1) {
           // 是首行就报错
           if (i === 0) {
-            console.log('没有找到账号信息')
+            console.log('没有找到账号信息:' + data)
             ret[0] = false
             return ret
           } else {
-            // 人工填写数据
+            // 人工填写数据: id-金额
             const second = data.indexOf('-')
             if (second !== 19) {
-              console.log('人工补填格式异常')
+              console.log('人工补填格式异常:' + data)
               ret[0] = false
               return ret
             }
@@ -265,15 +274,15 @@ export default {
         } else {
           const second = data.indexOf('-采购价:', first + 1)
           if (second === -1 || second - first !== 20) {
-            console.log('没有找到-采购价:')
+            console.log('没有找到-采购价:' + data)
             ret[0] = false
             return ret
           }
           if (i === 0) {
             // 查找采购价
-            const third = data.indexOf('元-利润:0元', second + 5)
-            if (first === -1) {
-              console.log('没有人工校验0元')
+            const third = data.indexOf('元-利润:', second + 5)
+            if (third === -1) {
+              console.log('没有找到元-利润:' + data)
               ret[0] = false
               return ret
             }

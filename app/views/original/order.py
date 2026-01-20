@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
+from app.models.const.good_type import GoodType
 from app.models.original.order import Order
 from app.models.system.good import Good
 
@@ -47,8 +48,9 @@ def addList(request):
                     response['code'] = -1
                     response['msg'] = '没有查询到商品:' + product
                     return JsonResponse(response, encoder=MyJSONEncoder)
-                good_ids += good.good_id
-            Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, order_note)
+                if good.good_type != GoodType.GIFT:
+                    good_ids = good_ids + good.good_id + '|'
+            Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -74,16 +76,23 @@ def getList(request):
     num = int(post.get('num'))
     total = Order.objects.total()
     orders = Order.objects.getList(shop_id, page, num)
-    data = Order.objects.encoderList(orders)
+    datas = Order.objects.encoderList(orders)
 
     # 商品id转换商品名称
+    for data in datas:
+        goods = data['good_ids'].split('|')
+        data['good_names'] = ''
+        for good in goods:
+            find_object = Good.objects.getById(shop_id, good)
+            if find_object:
+                data['good_names'] = data['good_names'] + find_object.short_name + ','
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
