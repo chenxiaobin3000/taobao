@@ -12,6 +12,8 @@ def addList(request):
     shop_id = int(post.get('id'))
     refunds = post.get('r')
 
+    # 获取赠品列表
+
     # 批量添加
     for refund in refunds:
         refund_id = refund['uid']
@@ -27,8 +29,10 @@ def addList(request):
         timeout_time = refund['tt']
         complete_time = refund['ct']
 
+        # 过滤赠品
+
         # 已存在更新状态
-        find_object = Refund.objects.getByIdAndTime(shop_id, order_id, apply_time)
+        find_object = Refund.objects.getByIdAndTime(shop_id, order_id, product_id, apply_time)
         if find_object:
             if find_object.product_id != product_id or find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_platform != refund_platform or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
                 find_object.product_id = product_id

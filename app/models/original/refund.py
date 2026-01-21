@@ -13,8 +13,8 @@ class RefundManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getByIdAndTime(self, shop_id, order_id, apply_time):
-        return self.filter(shop_id=shop_id, order_id=order_id, apply_time=apply_time).first()
+    def getByIdAndTime(self, shop_id, order_id, product_id, apply_time):
+        return self.filter(shop_id=shop_id, order_id=order_id, product_id=product_id, apply_time=apply_time).first()
 
     def total(self):
         return self.all().count()
