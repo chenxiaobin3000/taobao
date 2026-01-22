@@ -10,4 +10,5 @@ class RefundStatus:
     SHIPPED = 5  # 买家已经退货，等待卖家确认收货
     EXCHANGE = 6 # 卖家已发货,等待卖家和买家确认收货
     AGAIN = 7    # 等待买家确认重新邮寄的货物
-    OTHER = 8    # 异常
+    REFUSE = 8   # 卖家拒绝退款
+    OTHER = 9    # 异常

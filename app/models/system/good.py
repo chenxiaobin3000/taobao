@@ -24,6 +24,9 @@ class GoodManager(models.Manager):
 
     def getByName(self, shop_id, name):
         return self.filter(shop_id=shop_id, name=name).first()
+    
+    def getByType(self, shop_id, good_type):
+        return self.filter(shop_id=shop_id, good_type=good_type)
 
     def total(self):
         return self.all().count()

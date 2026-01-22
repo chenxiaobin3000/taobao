@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.original.refund import Refund
+from app.models.system.good import Good
+from app.models.const.good_type import GoodType
 
 @require_POST
 @transaction.atomic
@@ -13,6 +15,10 @@ def addList(request):
     refunds = post.get('r')
 
     # 获取赠品列表
+    gifts = []
+    goods = Good.objects.getByType(shop_id, GoodType.GIFT)
+    for good in goods:
+        gifts.append(good.good_id)
 
     # 批量添加
     for refund in refunds:
@@ -30,12 +36,13 @@ def addList(request):
         complete_time = refund['ct']
 
         # 过滤赠品
+        if product_id in gifts:
+            continue
 
         # 已存在更新状态
-        find_object = Refund.objects.getByIdAndTime(shop_id, order_id, product_id, apply_time)
+        find_object = Refund.objects.getByIdAndTime(shop_id, order_id, refund_id, product_id, apply_time)
         if find_object:
-            if find_object.product_id != product_id or find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_platform != refund_platform or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
-                find_object.product_id = product_id
+            if find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_platform != refund_platform or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
                 find_object.actual_pay = actual_pay
                 find_object.refund_pay = refund_pay
                 find_object.refund_platform = refund_platform

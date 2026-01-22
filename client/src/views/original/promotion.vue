@@ -149,6 +149,14 @@ export default {
         }
       })
       let length = p.length
+      // 预校验数据
+      for (let i = 0; i < length; ++i) {
+        if (p[i].t === PromotionType.OTHER) {
+          this.$message({ type: 'error', message: '数据异常!' })
+          console.log(p[i])
+          return
+        }
+      }
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {

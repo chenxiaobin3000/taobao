@@ -265,7 +265,8 @@ export const RefundStatus = {
   SHIPPED: 5, // 买家已经退货，等待卖家确认收货
   EXCHANGE: 6, // 卖家已发货,等待卖家和买家确认收货
   AGAIN: 7, // 等待买家确认重新邮寄的货物
-  OTHER: 8, // 异常
+  REFUSE: 8, // 卖家拒绝退款
+  OTHER: 9, // 异常
 
   text2num(text) {
     if (text === '退款成功') {
@@ -282,6 +283,8 @@ export const RefundStatus = {
       return this.EXCHANGE
     } else if (text === '等待买家确认重新邮寄的货物') {
       return this.AGAIN
+    } else if (text === '卖家拒绝退款') {
+      return this.REFUSE
     } else { // 异常
       return this.OTHER
     }
@@ -302,6 +305,8 @@ export const RefundStatus = {
         return '卖家已发货,等待卖家和买家确认收货'
       case this.AGAIN:
         return '等待买家确认重新邮寄的货物'
+      case this.REFUSE:
+        return '卖家拒绝退款'
     }
     return '异常'
   }
@@ -309,30 +314,50 @@ export const RefundStatus = {
 
 // 退款状态
 export const RefundType = {
-  REFUND: 1, // 仅退款
+  ONLY_REFUND: 1, // 仅退款
   RETURN: 2, // 退货退款
   EXCHANGE: 3, // 换货
-  OTHER: 4, // 异常
+  RESEND: 4, // 补寄
+  REFUND: 5, // 退款
+  SHIPPED: 6, // 退运费
+  REPAIR: 7, // 维修
+  OTHER: 8, // 异常
 
   text2num(text) {
-    if (text === '退款') {
-      return this.REFUND
+    if (text === '仅退款') {
+      return this.ONLY_REFUND
     } else if (text === '退货退款') {
       return this.RETURN
     } else if (text === '换货') {
       return this.EXCHANGE
+    } else if (text === '补寄') {
+      return this.RESEND
+    } else if (text === '退款') {
+      return this.REFUND
+    } else if (text === '退运费') {
+      return this.SHIPPED
+    } else if (text === '维修') {
+      return this.REPAIR
     } else { // 异常
       return this.OTHER
     }
   },
   num2text(num) {
     switch (num) {
-      case this.REFUND:
+      case this.ONLY_REFUND:
         return '仅退款'
       case this.RETURN:
         return '退货退款'
       case this.EXCHANGE:
         return '换货'
+      case this.RESEND:
+        return '补寄'
+      case this.REFUND:
+        return '退款'
+      case this.SHIPPED:
+        return '退运费'
+      case this.REPAIR:
+        return '维修'
     }
     return '异常'
   }
