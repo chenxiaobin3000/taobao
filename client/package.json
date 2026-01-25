@@ -1,7 +1,7 @@
 {
-  "name": "storehelper",
+  "name": "taobao",
   "version": "1.0.0",
-  "description": "storehelper",
+  "description": "taobao",
   "author": "cxb<chenxiaobin3000@gmail.com>",
   "scripts": {
     "dev": "vue-cli-service serve",
