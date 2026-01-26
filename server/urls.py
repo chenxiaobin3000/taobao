@@ -19,7 +19,8 @@ from django.views.generic.base import TemplateView
 from app.url.system import url_system
 from app.url.original import url_original
 from app.url.middle import url_middle
+from app.url.report import url_report
 
-urlpatterns = url_system + url_original + url_middle + [
+urlpatterns = url_system + url_original + url_middle + url_report + [
     path('', TemplateView.as_view(template_name='index.html'))
 ]

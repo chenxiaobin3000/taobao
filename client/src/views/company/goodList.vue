@@ -83,7 +83,7 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { GoodType } from '@/utils/const'
 import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
-import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/good_alias'
+import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/goodAlias'
 import { getShopList } from '@/api/system/shop'
 
 export default {
