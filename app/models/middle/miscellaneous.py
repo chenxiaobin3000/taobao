@@ -7,8 +7,10 @@ class MiscellaneousManager(models.Manager):
     def add(self, shop_id, create_date, user_id, project_name, amount, misc_note):
         return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, project_name=project_name, amount=amount, misc_note=misc_note)
 
-    def set(self, pk, project_name, amount, misc_note):
+    def set(self, pk, create_date, user_id, project_name, amount, misc_note):
         misc = self.get(pk=pk)
+        misc.create_date = create_date
+        misc.user_id = user_id
         misc.project_name = project_name
         misc.amount = amount
         misc.misc_note = misc_note
@@ -26,7 +28,7 @@ class MiscellaneousManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-ctime')[left:right]
+        return self.filter(shop_id=shop_id).order_by('-create_date')[left:right]
 
     def encoder(self, misc):
         return model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note'])
@@ -38,7 +40,7 @@ class Miscellaneous(models.Model):
     objects = MiscellaneousManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
     create_date = models.DateField(db_index=True) # 创建日期
-    user_id = models.IntegerField(db_index=True) # 打款人
+    user_id = models.IntegerField(db_index=True) # 负责人人
     project_name = models.CharField(max_length=32, db_index=True) # 项目名称
     amount = models.DecimalField(max_digits=6, decimal_places=2) # 金额
     misc_note = models.CharField(max_length=32) # 备注

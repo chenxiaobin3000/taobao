@@ -29,10 +29,12 @@ def add(request):
 def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
+    create_date = post.get('cdate')
+    user_id = int(post.get('uid'))
     project_name = post.get('name')
     amount = post.get('amount')
     misc_note = post.get('note')
-    data = Miscellaneous.objects.set(pk, project_name, amount, misc_note)
+    data = Miscellaneous.objects.set(pk, create_date, user_id, project_name, amount, misc_note)
     response = {
         'code': 0,
         'msg': 'success',

@@ -61,7 +61,7 @@
           <el-input v-model="temp.misc_note" />
         </el-form-item>
         <el-form-item label="日期">
-          <div>{{ temp.create_date }}</div>
+          <el-date-picker v-model="temp.create_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -138,8 +138,11 @@ export default {
     resetTemp() {
       this.temp = {
         id: 0,
-        marketId: 0,
-        name: ''
+        project_name: '',
+        create_date: new Date().toLocaleDateString().replace(/\//g, '-'),
+        user_id: 0,
+        amount: 0,
+        misc_note: ''
       }
     },
     getMiscList() {
@@ -181,12 +184,15 @@ export default {
     },
     createData() {
       addMisc({
-        name: this.temp.name,
-        cid: this.userdata.company.id,
-        mid: this.temp.marketId
+        id: this.listQuery.id,
+        name: this.temp.project_name,
+        cdate: this.temp.create_date,
+        uid: this.temp.user_id,
+        amount: this.temp.amount,
+        note: this.temp.misc_note
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
-        this.getShopList()
+        this.getMiscList()
         this.dialogVisible = false
       })
     },
@@ -198,10 +204,14 @@ export default {
     updateData() {
       setMisc({
         id: this.temp.id,
-        name: this.temp.name
+        name: this.temp.project_name,
+        cdate: this.temp.create_date,
+        uid: this.temp.user_id,
+        amount: this.temp.amount,
+        note: this.temp.misc_note
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
-        this.getUserList()
+        this.getMiscList()
         this.dialogVisible = false
       })
     },
@@ -215,7 +225,7 @@ export default {
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getRoles()
+          this.getMiscList()
         })
       })
     }

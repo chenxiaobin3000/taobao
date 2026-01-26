@@ -5,7 +5,7 @@ export default {
   component: Layout,
   name: 'report',
   meta: {
-    title: '报告管理',
+    title: '报表管理',
     roles: [5000]
   },
   children: [{
@@ -27,19 +27,7 @@ export default {
     path: 'fakeReport', component: () => import('@/views/report/fakeReport'),
     name: 'middle_fakeReport', meta: { title: '刷单汇总', roles: [5006] }
   }, {
-    path: 'successReport', component: () => import('@/views/report/successReport'),
-    name: 'middle_successReport', meta: { title: '订单完成', roles: [5007] }
-  }, {
-    path: 'closeReport', component: () => import('@/views/report/closeReport'),
-    name: 'middle_closeReport', meta: { title: '订单关闭', roles: [5008] }
-  }, {
-    path: 'shippedReport', component: () => import('@/views/report/shippedReport'),
-    name: 'middle_shippedReport', meta: { title: '已发货', roles: [5009] }
-  }, {
-    path: 'paidReport', component: () => import('@/views/report/paidReport'),
-    name: 'middle_paidReport', meta: { title: '未发货', roles: [5010] }
-  }, {
-    path: 'unpaidReport', component: () => import('@/views/report/unpaidReport'),
-    name: 'middle_unpaidReport', meta: { title: '未付款', roles: [5011] }
+    path: 'orderReport', component: () => import('@/views/report/orderReport'),
+    name: 'middle_orderReport', meta: { title: '订单汇总', roles: [5007] }
   }]
 }
