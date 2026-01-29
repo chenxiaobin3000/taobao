@@ -24,7 +24,7 @@ def addList(request):
             find_object.name = good['n']
             find_object.short_name = good['sn']
             find_object.good_type = good['t']
-            find_object.is_sale = good['s']
+            find_object.good_status = good['s']
             find_object.save()
         else:
             Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'])
@@ -38,8 +38,8 @@ def set(request):
     pk = int(post.get('id'))
     name = post.get('name')
     short_name = post.get('sname')
-    is_sale = int(post.get('sale'))
-    data = Good.objects.set(pk, name, short_name, is_sale)
+    good_status = int(post.get('status'))
+    data = Good.objects.set(pk, name, short_name, good_status)
     response = {
         'code': 0,
         'msg': 'success',

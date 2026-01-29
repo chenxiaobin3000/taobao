@@ -24,6 +24,11 @@
           {{ scope.row.good_id }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="商品状态" width="160">
+        <template slot-scope="scope">
+          {{ num2status(scope.row.good_status) }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="完整名称">
         <template slot-scope="scope">
           {{ scope.row.name }}
@@ -50,6 +55,11 @@
         </el-form-item>
         <el-form-item label="商品名称">
           <el-input v-model="temp.short_name" />
+        </el-form-item>
+        <el-form-item label="商品状态">
+          <el-select v-model="temp.good_status" class="filter-item" placeholder="请选择状态">
+            <el-option v-for="item in statusList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="完整名称">
           <el-input v-model="temp.name" />
@@ -81,7 +91,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { GoodType } from '@/utils/const'
+import { GoodStatus, GoodType } from '@/utils/const'
 import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
 import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/goodAlias'
 import { getShopList } from '@/api/system/shop'
@@ -95,6 +105,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      statusList: [], // 商品状态列表
       shopList: [], // 本公司所有店铺列表
       goodAliasList: [], // 商品所有别名列表
       listQuery: {
@@ -131,6 +142,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
+    this.statusList = GoodStatus.getList()
     this.resetTemp()
     this.getShopList()
   },
@@ -141,6 +153,7 @@ export default {
         good_id: '',
         name: '',
         short_name: '',
+        short_status: GoodStatus.SALE,
         alias: ''
       }
     },
@@ -168,6 +181,9 @@ export default {
         this.getGoodList()
       })
     },
+    num2status(num) {
+      return GoodStatus.num2text(num)
+    },
     num2type(num) {
       return GoodType.num2text(num)
     },
@@ -181,14 +197,16 @@ export default {
       const sname = header[0]
       const id = header[1]
       const type = header[2]
-      const name = header[3]
+      const status = header[3]
+      const name = header[4]
       const g = []
       results.forEach(v => {
         g.push({
           i: v[id],
           n: v[name],
           sn: v[sname],
-          t: v[type]
+          t: v[type],
+          s: v[status]
         })
       })
       addGoodList({
@@ -214,7 +232,8 @@ export default {
       setGood({
         id: this.temp.id,
         name: this.temp.name,
-        sname: this.temp.short_name
+        sname: this.temp.short_name,
+        status: this.temp.status
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getGoodList()

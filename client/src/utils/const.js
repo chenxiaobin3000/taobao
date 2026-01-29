@@ -154,6 +154,48 @@ export const DeductionType = {
 }
 
 // 商品状态
+export const GoodStatus = {
+  SALE: 1, // 在售
+  REMOVE: 2, // 下架
+  DELETE: 3, // 删除
+  OTHER: 4, // 异常
+
+  text2num(text) {
+    if (text === '在售') {
+      return this.SALE
+    } else if (text === '下架') {
+      return this.REMOVE
+    } else if (text === '删除') {
+      return this.DELETE
+    } else { // 异常
+      return this.OTHER
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.SALE:
+        return '在售'
+      case this.REMOVE:
+        return '下架'
+      case this.DELETE:
+        return '删除'
+    }
+    return '异常'
+  },
+  getList() {
+    return [{
+      id: this.SALE, name: '在售'
+    }, {
+      id: this.REMOVE, name: '下架'
+    }, {
+      id: this.DELETE, name: '删除'
+    }, {
+      id: this.OTHER, name: '异常'
+    }]
+  }
+}
+
+// 商品类型
 export const GoodType = {
   NORMAL: 1, // 商品
   GIFT: 2, // 赠品

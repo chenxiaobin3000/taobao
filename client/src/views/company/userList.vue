@@ -13,7 +13,7 @@
       </el-table-column>
       <el-table-column label="角色" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.role }}</span>
+          <span>{{ num2role(row.role_id) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="店铺" width="160px" align="center">
@@ -189,6 +189,14 @@ export default {
         this.roleList = response.data.data.list
         this.getUserList()
       })
+    },
+    num2role(num) {
+      for (let i = 0; i < this.roleList.length; ++i) {
+        if (this.roleList[i].id === num) {
+          return this.roleList[i].name
+        }
+      }
+      return '异常'
     },
     createData() {
       addUser({

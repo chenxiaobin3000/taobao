@@ -4,14 +4,14 @@ from django.forms.models import model_to_dict
 
 # 商品表
 class GoodManager(models.Manager):
-    def add(self, shop_id, good_id, name, short_name, good_type, is_sale):
-        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name, good_type=good_type, is_sale=is_sale)
+    def add(self, shop_id, good_id, name, short_name, good_type, good_status):
+        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name, good_type=good_type, good_status=good_status)
 
-    def set(self, pk, name, short_name, is_sale):
+    def set(self, pk, name, short_name, good_status):
         good = self.get(pk=pk)
         good.name = name
         good.short_name = short_name
-        good .is_sale = is_sale
+        good .good_status = good_status
         return good.save()
 
     def delete(self, pk):
@@ -38,10 +38,10 @@ class GoodManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, good):
-        return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'is_sale'])
+        return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status'])
 
     def encoderList(self, goods):
-        return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'is_sale']) for good in goods]
+        return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status']) for good in goods]
 
 class Good(models.Model):
     objects = GoodManager()
@@ -50,7 +50,7 @@ class Good(models.Model):
     name = models.CharField(max_length = 60, db_index = True) # 商品名称
     short_name = models.CharField(max_length = 16) # 商品短名
     good_type = models.IntegerField(db_index = True) # 商品类型
-    is_sale = models.IntegerField(db_index = True) # 是否上架，0下架，1上架
+    good_status = models.IntegerField(db_index = True) # 商品状态
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):

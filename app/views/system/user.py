@@ -146,8 +146,6 @@ def getList(request):
 
     # 获取店铺、角色信息
     for user in data:
-        role = Role.objects.find(user['role_id'])
-        user['role'] = role.name
         user['shops'] = []
         userShops = UserShop.objects.getList(user['id'])
         for userShop in userShops:
