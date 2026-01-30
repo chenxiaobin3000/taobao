@@ -72,7 +72,7 @@ def getList(request):
         if good:
             data['good_name'] = good.short_name
         else:
-            data['good_name'] = ''
+            data['good_name'] = data['good_id']
 
     response = {
         'code': 0,

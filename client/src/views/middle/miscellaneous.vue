@@ -20,7 +20,7 @@
       </el-table-column>
       <el-table-column align="center" label="负责人" width="160px">
         <template slot-scope="scope">
-          {{ scope.row.user_id }}
+          {{ num2name(scope.row.user_id) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注" width="160px">
@@ -178,6 +178,14 @@ export default {
         this.userList = response.data.data.list
         this.getMiscList()
       })
+    },
+    num2name(num) {
+      for (let i = 0; i < this.userList.length; ++i) {
+        if (this.userList[i].id === num) {
+          return this.userList[i].name
+        }
+      }
+      return '异常'
     },
     handleChange() {
       this.getMiscList()
