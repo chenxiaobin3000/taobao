@@ -16,8 +16,8 @@ class PolymerizeDiscardManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def getByCTime(self, shop_id, order_id, create_time):
-        return self.filter(shop_id=shop_id, order_id=order_id, create_time=create_time).first()
+    def getByCTime(self, shop_id, order_id, amount_type, create_time):
+        return self.filter(shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first()
 
     def total(self):
         return self.all().count()

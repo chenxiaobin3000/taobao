@@ -191,7 +191,7 @@ export default {
       // 预校验数据
       for (let i = 0; i < d.length; ++i) {
         if (d[i].t === DeductionType.OTHER || d[i].o.length !== 19) {
-          this.$message({ type: 'error', message: '异常数据!' })
+          this.$message({ type: 'error', message: '异常数据!' + i })
           console.log(d[i])
           return
         }

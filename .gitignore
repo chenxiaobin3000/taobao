@@ -2,6 +2,7 @@
 *.pyc
 app/migrations/*
 app/templates/index.html
+backup/*
 
 static/css
 static/fonts

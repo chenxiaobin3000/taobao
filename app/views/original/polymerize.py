@@ -35,11 +35,11 @@ def addList(request):
         
         # 不处理的数据放废弃表
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
-            if PolymerizeDiscard.objects.getByCTime(shop_id, order_id, create_time):
+            if PolymerizeDiscard.objects.getByCTime(shop_id, order_id, amount_type, create_time):
                 continue
             PolymerizeDiscard.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
         else:
-            if Polymerize.objects.getByCTime(shop_id, order_id, create_time):
+            if Polymerize.objects.getByCTime(shop_id, order_id, amount_type, create_time):
                 continue
             Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
 
