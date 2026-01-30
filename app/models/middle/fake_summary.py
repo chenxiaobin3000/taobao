@@ -2,8 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.forms.models import model_to_dict
 
-# 刷单表
-class FakeManager(models.Manager):
+# 刷单汇总表
+class FakeSummaryManager(models.Manager):
     def add(self, shop_id, create_date, order_amount, order_num, fake_amount, fake_num, commission, freight, fake_note):
         return self.create(shop_id=shop_id, create_date=create_date, order_amount=order_amount, order_num=order_num, fake_amount=fake_amount, fake_num=fake_num, commission=commission, freight=freight, fake_note=fake_note)
 
@@ -36,8 +36,8 @@ class FakeManager(models.Manager):
     def encoderList(self, fakes):
         return [model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note']) for fake in fakes]
 
-class Fake(models.Model):
-    objects = FakeManager()
+class FakeSummary(models.Model):
+    objects = FakeSummaryManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
     create_date = models.DateField(db_index=True) # 刷单日期
     order_amount = models.DecimalField(max_digits=6, decimal_places=2) # 真实总金额
@@ -50,4 +50,4 @@ class Fake(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
 
     class Meta(object):
-        db_table = 't_fake'
+        db_table = 't_fake_summary'

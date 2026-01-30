@@ -12,28 +12,31 @@ export default {
     path: 'order', component: () => import('@/views/original/order'),
     name: 'original_order', meta: { title: '订单管理', roles: [3001] }
   }, {
+    path: 'fake', component: () => import('@/views/original/fake'),
+    name: 'original_fake', meta: { title: '刷单管理', roles: [3002] }
+  }, {
     path: 'promotion', component: () => import('@/views/original/promotion'),
-    name: 'original_promotion', meta: { title: '推广管理', roles: [3002] }
+    name: 'original_promotion', meta: { title: '推广管理', roles: [3003] }
   }, {
     path: 'promotionDetail', component: () => import('@/views/original/promotionDetail'),
-    name: 'original_promotionDetail', meta: { title: '推广明细', roles: [3003] }
+    name: 'original_promotionDetail', meta: { title: '推广明细', roles: [3004] }
   }, {
     path: 'deduction', component: () => import('@/views/original/deduction'),
-    name: 'original_deduction', meta: { title: '扣费管理', roles: [3004] }
+    name: 'original_deduction', meta: { title: '扣费管理', roles: [3005] }
   }, {
     path: 'deductionDiscard', component: () => import('@/views/original/deductionDiscard'),
-    name: 'original_deductionDiscard', meta: { title: '扣费废弃', roles: [3005] }
+    name: 'original_deductionDiscard', meta: { title: '扣费废弃', roles: [3006] }
   }, {
     path: 'polymerize', component: () => import('@/views/original/polymerize'),
-    name: 'original_polymerize', meta: { title: '聚合管理', roles: [3006] }
+    name: 'original_polymerize', meta: { title: '聚合管理', roles: [3007] }
   }, {
     path: 'polymerizeDiscard', component: () => import('@/views/original/polymerizeDiscard'),
-    name: 'original_polymerizeDiscard', meta: { title: '聚合废弃', roles: [3007] }
+    name: 'original_polymerizeDiscard', meta: { title: '聚合废弃', roles: [3008] }
   }, {
     path: 'refund', component: () => import('@/views/original/refund'),
-    name: 'original_refund', meta: { title: '退货管理', roles: [3008] }
+    name: 'original_refund', meta: { title: '退货管理', roles: [3009] }
   }, {
     path: 'transfer', component: () => import('@/views/original/transfer'),
-    name: 'original_transfer', meta: { title: '小额打款', roles: [3009] }
+    name: 'original_transfer', meta: { title: '小额打款', roles: [3010] }
   }]
 }

@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.middle.fake import Fake
+from app.models.middle.fake_summary import FakeSummary
 
 @require_POST
 @transaction.atomic
@@ -24,7 +24,7 @@ def flush(request):
     commission = 0
     freight = 0
     fake_note = ''
-    Fake.objects.add(shop_id, create_date, order_amount, order_num, fake_amount, fake_num, commission, freight, fake_note)
+    FakeSummary.objects.add(shop_id, create_date, order_amount, order_num, fake_amount, fake_num, commission, freight, fake_note)
 
     response = {
         'code': 0,
@@ -43,7 +43,7 @@ def set(request):
     commission = int(post.get('comm'))
     freight = int(post.get('freight'))
     fake_note = post.get('note')
-    data = Fake.objects.set(pk, fake_amount, fake_num, commission, freight, fake_note)
+    data = FakeSummary.objects.set(pk, fake_amount, fake_num, commission, freight, fake_note)
     response = {
         'code': 0,
         'msg': 'success',
@@ -58,9 +58,9 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Fake.objects.total()
-    fakes = Fake.objects.getList(shop_id, page, num)
-    data = Fake.objects.encoderList(fakes)
+    total = FakeSummary.objects.total()
+    fakes = FakeSummary.objects.getList(shop_id, page, num)
+    data = FakeSummary.objects.encoderList(fakes)
     response = {
         'code': 0,
         'msg': 'success',

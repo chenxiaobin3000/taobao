@@ -12,7 +12,7 @@ export default {
     path: 'miscellaneous', component: () => import('@/views/middle/miscellaneous'),
     name: 'middle_miscellaneous', meta: { title: '杂项管理', roles: [4001] }
   }, {
-    path: 'fake', component: () => import('@/views/middle/fake'),
-    name: 'middle_fake', meta: { title: '刷单管理', roles: [4002] }
+    path: 'fakeSummary', component: () => import('@/views/middle/fakeSummary'),
+    name: 'middle_fakeSummary', meta: { title: '刷单管理', roles: [4002] }
   }]
 }

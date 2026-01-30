@@ -1,11 +1,11 @@
 from django.urls import path
-from app.views.middle import fake, miscellaneous
+from app.views.middle import fake_summary, miscellaneous
 
 url_middle = [
     # 刷单
-    path('api/fake/flush', fake.flush),
-    path('api/fake/set', fake.set),
-    path('api/fake/getList', fake.getList),
+    path('api/fake_summary/flush', fake_summary.flush),
+    path('api/fake_summary/set', fake_summary.set),
+    path('api/fake_summary/getList', fake_summary.getList),
 
     # 杂项
     path('api/misc/add', miscellaneous.add),

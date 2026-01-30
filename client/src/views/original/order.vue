@@ -84,7 +84,6 @@ export default {
         num: 10,
         search: null
       },
-      temp: {},
       dialogVisible: false
     }
   },
@@ -111,20 +110,9 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
-    this.resetTemp()
     this.getShopList()
   },
   methods: {
-    resetTemp() {
-      this.temp = {
-        order_id: 0,
-        payment: 0,
-        procure: 0,
-        create_time: '',
-        good_names: '',
-        order_note: ''
-      }
-    },
     getOrderList() {
       this.loading = true
       getOrderList(
@@ -181,6 +169,7 @@ export default {
       // 提取采购价
       let length = o.length
       for (let i = 0; i < length; ++i) {
+        console.log(i)
         const ext = this.extract(o[i].no)
         if (!ext[0]) {
           this.$message({ type: 'error', message: '数据异常!' })
