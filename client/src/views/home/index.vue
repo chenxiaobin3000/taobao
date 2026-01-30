@@ -1,5 +1,7 @@
 <template>
-  <component :is="currentRole" />
+  <div class="app-container">
+    <component :is="currentRole" />
+  </div>
 </template>
 
 <script>
@@ -29,3 +31,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.app-container {
+  padding: 32px;
+  color: #666;
+}
+</style>

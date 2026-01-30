@@ -1,10 +1,8 @@
 <template>
-  <div class="app-container">
-    <br>
-    <span class="firstLine">{{ userdata.user.name }} ( {{ userdata.group.name }} ) :</span>
-    <br><br>
-    <span class="secondLine">超级管理员，您好！超管的权限很大，请谨慎操作！</span>
-  </div>
+  <br>
+  <span class="firstLine">{{ userdata.user.name }} ( {{ userdata.group.name }} ) :</span>
+  <br><br>
+  <span class="secondLine">超级管理员，您好！超管的权限很大，请谨慎操作！</span>
 </template>
 
 <script>
@@ -37,11 +35,6 @@ export default {
 </script>
 
 <style scoped>
-.app-container {
-  padding: 32px;
-  color: #666;
-}
-
 .firstLine {
   padding-left: 2%;
 }
