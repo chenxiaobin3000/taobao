@@ -64,5 +64,9 @@ export const MyRoleData = [{
   id: 1000, label: '系统管理',
   children: [{
     id: 1001, label: '修改密码'
+  }, {
+    id: 10, label: '高管权限'
+  }, {
+    id: 20, label: '超级权限'
   }]
 }]

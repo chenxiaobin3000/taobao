@@ -5,28 +5,40 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import reportPage from './components/report.vue'
-import superPage from './components/super.vue'
-import userInfoPage from './components/userInfo.vue'
+import { mapState } from 'vuex'
+import companyPage from './components/company.vue'
+import systemPage from './components/system.vue'
+import userPage from './components/user.vue'
 
 export default {
-  components: { reportPage, superPage, userInfoPage },
+  components: { companyPage, systemPage, userPage },
   data() {
     return {
-      currentRole: 'userInfoPage'
+      currentRole: ''
     }
   },
   computed: {
-    ...mapGetters([
-      'roles'
-    ])
+    ...mapState({
+      search: state => state.header.search,
+      create: state => state.header.create
+    })
+  },
+  watch: {
+    search(newVal, oldVal) {
+      this.$message({ type: 'error', message: '不支持搜索!' })
+    },
+    create() {
+      this.$message({ type: 'error', message: '不支持新建!' })
+    }
   },
   created() {
-    if (this.roles.includes(100)) {
-      this.currentRole = 'reportPage'
-    } else if (this.roles.includes(101)) {
-      this.currentRole = 'superPage'
+    const roles = this.$store.getters.roles
+    if (roles.includes(20)) {
+      this.currentRole = 'systemPage'
+    } else if (roles.includes(10)) {
+      this.currentRole = 'companyPage'
+    } else {
+      this.currentRole = 'userPage'
     }
   }
 }

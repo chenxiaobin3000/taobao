@@ -1,8 +1,9 @@
 <template>
   <div>
+    <!-- 个人信息 -->
     <el-row :gutter="40" class="panel-group">
       <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSelect(0)">
+        <div class="card-panel">
           <div class="card-panel-icon-wrapper icon-message">
             <div class="card-panel-text">{{ userdata.user.name }}</div>
           </div>
@@ -12,25 +13,13 @@
         </div>
       </el-col>
     </el-row>
+
+    <!-- 店铺信息 -->
     <el-row :gutter="40" class="panel-group">
-      <div v-for="data in userdata.market" :key="'F'+data.id">
+      <div v-for="data in userdata.shop" :key="data.id">
         <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
-          <div class="card-panel" @click="handleSelect(data.id)">
-            <div class="card-panel-icon-wrapper icon-message">
-              <div class="card-panel-text">{{ data.name }}</div>
-            </div>
-            <div class="card-panel-description">
-              <div class="card-panel-text">平台</div>
-            </div>
-          </div>
-        </el-col>
-      </div>
-    </el-row>
-    <el-row :gutter="40" class="panel-group">
-      <div v-for="data in userdata.shop" :key="'S'+data.id">
-        <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
-          <div class="card-panel" @click="handleSelect(10000 + data.id)">
-            <div class="card-panel-icon-wrapper icon-message">
+          <div class="card-panel">
+            <div class="card-panel-icon-wrapper icon-people">
               <div class="card-panel-text">{{ data.name }}</div>
             </div>
             <div class="card-panel-description">
@@ -44,7 +33,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
 
 export default {
   data() {
@@ -52,27 +40,8 @@ export default {
       userdata: {}
     }
   },
-  computed: {
-    ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
-    })
-  },
-  watch: {
-    search(newVal, oldVal) {
-      this.$message({ type: 'error', message: '不支持搜索!' })
-    },
-    create() {
-      this.$message({ type: 'error', message: '不支持新建!' })
-    }
-  },
   created() {
     this.userdata = this.$store.getters.userdata
-  },
-  methods: {
-    handleSelect(id) {
-
-    }
   }
 }
 </script>

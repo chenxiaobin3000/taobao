@@ -10,6 +10,32 @@ export const ImportCount = 1000
 // 导入间隔时间
 export const ImportSpan = 1000
 
+// 公司状态
+export const CompanyStatus = {
+  NORMAL: 1, // 正常
+  CLOSE: 2, // 停业
+  OTHER: 3, // 异常
+
+  text2num(text) {
+    if (text === '正常') {
+      return this.NORMAL
+    } else if (text === '停业') {
+      return this.CLOSE
+    } else { // 异常
+      return this.OTHER
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.NORMAL:
+        return '正常'
+      case this.CLOSE:
+        return '停业'
+    }
+    return '异常'
+  }
+}
+
 // 扣款状态
 export const DeductionType = {
   // 有订单信息
