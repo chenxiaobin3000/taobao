@@ -169,7 +169,6 @@ export default {
       // 提取采购价
       let length = o.length
       for (let i = 0; i < length; ++i) {
-        console.log(i)
         const ext = this.extract(o[i].no)
         if (!ext[0]) {
           this.$message({ type: 'error', message: '数据异常!' })
@@ -223,65 +222,50 @@ export default {
     },
     // 从备注提取采购金额和订单号
     extract(note) {
-      const ret = [true, -1, '']
-      // 校验人工审核
-      if (note.split('-').length > 3 && note.indexOf('元-利润:0元') === -1) {
-        console.log('未经人工校验:' + note)
-        ret[0] = false
-        return ret
+      const ret = [false, -1, '']
+      // 空数据直接返回0
+      if (note === undefined) {
+        return [true, 0, '0000000000000000000']
       }
-      // 按竖线分割
+      // 校验人工审核
+      let count = 0
       const notes = note.split('|')
       for (let i = 0; i < notes.length; ++i) {
-        const data = notes[i].trim()
-        // 忽略长度小于订单编号的数据
-        if (data.length < 20) {
-          continue
-        }
-        // 忽略自动售后
-        if (data.indexOf('1688自动售后') !== -1) {
-          continue
-        }
-        // 按标准格式查找: tb:id-采购价:0元-利润:0元 |
-        const first = data.indexOf(':')
-        if (first === -1) {
-          // 是首行就报错
-          if (i === 0) {
-            console.log('没有找到账号信息:' + data)
-            ret[0] = false
-            return ret
-          } else {
-            // 人工填写数据: id-金额
-            const second = data.indexOf('-')
-            if (second !== 19) {
-              console.log('人工补填格式异常:' + data)
-              ret[0] = false
-              return ret
-            }
-            ret[2] = ret[2] + '|' + data.substring(0, second)
-          }
-        } else {
-          const second = data.indexOf('-采购价:', first + 1)
-          if (second === -1 || second - first !== 20) {
-            console.log('没有找到-采购价:' + data)
-            ret[0] = false
-            return ret
-          }
-          if (i === 0) {
-            // 查找采购价
-            const third = data.indexOf('元-利润:', second + 5)
-            if (third === -1) {
-              console.log('没有找到元-利润:' + data)
-              ret[0] = false
-              return ret
-            }
-            ret[1] = data.substring(second + 5, third)
-            ret[2] = data.substring(first + 1, second)
-          } else {
-            ret[2] = ret[2] + '|' + data.substring(first + 1, second)
-          }
+        if (notes[i].length > 19) {
+          ++count
         }
       }
+      if (count > 2 && note.indexOf('元-利润:0元') === -1) {
+        console.log(notes.length)
+        console.log('未经人工校验:' + note)
+        return ret
+      }
+      const data = notes[0].trim()
+      // 忽略长度小于订单编号的数据
+      if (data.length < 20) {
+        console.log('异常数据:' + note)
+        return ret
+      }
+      // 按标准格式查找: tb:id-采购价:0元-利润:0元 |
+      const first = data.indexOf(':')
+      if (first === -1) {
+        console.log('没有找到账号信息:' + data)
+        return ret
+      }
+      const second = data.indexOf('-采购价:', first + 1)
+      if (second === -1 || second - first !== 20) {
+        console.log('没有找到-采购价:' + data)
+        return ret
+      }
+      // 查找采购价
+      const third = data.indexOf('元-利润:', second + 5)
+      if (third === -1) {
+        console.log('没有找到元-利润:' + data)
+        return ret
+      }
+      ret[0] = true
+      ret[1] = data.substring(second + 5, third)
+      ret[2] = data.substring(first + 1, second)
       return ret
     }
   }

@@ -33,7 +33,6 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.getCompanyList()
-    console.log(this.list)
   },
   methods: {
     getCompanyList() {
