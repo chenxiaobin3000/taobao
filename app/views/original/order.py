@@ -6,6 +6,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.const.good_type import GoodType
 from app.models.const.order_status import OrderStatus
 from app.models.original.order import Order
+from app.models.original.fake import Fake
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
 
@@ -52,6 +53,7 @@ def addList(request):
                 # 转换商品id
                 products = product_name.split(',')
                 good_ids = ''
+                is_supplement = False
                 for product in products:
                     # 查询商品表
                     good = Good.objects.getByName(shop_id, product)
@@ -67,7 +69,13 @@ def addList(request):
                             return JsonResponse(response, encoder=MyJSONEncoder)
                     if good.good_type != GoodType.GIFT:
                         good_ids = good_ids + good.good_id + '|'
-                Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
+                    if good.good_type == GoodType.SUPPLEMENT:
+                        is_supplement = True
+                # 不是补差价，且单价低于30，认定刷单
+                if payment <= 30 and not is_supplement:
+                    Fake.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
+                else:
+                    Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
