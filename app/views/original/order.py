@@ -4,8 +4,10 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.const.good_type import GoodType
+from app.models.const.order_status import OrderStatus
 from app.models.original.order import Order
 from app.models.system.good import Good
+from app.models.system.good_alias import GoodAlias
 
 @require_POST
 @transaction.atomic
@@ -26,9 +28,13 @@ def addList(request):
         procure = order['pr']
         order_status = int(order['st'])
         create_time = order['ct']
-        product_name = order['na']
         procure_ids = order['pi']
-        order_note = order['no']
+        product_name = ''
+        if 'na' in order:
+            product_name = order['na']
+        order_note = ''
+        if 'no' in order:
+            order_note = order['no']
 
         # 已存在更新状态
         find_object = Order.objects.getById(shop_id, order_id)
@@ -39,18 +45,29 @@ def addList(request):
             find_object.order_note = order_note
             find_object.save()
         else:
-            # 转换商品id
-            products = product_name.split(',')
-            good_ids = ''
-            for product in products:
-                good = Good.objects.getByName(shop_id, product)
-                if not good:
-                    response['code'] = -1
-                    response['msg'] = '没有查询到商品:' + product
-                    return JsonResponse(response, encoder=MyJSONEncoder)
-                if good.good_type != GoodType.GIFT:
-                    good_ids = good_ids + good.good_id + '|'
-            Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
+            # 已关闭订单，允许没有商品信息
+            if order_status == OrderStatus.CLOSE and len(product_name) == 0:
+                Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, '', procure_ids, order_note)
+            else:
+                # 转换商品id
+                products = product_name.split(',')
+                good_ids = ''
+                for product in products:
+                    # 查询商品表
+                    good = Good.objects.getByName(shop_id, product)
+                    if not good:
+                        # 查不到就查询别名表
+                        good = GoodAlias.objects.getByName(shop_id, product)
+                        if good:
+                            # 在别名表命中，返回商品表查询
+                            good = Good.objects.getById(shop_id, good.good_id)
+                        if not good:
+                            response['code'] = -1
+                            response['msg'] = '没有查询到商品:' + order_id + ',' + product
+                            return JsonResponse(response, encoder=MyJSONEncoder)
+                    if good.good_type != GoodType.GIFT:
+                        good_ids = good_ids + good.good_id + '|'
+                Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

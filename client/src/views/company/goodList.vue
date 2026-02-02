@@ -153,7 +153,7 @@ export default {
         good_id: '',
         name: '',
         short_name: '',
-        short_status: GoodStatus.SALE,
+        good_status: GoodStatus.SALE,
         alias: ''
       }
     },
@@ -233,7 +233,7 @@ export default {
         id: this.temp.id,
         name: this.temp.name,
         sname: this.temp.short_name,
-        status: this.temp.status
+        status: this.temp.good_status
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getGoodList()

@@ -32,7 +32,7 @@ def addList(request):
             response['code'] = -1
             response['msg'] = '异常数据'
             return JsonResponse(response, encoder=MyJSONEncoder)
-        
+
         # 不处理的数据放废弃表
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
             if DeductionDiscard.objects.getByCTime(shop_id, order_id, amount_type, create_time):
