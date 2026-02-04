@@ -37,7 +37,17 @@ def addList(request):
         if 'no' in order:
             order_note = order['no']
 
-        # 已存在更新状态
+        # 已存在更新刷单状态
+        find_object = Fake.objects.getById(shop_id, order_id)
+        if find_object:
+            find_object.procure = procure
+            find_object.order_status = order_status
+            find_object.procure_ids = procure_ids
+            find_object.order_note = order_note
+            find_object.save()
+            continue
+
+        # 已存在更新订单状态
         find_object = Order.objects.getById(shop_id, order_id)
         if find_object:
             find_object.procure = procure
@@ -45,37 +55,41 @@ def addList(request):
             find_object.procure_ids = procure_ids
             find_object.order_note = order_note
             find_object.save()
+            continue
+        
+        # 已关闭订单，允许没有商品信息
+        if order_status == OrderStatus.CLOSE and len(product_name) == 0:
+            Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, '', procure_ids, order_note)
         else:
-            # 已关闭订单，允许没有商品信息
-            if order_status == OrderStatus.CLOSE and len(product_name) == 0:
-                Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, '', procure_ids, order_note)
-            else:
-                # 转换商品id
-                products = product_name.split(',')
-                good_ids = ''
-                is_supplement = False
-                for product in products:
-                    # 查询商品表
-                    good = Good.objects.getByName(shop_id, product)
+            # 转换商品id
+            products = product_name.split(',')
+            good_ids = ''
+            is_supplement = False
+            for product in products:
+                # 组合刷单处理
+                if payment <= 30 and len(product) < 10:
+                    continue
+                # 查询商品表
+                good = Good.objects.getByName(shop_id, product)
+                if not good:
+                    # 查不到就查询别名表
+                    good = GoodAlias.objects.getByName(shop_id, product)
+                    if good:
+                        # 在别名表命中，返回商品表查询
+                        good = Good.objects.getById(shop_id, good.good_id)
                     if not good:
-                        # 查不到就查询别名表
-                        good = GoodAlias.objects.getByName(shop_id, product)
-                        if good:
-                            # 在别名表命中，返回商品表查询
-                            good = Good.objects.getById(shop_id, good.good_id)
-                        if not good:
-                            response['code'] = -1
-                            response['msg'] = '没有查询到商品:' + order_id + ',' + product
-                            return JsonResponse(response, encoder=MyJSONEncoder)
-                    if good.good_type != GoodType.GIFT:
-                        good_ids = good_ids + good.good_id + '|'
-                    if good.good_type == GoodType.SUPPLEMENT:
-                        is_supplement = True
-                # 不是补差价，且单价低于30，认定刷单
-                if payment <= 30 and not is_supplement:
-                    Fake.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
-                else:
-                    Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
+                        response['code'] = -1
+                        response['msg'] = '没有查询到商品:' + order_id + ',' + product
+                        return JsonResponse(response, encoder=MyJSONEncoder)
+                if good.good_type != GoodType.GIFT:
+                    good_ids = good_ids + good.good_id + '|'
+                if good.good_type == GoodType.SUPPLEMENT:
+                    is_supplement = True
+            # 不是补差价，且单价低于30，认定刷单
+            if payment <= 30 and not is_supplement:
+                Fake.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
+            else:
+                Order.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

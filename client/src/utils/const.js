@@ -5,10 +5,10 @@ export const NoneTime = '2000-01-01 00:00:00'
 export const DefaultOrder = '0000000000000000000'
 
 // 批次导入数量
-export const ImportCount = 1000
+export const ImportCount = 500
 
 // 导入间隔时间
-export const ImportSpan = 1000
+export const ImportSpan = 2000
 
 // 公司状态
 export const CompanyStatus = {

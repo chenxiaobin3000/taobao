@@ -76,6 +76,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'cxkw.db',
+        'OPTIONS': {
+            'timeout': 500, # 超时时间
+        },
     }
 }
 
