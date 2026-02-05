@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/fake'
+const path = '/fake_summary'
 
-export function flushFake(data) {
+export function flushFakeSummary(data) {
   return request({
     url: `${path}/flush`,
     method: 'post',
@@ -9,7 +9,7 @@ export function flushFake(data) {
   })
 }
 
-export function setFake(data) {
+export function setFakeSummary(data) {
   return request({
     url: `${path}/set`,
     method: 'post',
@@ -17,7 +17,7 @@ export function setFake(data) {
   })
 }
 
-export function getFakeList(data) {
+export function getFakeSummaryList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

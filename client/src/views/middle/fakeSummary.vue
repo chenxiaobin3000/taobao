@@ -1,12 +1,21 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
-      </el-form-item>
+    <el-form :model="listQuery" label-position="left" label-width="80px">
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="开始日期:" prop="startDate">
+            <el-date-picker v-model="temp.start_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+            <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="日期" width="160">
@@ -51,7 +60,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getFakeList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getFakeSummaryList" />
 
     <!-- 刷单信息编辑 -->
     <el-dialog title="修改刷单信息" :visible.sync="dialogVisible">
@@ -86,7 +95,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { getFakeList, flushFake, setFake } from '@/api/middle/fake'
+import { getFakeSummaryList, flushFakeSummary, setFakeSummary } from '@/api/middle/fakeSummary'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -142,12 +151,13 @@ export default {
         fake_num: 0,
         commission: 0,
         freight: 0,
-        fake_note: ''
+        fake_note: '',
+        start_date: new Date().toLocaleDateString().replace(/\//g, '-')
       }
     },
-    getFakeList() {
+    getFakeSummaryList() {
       this.loading = true
-      getFakeList(
+      getFakeSummaryList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -166,18 +176,19 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getFakeList()
+        this.getFakeSummaryList()
       })
     },
     handleChange() {
-      this.getFakeList()
+      this.getFakeSummaryList()
     },
     handleFlush() {
-      flushFake({
-        id: this.listQuery.id
+      flushFakeSummary({
+        id: this.listQuery.id,
+        sdate: this.temp.start_date
       }).then(() => {
         this.$message({ type: 'success', message: '刷新成功!' })
-        this.getFakeList()
+        this.getFakeSummaryList()
       })
     },
     handleUpdate(row) {
@@ -185,7 +196,7 @@ export default {
       this.dialogVisible = true
     },
     updateData() {
-      setFake({
+      setFakeSummary({
         id: this.temp.id,
         amount: this.temp.fake_amount,
         num: this.temp.fake_num,
@@ -194,7 +205,7 @@ export default {
         note: this.temp.fake_note
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
-        this.getFakeList()
+        this.getFakeSummaryList()
         this.dialogVisible = false
       })
     }

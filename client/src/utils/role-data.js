@@ -44,6 +44,8 @@ export const MyRoleData = [{
     id: 4001, label: '杂项信息'
   }, {
     id: 4002, label: '刷单管理'
+  }, {
+    id: 4003, label: '扣款管理'
   }]
 }, {
   id: 2000, label: '公司管理',

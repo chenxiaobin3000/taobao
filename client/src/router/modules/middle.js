@@ -14,5 +14,8 @@ export default {
   }, {
     path: 'fakeSummary', component: () => import('@/views/middle/fakeSummary'),
     name: 'middle_fakeSummary', meta: { title: '刷单管理', roles: [4002] }
+  }, {
+    path: 'deductionSummary', component: () => import('@/views/middle/deductionSummary'),
+    name: 'middle_deductionSummary', meta: { title: '扣款管理', roles: [4003] }
   }]
 }
