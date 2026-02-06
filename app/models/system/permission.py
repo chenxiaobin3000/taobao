@@ -12,9 +12,14 @@ class PermissionManager(models.Manager):
 
     def deleteByRole(self, role_id):
         return self.filter(role_id=role_id).delete()
-    
-    def getList(self, role_id):
-        return self.filter(role_id=role_id)
+
+    def total(self, role_id):
+        return self.filter(role_id=role_id).count()
+
+    def getList(self, role_id, page, num):
+        left = (page - 1) * num
+        right = page * num
+        return self.filter(role_id=role_id)[left:right]
 
     def encoderList(self, permissions):
         return [model_to_dict(permission, fields=['id', 'role_id', 'permission']) for permission in permissions]

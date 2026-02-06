@@ -16,7 +16,8 @@ def add(request):
     company_id = int(post.get('cid'))
     market_id = int(post.get('mid'))
     name = post.get('name')
-    shop = Shop.objects.add(company_id, market_id, name)
+    deposit = int(post.get('deposit'))
+    shop = Shop.objects.add(company_id, market_id, name, deposit)
     data = Shop.objects.encoder(shop)
     response = {
         'code': 0,
@@ -31,7 +32,8 @@ def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     name = post.get('name')
-    data = Shop.objects.set(pk, name)
+    deposit = int(post.get('deposit'))
+    data = Shop.objects.set(pk, name, deposit)
     response = {
         'code': 0,
         'msg': 'success',
@@ -109,7 +111,7 @@ def getList(request):
     company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Shop.objects.total()
+    total = Shop.objects.total(company_id)
     shops = Shop.objects.getList(company_id, page, num)
     datas = Shop.objects.encoderList(shops)
 

@@ -65,7 +65,7 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Polymerize.objects.total()
+    total = Polymerize.objects.total(shop_id)
     polymerizes = Polymerize.objects.getList(shop_id, page, num)
     data = Polymerize.objects.encoderList(polymerizes)
     response = {

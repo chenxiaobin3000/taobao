@@ -38,7 +38,7 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = DeductionDiscard.objects.total()
+    total = DeductionDiscard.objects.total(shop_id)
     deductions = DeductionDiscard.objects.getList(shop_id, page, num)
     data = DeductionDiscard.objects.encoderList(deductions)
     response = {

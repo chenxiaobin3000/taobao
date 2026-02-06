@@ -70,7 +70,7 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = FakeSummary.objects.total()
+    total = FakeSummary.objects.total(shop_id)
     fakes = FakeSummary.objects.getList(shop_id, page, num)
     data = FakeSummary.objects.encoderList(fakes)
     response = {

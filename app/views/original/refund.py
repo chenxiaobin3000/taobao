@@ -81,7 +81,7 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Refund.objects.total()
+    total = Refund.objects.total(shop_id)
     refunds = Refund.objects.getList(shop_id, page, num)
     data = Refund.objects.encoderList(refunds)
     response = {

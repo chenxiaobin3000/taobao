@@ -84,7 +84,7 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = GoodAlias.objects.total()
+    total = GoodAlias.objects.total(shop_id)
     goods = GoodAlias.objects.getList(shop_id, page, num)
     data = GoodAlias.objects.encoderList(goods)
     response = {

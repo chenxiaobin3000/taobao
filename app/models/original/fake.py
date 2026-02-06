@@ -7,10 +7,11 @@ class FakeManager(models.Manager):
     def add(self, shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note):
         return self.create(shop_id=shop_id, order_id=order_id, payment=payment, procure=procure, order_status=order_status, create_time=create_time, good_ids=good_ids, procure_ids=procure_ids, order_note=order_note)
 
-    def set(self, pk, procure, order_status, order_note):
+    def set(self, pk, procure, order_status, procure_ids, order_note):
         order = self.get(pk=pk)
         order.procure = procure
         order.order_status = order_status
+        order.procure_ids = procure_ids
         order.order_note = order_note
         return order.save()
 
@@ -23,8 +24,8 @@ class FakeManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.filter(shop_id=shop_id, order_id=order_id).first()
 
-    def total(self):
-        return self.all().count()
+    def total(self, shop_id):
+        return self.filter(shop_id=shop_id).count()
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num

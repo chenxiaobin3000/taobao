@@ -6,9 +6,14 @@
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="平台" width="160px">
+      <el-table-column align="center" label="平台" width="80px">
         <template slot-scope="scope">
           {{ scope.row.market_name }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="保证金" width="80px">
+        <template slot-scope="scope">
+          {{ scope.row.deposit }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="160">
@@ -26,6 +31,9 @@
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="店铺名称">
           <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item label="保证金">
+          <el-input v-model="temp.deposit" />
         </el-form-item>
         <el-form-item v-if="isNew" label="平台">
           <el-select v-model="temp.marketId" class="filter-item" placeholder="请选择平台">
@@ -123,7 +131,8 @@ export default {
       this.temp = {
         id: 0,
         marketId: 0,
-        name: ''
+        name: '',
+        deposit: 0
       }
     },
     getShopList() {
@@ -198,7 +207,8 @@ export default {
     updateData() {
       setShop({
         id: this.temp.id,
-        name: this.temp.name
+        name: this.temp.name,
+        deposit: this.temp.deposit
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getUserList()

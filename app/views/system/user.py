@@ -85,7 +85,7 @@ def getInfo(request):
     dataCompany = Company.objects.encoder(company)
 
     # 平台信息
-    companyMarkets = CompanyMarket.objects.getList(user.company_id)
+    companyMarkets = CompanyMarket.objects.getList(user.company_id, 1, 1000)
     dataCM = []
     for companyMarket in companyMarkets:
         market = Market.objects.find(companyMarket.market_id)
@@ -94,7 +94,7 @@ def getInfo(request):
 
     # 店铺信息
     dataShop = []
-    userShops = UserShop.objects.getList(user.id)
+    userShops = UserShop.objects.getList(user.id, 1, 1000)
     for userShop in userShops:
         shop = Shop.objects.find(userShop.shop_id)
         tmp = Shop.objects.encoder(shop)
@@ -102,7 +102,7 @@ def getInfo(request):
         dataShop.append(tmp)
 
     # 权限信息
-    permissions = Permission.objects.getList(user.role_id)
+    permissions = Permission.objects.getList(user.role_id, 1, 1000)
     dataP = Permission.objects.encoderList(permissions)
     dataP = [data['permission'] for data in dataP]
 
@@ -140,14 +140,14 @@ def getList(request):
     company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = User.objects.total()
+    total = User.objects.total(company_id)
     users = User.objects.getList(company_id, page, num)
     data = User.objects.encoderList(users)
 
     # 获取店铺、角色信息
     for user in data:
         user['shops'] = []
-        userShops = UserShop.objects.getList(user['id'])
+        userShops = UserShop.objects.getList(user['id'], 1, 1000)
         for userShop in userShops:
             shop = Shop.objects.find(userShop.shop_id)
             dataShop = Shop.objects.encoder(shop)

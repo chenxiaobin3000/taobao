@@ -70,7 +70,7 @@ def get(request):
     data = Role.objects.encoder(role)
 
     # 获取权限信息
-    permissions = Permission.objects.getList(data['id'])
+    permissions = Permission.objects.getList(data['id'], 1, 1000)
     dataP = Permission.objects.encoderList(permissions)
     data['p'] = [tmp['permission'] for tmp in dataP]
 
@@ -88,13 +88,13 @@ def getList(request):
     company_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Role.objects.total()
+    total = Role.objects.total(company_id)
     roles = Role.objects.getList(company_id, page, num)
     data = Role.objects.encoderList(roles)
 
     # 获取权限信息
     for role in data:
-        permissions = Permission.objects.getList(role['id'])
+        permissions = Permission.objects.getList(role['id'], 1, 1000)
         dataP = Permission.objects.encoderList(permissions)
         role['p'] = [data['permission'] for data in dataP]
 

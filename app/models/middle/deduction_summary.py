@@ -16,8 +16,8 @@ class DeductionSummaryManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.filter(shop_id=shop_id, order_id=order_id).first()
 
-    def total(self):
-        return self.all().count()
+    def total(self, shop_id):
+        return self.filter(shop_id=shop_id).count()
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
