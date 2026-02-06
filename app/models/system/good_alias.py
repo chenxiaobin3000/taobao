@@ -16,14 +16,14 @@ class GoodAliasManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
-
     def getById(self, shop_id, good_id):
         return self.filter(shop_id=shop_id, good_id=good_id)
 
     def getByName(self, shop_id, name):
         return self.filter(shop_id=shop_id, name=name).first()
+
+    def total(self, shop_id):
+        return self.filter(shop_id=shop_id).count()
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num

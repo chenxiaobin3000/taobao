@@ -30,11 +30,6 @@ class FakeSummaryManager(models.Manager):
         right = page * num
         return self.filter(shop_id=shop_id).order_by('-ctime')[left:right]
 
-    def getCountByDay(self):
-        # SELECT strftime('%Y-%m-%d', date_col) AS day, count(*) FROM orders GROUP BY day;
-        # Foo.objects.values(day, sum).annotate(day=strftime('%Y-%m-%d', date_col), sum=count(id))
-        return ''
-
     def encoder(self, fake):
         return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note'])
 
