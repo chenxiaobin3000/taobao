@@ -36,9 +36,9 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = FakeSummary.objects.total()
-    fakes = FakeSummary.objects.getList(shop_id, page, num)
-    data = FakeSummary.objects.encoderList(fakes)
+    total = DeductionSummary.objects.total(shop_id)
+    fakes = DeductionSummary.objects.getList(shop_id, page, num)
+    data = DeductionSummary.objects.encoderList(fakes)
     response = {
         'code': 0,
         'msg': 'success',

@@ -51,7 +51,7 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Transfer.objects.total()
+    total = Transfer.objects.total(shop_id)
     transfers = Transfer.objects.getList(shop_id, page, num)
     data = Transfer.objects.encoderList(transfers)
     response = {

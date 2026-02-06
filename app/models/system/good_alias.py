@@ -16,8 +16,8 @@ class GoodAliasManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def total(self):
-        return self.all().count()
+    def total(self, shop_id):
+        return self.filter(shop_id=shop_id).count()
 
     def getById(self, shop_id, good_id):
         return self.filter(shop_id=shop_id, good_id=good_id)

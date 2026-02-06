@@ -23,8 +23,8 @@ class UserManager(models.Manager):
     def getByPhone(self, phone):
         return self.filter(phone=phone).first()
 
-    def total(self):
-        return self.all().count()
+    def total(self, company_id):
+        return self.filter(company_id=company_id).count()
 
     def getList(self, company_id, page, num):
         left = (page - 1) * num

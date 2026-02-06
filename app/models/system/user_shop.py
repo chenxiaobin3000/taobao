@@ -5,7 +5,7 @@ from django.forms.models import model_to_dict
 # 用户-店铺关系表
 class UserShopManager(models.Manager):
     def add(self, user_id, shop_id):
-        # 无论如何都先删除，肯定不会有重复的
+        # 无论如何都先删除，确保不会有重复的
         self.filter(user_id=user_id, shop_id=shop_id).delete()
         return self.create(user_id=user_id, shop_id=shop_id)
 
@@ -15,11 +15,13 @@ class UserShopManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
-    def total(self):
-        return self.all().count()
+    def total(self, user_id):
+        return self.filter(user_id=user_id).count()
 
-    def getList(self, user_id):
-        return self.filter(user_id=user_id)
+    def getList(self, user_id, page, num):
+        left = (page - 1) * num
+        right = page * num
+        return self.filter(user_id=user_id)[left:right]
 
     def getListByShop(self, shop_id):
         return self.filter(shop_id=shop_id)

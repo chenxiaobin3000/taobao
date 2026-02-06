@@ -38,11 +38,11 @@ def delete(request):
 @transaction.atomic
 def getList(request):
     post = json.loads(request.body)
-    role_id = int(post.get('id'))
+    user_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserShop.objects.total()
-    userShops = UserShop.objects.getList(role_id, page, num)
+    total = UserShop.objects.total(user_id)
+    userShops = UserShop.objects.getList(user_id, page, num)
     data = UserShop.objects.encoderList(userShops)
     response = {
         'code': 0,

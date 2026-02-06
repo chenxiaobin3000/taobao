@@ -16,8 +16,8 @@ class PolymerizeManager(models.Manager):
     def getByCTime(self, shop_id, order_id, amount_type, create_time):
         return self.filter(shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first()
 
-    def total(self):
-        return self.all().count()
+    def total(self, shop_id):
+        return self.filter(shop_id=shop_id).count()
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num

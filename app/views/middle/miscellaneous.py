@@ -62,7 +62,7 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Miscellaneous.objects.total()
+    total = Miscellaneous.objects.total(shop_id)
     miscs = Miscellaneous.objects.getList(shop_id, page, num)
     data = Miscellaneous.objects.encoderList(miscs)
     response = {

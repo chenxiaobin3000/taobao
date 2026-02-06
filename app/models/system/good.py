@@ -29,8 +29,8 @@ class GoodManager(models.Manager):
     def getByType(self, shop_id, good_type):
         return self.filter(shop_id=shop_id, good_type=good_type)
 
-    def total(self):
-        return self.all().count()
+    def total(self, shop_id):
+        return self.filter(shop_id=shop_id).count()
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
