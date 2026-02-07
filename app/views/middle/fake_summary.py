@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.fake_summary import FakeSummary
+from app.models.original.fake import Fake
 
 
 @require_POST
@@ -31,18 +32,14 @@ def flush(request):
 
     # 按天生成数据
     for i in range(0, days):
-        print(start_date + timedelta(days=i))
+        if i > 1:
+            break
+        end_date = start_date + timedelta(days=i+1)
+        print(end_date)
+        data = Fake.objects.getListByDay(shop_id, start_date, end_date)
+        print(data)
+        FakeSummary.objects.add(shop_id, start_date, data['amounts'], data['nums'], 0, 0, 0, 0, '')
 
-
-    create_date = ''
-    order_amount = 0
-    order_num = 0
-    fake_amount = order_amount
-    fake_num = order_num
-    commission = 0
-    freight = 0
-    fake_note = ''
-    #FakeSummary.objects.add(shop_id, create_date, order_amount, order_num, fake_amount, fake_num, commission, freight, fake_note)
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST

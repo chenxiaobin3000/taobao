@@ -76,10 +76,9 @@ def getList(request):
     num = int(post.get('num'))
     total = Fake.objects.total(shop_id)
     orders = Fake.objects.getList(shop_id, page, num)
-    datas = Fake.objects.encoderList(orders)
 
     # 商品id转换商品名称
-    for data in datas:
+    for data in orders:
         goods = data['good_ids'].split('|')
         data['good_names'] = ''
         for good in goods:
@@ -92,7 +91,7 @@ def getList(request):
         'msg': 'success',
         'data': {
             'total': total,
-            'list': datas
+            'list': orders
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

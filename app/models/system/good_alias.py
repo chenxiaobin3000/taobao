@@ -25,6 +25,9 @@ class GoodAliasManager(models.Manager):
     def getByName(self, shop_id, name):
         return self.filter(shop_id=shop_id, name=name).first()
 
+    def total(self, shop_id):
+        return self.filter(shop_id=shop_id).count()
+
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
