@@ -10,9 +10,6 @@ class RefundManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByIdAndTime(self, shop_id, order_id, refund_id, product_id, apply_time):
         return self.filter(shop_id=shop_id, order_id=order_id, refund_id=refund_id, product_id=product_id, apply_time=apply_time).first()
 
@@ -25,10 +22,14 @@ class RefundManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-apply_time')[left:right]
 
     def encoder(self, refund):
-        return model_to_dict(refund, fields=['id', 'shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_platform', 'refund_type', 'refund_status', 'pay_time', 'apply_time', 'timeout_time', 'complete_time'])
+        if refund:
+            return model_to_dict(refund, fields=['id', 'shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_platform', 'refund_type', 'refund_status', 'pay_time', 'apply_time', 'timeout_time', 'complete_time'])
+        return None
 
     def encoderList(self, refunds):
-        return [model_to_dict(refund, fields=['id', 'shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_platform', 'refund_type', 'refund_status', 'pay_time', 'apply_time', 'timeout_time', 'complete_time']) for refund in refunds]
+        if refunds:
+            return [model_to_dict(refund, fields=['id', 'shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_platform', 'refund_type', 'refund_status', 'pay_time', 'apply_time', 'timeout_time', 'complete_time']) for refund in refunds]
+        return None
     
 class Refund(models.Model):
     objects = RefundManager()

@@ -27,10 +27,14 @@ class UserShopManager(models.Manager):
         return self.filter(shop_id=shop_id)
 
     def encoder(self, userShop):
-        return model_to_dict(userShop, fields=['id', 'user_id', 'shop_id'])
+        if userShop:
+            return model_to_dict(userShop, fields=['id', 'user_id', 'shop_id'])
+        return None
 
     def encoderList(self, userShops):
-        return [model_to_dict(userShop, fields=['id', 'user_id', 'shop_id']) for userShop in userShops]
+        if userShops:
+            return [model_to_dict(userShop, fields=['id', 'user_id', 'shop_id']) for userShop in userShops]
+        return None
     
 class UserShop(models.Model):
     objects = UserShopManager()

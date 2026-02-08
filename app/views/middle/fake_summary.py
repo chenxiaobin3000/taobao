@@ -14,7 +14,6 @@ def flush(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
-    now_date = timezone.now()
     response = {
         'code': 0,
         'msg': 'success',
@@ -22,7 +21,7 @@ def flush(request):
     }
 
     # 计算开始日期至今的数据
-    duration = now_date - start_date
+    duration = timezone.now() - start_date
     days = duration.days
     if days < 1:
         response['code'] = -1
@@ -69,13 +68,12 @@ def getList(request):
     num = int(post.get('num'))
     total = FakeSummary.objects.total(shop_id)
     fakes = FakeSummary.objects.getList(shop_id, page, num)
-    data = FakeSummary.objects.encoderList(fakes)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': fakes
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

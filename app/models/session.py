@@ -1,20 +1,19 @@
+from datetime import timedelta
 from django.db import models
 from django.utils import timezone
-from django.forms.models import model_to_dict
 
 # 会话表
 class SessionManager(models.Manager):
     def add(self, account, token):
         return self.create(account=account, token=token)
 
-    def delete(self, pk):
-        return self.get(pk=pk).delete()
+    # 删除指定天数之前的数据
+    def delete(self, day):
+        ago = timezone.now() - timedelta(days=day)
+        return self.filter(ctime__lt=ago).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
-    def encoder(self, session):
-        return model_to_dict(session, fields=['id', 'account', 'token'])
+    def check(self, token):
+        return self.filter(token=token).first()
 
 class Session(models.Model):
     objects = SessionManager()

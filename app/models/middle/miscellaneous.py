@@ -19,9 +19,6 @@ class MiscellaneousManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 
@@ -31,10 +28,14 @@ class MiscellaneousManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_date')[left:right]
 
     def encoder(self, misc):
-        return model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note'])
+        if misc:
+            return model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note'])
+        return None
 
     def encoderList(self, miscs):
-        return [model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note']) for misc in miscs]
+        if miscs:
+            return [model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note']) for misc in miscs]
+        return None
     
 class Miscellaneous(models.Model):
     objects = MiscellaneousManager()

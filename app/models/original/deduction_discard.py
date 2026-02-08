@@ -13,9 +13,6 @@ class DeductionDiscardManager(models.Manager):
     def deleteAll(self, shop_id):
         return self.filter(shop_id=shop_id).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByCTime(self, shop_id, order_id, amount_type, create_time):
         return self.filter(shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first()
 
@@ -28,10 +25,14 @@ class DeductionDiscardManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, deduction):
-        return model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'deduction_note'])
+        if deduction:
+            return model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'deduction_note'])
+        return None
 
     def encoderList(self, deductions):
-        return [model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'deduction_note']) for deduction in deductions]
+        if deductions:
+            return [model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'deduction_note']) for deduction in deductions]
+        return None
     
 class DeductionDiscard(models.Model):
     objects = DeductionDiscardManager()

@@ -10,9 +10,6 @@ class PromotionDetailManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByIdAndDate(self, shop_id, promotion_date, good_id):
         return self.filter(shop_id=shop_id, promotion_date=promotion_date, good_id=good_id).first()
 
@@ -25,10 +22,14 @@ class PromotionDetailManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-promotion_date')[left:right]
 
     def encoder(self, promotion):
-        return model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_date', 'good_id', 'show_num', 'click_num', 'click_rate', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi'])
+        if promotion:
+            return model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_date', 'good_id', 'show_num', 'click_num', 'click_rate', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi'])
+        return None
 
     def encoderList(self, promotions):
-        return [model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_date', 'good_id', 'show_num', 'click_num', 'click_rate', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi']) for promotion in promotions]
+        if promotions:
+            return [model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_date', 'good_id', 'show_num', 'click_num', 'click_rate', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi']) for promotion in promotions]
+        return None
 
 class PromotionDetail(models.Model):
     objects = PromotionDetailManager()

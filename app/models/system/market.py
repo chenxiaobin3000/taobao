@@ -27,10 +27,14 @@ class MarketManager(models.Manager):
         return self.all()[left:right]
 
     def encoder(self, market):
-        return model_to_dict(market, fields=['id', 'company_id', 'market_id', 'name'])
+        if market:
+            return model_to_dict(market, fields=['id', 'company_id', 'market_id', 'name'])
+        return None
 
     def encoderList(self, markets):
-        return [model_to_dict(market, fields=['id', 'company_id', 'market_id', 'name']) for market in markets]
+        if markets:
+            return [model_to_dict(market, fields=['id', 'company_id', 'market_id', 'name']) for market in markets]
+        return None
     
 class Market(models.Model):
     objects = MarketManager()

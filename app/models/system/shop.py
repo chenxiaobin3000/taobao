@@ -28,10 +28,14 @@ class ShopManager(models.Manager):
         return self.filter(company_id=company_id)[left:right]
 
     def encoder(self, shop):
-        return model_to_dict(shop, fields=['id', 'company_id', 'market_id', 'name', 'deposit'])
+        if shop:
+            return model_to_dict(shop, fields=['id', 'company_id', 'market_id', 'name', 'deposit'])
+        return None
 
     def encoderList(self, shops):
-        return [model_to_dict(shop, fields=['id', 'company_id', 'market_id', 'name', 'deposit']) for shop in shops]
+        if shops:
+            return [model_to_dict(shop, fields=['id', 'company_id', 'market_id', 'name', 'deposit']) for shop in shops]
+        return None
     
 class Shop(models.Model):
     objects = ShopManager()

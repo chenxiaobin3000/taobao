@@ -18,9 +18,6 @@ class OrderManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getById(self, shop_id, order_id):
         return self.filter(shop_id=shop_id, order_id=order_id).first()
 
@@ -33,10 +30,14 @@ class OrderManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, order):
-        return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'])
+        if order:
+            return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'])
+        return None
 
     def encoderList(self, orders):
-        return [model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note']) for order in orders]
+        if orders:
+            return [model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note']) for order in orders]
+        return None
     
 class Order(models.Model):
     objects = OrderManager()

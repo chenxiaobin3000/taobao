@@ -10,9 +10,6 @@ class PolymerizeManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByCTime(self, shop_id, order_id, amount_type, create_time):
         return self.filter(shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first()
 
@@ -25,10 +22,14 @@ class PolymerizeManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, polymerize):
-        return model_to_dict(polymerize, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'polymerize_note'])
+        if polymerize:
+            return model_to_dict(polymerize, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'polymerize_note'])
+        return None
 
     def encoderList(self, polymerizes):
-        return [model_to_dict(polymerize, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'polymerize_note']) for polymerize in polymerizes]
+        if polymerizes:
+            return [model_to_dict(polymerize, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'polymerize_note']) for polymerize in polymerizes]
+        return None
     
     
 class Polymerize(models.Model):

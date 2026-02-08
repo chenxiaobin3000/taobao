@@ -27,10 +27,14 @@ class RoleManager(models.Manager):
         return self.filter(company_id=company_id)[left:right]
 
     def encoder(self, role):
-        return model_to_dict(role, fields=['id', 'company_id', 'name'])
+        if role:
+            return model_to_dict(role, fields=['id', 'company_id', 'name'])
+        return None
 
     def encoderList(self, roles):
-        return [model_to_dict(role, fields=['id', 'company_id', 'name']) for role in roles]
+        if roles:
+            return [model_to_dict(role, fields=['id', 'company_id', 'name']) for role in roles]
+        return None
     
 class Role(models.Model):
     objects = RoleManager()

@@ -38,10 +38,14 @@ class GoodManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, good):
-        return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status'])
+        if good:
+            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status'])
+        return None
 
     def encoderList(self, goods):
-        return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status']) for good in goods]
+        if goods:
+            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status']) for good in goods]
+        return None
 
 class Good(models.Model):
     objects = GoodManager()

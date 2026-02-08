@@ -29,10 +29,14 @@ class CompanyManager(models.Manager):
         return self.all()[left:right]
 
     def encoder(self, company):
-        return model_to_dict(company, fields=['id', 'name', 'user_id', 'company_status'])
+        if company:
+            return model_to_dict(company, fields=['id', 'name', 'user_id', 'company_status'])
+        return None
 
     def encoderList(self, companys):
-        return [model_to_dict(company, fields=['id', 'name', 'user_id', 'company_status']) for company in companys]
+        if companys:
+            return [model_to_dict(company, fields=['id', 'name', 'user_id', 'company_status']) for company in companys]
+        return None
     
 class Company(models.Model):
     objects = CompanyManager()

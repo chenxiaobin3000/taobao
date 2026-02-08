@@ -19,11 +19,8 @@ class FakeSummaryManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByDate(self, shop_id, date):
-        return self.filter(shop_id=shop_id, create_date=date).first()
+        return self.encoder(self.filter(shop_id=shop_id, create_date=date).first())
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
@@ -31,13 +28,17 @@ class FakeSummaryManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-ctime')[left:right]
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-ctime')[left:right])
 
     def encoder(self, fake):
-        return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note'])
+        if fake:
+            return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note'])
+        return None
 
     def encoderList(self, fakes):
-        return [model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note']) for fake in fakes]
+        if fakes:
+            return [model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note']) for fake in fakes]
+        return None
 
 class FakeSummary(models.Model):
     objects = FakeSummaryManager()

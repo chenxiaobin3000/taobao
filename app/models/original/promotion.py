@@ -10,9 +10,6 @@ class PromotionManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByCDate(self, shop_id, create_date, promotion_type):
         return self.filter(shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first()
 
@@ -25,10 +22,14 @@ class PromotionManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_date')[left:right]
 
     def encoder(self, promotion):
-        return model_to_dict(promotion, fields=['id', 'create_date', 'payment', 'promotion_type', 'promotion_note'])
+        if promotion:
+            return model_to_dict(promotion, fields=['id', 'create_date', 'payment', 'promotion_type', 'promotion_note'])
+        return None
 
     def encoderList(self, promotions):
-        return [model_to_dict(promotion, fields=['id', 'create_date', 'payment', 'promotion_type', 'promotion_note']) for promotion in promotions]
+        if promotions:
+            return [model_to_dict(promotion, fields=['id', 'create_date', 'payment', 'promotion_type', 'promotion_note']) for promotion in promotions]
+        return None
     
 class Promotion(models.Model):
     objects = PromotionManager()

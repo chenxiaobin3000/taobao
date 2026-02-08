@@ -19,11 +19,9 @@ def register(request):
 
     # 创建账号
     account = Account.objects.add(account, password, user_id)
-    data = Account.objects.encoder(account)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -36,8 +34,7 @@ def login(request):
     object = Account.objects.getByAccount(account)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': {}
+        'msg': 'success'
     }
     
     # 校验密码
@@ -60,8 +57,7 @@ def logout(request):
     
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': {}
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -71,11 +67,10 @@ def setPassword(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     password = post.get('password')
-    data = Account.objects.set(pk, password)
+    Account.objects.set(pk, password)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -84,10 +79,9 @@ def setPassword(request):
 def resetPassword(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Account.objects.set(pk, default_password)
+    Account.objects.set(pk, default_password)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

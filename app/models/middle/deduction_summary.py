@@ -10,11 +10,8 @@ class DeductionSummaryManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getById(self, shop_id, order_id):
-        return self.filter(shop_id=shop_id, order_id=order_id).first()
+        return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
@@ -22,13 +19,17 @@ class DeductionSummaryManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-ctime')[left:right]
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-ctime')[left:right])
 
     def encoder(self, deduction):
-        return model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'deduction_detail'])
+        if deduction:
+            return model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'deduction_detail'])
+        return None
 
     def encoderList(self, deductions):
-        return [model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'deduction_detail']) for deduction in deductions]
+        if deductions:
+            return [model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'deduction_detail']) for deduction in deductions]
+        return None
 
 class DeductionSummary(models.Model):
     objects = DeductionSummaryManager()

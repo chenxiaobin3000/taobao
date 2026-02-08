@@ -22,7 +22,9 @@ class PermissionManager(models.Manager):
         return self.filter(role_id=role_id)[left:right]
 
     def encoderList(self, permissions):
-        return [model_to_dict(permission, fields=['id', 'role_id', 'permission']) for permission in permissions]
+        if permissions:
+            return [model_to_dict(permission, fields=['id', 'role_id', 'permission']) for permission in permissions]
+        return None
     
 class Permission(models.Model):
     objects = PermissionManager()

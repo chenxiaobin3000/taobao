@@ -32,10 +32,14 @@ class UserManager(models.Manager):
         return self.filter(company_id=company_id)[left:right]
 
     def encoder(self, user):
-        return model_to_dict(user, fields=['id', 'name', 'phone', 'company_id', 'role_id'])
+        if user:
+            return model_to_dict(user, fields=['id', 'name', 'phone', 'company_id', 'role_id'])
+        return None
 
     def encoderList(self, users):
-        return [model_to_dict(user, fields=['id', 'name', 'phone', 'company_id', 'role_id']) for user in users]
+        if users:
+            return [model_to_dict(user, fields=['id', 'name', 'phone', 'company_id', 'role_id']) for user in users]
+        return None
 
 class User(models.Model):
     objects = UserManager()

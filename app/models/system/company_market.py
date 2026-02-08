@@ -19,7 +19,9 @@ class CompanyMarketManager(models.Manager):
         return self.filter(company_id=company_id)[left:right]
 
     def encoderList(self, companyMarkets):
-        return [model_to_dict(companyMarket, fields=['id', 'company_id', 'market_id']) for companyMarket in companyMarkets]
+        if companyMarkets:
+            return [model_to_dict(companyMarket, fields=['id', 'company_id', 'market_id']) for companyMarket in companyMarkets]
+        return None
     
 class CompanyMarket(models.Model):
     objects = CompanyMarketManager()

@@ -15,9 +15,6 @@ class PurchaseManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 
@@ -27,10 +24,14 @@ class PurchaseManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, purchase):
-        return model_to_dict(purchase, fields=['id', 'shop_id', 'purchase_id', 'order_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note'])
+        if purchase:
+            return model_to_dict(purchase, fields=['id', 'shop_id', 'purchase_id', 'order_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note'])
+        return None
 
     def encoderList(self, purchases):
-        return [model_to_dict(purchase, fields=['id', 'shop_id', 'purchase_id', 'order_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note']) for purchase in purchases]
+        if purchases:
+            return [model_to_dict(purchase, fields=['id', 'shop_id', 'purchase_id', 'order_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note']) for purchase in purchases]
+        return None
     
 class Purchase(models.Model):
     objects = PurchaseManager()

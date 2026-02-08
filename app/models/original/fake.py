@@ -18,9 +18,6 @@ class FakeManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.encoder(self.get(pk=pk))
-
     def getById(self, shop_id, order_id):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 

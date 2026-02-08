@@ -31,10 +31,14 @@ class GoodAliasManager(models.Manager):
         return self.filter(shop_id=shop_id)[left:right]
 
     def encoder(self, good):
-        return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name'])
+        if good:
+            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name'])
+        return None
 
     def encoderList(self, goods):
-        return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name']) for good in goods]
+        if goods:
+            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name']) for good in goods]
+        return None
 
 class GoodAlias(models.Model):
     objects = GoodAliasManager()

@@ -15,11 +15,8 @@ class AccountManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByAccount(self, account):
-        return self.filter(account=account).first()
+        return self.encoder(self.filter(account=account).first())
 
     def total(self):
         return self.all().count()
@@ -27,13 +24,17 @@ class AccountManager(models.Manager):
     def getList(self, user_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(user_id=user_id)[left:right]
+        return self.encoder(self.filter(user_id=user_id)[left:right])
 
     def encoder(self, account):
-        return model_to_dict(account, fields=['id', 'account', 'password', 'user_id'])
+        if account:
+            return model_to_dict(account, fields=['id', 'account', 'password', 'user_id'])
+        return None
 
     def encoderList(self, accounts):
-        return [model_to_dict(account, fields=['id', 'account', 'password', 'user_id']) for account in accounts]
+        if accounts:
+            return [model_to_dict(account, fields=['id', 'account', 'password', 'user_id']) for account in accounts]
+        return None
 
 class Account(models.Model):
     objects = AccountManager()

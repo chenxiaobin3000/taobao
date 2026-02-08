@@ -10,9 +10,6 @@ class TransferManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getByCTime(self, shop_id, create_time):
         return self.filter(shop_id=shop_id, create_time=create_time).first()
 
@@ -25,10 +22,14 @@ class TransferManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
 
     def encoder(self, transfer):
-        return model_to_dict(transfer, fields=['id', 'shop_id', 'user_name', 'payee_name', 'order_id', 'amount', 'create_time', 'transfer_note'])
+        if transfer:
+            return model_to_dict(transfer, fields=['id', 'shop_id', 'user_name', 'payee_name', 'order_id', 'amount', 'create_time', 'transfer_note'])
+        return None
 
     def encoderList(self, transfers):
-        return [model_to_dict(transfer, fields=['id', 'shop_id', 'user_name', 'payee_name', 'order_id', 'amount', 'create_time', 'transfer_note']) for transfer in transfers]
+        if transfers:
+            return [model_to_dict(transfer, fields=['id', 'shop_id', 'user_name', 'payee_name', 'order_id', 'amount', 'create_time', 'transfer_note']) for transfer in transfers]
+        return None
     
 class Transfer(models.Model):
     objects = TransferManager()
