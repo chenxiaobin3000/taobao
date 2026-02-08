@@ -17,12 +17,10 @@ def add(request):
     market_id = int(post.get('mid'))
     name = post.get('name')
     deposit = int(post.get('deposit'))
-    shop = Shop.objects.add(company_id, market_id, name, deposit)
-    data = Shop.objects.encoder(shop)
+    Shop.objects.add(company_id, market_id, name, deposit)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -33,11 +31,10 @@ def set(request):
     pk = int(post.get('id'))
     name = post.get('name')
     deposit = int(post.get('deposit'))
-    data = Shop.objects.set(pk, name, deposit)
+    Shop.objects.set(pk, name, deposit)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -48,8 +45,7 @@ def delete(request):
     pk = int(post.get('id'))
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': {}
+        'msg': 'success'
     }
 
     # 存在商品不能删除
@@ -66,8 +62,7 @@ def delete(request):
         response['msg'] = '存在管理员，不能删除'
         return JsonResponse(response, encoder=MyJSONEncoder)
 
-    data = Shop.objects.delete(pk)
-    response['data'] = data
+    Shop.objects.delete(pk)
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -76,31 +71,28 @@ def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     shop = Shop.objects.find(pk)
-    data = Shop.objects.encoder(shop)
 
     # 平台信息
-    market = Market.objects.find(data['market_id'])
-    data['market_name'] = market.name
+    market = Market.objects.find(shop['market_id'])
+    shop['market_name'] = market.name
 
     # 所有用户信息
-    users = User.objects.getList(data['company_id'], 1, 1000)
-    userDatas = User.objects.encoderList(users)
+    users = User.objects.getList(shop['company_id'], 1, 1000)
 
     # 管理员信息
-    userShops = UserShop.objects.getListByShop(data['id'])
-    userShopDatas = UserShop.objects.encoderList(userShops)
-    for userShop in userShopDatas:
+    userShops = UserShop.objects.getListByShop(shop['id'])
+    for userShop in userShops:
         del userShop['id']
-        del userShop['shop_id']
-        for user in userDatas:
+        del userShop['users']
+        for user in users:
             if user['id'] == userShop['user_id']:
                 userShop['name'] = user['name']
                 break
-    data['users'] = userShopDatas
+    shop['users'] = userShops
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': shop
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -113,34 +105,31 @@ def getList(request):
     num = int(post.get('num'))
     total = Shop.objects.total(company_id)
     shops = Shop.objects.getList(company_id, page, num)
-    datas = Shop.objects.encoderList(shops)
 
     # 所有用户信息
     users = User.objects.getList(company_id, 1, 1000)
-    userDatas = User.objects.encoderList(users)
 
     # 获取平台、管理员信息
-    for data in datas:
+    for data in shops:
         market = Market.objects.find(data['market_id'])
         data['market_name'] = market.name
 
         userShops = UserShop.objects.getListByShop(data['id'])
-        userShopDatas = UserShop.objects.encoderList(userShops)
-        for userShop in userShopDatas:
+        for userShop in userShops:
             del userShop['id']
             del userShop['shop_id']
-            for user in userDatas:
+            for user in users:
                 if user['id'] == userShop['user_id']:
                     userShop['name'] = user['name']
                     break
-        data['users'] = userShopDatas
+        data['users'] = userShops
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': datas
+            'list': shops
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

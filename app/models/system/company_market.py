@@ -16,7 +16,7 @@ class CompanyMarketManager(models.Manager):
     def getList(self, company_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(company_id=company_id)[left:right]
+        return self.encoderList(self.filter(company_id=company_id)[left:right])
 
     def encoderList(self, companyMarkets):
         if companyMarkets:

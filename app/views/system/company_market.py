@@ -12,11 +12,10 @@ def add(request):
     company_id = int(post.get('cid'))
     market_id = int(post.get('mid'))
     cm = CompanyMarket.objects.add(company_id, market_id)
-    data = CompanyMarket.objects.encoder(cm)
+    CompanyMarket.objects.encoder(cm)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -25,11 +24,10 @@ def add(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = CompanyMarket.objects.delete(pk)
+    CompanyMarket.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -42,13 +40,12 @@ def getList(request):
     num = int(post.get('num'))
     total = CompanyMarket.objects.total(company_id)
     cms = CompanyMarket.objects.getList(company_id, page, num)
-    data = CompanyMarket.objects.encoderList(cms)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': cms
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

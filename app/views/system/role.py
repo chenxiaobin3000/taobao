@@ -14,16 +14,14 @@ def add(request):
     name = post.get('name')
     permissions = post.get('p')
     role = Role.objects.add(company_id, name)
-    data = Role.objects.encoder(role)
 
     # 添加权限
     for p in permissions:
-        Permission.objects.add(role.id, p)
+        Permission.objects.add(role['id'], p)
 
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -34,7 +32,7 @@ def set(request):
     pk = int(post.get('id'))
     name = post.get('name')
     permissions = post.get('p')
-    data = Role.objects.set(pk, name)
+    Role.objects.set(pk, name)
 
     # 修改权限
     Permission.objects.deleteByRole(pk)
@@ -43,8 +41,7 @@ def set(request):
 
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -53,11 +50,10 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Role.objects.delete(pk)
+    Role.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -67,17 +63,15 @@ def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     role = Role.objects.find(pk)
-    data = Role.objects.encoder(role)
 
     # 获取权限信息
-    permissions = Permission.objects.getList(data['id'], 1, 1000)
-    dataP = Permission.objects.encoderList(permissions)
-    data['p'] = [tmp['permission'] for tmp in dataP]
+    permissions = Permission.objects.getList(role['id'], 1, 1000)
+    role['p'] = [tmp['permission'] for tmp in permissions]
 
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': role
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -90,20 +84,18 @@ def getList(request):
     num = int(post.get('num'))
     total = Role.objects.total(company_id)
     roles = Role.objects.getList(company_id, page, num)
-    data = Role.objects.encoderList(roles)
 
     # 获取权限信息
-    for role in data:
+    for role in roles:
         permissions = Permission.objects.getList(role['id'], 1, 1000)
-        dataP = Permission.objects.encoderList(permissions)
-        role['p'] = [data['permission'] for data in dataP]
+        role['p'] = [data['permission'] for data in permissions]
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': roles
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

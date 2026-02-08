@@ -11,11 +11,10 @@ def add(request):
     post = json.loads(request.body)
     name = post.get('name')
     market = Market.objects.add(name)
-    data = Market.objects.encoder(market)
+    Market.objects.encoder(market)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -25,11 +24,10 @@ def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     name = post.get('name')
-    data = Market.objects.set(pk, name)
+    Market.objects.set(pk, name)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -38,11 +36,10 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Market.objects.delete(pk)
+    Market.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -52,11 +49,10 @@ def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     market = Market.objects.find(pk)
-    data = Market.objects.encoder(market)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': market
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -68,13 +64,12 @@ def getList(request):
     num = int(post.get('num'))
     total = Market.objects.total()
     markets = Market.objects.getList(page, num)
-    data = Market.objects.encoderList(markets)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': markets
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

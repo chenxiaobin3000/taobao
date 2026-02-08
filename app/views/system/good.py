@@ -13,19 +13,14 @@ def addList(request):
     goods = post.get('g')
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
 
     # 批量添加
     for good in goods:
         find_object = Good.objects.getById(shop_id, good['i'])
         if find_object:
-            find_object.name = good['n']
-            find_object.short_name = good['sn']
-            find_object.good_type = good['t']
-            find_object.good_status = good['s']
-            find_object.save()
+            Good.objects.set(good['i'], good['n'], good['sn'], good['t'], good['s'])
         else:
             Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'])
 
@@ -38,12 +33,12 @@ def set(request):
     pk = int(post.get('id'))
     name = post.get('name')
     short_name = post.get('sname')
+    good_type = int(post.get('type'))
     good_status = int(post.get('status'))
-    data = Good.objects.set(pk, name, short_name, good_status)
+    Good.objects.set(pk, name, short_name, good_type, good_status)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -52,11 +47,10 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Good.objects.delete(pk)
+    Good.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -69,13 +63,12 @@ def getList(request):
     num = int(post.get('num'))
     total = Good.objects.total(shop_id)
     goods = Good.objects.getList(shop_id, page, num)
-    data = Good.objects.encoderList(goods)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': goods
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

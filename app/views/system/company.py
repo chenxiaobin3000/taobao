@@ -13,11 +13,10 @@ def add(request):
     name = post.get('name')
     user_id = int(post.get('uid'))
     company = Company.objects.add(name, user_id)
-    data = Company.objects.encoder(company)
+    Company.objects.encoder(company)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -28,11 +27,10 @@ def set(request):
     pk = int(post.get('id'))
     name = post.get('name')
     user_id = int(post.get('uid'))
-    data = Company.objects.set(pk, name, user_id)
+    Company.objects.set(pk, name, user_id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -41,11 +39,10 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Company.objects.delete(pk)
+    Company.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -57,19 +54,18 @@ def getList(request):
     num = int(post.get('num'))
     total = Company.objects.total()
     companys = Company.objects.getList(page, num)
-    data = Company.objects.encoderList(companys)
 
     # 获取负责人信息
-    for company in data:
+    for company in companys:
         user = User.objects.find(company['user_id'])
-        company['user'] = user.name
+        company['user'] = user['name']
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': companys
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

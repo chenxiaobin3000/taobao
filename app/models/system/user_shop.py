@@ -12,24 +12,16 @@ class UserShopManager(models.Manager):
     def delete(self, user_id, shop_id):
         return self.filter(user_id=user_id, shop_id=shop_id).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def total(self, user_id):
         return self.filter(user_id=user_id).count()
 
     def getList(self, user_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(user_id=user_id)[left:right]
+        return self.encoderList(self.filter(user_id=user_id)[left:right])
 
     def getListByShop(self, shop_id):
-        return self.filter(shop_id=shop_id)
-
-    def encoder(self, userShop):
-        if userShop:
-            return model_to_dict(userShop, fields=['id', 'user_id', 'shop_id'])
-        return None
+        return self.encoderList(self.filter(shop_id=shop_id))
 
     def encoderList(self, userShops):
         if userShops:

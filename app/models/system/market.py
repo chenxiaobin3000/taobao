@@ -16,7 +16,7 @@ class MarketManager(models.Manager):
         return self.get(pk=pk).delete()
 
     def find(self, pk):
-        return self.get(pk=pk)
+        return self.encoder(self.get(pk=pk))
 
     def total(self):
         return self.all().count()
@@ -24,7 +24,7 @@ class MarketManager(models.Manager):
     def getList(self, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.all()[left:right]
+        return self.encoderList(self.all()[left:right])
 
     def encoder(self, market):
         if market:

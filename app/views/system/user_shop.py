@@ -11,12 +11,10 @@ def add(request):
     post = json.loads(request.body)
     user_id = int(post.get('uid'))
     shop_id = int(post.get('sid'))
-    userShop = UserShop.objects.add(user_id, shop_id)
-    data = UserShop.objects.encoder(userShop)
+    UserShop.objects.add(user_id, shop_id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -26,11 +24,10 @@ def delete(request):
     post = json.loads(request.body)
     user_id = int(post.get('uid'))
     shop_id = int(post.get('sid'))
-    data = UserShop.objects.delete(user_id, shop_id)
+    UserShop.objects.delete(user_id, shop_id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -43,13 +40,12 @@ def getList(request):
     num = int(post.get('num'))
     total = UserShop.objects.total(user_id)
     userShops = UserShop.objects.getList(user_id, page, num)
-    data = UserShop.objects.encoderList(userShops)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': userShops
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -17,7 +17,7 @@ class ShopManager(models.Manager):
         return self.get(pk=pk).delete()
 
     def find(self, pk):
-        return self.get(pk=pk)
+        return self.encoder(self.get(pk=pk))
 
     def total(self, company_id):
         return self.filter(company_id=company_id).count()
@@ -25,7 +25,7 @@ class ShopManager(models.Manager):
     def getList(self, company_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(company_id=company_id)[left:right]
+        return self.encoderList(self.filter(company_id=company_id)[left:right])
 
     def encoder(self, shop):
         if shop:

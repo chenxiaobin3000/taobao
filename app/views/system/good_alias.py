@@ -12,12 +12,10 @@ def add(request):
     shop_id = int(post.get('id'))
     good_id = post.get('gid')
     name = post.get('name')
-    good = GoodAlias.objects.add(shop_id, good_id, name)
-    data = GoodAlias.objects.encoder(good)
+    GoodAlias.objects.add(shop_id, good_id, name)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -26,11 +24,10 @@ def add(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = GoodAlias.objects.delete(pk)
+    GoodAlias.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -40,11 +37,10 @@ def deleteById(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     good_id = post.get('gid')
-    data = GoodAlias.objects.deleteById(shop_id, good_id)
+    GoodAlias.objects.deleteById(shop_id, good_id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -54,12 +50,11 @@ def getById(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     good_id = post.get('gid')
-    goods = GoodAlias.objects.getById(shop_id, good_id)
-    data = GoodAlias.objects.encoderList(goods)
+    good = GoodAlias.objects.getById(shop_id, good_id)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': good
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -69,11 +64,10 @@ def getByName(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     good = GoodAlias.objects.getByName(pk)
-    data = GoodAlias.objects.encoder(good)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': good
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -86,13 +80,12 @@ def getList(request):
     num = int(post.get('num'))
     total = GoodAlias.objects.total(shop_id)
     goods = GoodAlias.objects.getList(shop_id, page, num)
-    data = GoodAlias.objects.encoderList(goods)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': goods
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

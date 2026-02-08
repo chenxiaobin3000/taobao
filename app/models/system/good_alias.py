@@ -13,14 +13,11 @@ class GoodAliasManager(models.Manager):
     def deleteById(self, shop_id, good_id):
         return self.filter(shop_id=shop_id, good_id=good_id).delete()
 
-    def find(self, pk):
-        return self.get(pk=pk)
-
     def getById(self, shop_id, good_id):
-        return self.filter(shop_id=shop_id, good_id=good_id)
+        return self.encoder(self.filter(shop_id=shop_id, good_id=good_id))
 
     def getByName(self, shop_id, name):
-        return self.filter(shop_id=shop_id, name=name).first()
+        return self.encoder(self.filter(shop_id=shop_id, name=name).first())
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
@@ -28,7 +25,7 @@ class GoodAliasManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id)[left:right]
+        return self.encoderList(self.filter(shop_id=shop_id)[left:right])
 
     def encoder(self, good):
         if good:

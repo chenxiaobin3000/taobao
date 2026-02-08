@@ -19,7 +19,7 @@ class PermissionManager(models.Manager):
     def getList(self, role_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(role_id=role_id)[left:right]
+        return self.encoderList(self.filter(role_id=role_id)[left:right])
 
     def encoderList(self, permissions):
         if permissions:

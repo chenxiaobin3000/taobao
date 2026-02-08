@@ -10,7 +10,6 @@ from app.models.system.market import Market
 from app.models.system.shop import Shop
 from app.models.system.user_shop import UserShop
 from app.models.system.permission import Permission
-from app.models.system.role import Role
 
 @require_POST
 @transaction.atomic
@@ -20,12 +19,10 @@ def add(request):
     phone = post.get('phone')
     company_id = int(post.get('cid'))
     role_id = int(post.get('rid'))
-    user = User.objects.add(name, phone, company_id, role_id)
-    data = User.objects.encoder(user)
+    User.objects.add(name, phone, company_id, role_id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -37,11 +34,10 @@ def set(request):
     name = post.get('name')
     phone = post.get('phone')
     role_id = int(post.get('rid'))
-    data = User.objects.set(pk, name, phone, role_id)
+    User.objects.set(pk, name, phone, role_id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -50,11 +46,10 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = User.objects.delete(pk)
+    User.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -64,11 +59,10 @@ def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     user = User.objects.find(pk)
-    data = User.objects.encoder(user)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': user
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -78,43 +72,38 @@ def getInfo(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     user = User.objects.find(pk)
-    dataUser = User.objects.encoder(user)
 
     # 公司信息
-    company = Company.objects.find(user.company_id)
-    dataCompany = Company.objects.encoder(company)
+    company = Company.objects.find(user['company_id'])
 
     # 平台信息
-    companyMarkets = CompanyMarket.objects.getList(user.company_id, 1, 1000)
+    companyMarkets = CompanyMarket.objects.getList(user['company_id'], 1, 1000)
     dataCM = []
     for companyMarket in companyMarkets:
-        market = Market.objects.find(companyMarket.market_id)
-        tmp = Market.objects.encoder(market)
-        dataCM.append(tmp)
+        market = Market.objects.find(companyMarket['market_id'])
+        dataCM.append(market)
 
     # 店铺信息
     dataShop = []
-    userShops = UserShop.objects.getList(user.id, 1, 1000)
+    userShops = UserShop.objects.getList(user['id'], 1, 1000)
     for userShop in userShops:
-        shop = Shop.objects.find(userShop.shop_id)
-        tmp = Shop.objects.encoder(shop)
-        del tmp['company_id']
-        dataShop.append(tmp)
+        shop = Shop.objects.find(userShop['shop_id'])
+        del shop['company_id']
+        dataShop.append(shop)
 
     # 权限信息
     permissions = Permission.objects.getList(user.role_id, 1, 1000)
-    dataP = Permission.objects.encoderList(permissions)
-    dataP = [data['permission'] for data in dataP]
+    permissions = [data['permission'] for data in permissions]
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'user': dataUser,
-            'company': dataCompany,
+            'user': user,
+            'company': company,
             'market': dataCM,
             'shop': dataShop,
-            'perms': dataP
+            'perms': permissions
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
@@ -125,11 +114,10 @@ def getByPhone(request):
     post = json.loads(request.body)
     phone = post.get('phone')
     user = User.objects.getByPhone(phone)
-    data = User.objects.encoder(user)
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': user
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -142,23 +130,21 @@ def getList(request):
     num = int(post.get('num'))
     total = User.objects.total(company_id)
     users = User.objects.getList(company_id, page, num)
-    data = User.objects.encoderList(users)
 
     # 获取店铺、角色信息
-    for user in data:
+    for user in users:
         user['shops'] = []
         userShops = UserShop.objects.getList(user['id'], 1, 1000)
         for userShop in userShops:
-            shop = Shop.objects.find(userShop.shop_id)
-            dataShop = Shop.objects.encoder(shop)
-            user['shops'].append(dataShop)
+            shop = Shop.objects.find(userShop['shop_id'])
+            user['shops'].append(shop)
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': users
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
