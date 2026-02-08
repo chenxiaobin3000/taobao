@@ -10,11 +10,10 @@ from app.models.original.polymerize_discard import PolymerizeDiscard
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = PolymerizeDiscard.objects.delete(pk)
+    PolymerizeDiscard.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -23,11 +22,10 @@ def delete(request):
 def deleteAll(request):
     post = json.loads(request.body)
     id = int(post.get('id'))
-    data = PolymerizeDiscard.objects.deleteAll(id)
+    PolymerizeDiscard.objects.deleteAll(id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -40,13 +38,12 @@ def getList(request):
     num = int(post.get('num'))
     total = PolymerizeDiscard.objects.total(shop_id)
     polymerizes = PolymerizeDiscard.objects.getList(shop_id, page, num)
-    data = PolymerizeDiscard.objects.encoderList(polymerizes)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': polymerizes
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

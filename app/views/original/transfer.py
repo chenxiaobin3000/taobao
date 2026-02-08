@@ -26,8 +26,7 @@ def addList(request):
 
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -36,11 +35,10 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Transfer.objects.delete(pk)
+    Transfer.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -53,13 +51,12 @@ def getList(request):
     num = int(post.get('num'))
     total = Transfer.objects.total(shop_id)
     transfers = Transfer.objects.getList(shop_id, page, num)
-    data = Transfer.objects.encoderList(transfers)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': transfers
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

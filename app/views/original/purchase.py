@@ -27,8 +27,7 @@ def addList(request):
 
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -38,11 +37,10 @@ def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     order_status = int(post.get('status'))
-    data = Purchase.objects.set(pk, order_status)
+    Purchase.objects.set(pk, order_status)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -54,8 +52,7 @@ def delete(request):
     data = Purchase.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -68,13 +65,12 @@ def getList(request):
     num = int(post.get('num'))
     total = Purchase.objects.total(shop_id)
     purchases = Purchase.objects.getList(shop_id, page, num)
-    data = Purchase.objects.encoderList(purchases)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': purchases
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

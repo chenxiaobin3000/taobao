@@ -15,8 +15,7 @@ def addList(request):
     orders = post.get('o')
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
 
     # 批量添加
@@ -59,11 +58,10 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Fake.objects.delete(pk)
+    Fake.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 

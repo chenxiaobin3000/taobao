@@ -14,7 +14,7 @@ class DeductionDiscardManager(models.Manager):
         return self.filter(shop_id=shop_id).delete()
 
     def getByCTime(self, shop_id, order_id, amount_type, create_time):
-        return self.filter(shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first()
+        return self.encoder(self.filter(shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first())
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
@@ -22,7 +22,7 @@ class DeductionDiscardManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
+        return self.encoderLst(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
     def encoder(self, deduction):
         if deduction:

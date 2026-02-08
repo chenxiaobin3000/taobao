@@ -18,8 +18,7 @@ def addList(request):
     orders = post.get('o')
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
 
     # 批量添加
@@ -98,11 +97,10 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Order.objects.delete(pk)
+    Order.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -115,10 +113,9 @@ def getList(request):
     num = int(post.get('num'))
     total = Order.objects.total(shop_id)
     orders = Order.objects.getList(shop_id, page, num)
-    datas = Order.objects.encoderList(orders)
 
     # 商品id转换商品名称
-    for data in datas:
+    for data in orders:
         goods = data['good_ids'].split('|')
         data['good_names'] = ''
         for good in goods:
@@ -131,7 +128,7 @@ def getList(request):
         'msg': 'success',
         'data': {
             'total': total,
-            'list': datas
+            'list': orders
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

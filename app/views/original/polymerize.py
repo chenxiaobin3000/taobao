@@ -15,8 +15,7 @@ def addList(request):
     polymerizes = post.get('p')
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
 
     # 批量添加
@@ -50,11 +49,10 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Polymerize.objects.delete(pk)
+    Polymerize.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -67,13 +65,12 @@ def getList(request):
     num = int(post.get('num'))
     total = Polymerize.objects.total(shop_id)
     polymerizes = Polymerize.objects.getList(shop_id, page, num)
-    data = Polymerize.objects.encoderList(polymerizes)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': polymerizes
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

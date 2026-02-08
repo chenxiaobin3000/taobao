@@ -11,7 +11,7 @@ class PromotionManager(models.Manager):
         return self.get(pk=pk).delete()
 
     def getByCDate(self, shop_id, create_date, promotion_type):
-        return self.filter(shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first()
+        return self.encoder(self.filter(shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first())
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
@@ -19,7 +19,7 @@ class PromotionManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-create_date')[left:right]
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_date')[left:right])
 
     def encoder(self, promotion):
         if promotion:

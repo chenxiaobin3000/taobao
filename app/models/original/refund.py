@@ -11,7 +11,7 @@ class RefundManager(models.Manager):
         return self.get(pk=pk).delete()
 
     def getByIdAndTime(self, shop_id, order_id, refund_id, product_id, apply_time):
-        return self.filter(shop_id=shop_id, order_id=order_id, refund_id=refund_id, product_id=product_id, apply_time=apply_time).first()
+        return self.encoder(self.filter(shop_id=shop_id, order_id=order_id, refund_id=refund_id, product_id=product_id, apply_time=apply_time).first())
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
@@ -19,7 +19,7 @@ class RefundManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-apply_time')[left:right]
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-apply_time')[left:right])
 
     def encoder(self, refund):
         if refund:

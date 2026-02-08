@@ -10,11 +10,10 @@ from app.models.original.deduction_discard import DeductionDiscard
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = DeductionDiscard.objects.delete(pk)
+    DeductionDiscard.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -23,11 +22,10 @@ def delete(request):
 def deleteAll(request):
     post = json.loads(request.body)
     id = int(post.get('id'))
-    data = DeductionDiscard.objects.deleteAll(id)
+    DeductionDiscard.objects.deleteAll(id)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -40,13 +38,12 @@ def getList(request):
     num = int(post.get('num'))
     total = DeductionDiscard.objects.total(shop_id)
     deductions = DeductionDiscard.objects.getList(shop_id, page, num)
-    data = DeductionDiscard.objects.encoderList(deductions)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': deductions
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

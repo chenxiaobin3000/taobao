@@ -56,8 +56,7 @@ def addList(request):
 
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -69,8 +68,7 @@ def delete(request):
     data = Refund.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -83,13 +81,12 @@ def getList(request):
     num = int(post.get('num'))
     total = Refund.objects.total(shop_id)
     refunds = Refund.objects.getList(shop_id, page, num)
-    data = Refund.objects.encoderList(refunds)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': refunds
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

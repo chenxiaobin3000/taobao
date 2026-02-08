@@ -25,12 +25,7 @@ class MiscellaneousManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-create_date')[left:right]
-
-    def encoder(self, misc):
-        if misc:
-            return model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note'])
-        return None
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_date')[left:right])
 
     def encoderList(self, miscs):
         if miscs:

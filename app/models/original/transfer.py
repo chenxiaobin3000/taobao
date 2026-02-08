@@ -11,7 +11,7 @@ class TransferManager(models.Manager):
         return self.get(pk=pk).delete()
 
     def getByCTime(self, shop_id, create_time):
-        return self.filter(shop_id=shop_id, create_time=create_time).first()
+        return self.encoder(self.filter(shop_id=shop_id, create_time=create_time).first())
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
@@ -19,7 +19,7 @@ class TransferManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.filter(shop_id=shop_id).order_by('-create_time')[left:right]
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
     def encoder(self, transfer):
         if transfer:

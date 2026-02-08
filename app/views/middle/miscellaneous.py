@@ -15,12 +15,10 @@ def add(request):
     project_name = post.get('name')
     amount = post.get('amount')
     misc_note = post.get('note')
-    misc = Miscellaneous.objects.add(shop_id, create_date, user_id, project_name, amount, misc_note)
-    data = Miscellaneous.objects.encoder(misc)
+    Miscellaneous.objects.add(shop_id, create_date, user_id, project_name, amount, misc_note)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -34,11 +32,10 @@ def set(request):
     project_name = post.get('name')
     amount = post.get('amount')
     misc_note = post.get('note')
-    data = Miscellaneous.objects.set(pk, create_date, user_id, project_name, amount, misc_note)
+    Miscellaneous.objects.set(pk, create_date, user_id, project_name, amount, misc_note)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -47,11 +44,10 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Miscellaneous.objects.delete(pk)
+    Miscellaneous.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -64,13 +60,12 @@ def getList(request):
     num = int(post.get('num'))
     total = Miscellaneous.objects.total(shop_id)
     miscs = Miscellaneous.objects.getList(shop_id, page, num)
-    data = Miscellaneous.objects.encoderList(miscs)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': miscs
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

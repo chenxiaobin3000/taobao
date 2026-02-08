@@ -14,8 +14,7 @@ def addList(request):
     polymerizes = post.get('p')
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
 
     # 批量添加
@@ -47,11 +46,10 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = PromotionDetail.objects.delete(pk)
+    PromotionDetail.objects.delete(pk)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -64,13 +62,12 @@ def getList(request):
     num = int(post.get('num'))
     total = PromotionDetail.objects.total(shop_id)
     promotions = PromotionDetail.objects.getList(shop_id, page, num)
-    datas = PromotionDetail.objects.encoderList(promotions)
 
     # 商品信息
-    for data in datas:
+    for data in promotions:
         good = Good.objects.getById(shop_id, data['good_id'])
         if good:
-            data['good_name'] = good.short_name
+            data['good_name'] = good['short_name']
         else:
             data['good_name'] = data['good_id']
 
@@ -79,7 +76,7 @@ def getList(request):
         'msg': 'success',
         'data': {
             'total': total,
-            'list': datas
+            'list': promotions
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
