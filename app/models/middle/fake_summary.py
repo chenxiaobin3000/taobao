@@ -22,6 +22,9 @@ class FakeSummaryManager(models.Manager):
     def find(self, pk):
         return self.get(pk=pk)
 
+    def getByDate(self, shop_id, date):
+        return self.filter(shop_id=shop_id, create_date=date).first()
+
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 
@@ -31,10 +34,10 @@ class FakeSummaryManager(models.Manager):
         return self.filter(shop_id=shop_id).order_by('-ctime')[left:right]
 
     def encoder(self, fake):
-        return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note'])
+        return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note'])
 
     def encoderList(self, fakes):
-        return [model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note']) for fake in fakes]
+        return [model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note']) for fake in fakes]
 
 class FakeSummary(models.Model):
     objects = FakeSummaryManager()

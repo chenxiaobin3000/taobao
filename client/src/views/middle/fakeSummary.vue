@@ -28,6 +28,11 @@
           {{ scope.row.order_num }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="真实金额" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.order_amount }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="刷单订单数" width="160">
         <template slot-scope="scope">
           {{ scope.row.fake_num }}
@@ -38,12 +43,12 @@
           {{ scope.row.fake_amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="佣金" width="160">
+      <el-table-column align="center" label="总佣金" width="160">
         <template slot-scope="scope">
           {{ scope.row.commission }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="运费" width="160">
+      <el-table-column align="center" label="总运费" width="160">
         <template slot-scope="scope">
           {{ scope.row.freight }}
         </template>
@@ -66,7 +71,7 @@
     <el-dialog title="修改刷单信息" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="真实数据">
-          金额:<div>{{ temp.order_amount }}</div>, 订单数:<div>{{ temp.order_num }}</div>
+          <div>金额: {{ temp.order_amount }}, 订单数: {{ temp.order_num }}</div>
         </el-form-item>
         <el-form-item label="刷单总金额">
           <el-input v-model="temp.fake_amount" />
@@ -74,11 +79,13 @@
         <el-form-item label="刷单订单数">
           <el-input v-model="temp.fake_num" />
         </el-form-item>
-        <el-form-item label="佣金">
-          <el-input v-model="temp.commission" />x<div>{{ temp.good_id }}</div>
+        <el-form-item label="总佣金">
+          <el-input v-model="temp.commission" />
+          <div>校验: 3 x {{ temp.fake_num }} = {{ 3 * temp.fake_num }}</div>
         </el-form-item>
-        <el-form-item label="运费">
-          <el-input v-model="temp.freight" />x<div>{{ temp.good_id }}</div>
+        <el-form-item label="总运费">
+          <el-input v-model="temp.freight" />
+          <div>校验: 2 x {{ temp.fake_num }} = {{ 2 * temp.fake_num }}</div>
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="temp.fake_note" />

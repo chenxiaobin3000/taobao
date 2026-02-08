@@ -33,9 +33,7 @@ class FakeManager(models.Manager):
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
     def getListByDay(self, shop_id, start_date, end_date):
-        ret = self.filter(shop_id=shop_id, create_time__range=(start_date, end_date)).annotate(amounts=models.Sum('payment'), nums=models.Count('id')).values('amounts', 'nums')
-        print(ret)
-        return ret
+        return self.filter(shop_id=shop_id, create_time__range=(start_date, end_date)).aggregate(models.Sum('payment'), models.Count('id'))
 
     def encoder(self, order):
         if order:

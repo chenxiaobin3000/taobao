@@ -8,7 +8,6 @@ from app.json_encoder import MyJSONEncoder
 from app.models.middle.fake_summary import FakeSummary
 from app.models.original.fake import Fake
 
-
 @require_POST
 @transaction.atomic
 def flush(request):
@@ -32,13 +31,14 @@ def flush(request):
 
     # 按天生成数据
     for i in range(0, days):
-        if i > 1:
-            break
-        end_date = start_date + timedelta(days=i+1)
-        print(end_date)
-        data = Fake.objects.getListByDay(shop_id, start_date, end_date)
-        print(data)
-        FakeSummary.objects.add(shop_id, start_date, data['amounts'], data['nums'], 0, 0, 0, 0, '')
+        start = start_date + timedelta(days=i)
+        end = start_date + timedelta(days=i+1)
+        # 已经生成的就跳过
+        if FakeSummary.objects.getByDate(shop_id, start):
+            continue
+        data = Fake.objects.getListByDay(shop_id, start, end)
+        if data and data['payment__sum'] and data['id__count'] > 0:
+            FakeSummary.objects.add(shop_id, start, data['payment__sum'], data['id__count'], 0, 0, 0, 0, '')
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
