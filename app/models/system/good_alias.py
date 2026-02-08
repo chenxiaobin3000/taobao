@@ -13,9 +13,6 @@ class GoodAliasManager(models.Manager):
     def deleteById(self, shop_id, good_id):
         return self.filter(shop_id=shop_id, good_id=good_id).delete()
 
-    def getById(self, shop_id, good_id):
-        return self.encoder(self.filter(shop_id=shop_id, good_id=good_id))
-
     def getByName(self, shop_id, name):
         return self.encoder(self.filter(shop_id=shop_id, name=name).first())
 
@@ -26,6 +23,9 @@ class GoodAliasManager(models.Manager):
         left = (page - 1) * num
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id)[left:right])
+
+    def getListById(self, shop_id, good_id):
+        return self.encoderList(self.filter(shop_id=shop_id, good_id=good_id))
 
     def encoder(self, good):
         if good:

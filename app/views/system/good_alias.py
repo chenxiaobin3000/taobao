@@ -50,7 +50,7 @@ def getById(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     good_id = post.get('gid')
-    good = GoodAlias.objects.getById(shop_id, good_id)
+    good = GoodAlias.objects.getListById(shop_id, good_id)
     response = {
         'code': 0,
         'msg': 'success',

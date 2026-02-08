@@ -215,8 +215,6 @@ export const GoodStatus = {
       id: this.REMOVE, name: '下架'
     }, {
       id: this.DELETE, name: '删除'
-    }, {
-      id: this.OTHER, name: '异常'
     }]
   }
 }
@@ -249,6 +247,15 @@ export const GoodType = {
         return '补差价'
     }
     return '异常'
+  },
+  getList() {
+    return [{
+      id: this.NORMAL, name: '商品'
+    }, {
+      id: this.GIFT, name: '赠品'
+    }, {
+      id: this.SUPPLEMENT, name: '补差价'
+    }]
   }
 }
 

@@ -9,6 +9,8 @@ class AccountManager(models.Manager):
 
     def set(self, pk, password):
         account = self.get(pk=pk)
+        if not account:
+            return
         account.password = password
         return account.save()
 
@@ -17,6 +19,9 @@ class AccountManager(models.Manager):
 
     def getByAccount(self, account):
         return self.encoder(self.filter(account=account).first())
+
+    def getByUserId(self, user_id):
+        return self.encoder(self.filter(user_id=user_id).first())
 
     def total(self):
         return self.all().count()

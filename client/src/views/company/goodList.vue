@@ -50,11 +50,13 @@
         <el-form-item label="商品编码">
           <div>{{ temp.good_id }}</div>
         </el-form-item>
-        <el-form-item label="商品类型">
-          <div>{{ num2type(temp.good_type) }}</div>
-        </el-form-item>
         <el-form-item label="商品名称">
           <el-input v-model="temp.short_name" />
+        </el-form-item>
+        <el-form-item label="商品类型">
+          <el-select v-model="temp.good_type" class="filter-item" placeholder="请选择类型">
+            <el-option v-for="item in typeList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="商品状态">
           <el-select v-model="temp.good_status" class="filter-item" placeholder="请选择状态">
@@ -105,6 +107,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      typeList: [], // 商品类型列表
       statusList: [], // 商品状态列表
       shopList: [], // 本公司所有店铺列表
       goodAliasList: [], // 商品所有别名列表
@@ -142,6 +145,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
+    this.typeList = GoodType.getList()
     this.statusList = GoodStatus.getList()
     this.resetTemp()
     this.getShopList()
@@ -153,6 +157,7 @@ export default {
         good_id: '',
         name: '',
         short_name: '',
+        good_type: GoodType.NORMAL,
         good_status: GoodStatus.SALE,
         alias: ''
       }
@@ -233,6 +238,7 @@ export default {
         id: this.temp.id,
         name: this.temp.name,
         sname: this.temp.short_name,
+        type: this.temp.good_type,
         status: this.temp.good_status
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })

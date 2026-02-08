@@ -112,9 +112,11 @@ def getList(request):
     # 获取平台、管理员信息
     for data in shops:
         market = Market.objects.find(data['market_id'])
-        data['market_name'] = market.name
+        data['market_name'] = market['name']
 
         userShops = UserShop.objects.getListByShop(data['id'])
+        if not userShops:
+            continue
         for userShop in userShops:
             del userShop['id']
             del userShop['shop_id']

@@ -6,17 +6,22 @@
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="手机号" align="center">
+      <el-table-column label="账号名称" width="160px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.account }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="手机号" width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="角色" width="160px" align="center">
+      <el-table-column label="角色" width="80px" align="center">
         <template slot-scope="{row}">
           <span>{{ num2role(row.role_id) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="店铺" width="160px" align="center">
+      <el-table-column label="店铺" align="center">
         <template slot-scope="{row}">
           <span>{{ row.shopList }}</span>
         </template>
@@ -34,6 +39,9 @@
     <!-- 用户信息编辑 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
+        <el-form-item v-if="dialogStatus==='create'" label="账号">
+          <el-input v-model="temp.account" />
+        </el-form-item>
         <el-form-item label="用户名">
           <el-input v-model="temp.name" />
         </el-form-item>
@@ -45,7 +53,7 @@
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="店铺">
+        <el-form-item v-if="dialogStatus!=='create'" label="店铺">
           <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleShopChange" />
         </el-form-item>
         <el-form-item v-if="dialogStatus==='create'" label="说明">
@@ -111,6 +119,7 @@ export default {
     },
     create() {
       this.resetTemp()
+      this.temp.id = this.userdata.user.id
 
       // 默认角色
       this.temp.role_id = this.roleList[0].id
@@ -144,9 +153,11 @@ export default {
     resetTemp() {
       this.temp = {
         id: 0,
+        account: '',
         name: '',
         phone: '',
-        role_id: 0
+        role_id: 0,
+        shops: null
       }
     },
     getUserList() {
@@ -200,10 +211,11 @@ export default {
     },
     createData() {
       addUser({
+        account: this.temp.account,
         name: this.temp.name,
         phone: this.temp.phone,
         cid: this.userdata.company.id,
-        rid: this.temp.role.id
+        rid: this.temp.role_id
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
         this.getUserList()
@@ -226,8 +238,8 @@ export default {
       // 生成选中列表
       this.$nextTick(() => {
         const checkedKeys = []
-        for (let i = 0; i < this.userdata.shop.length; ++i) {
-          checkedKeys.push(this.userdata.shop[i].id)
+        for (let i = 0; i < this.temp.shops.length; ++i) {
+          checkedKeys.push(this.temp.shops[i].id)
         }
         this.$refs.tree.setCheckedKeys(checkedKeys)
       })
@@ -249,14 +261,14 @@ export default {
     handleShopChange(data, obj) {
       if (obj.checkedKeys.includes(data.id)) {
         addUserShop({
-          uid: this.userdata.user.id,
+          uid: this.temp.id,
           sid: data.id
         }).then(() => {
           this.getUserList()
         })
       } else {
         delUserShop({
-          uid: this.userdata.user.id,
+          uid: this.temp.id,
           sid: data.id
         }).then(() => {
           this.getUserList()

@@ -77,8 +77,8 @@ export default {
       }
       setPassword({
         id: this.$store.getters.userdata.user.id,
-        oldpassword: md5(this.oldPwd),
-        newpassword: md5(this.newPwd)
+        oldp: md5(this.oldPwd),
+        newp: md5(this.newPwd)
       }).then(response => {
         this.$message({ type: 'success', message: '修改成功!' })
       })

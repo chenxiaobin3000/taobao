@@ -3,10 +3,8 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
+from app.models.const.default_password import DefaultPassword
 from app.models.account import Account
-
-# 系统默认密码:888888
-default_password = '21218cca77804d2ba1922c33e0151105'
 
 @require_POST
 @transaction.atomic
@@ -34,15 +32,16 @@ def login(request):
     object = Account.objects.getByAccount(account)
     response = {
         'code': 0,
-        'msg': 'success'
+        'msg': 'success',
+        'data': {}
     }
     
     # 校验密码
-    if (password != object.password):
+    if (password != object['password']):
         response['code'] = -1
         response['msg'] = '密码不正确'
         return JsonResponse(response, encoder=MyJSONEncoder)
-    response['data']['id'] = object.user_id
+    response['data']['id'] = object['user_id']
 
     # 刷新session信息
     # response['data']['token'] = ''
@@ -66,12 +65,26 @@ def logout(request):
 def setPassword(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    password = post.get('password')
-    Account.objects.set(pk, password)
+    old_password = post.get('oldp')
+    new_password = post.get('newp')
     response = {
         'code': 0,
         'msg': 'success'
     }
+
+    # 用户id转账号id
+    account = Account.objects.getByUserId(pk)
+    if not account:
+        response['code'] = -1
+        response['msg'] = '查询账号信息异常'
+        return JsonResponse(response, encoder=MyJSONEncoder)
+
+    if old_password != account['password']:
+        response['code'] = -1
+        response['msg'] = '原始密码错误'
+        return JsonResponse(response, encoder=MyJSONEncoder)
+
+    Account.objects.set(account['id'], new_password)
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -79,9 +92,17 @@ def setPassword(request):
 def resetPassword(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    Account.objects.set(pk, default_password)
     response = {
         'code': 0,
         'msg': 'success'
     }
+
+    # 用户id转账号id
+    account = Account.objects.getByUserId(pk)
+    if not account:
+        response['code'] = -1
+        response['msg'] = '查询账号信息异常'
+        return JsonResponse(response, encoder=MyJSONEncoder)
+
+    Account.objects.set(pk, DefaultPassword.VALUE)
     return JsonResponse(response, encoder=MyJSONEncoder)
