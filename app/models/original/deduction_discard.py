@@ -22,7 +22,7 @@ class DeductionDiscardManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.encoderLst(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
     def encoder(self, deduction):
         if deduction:

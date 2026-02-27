@@ -115,13 +115,14 @@ def getList(request):
     orders = Order.objects.getList(shop_id, page, num)
 
     # 商品id转换商品名称
-    for data in orders:
-        goods = data['good_ids'].split('|')
-        data['good_names'] = ''
-        for good in goods:
-            find_object = Good.objects.getById(shop_id, good)
-            if find_object:
-                data['good_names'] = data['good_names'] + find_object.short_name + ','
+    if orders:
+        for data in orders:
+            goods = data['good_ids'].split('|')
+            data['good_names'] = ''
+            for good in goods:
+                find_object = Good.objects.getById(shop_id, good)
+                if find_object:
+                    data['good_names'] = data['good_names'] + find_object.short_name + ','
 
     response = {
         'code': 0,

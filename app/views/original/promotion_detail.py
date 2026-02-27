@@ -64,12 +64,13 @@ def getList(request):
     promotions = PromotionDetail.objects.getList(shop_id, page, num)
 
     # 商品信息
-    for data in promotions:
-        good = Good.objects.getById(shop_id, data['good_id'])
-        if good:
-            data['good_name'] = good['short_name']
-        else:
-            data['good_name'] = data['good_id']
+    if promotions:
+        for data in promotions:
+            good = Good.objects.getById(shop_id, data['good_id'])
+            if good:
+                data['good_name'] = good['short_name']
+            else:
+                data['good_name'] = data['good_id']
 
     response = {
         'code': 0,
