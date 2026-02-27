@@ -12,6 +12,7 @@ from app.models.const.deduction_type import DeductionType
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     polymerizes = post.get('p')
     response = {
         'code': 0,
@@ -34,13 +35,13 @@ def addList(request):
         
         # 不处理的数据放废弃表
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
-            if UserPolymerizeDiscard.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+            if UserPolymerizeDiscard.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserPolymerizeDiscard.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+            UserPolymerizeDiscard.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, polymerize_note)
         else:
-            if UserPolymerize.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+            if UserPolymerize.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserPolymerize.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+            UserPolymerize.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, polymerize_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -61,10 +62,11 @@ def delete(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserPolymerize.objects.total(shop_id)
-    polymerizes = UserPolymerize.objects.getList(shop_id, page, num)
+    total = UserPolymerize.objects.total(user_id, shop_id)
+    polymerizes = UserPolymerize.objects.getList(user_id, shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

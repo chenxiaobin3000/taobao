@@ -1,5 +1,5 @@
 from django.urls import path
-from app.views.trunk import deduction, deduction_discard, fake, order, polymerize, polymerize_discard, promotion_detail, promotion, purchase, refund, transfer
+from app.views.trunk import deduction, fake, order, polymerize, promotion_detail, promotion, purchase, refund, transfer
 
 url_trunk = [
     # 扣费
@@ -7,13 +7,7 @@ url_trunk = [
     path('api/deduction/del', deduction.delete),
     path('api/deduction/getList', deduction.getList),
 
-    # 扣费-废弃
-    path('api/deduction_discard/del', deduction_discard.delete),
-    path('api/deduction_discard/delAll', deduction_discard.deleteAll),
-    path('api/deduction_discard/getList', deduction_discard.getList),
-
     # 刷单
-    path('api/fake/addList', fake.addList),
     path('api/fake/del', fake.delete),
     path('api/fake/getList', fake.getList),
 
@@ -26,11 +20,6 @@ url_trunk = [
     path('api/polymerize/addList', polymerize.addList),
     path('api/polymerize/del', polymerize.delete),
     path('api/polymerize/getList', polymerize.getList),
-
-    # 聚合-废弃
-    path('api/polymerize_discard/del', polymerize_discard.delete),
-    path('api/polymerize_discard/delAll', polymerize_discard.deleteAll),
-    path('api/polymerize_discard/getList', polymerize_discard.getList),
 
     # 推广明细
     path('api/promotion_detail/addList', promotion_detail.addList),

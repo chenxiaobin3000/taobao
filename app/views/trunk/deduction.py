@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.deduction import Deduction
-from app.models.trunk.deduction_discard import DeductionDiscard
 from app.models.const.deduction_type import DeductionType
 
 @require_POST
@@ -32,15 +31,10 @@ def addList(request):
             response['msg'] = '异常数据'
             return JsonResponse(response, encoder=MyJSONEncoder)
 
-        # 不处理的数据放废弃表
-        if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
-            if DeductionDiscard.objects.getByCTime(shop_id, order_id, amount_type, create_time):
-                continue
-            DeductionDiscard.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
-        else:
-            if Deduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
-                continue
-            Deduction.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
+        # 插入数据
+        if Deduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+            continue
+        Deduction.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

@@ -22,7 +22,8 @@ def delete(request):
 def deleteAll(request):
     post = json.loads(request.body)
     id = int(post.get('id'))
-    UserDeductionDiscard.objects.deleteAll(id)
+    user_id = int(post.get('uid'))
+    UserDeductionDiscard.objects.deleteAll(id, user_id)
     response = {
         'code': 0,
         'msg': 'success'
@@ -34,10 +35,11 @@ def deleteAll(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserDeductionDiscard.objects.total(shop_id)
-    deductions = UserDeductionDiscard.objects.getList(shop_id, page, num)
+    total = UserDeductionDiscard.objects.total(user_id, shop_id)
+    deductions = UserDeductionDiscard.objects.getList(user_id, shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

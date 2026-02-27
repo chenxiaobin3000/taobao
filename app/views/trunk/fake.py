@@ -9,52 +9,6 @@ from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic
-def addList(request):
-    post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    orders = post.get('o')
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
-
-    # 批量添加
-    for order in orders:
-        order_id = order['id']
-        payment = order['pa']
-        procure = order['pr']
-        order_status = int(order['st'])
-        create_time = order['ct']
-        product_name = order['na']
-        procure_ids = order['pi']
-        order_note = order['no']
-
-        # 已存在更新状态
-        find_object = Fake.objects.getById(shop_id, order_id)
-        if find_object:
-            find_object.procure = procure
-            find_object.order_status = order_status
-            find_object.procure_ids = procure_ids
-            find_object.order_note = order_note
-            find_object.save()
-        else:
-            # 转换商品id
-            products = product_name.split(',')
-            good_ids = ''
-            for product in products:
-                good = Good.objects.getByName(shop_id, product)
-                if not good:
-                    response['code'] = -1
-                    response['msg'] = '没有查询到商品:' + product
-                    return JsonResponse(response, encoder=MyJSONEncoder)
-                if good.good_type != GoodType.GIFT:
-                    good_ids = good_ids + good.good_id + '|'
-            Fake.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
-
-    return JsonResponse(response, encoder=MyJSONEncoder)
-
-@require_POST
-@transaction.atomic
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))

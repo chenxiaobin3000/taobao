@@ -12,6 +12,7 @@ from app.models.const.good_type import GoodType
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     refunds = post.get('r')
 
     # 获取赠品列表
@@ -40,7 +41,7 @@ def addList(request):
             continue
 
         # 已存在更新状态
-        find_object = UserRefund.objects.getByIdAndTime(shop_id, order_id, refund_id, product_id, apply_time)
+        find_object = UserRefund.objects.getByIdAndTime(user_id, shop_id, order_id, refund_id, product_id, apply_time)
         if find_object:
             if find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_platform != refund_platform or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
                 find_object.actual_pay = actual_pay
@@ -52,7 +53,7 @@ def addList(request):
                 find_object.complete_time = complete_time
                 find_object.save()
         else:
-            UserRefund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, pay_time, apply_time, timeout_time, complete_time)
+            UserRefund.objects.add(user_id, shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, pay_time, apply_time, timeout_time, complete_time)
 
     response = {
         'code': 0,
@@ -65,7 +66,7 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = UserRefund.objects.delete(pk)
+    UserRefund.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -77,10 +78,11 @@ def delete(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserRefund.objects.total(shop_id)
-    refunds = UserRefund.objects.getList(shop_id, page, num)
+    total = UserRefund.objects.total(user_id, shop_id)
+    refunds = UserRefund.objects.getList(user_id, shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

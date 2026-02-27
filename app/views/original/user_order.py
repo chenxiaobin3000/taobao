@@ -15,6 +15,7 @@ from app.models.system.good_alias import GoodAlias
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     orders = post.get('o')
     response = {
         'code': 0,
@@ -37,7 +38,7 @@ def addList(request):
             order_note = order['no']
 
         # 已存在更新刷单状态
-        find_object = UserFake.objects.getById(shop_id, order_id)
+        find_object = UserFake.objects.getById(user_id, shop_id, order_id)
         if find_object:
             find_object.procure = procure
             find_object.order_status = order_status
@@ -47,7 +48,7 @@ def addList(request):
             continue
 
         # 已存在更新订单状态
-        find_object = UserOrder.objects.getById(shop_id, order_id)
+        find_object = UserOrder.objects.getById(user_id, shop_id, order_id)
         if find_object:
             find_object.procure = procure
             find_object.order_status = order_status
@@ -86,9 +87,9 @@ def addList(request):
                     is_supplement = True
             # 不是补差价，且单价低于30，认定刷单
             if payment <= 30 and not is_supplement:
-                UserFake.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
+                UserFake.objects.add(user_id, shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
             else:
-                UserOrder.objects.add(shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
+                UserOrder.objects.add(user_id, shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -109,10 +110,11 @@ def delete(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserOrder.objects.total(shop_id)
-    orders = UserOrder.objects.getList(shop_id, page, num)
+    total = UserOrder.objects.total(user_id, shop_id)
+    orders = UserOrder.objects.getList(user_id, shop_id, page, num)
 
     # 商品id转换商品名称
     if orders:

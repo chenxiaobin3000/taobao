@@ -10,6 +10,7 @@ from app.models.original.user_transfer import UserTransfer
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     transfers = post.get('t')
 
     # 批量添加
@@ -20,9 +21,9 @@ def addList(request):
         amount = transfer['a']
         create_time = transfer['c']
         transfer_note= transfer['tn']
-        if UserTransfer.objects.getByCTime(shop_id, create_time):
+        if UserTransfer.objects.getByCTime(user_id, shop_id, create_time):
             continue
-        UserTransfer.objects.add(shop_id, user_name, payee_name, order_id, amount, create_time, transfer_note)
+        UserTransfer.objects.add(user_id, shop_id, user_name, payee_name, order_id, amount, create_time, transfer_note)
 
     response = {
         'code': 0,
@@ -47,10 +48,11 @@ def delete(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserTransfer.objects.total(shop_id)
-    transfers = UserTransfer.objects.getList(shop_id, page, num)
+    total = UserTransfer.objects.total(user_id, shop_id)
+    transfers = UserTransfer.objects.getList(user_id, shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

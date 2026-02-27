@@ -12,6 +12,7 @@ from app.models.const.deduction_type import DeductionType
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     deductions = post.get('d')
     response = {
         'code': 0,
@@ -34,13 +35,13 @@ def addList(request):
 
         # 不处理的数据放废弃表
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
-            if UserDeductionDiscard.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+            if UserDeductionDiscard.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserDeductionDiscard.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
+            UserDeductionDiscard.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, deduction_note)
         else:
-            if UserDeduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+            if UserDeduction.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserDeduction.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
+            UserDeduction.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, deduction_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -61,10 +62,11 @@ def delete(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserDeduction.objects.total(shop_id)
-    deductions = UserDeduction.objects.getList(shop_id, page, num)
+    total = UserDeduction.objects.total(user_id, shop_id)
+    deductions = UserDeduction.objects.getList(user_id, shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

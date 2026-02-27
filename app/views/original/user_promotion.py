@@ -10,6 +10,7 @@ from app.models.original.user_promotion import UserPromotion
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     promotions = post.get('p')
 
     # 批量添加
@@ -18,9 +19,9 @@ def addList(request):
         payment = promotion['p']
         promotion_type = promotion['t']
         promotion_note = promotion['n']
-        if UserPromotion.objects.getByCDate(shop_id, create_date, promotion_type):
+        if UserPromotion.objects.getByCDate(user_id, shop_id, create_date, promotion_type):
             continue
-        UserPromotion.objects.add(shop_id, create_date, payment, promotion_type, promotion_note)
+        UserPromotion.objects.add(user_id, shop_id, create_date, payment, promotion_type, promotion_note)
 
     response = {
         'code': 0,
@@ -45,10 +46,11 @@ def delete(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserPromotion.objects.total(shop_id)
-    promotions = UserPromotion.objects.getList(shop_id, page, num)
+    total = UserPromotion.objects.total(user_id, shop_id)
+    promotions = UserPromotion.objects.getList(user_id, shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

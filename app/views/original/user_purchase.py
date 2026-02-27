@@ -10,6 +10,7 @@ from app.models.original.user_purchase import UserPurchase
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     purchases = post.get('p')
 
     # 批量添加
@@ -23,7 +24,7 @@ def addList(request):
         create_time = purchase['ctime']
         product_name = purchase['pn']
         purchase_note = purchase['note']
-        UserPurchase.objects.add(shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
+        UserPurchase.objects.add(user_id, shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
     response = {
         'code': 0,
@@ -49,7 +50,7 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = UserPurchase.objects.delete(pk)
+    UserPurchase.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -61,10 +62,11 @@ def delete(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserPurchase.objects.total(shop_id)
-    purchases = UserPurchase.objects.getList(shop_id, page, num)
+    total = UserPurchase.objects.total(user_id, shop_id)
+    purchases = UserPurchase.objects.getList(user_id, shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

@@ -13,7 +13,6 @@ url_original = [
     path('api/user_deduction_discard/getList', user_deduction_discard.getList),
 
     # 刷单
-    path('api/user_fake/addList', user_fake.addList),
     path('api/user_fake/del', user_fake.delete),
     path('api/user_fake/getList', user_fake.getList),
 

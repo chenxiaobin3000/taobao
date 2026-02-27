@@ -116,6 +116,7 @@ export default {
       shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
+        uid: 0,
         page: 1,
         num: 10,
         search: null
@@ -146,6 +147,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
+    this.listQuery.uid = this.userdata.user.id
     this.getShopList()
   },
   methods: {
@@ -219,6 +221,7 @@ export default {
         for (let i = 0; i <= length; ++i) {
           addPromotionDetailList({
             id: this.listQuery.id,
+            uid: this.userdata.user.id,
             p: p.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
@@ -234,6 +237,7 @@ export default {
       } else {
         addPromotionDetailList({
           id: this.listQuery.id,
+          uid: this.userdata.user.id,
           p: p
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })

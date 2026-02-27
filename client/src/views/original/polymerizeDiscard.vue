@@ -64,6 +64,7 @@ export default {
       shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
+        uid: 0,
         page: 1,
         num: 10,
         search: null
@@ -93,6 +94,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = 0
+    this.listQuery.uid = this.userdata.user.id
     this.getShopList()
   },
   methods: {
@@ -147,7 +149,8 @@ export default {
         type: 'warning'
       }).then(() => {
         delAllPolymerizeDiscard({
-          id: this.listQuery.id
+          id: this.listQuery.id,
+          uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getPolymerizeDiscardList()
