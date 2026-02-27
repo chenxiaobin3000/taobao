@@ -3,8 +3,8 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.original.polymerize import Polymerize
-from app.models.original.polymerize_discard import PolymerizeDiscard
+from app.models.original.user_deduction import UserDeduction
+from app.models.original.user_deduction_discard import UserDeductionDiscard
 from app.models.const.deduction_type import DeductionType
 
 @require_POST
@@ -12,35 +12,35 @@ from app.models.const.deduction_type import DeductionType
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    polymerizes = post.get('p')
+    deductions = post.get('d')
     response = {
         'code': 0,
         'msg': 'success'
     }
 
     # 批量添加
-    for polymerize in polymerizes:
-        order_id = polymerize['o']
-        amount = polymerize['a']
-        amount_type = int(polymerize['t'])
-        create_time = polymerize['c']
-        polymerize_note = polymerize['n']
+    for deduction in deductions:
+        order_id = deduction['o']
+        amount = deduction['a']
+        amount_type = int(deduction['t'])
+        create_time = deduction['c']
+        deduction_note = deduction['n']
 
         # 未知数据类型返回失败
         if DeductionType.OTHER == amount_type:
             response['code'] = -1
             response['msg'] = '异常数据'
             return JsonResponse(response, encoder=MyJSONEncoder)
-        
+
         # 不处理的数据放废弃表
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
-            if PolymerizeDiscard.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+            if UserDeductionDiscard.objects.getByCTime(shop_id, order_id, amount_type, create_time):
                 continue
-            PolymerizeDiscard.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+            UserDeductionDiscard.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
         else:
-            if Polymerize.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+            if UserDeduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
                 continue
-            Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+            UserDeduction.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -49,7 +49,7 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    Polymerize.objects.delete(pk)
+    UserDeduction.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -63,14 +63,14 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Polymerize.objects.total(shop_id)
-    polymerizes = Polymerize.objects.getList(shop_id, page, num)
+    total = UserDeduction.objects.total(shop_id)
+    deductions = UserDeduction.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': polymerizes
+            'list': deductions
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

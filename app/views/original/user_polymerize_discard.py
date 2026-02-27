@@ -3,14 +3,14 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.original.polymerize_discard import PolymerizeDiscard
+from app.models.original.user_polymerize_discard import UserPolymerizeDiscard
 
 @require_POST
 @transaction.atomic
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    PolymerizeDiscard.objects.delete(pk)
+    UserPolymerizeDiscard.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -22,7 +22,7 @@ def delete(request):
 def deleteAll(request):
     post = json.loads(request.body)
     id = int(post.get('id'))
-    PolymerizeDiscard.objects.deleteAll(id)
+    UserPolymerizeDiscard.objects.deleteAll(id)
     response = {
         'code': 0,
         'msg': 'success'
@@ -36,8 +36,8 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = PolymerizeDiscard.objects.total(shop_id)
-    polymerizes = PolymerizeDiscard.objects.getList(shop_id, page, num)
+    total = UserPolymerizeDiscard.objects.total(shop_id)
+    polymerizes = UserPolymerizeDiscard.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

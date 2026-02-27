@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.urls import path
 from django.views.generic.base import TemplateView
-from app.url.system import url_system
-from app.url.original import url_original
 from app.url.middle import url_middle
+from app.url.original import url_original
 from app.url.report import url_report
+from app.url.system import url_system
+from app.url.trunk import url_trunk
 
-urlpatterns = url_system + url_original + url_middle + url_report + [
+urlpatterns = url_middle + url_original + url_report + url_system + url_trunk + [
     path('', TemplateView.as_view(template_name='index.html'))
 ]

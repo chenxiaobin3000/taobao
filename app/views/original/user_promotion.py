@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.original.promotion import Promotion
+from app.models.original.user_promotion import UserPromotion
 
 @require_POST
 @transaction.atomic
@@ -18,9 +18,9 @@ def addList(request):
         payment = promotion['p']
         promotion_type = promotion['t']
         promotion_note = promotion['n']
-        if Promotion.objects.getByCDate(shop_id, create_date, promotion_type):
+        if UserPromotion.objects.getByCDate(shop_id, create_date, promotion_type):
             continue
-        Promotion.objects.add(shop_id, create_date, payment, promotion_type, promotion_note)
+        UserPromotion.objects.add(shop_id, create_date, payment, promotion_type, promotion_note)
 
     response = {
         'code': 0,
@@ -33,7 +33,7 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    Promotion.objects.delete(pk)
+    UserPromotion.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -47,8 +47,8 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Promotion.objects.total(shop_id)
-    promotions = Promotion.objects.getList(shop_id, page, num)
+    total = UserPromotion.objects.total(shop_id)
+    promotions = UserPromotion.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

@@ -6,7 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.fake_summary import FakeSummary
-from app.models.original.fake import Fake
+from app.models.original.user_fake import UserFake
 
 @require_POST
 @transaction.atomic
@@ -35,7 +35,7 @@ def flush(request):
         # 已经生成的就跳过
         if FakeSummary.objects.getByDate(shop_id, start):
             continue
-        data = Fake.objects.getListByDay(shop_id, start, end)
+        data = UserFake.objects.getListByDay(shop_id, start, end)
         if data and data['payment__sum'] and data['id__count'] > 0:
             FakeSummary.objects.add(shop_id, start, data['payment__sum'], data['id__count'], 0, 0, 0, 0, '')
 

@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.original.purchase import Purchase
+from app.models.original.user_purchase import UserPurchase
 
 @require_POST
 @transaction.atomic
@@ -23,7 +23,7 @@ def addList(request):
         create_time = purchase['ctime']
         product_name = purchase['pn']
         purchase_note = purchase['note']
-        Purchase.objects.add(shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
+        UserPurchase.objects.add(shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
     response = {
         'code': 0,
@@ -37,7 +37,7 @@ def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     order_status = int(post.get('status'))
-    Purchase.objects.set(pk, order_status)
+    UserPurchase.objects.set(pk, order_status)
     response = {
         'code': 0,
         'msg': 'success'
@@ -49,7 +49,7 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    data = Purchase.objects.delete(pk)
+    data = UserPurchase.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -63,8 +63,8 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Purchase.objects.total(shop_id)
-    purchases = Purchase.objects.getList(shop_id, page, num)
+    total = UserPurchase.objects.total(shop_id)
+    purchases = UserPurchase.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

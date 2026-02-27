@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.original.promotion_detail import PromotionDetail
+from app.models.original.user_promotion_detail import UserPromotionDetail
 from app.models.system.good import Good
 
 @require_POST
@@ -35,9 +35,9 @@ def addList(request):
         roi = polymerize['roi']
 
         # 不存在就插入
-        find_object = PromotionDetail.objects.getByIdAndDate(shop_id, promotion_date, good_id)
+        find_object = UserPromotionDetail.objects.getByIdAndDate(shop_id, promotion_date, good_id)
         if not find_object:
-            PromotionDetail.objects.add(shop_id, promotion_date, good_id, show_num, click_num, click_rate, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
+            UserPromotionDetail.objects.add(shop_id, promotion_date, good_id, show_num, click_num, click_rate, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -46,7 +46,7 @@ def addList(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    PromotionDetail.objects.delete(pk)
+    UserPromotionDetail.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -60,8 +60,8 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = PromotionDetail.objects.total(shop_id)
-    promotions = PromotionDetail.objects.getList(shop_id, page, num)
+    total = UserPromotionDetail.objects.total(shop_id)
+    promotions = UserPromotionDetail.objects.getList(shop_id, page, num)
 
     # 商品信息
     if promotions:
