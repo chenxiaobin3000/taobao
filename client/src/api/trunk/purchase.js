@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/user_promotion'
+const path = '/purchase'
 
-export function addPromotionList(data) {
+export function addPurchaseList(data) {
   return request({
     url: `${path}/addList`,
     method: 'post',
@@ -9,7 +9,15 @@ export function addPromotionList(data) {
   })
 }
 
-export function delPromotion(data) {
+export function setPurchase(data) {
+  return request({
+    url: `${path}/set`,
+    method: 'post',
+    data
+  })
+}
+
+export function delPurchase(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -17,7 +25,7 @@ export function delPromotion(data) {
   })
 }
 
-export function getPromotionList(data) {
+export function getPurchaseList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/deduction_discard'
+const path = '/user_deduction_discard'
 
 export function delDeductionDiscard(data) {
   return request({

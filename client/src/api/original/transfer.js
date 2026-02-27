@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/transfer'
+const path = '/user_transfer'
 
 export function addTransferList(data) {
   return request({

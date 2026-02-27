@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/user_fake'
+const path = '/fake'
 
 export function delFake(data) {
   return request({

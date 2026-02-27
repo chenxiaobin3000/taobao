@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/order'
+const path = '/user_order'
 
 export function addOrderList(data) {
   return request({

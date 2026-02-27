@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/polymerize_discard'
+const path = '/user_polymerize_discard'
 
 export function delPolymerizeDiscard(data) {
   return request({

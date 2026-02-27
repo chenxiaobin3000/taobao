@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/purchase'
+const path = '/user_purchase'
 
 export function addPurchaseList(data) {
   return request({

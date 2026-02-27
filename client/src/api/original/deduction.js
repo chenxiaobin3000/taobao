@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/deduction'
+const path = '/user_deduction'
 
 export function addDeductionList(data) {
   return request({

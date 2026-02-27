@@ -1,15 +1,7 @@
 import request from '@/utils/request'
-const path = '/user_promotion'
+const path = '/polymerize_discard'
 
-export function addPromotionList(data) {
-  return request({
-    url: `${path}/addList`,
-    method: 'post',
-    data
-  })
-}
-
-export function delPromotion(data) {
+export function delPolymerizeDiscard(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -17,7 +9,15 @@ export function delPromotion(data) {
   })
 }
 
-export function getPromotionList(data) {
+export function delAllPolymerizeDiscard(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
+export function getPolymerizeDiscardList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

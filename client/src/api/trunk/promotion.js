@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/user_promotion'
+const path = '/promotion'
 
 export function addPromotionList(data) {
   return request({

@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/refund'
+const path = '/user_refund'
 
 export function addRefundList(data) {
   return request({

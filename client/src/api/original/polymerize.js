@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/polymerize'
+const path = '/user_polymerize'
 
 export function addPolymerizeList(data) {
   return request({
