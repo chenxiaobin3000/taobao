@@ -12,8 +12,7 @@ def add(request):
     post = json.loads(request.body)
     name = post.get('name')
     user_id = int(post.get('uid'))
-    company = Company.objects.add(name, user_id)
-    Company.objects.encoder(company)
+    Company.objects.add(name, user_id)
     response = {
         'code': 0,
         'msg': 'success'

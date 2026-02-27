@@ -11,8 +11,7 @@ def add(request):
     post = json.loads(request.body)
     company_id = int(post.get('cid'))
     market_id = int(post.get('mid'))
-    cm = CompanyMarket.objects.add(company_id, market_id)
-    CompanyMarket.objects.encoder(cm)
+    CompanyMarket.objects.add(company_id, market_id)
     response = {
         'code': 0,
         'msg': 'success'

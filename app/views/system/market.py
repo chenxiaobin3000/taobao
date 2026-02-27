@@ -10,8 +10,7 @@ from app.models.system.market import Market
 def add(request):
     post = json.loads(request.body)
     name = post.get('name')
-    market = Market.objects.add(name)
-    Market.objects.encoder(market)
+    Market.objects.add(name)
     response = {
         'code': 0,
         'msg': 'success'

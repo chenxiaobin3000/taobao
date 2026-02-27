@@ -24,8 +24,7 @@ def flush(request):
 
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -38,13 +37,12 @@ def getList(request):
     num = int(post.get('num'))
     total = DeductionSummary.objects.total(shop_id)
     fakes = DeductionSummary.objects.getList(shop_id, page, num)
-    data = DeductionSummary.objects.encoderList(fakes)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': data
+            'list': fakes
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
