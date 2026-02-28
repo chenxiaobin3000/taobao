@@ -41,7 +41,7 @@ class GoodAlias(models.Model):
     objects = GoodAliasManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
     good_id = models.CharField(max_length = 10, db_index = True) # 商品id
-    name = models.CharField(max_length = 60, db_index = True) # 商品别名
+    name = models.CharField(max_length = 60, db_index = True, unique=True) # 商品别名
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):

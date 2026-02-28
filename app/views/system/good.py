@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.good import Good
+from app.models.system.good_alias import GoodAlias
 
 @require_POST
 @transaction.atomic
@@ -20,9 +21,16 @@ def addList(request):
     for good in goods:
         find_object = Good.objects.getById(shop_id, good['i'])
         if find_object:
-            Good.objects.set(good['i'], good['n'], good['sn'], good['t'], good['s'])
+            Good.objects.set(find_object['id'], good['n'], good['sn'], good['t'], good['s'])
         else:
             Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'])
+
+        # 处理别名
+        for alias in good['as']:
+            if alias:
+                find_object = GoodAlias.objects.getByName(shop_id, alias)
+                if not find_object:
+                    GoodAlias.objects.add(shop_id, good['i'], alias)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

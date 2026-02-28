@@ -14,17 +14,17 @@
           {{ scope.row.short_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品类型" width="80">
-        <template slot-scope="scope">
-          {{ num2type(scope.row.good_type) }}
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="商品编码" width="160">
         <template slot-scope="scope">
           {{ scope.row.good_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品状态" width="160">
+      <el-table-column align="center" label="商品类型" width="80">
+        <template slot-scope="scope">
+          {{ num2type(scope.row.good_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="商品状态" width="80">
         <template slot-scope="scope">
           {{ num2status(scope.row.good_status) }}
         </template>
@@ -84,6 +84,7 @@
     </el-dialog>
 
     <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
+      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5  |  别名(最多5个)</pre>
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -204,14 +205,21 @@ export default {
       const type = header[2]
       const status = header[3]
       const name = header[4]
+      const alias1 = header[5]
+      const alias2 = header[6]
+      const alias3 = header[7]
+      const alias4 = header[8]
+      const alias5 = header[9]
       const g = []
       results.forEach(v => {
+        const alias = [v[alias1], v[alias2], v[alias3], v[alias4], v[alias5]]
         g.push({
           i: v[id],
           n: v[name],
           sn: v[sname],
           t: v[type],
-          s: v[status]
+          s: v[status],
+          as: alias
         })
       })
       addGoodList({
