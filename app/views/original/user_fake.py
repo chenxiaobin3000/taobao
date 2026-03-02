@@ -38,7 +38,7 @@ def getList(request):
             for good in goods:
                 find_object = Good.objects.getById(shop_id, good)
                 if find_object:
-                    data['good_names'] = data['good_names'] + find_object.short_name + ','
+                    data['good_names'] = data['good_names'] + find_object['short_name'] + ','
 
     response = {
         'code': 0,

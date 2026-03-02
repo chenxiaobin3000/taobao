@@ -7,6 +7,17 @@ class UserRefundManager(models.Manager):
     def add(self, user_id, shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, pay_time, apply_time, timeout_time, complete_time):
         return self.create(user_id=user_id, shop_id=shop_id, refund_id=refund_id, order_id=order_id, product_id=product_id, actual_pay=actual_pay, refund_pay=refund_pay, refund_platform=refund_platform, refund_type=refund_type, refund_status=refund_status, pay_time=pay_time, apply_time=apply_time, timeout_time=timeout_time, complete_time=complete_time)
 
+    def set(self, pk, actual_pay, refund_pay, refund_platform, refund_type, refund_status, timeout_time, complete_time):
+        refund = self.get(pk=pk)
+        refund.actual_pay = actual_pay
+        refund.refund_pay = refund_pay
+        refund.refund_platform = refund_platform
+        refund.refund_type = refund_type
+        refund.refund_status = refund_status
+        refund.timeout_time = timeout_time
+        refund.complete_time = complete_time
+        return refund.save()
+
     def delete(self, pk):
         return self.get(pk=pk).delete()
 

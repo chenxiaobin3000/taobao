@@ -39,21 +39,13 @@ def addList(request):
         # 已存在更新刷单状态
         find_object = Fake.objects.getById(shop_id, order_id)
         if find_object:
-            find_object.procure = procure
-            find_object.order_status = order_status
-            find_object.procure_ids = procure_ids
-            find_object.order_note = order_note
-            find_object.save()
+            Fake.objects.set(find_object['id'], procure, order_status, procure_ids, order_note)
             continue
 
         # 已存在更新订单状态
         find_object = Order.objects.getById(shop_id, order_id)
         if find_object:
-            find_object.procure = procure
-            find_object.order_status = order_status
-            find_object.procure_ids = procure_ids
-            find_object.order_note = order_note
-            find_object.save()
+            Order.objects.set(find_object['id'], procure, order_status, procure_ids, order_note)
             continue
         
         # 已关闭订单，允许没有商品信息
@@ -122,7 +114,7 @@ def getList(request):
             for good in goods:
                 find_object = Good.objects.getById(shop_id, good)
                 if find_object:
-                    data['good_names'] = data['good_names'] + find_object.short_name + ','
+                    data['good_names'] = data['good_names'] + find_object['short_name'] + ','
 
     response = {
         'code': 0,

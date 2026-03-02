@@ -40,26 +40,18 @@ def addList(request):
         # 已存在更新刷单状态
         find_object = UserFake.objects.getById(user_id, shop_id, order_id)
         if find_object:
-            find_object.procure = procure
-            find_object.order_status = order_status
-            find_object.procure_ids = procure_ids
-            find_object.order_note = order_note
-            find_object.save()
+            UserFake.objects.set(find_object['id'], procure, order_status, procure_ids, order_note)
             continue
 
         # 已存在更新订单状态
         find_object = UserOrder.objects.getById(user_id, shop_id, order_id)
         if find_object:
-            find_object.procure = procure
-            find_object.order_status = order_status
-            find_object.procure_ids = procure_ids
-            find_object.order_note = order_note
-            find_object.save()
+            UserOrder.objects.set(find_object['id'], procure, order_status, procure_ids, order_note)
             continue
         
         # 已关闭订单，允许没有商品信息
         if order_status == OrderStatus.CLOSE and len(product_name) == 0:
-            UserOrder.objects.add(shop_id, order_id, payment, procure, order_status, create_time, '', procure_ids, order_note)
+            UserOrder.objects.add(user_id, shop_id, order_id, payment, procure, order_status, create_time, '', procure_ids, order_note)
         else:
             # 转换商品id
             products = product_name.split(',')
@@ -76,14 +68,14 @@ def addList(request):
                     good = GoodAlias.objects.getByName(shop_id, product)
                     if good:
                         # 在别名表命中，返回商品表查询
-                        good = Good.objects.getById(shop_id, good.good_id)
+                        good = Good.objects.getById(shop_id, good['good_id'])
                     if not good:
                         response['code'] = -1
                         response['msg'] = '没有查询到商品:' + order_id + ',' + product
                         return JsonResponse(response, encoder=MyJSONEncoder)
-                if good.good_type != GoodType.GIFT:
-                    good_ids = good_ids + good.good_id + '|'
-                if good.good_type == GoodType.SUPPLEMENT:
+                if good['good_type'] != GoodType.GIFT:
+                    good_ids = good_ids + good['good_id'] + '|'
+                if good['good_type'] == GoodType.SUPPLEMENT:
                     is_supplement = True
             # 不是补差价，且单价低于30，认定刷单
             if payment <= 30 and not is_supplement:
@@ -124,7 +116,7 @@ def getList(request):
             for good in goods:
                 find_object = Good.objects.getById(shop_id, good)
                 if find_object:
-                    data['good_names'] = data['good_names'] + find_object.short_name + ','
+                    data['good_names'] = data['good_names'] + find_object['short_name'] + ','
 
     response = {
         'code': 0,
