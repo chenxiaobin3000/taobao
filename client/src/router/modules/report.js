@@ -5,7 +5,7 @@ export default {
   component: Layout,
   name: 'report',
   meta: {
-    title: '报表管理',
+    title: '统计报表',
     roles: [5000]
   },
   children: [{

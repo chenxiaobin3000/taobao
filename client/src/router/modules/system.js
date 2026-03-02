@@ -5,7 +5,7 @@ export default {
   component: Layout,
   name: 'system',
   meta: {
-    title: '系统管理',
+    title: '系统功能',
     roles: [1000]
   },
   children: [{

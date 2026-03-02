@@ -5,7 +5,7 @@ export default {
   component: Layout,
   name: 'trunk',
   meta: {
-    title: '核心管理',
+    title: '存档数据',
     roles: [4000]
   },
   children: [{

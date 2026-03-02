@@ -5,7 +5,7 @@ export default {
   component: Layout,
   name: 'company',
   meta: {
-    title: '公司管理',
+    title: '公司数据',
     roles: [2000]
   },
   children: [{

@@ -5,7 +5,7 @@ export default {
   component: Layout,
   name: 'middle',
   meta: {
-    title: '辅助管理',
+    title: '辅助工具',
     roles: [6000]
   },
   children: [{
