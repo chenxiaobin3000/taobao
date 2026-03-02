@@ -20,7 +20,7 @@ def addList(request):
         order_id = transfer['o']
         amount = transfer['a']
         create_time = transfer['c']
-        transfer_note= transfer['tn']
+        transfer_note= transfer['tn'] if 'tn' in transfer else ''
         if UserTransfer.objects.getByCTime(user_id, shop_id, create_time):
             continue
         UserTransfer.objects.add(user_id, shop_id, user_name, payee_name, order_id, amount, create_time, transfer_note)

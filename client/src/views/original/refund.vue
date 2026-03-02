@@ -69,7 +69,8 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getRefundList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5</pre>
+      <pre style="text-align:center;font-size:13px;">订单号1  |  退货编号2  |  付款时间3  |  完结时间4  |  付款金额5  |  退款金额6</pre>
+      <pre style="text-align:center;font-size:13px;">申请时间9  |  超时时间10  |  状态11  |  类型12  |  商品编码13  |  退给平台15</pre>
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -171,15 +172,15 @@ export default {
     async handleSuccess({ results, header }) {
       const refund_id = header[1]
       const order_id = header[0]
-      const product_id = header[9]
+      const product_id = header[12]
       const actual_pay = header[4]
-      const refund_pay = header[10]
-      const refund_platform = header[11]
-      const refund_type = header[8]
-      const refund_status = header[7]
+      const refund_pay = header[5]
+      const refund_platform = header[14]
+      const refund_type = header[11]
+      const refund_status = header[10]
       const pay_time = header[2]
-      const apply_time = header[5]
-      const timeout_time = header[6]
+      const apply_time = header[8]
+      const timeout_time = header[9]
       const complete_time = header[3]
       const r = []
       results.forEach(v => {

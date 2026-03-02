@@ -305,7 +305,8 @@ export const PromotionType = {
   CAR: 1, // 直通车
   WHOLE: 2, // 全站
   PEOPLE: 3, // 人群
-  OTHER: 4, // 异常
+  PREPAYMENT: 4, // 下单金额被预支付扣款
+  OTHER: 5, // 异常
 
   text2num(text) {
     if (text.indexOf('现金消耗扣款') !== -1) {
@@ -314,6 +315,8 @@ export const PromotionType = {
       return this.WHOLE
     } else if (text.indexOf('人群超市订单') !== -1) {
       return this.PEOPLE
+    } else if (text.indexOf('下单金额被预支付扣款') !== -1) {
+      return this.PREPAYMENT
     } else { // 异常
       return this.OTHER
     }
@@ -326,6 +329,8 @@ export const PromotionType = {
         return '全站'
       case this.PEOPLE:
         return '人群'
+      case this.PREPAYMENT:
+        return '预支付扣款'
     }
     return '异常'
   }

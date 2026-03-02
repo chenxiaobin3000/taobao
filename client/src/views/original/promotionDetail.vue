@@ -89,7 +89,9 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getPromotionDetailList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5</pre>
+      <pre style="text-align:center;font-size:13px;">日期1  |  编号2  |  展现量5  |  点击量6  |  消耗7</pre>
+      <pre style="text-align:center;font-size:13px;">点击率8  |  平均消耗9  |  千次消耗10  |  金额19  |  订单20</pre>
+      <pre style="text-align:center;font-size:13px;">投产比24  |  成交成本26  |  购物车27  |  收藏31</pre>
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
