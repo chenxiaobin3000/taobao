@@ -28,7 +28,7 @@ class GoodManager(models.Manager):
         return self.encoder(self.filter(shop_id=shop_id, name=name).first())
     
     def getByType(self, shop_id, good_type):
-        return self.encoder(self.filter(shop_id=shop_id, good_type=good_type))
+        return self.encoderList(self.filter(shop_id=shop_id, good_type=good_type))
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()

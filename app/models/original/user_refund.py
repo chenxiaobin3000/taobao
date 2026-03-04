@@ -56,8 +56,8 @@ class UserRefund(models.Model):
     refund_status = models.IntegerField(db_index=True) # 退货状态
     pay_time = models.DateTimeField(db_index=True) # 支付时间
     apply_time = models.DateTimeField(db_index=True) # 申请时间
-    timeout_time = models.DateTimeField() # 超时时间
-    complete_time = models.DateTimeField() # 完结时间
+    timeout_time = models.DateTimeField(null=True, blank=True) # 超时时间
+    complete_time = models.DateTimeField(null=True, blank=True) # 完结时间
     ctime = models.DateTimeField(default=timezone.now)
 
     class Meta(object):

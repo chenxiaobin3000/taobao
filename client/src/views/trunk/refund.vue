@@ -167,18 +167,18 @@ export default {
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
-      const refund_id = header[1]
       const order_id = header[0]
-      const product_id = header[9]
-      const actual_pay = header[4]
-      const refund_pay = header[10]
-      const refund_platform = header[11]
-      const refund_type = header[8]
-      const refund_status = header[7]
+      const refund_id = header[1]
       const pay_time = header[2]
-      const apply_time = header[5]
-      const timeout_time = header[6]
       const complete_time = header[3]
+      const actual_pay = header[4]
+      const refund_pay = header[5]
+      const apply_time = header[10]
+      const timeout_time = header[11]
+      const refund_status = header[12]
+      const refund_type = header[13]
+      const product_id = header[14]
+      const refund_platform = header[16]
       const r = []
       results.forEach(v => {
         r.push({

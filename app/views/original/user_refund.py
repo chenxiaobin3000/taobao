@@ -19,7 +19,7 @@ def addList(request):
     gifts = []
     goods = Good.objects.getByType(shop_id, GoodType.GIFT)
     for good in goods:
-        gifts.append(good.good_id)
+        gifts.append(good['good_id'])
 
     # 批量添加
     for refund in refunds:
@@ -33,8 +33,8 @@ def addList(request):
         refund_status = refund['rs']
         pay_time = refund['pt']
         apply_time = refund['at']
-        timeout_time = refund['tt']
-        complete_time = refund['ct']
+        timeout_time = refund['tt'] if 'tt' in refund else None
+        complete_time = refund['ct'] if 'ct' in refund else None
 
         # 过滤赠品
         if product_id in gifts:
@@ -44,14 +44,7 @@ def addList(request):
         find_object = UserRefund.objects.getByIdAndTime(user_id, shop_id, order_id, refund_id, product_id, apply_time)
         if find_object:
             if find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_platform != refund_platform or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
-                find_object.actual_pay = actual_pay
-                find_object.refund_pay = refund_pay
-                find_object.refund_platform = refund_platform
-                find_object.refund_type = refund_type
-                find_object.refund_status = refund_status
-                find_object.timeout_time = timeout_time
-                find_object.complete_time = complete_time
-                find_object.save()
+                UserRefund.objects.set(find_object['id'], actual_pay, refund_pay, refund_platform, refund_type, refund_status, timeout_time, complete_time)
         else:
             UserRefund.objects.add(user_id, shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, pay_time, apply_time, timeout_time, complete_time)
 
