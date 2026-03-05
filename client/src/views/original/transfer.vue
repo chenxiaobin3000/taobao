@@ -6,6 +6,7 @@
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
+        <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -62,7 +63,7 @@ import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
 import { xlsx_time_str } from '@/utils/xlsx'
-import { getTransferList, addTransferList, delTransfer } from '@/api/original/transfer'
+import { getTransferList, addTransferList, delTransfer, delAllTransfer } from '@/api/original/transfer'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -199,6 +200,21 @@ export default {
       }).then(() => {
         delTransfer({
           id: row.id
+        }).then(() => {
+          this.$message({ type: 'success', message: '删除成功!' })
+          this.getTransferList()
+        })
+      })
+    },
+    handleDeleteAll() {
+      this.$confirm('确定要清空数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delAllTransfer({
+          id: this.listQuery.id,
+          uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getTransferList()

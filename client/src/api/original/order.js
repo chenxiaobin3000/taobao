@@ -17,6 +17,14 @@ export function delOrder(data) {
   })
 }
 
+export function delAllOrder(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getOrderList(data) {
   return request({
     url: `${path}/getList`,

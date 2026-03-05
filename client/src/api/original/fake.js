@@ -9,6 +9,14 @@ export function delFake(data) {
   })
 }
 
+export function delAllFake(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getFakeList(data) {
   return request({
     url: `${path}/getList`,

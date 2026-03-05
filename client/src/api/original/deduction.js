@@ -17,6 +17,14 @@ export function delDeduction(data) {
   })
 }
 
+export function delAllDeduction(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getDeductionList(data) {
   return request({
     url: `${path}/getList`,

@@ -25,6 +25,14 @@ export function delPurchase(data) {
   })
 }
 
+export function delAllPurchase(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getPurchaseList(data) {
   return request({
     url: `${path}/getList`,

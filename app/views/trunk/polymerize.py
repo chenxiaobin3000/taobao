@@ -20,6 +20,7 @@ def addList(request):
     # 批量添加
     for polymerize in polymerizes:
         order_id = polymerize['o']
+        finance_type = polymerize['f']
         amount = polymerize['a']
         amount_type = int(polymerize['t'])
         create_time = polymerize['c']
@@ -34,7 +35,7 @@ def addList(request):
         # 插入数据
         if Polymerize.objects.getByCTime(shop_id, order_id, amount_type, create_time):
             continue
-        Polymerize.objects.add(shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+        Polymerize.objects.add(shop_id, order_id, finance_type, amount, amount_type, create_time, polymerize_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

@@ -14,9 +14,14 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="类型" width="80">
+      <el-table-column align="center" label="财务类型" width="80">
         <template slot-scope="scope">
-          {{ num2type(scope.row.amount_type) }}
+          {{ num2ftype(scope.row.finance_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="扣费类型" width="80">
+        <template slot-scope="scope">
+          {{ num2dtype(scope.row.amount_type) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="金额" width="80">
@@ -54,7 +59,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { DefaultOrder, ImportCount, ImportSpan, DeductionType } from '@/utils/const'
+import { DefaultOrder, ImportCount, ImportSpan, DeductionType, FinanceType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
 import { getDeductionList, addDeductionList, delDeduction } from '@/api/trunk/deduction'
 import { getShopList } from '@/api/system/shop'
@@ -128,8 +133,11 @@ export default {
         this.getDeductionList()
       })
     },
-    num2type(num) {
+    num2dtype(num) {
       return DeductionType.num2text(num)
+    },
+    num2ftype(num) {
+      return FinanceType.num2text(num)
     },
     handleChange() {
       this.getDeductionList()

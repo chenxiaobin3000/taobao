@@ -53,6 +53,8 @@ export const DeductionType = {
   XIAN_SHI: 12, // 限时红包代商家垫付扣回
   XIN_PIN: 13, // 品牌新享淘宝新品营销
   XIN_XIANG_FU_WU: 14, // 品牌新享-淘宝营销托管
+  XIAO_FEI_QUAN: 15, // 消费券代付资金扣回
+  GUAN_KONG: 16, // 保证金管控资金使用
 
   // 无订单信息
   GONG_YI: 100, // 公益宝贝捐赠
@@ -67,6 +69,7 @@ export const DeductionType = {
   ZHUAN_ZHANG: 201, // 转账
   BAO_ZHENG_JIN: 202, // 淘宝消费者保证金
   DA_KUAN: 203, // 支付宝转账小额打款
+
   OTHER: 1000, // 异常
 
   text2num(text) {
@@ -98,6 +101,10 @@ export const DeductionType = {
       return this.XIN_PIN
     } else if (text.indexOf('品牌新享-淘宝营销托管') !== -1) {
       return this.XIN_XIANG_FU_WU
+    } else if (text.indexOf('消费券代付资金扣回') !== -1) {
+      return this.XIAO_FEI_QUAN
+    } else if (text.indexOf('保证金管控资金使用') !== -1) {
+      return this.GUAN_KONG
     } else if (text.indexOf('公益宝贝捐赠') !== -1) {
       return this.GONG_YI
     } else if (text.indexOf('卖家延迟发货赔付红包') !== -1) {
@@ -152,6 +159,10 @@ export const DeductionType = {
         return '新品礼金'
       case this.XIN_XIANG_FU_WU:
         return '新享服务费'
+      case this.XIAO_FEI_QUAN:
+        return '消费券代付'
+      case this.GUAN_KONG:
+        return '管控资金使用'
 
       case this.GONG_YI:
         return '公益宝贝捐赠'
@@ -176,6 +187,61 @@ export const DeductionType = {
         return '小额打款'
     }
     return '异常'
+  }
+}
+
+// 财务类型
+export const FinanceType = {
+  MARGIN: 1, // 保证金
+  SHARE: 2, // 分账
+  ONLINE: 3, // 在线支付
+  TRANSFER: 4, // 转账
+  REFUND: 5, // 退款
+  OTHER: 6, // 其他
+  ERROR: 7, // 异常
+
+  text2num(text) {
+    if (text === '保证金') {
+      return this.MARGIN
+    } else if (text === '分账') {
+      return this.SHARE
+    } else if (text === '在线支付') {
+      return this.ONLINE
+    } else if (text === '转账') {
+      return this.TRANSFER
+    } else if (text === '退款') {
+      return this.REFUND
+    } else if (text === '其他') {
+      return this.OTHER
+    } else { // 异常
+      return this.ERROR
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.MARGIN:
+        return '保证金'
+      case this.SHARE:
+        return '分账'
+      case this.ONLINE:
+        return '在线支付'
+      case this.TRANSFER:
+        return '转账'
+      case this.REFUND:
+        return '退款'
+      case this.OTHER:
+        return '其他'
+    }
+    return '异常'
+  },
+  getList() {
+    return [{
+      id: this.SALE, name: '在售'
+    }, {
+      id: this.REMOVE, name: '下架'
+    }, {
+      id: this.DELETE, name: '删除'
+    }]
   }
 }
 

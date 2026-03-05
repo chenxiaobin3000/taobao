@@ -5,7 +5,7 @@
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleDeleteAll()">清空</el-button>
+        <el-button type="danger" size="mini" style="float:right;width:60px" @click="handleDeleteAll()">清空</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -14,9 +14,14 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="类型" width="80">
+      <el-table-column align="center" label="财务类型" width="80">
         <template slot-scope="scope">
-          {{ num2type(scope.row.amount_type) }}
+          {{ num2ftype(scope.row.finance_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="扣费类型" width="80">
+        <template slot-scope="scope">
+          {{ num2dtype(scope.row.amount_type) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="金额" width="80">
@@ -48,7 +53,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { DeductionType } from '@/utils/const'
+import { DeductionType, FinanceType } from '@/utils/const'
 import { getPolymerizeDiscardList, delPolymerizeDiscard, delAllPolymerizeDiscard } from '@/api/original/polymerizeDiscard'
 import { getShopList } from '@/api/system/shop'
 
@@ -122,8 +127,11 @@ export default {
         this.getPolymerizeDiscardList()
       })
     },
-    num2type(num) {
+    num2dtype(num) {
       return DeductionType.num2text(num)
+    },
+    num2ftype(num) {
+      return FinanceType.num2text(num)
     },
     handleChange() {
       this.getPolymerizeDiscardList()

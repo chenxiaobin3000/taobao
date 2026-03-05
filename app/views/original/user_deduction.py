@@ -22,6 +22,7 @@ def addList(request):
     # 批量添加
     for deduction in deductions:
         order_id = deduction['o']
+        finance_type = deduction['f']
         amount = deduction['a']
         amount_type = int(deduction['t'])
         create_time = deduction['c']
@@ -37,11 +38,11 @@ def addList(request):
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
             if UserDeductionDiscard.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserDeductionDiscard.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, deduction_note)
+            UserDeductionDiscard.objects.add(user_id, shop_id, order_id, finance_type, amount, amount_type, create_time, deduction_note)
         else:
             if UserDeduction.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserDeduction.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, deduction_note)
+            UserDeduction.objects.add(user_id, shop_id, order_id, finance_type, amount, amount_type, create_time, deduction_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -51,6 +52,19 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserDeduction.objects.delete(pk)
+    response = {
+        'code': 0,
+        'msg': 'success'
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
+def deleteAll(request):
+    post = json.loads(request.body)
+    id = int(post.get('id'))
+    user_id = int(post.get('uid'))
+    UserDeduction.objects.deleteAll(user_id, id)
     response = {
         'code': 0,
         'msg': 'success'

@@ -20,6 +20,7 @@ def addList(request):
     # 批量添加
     for deduction in deductions:
         order_id = deduction['o']
+        finance_type = deduction['f']
         amount = deduction['a']
         amount_type = int(deduction['t'])
         create_time = deduction['c']
@@ -34,7 +35,7 @@ def addList(request):
         # 插入数据
         if Deduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
             continue
-        Deduction.objects.add(shop_id, order_id, amount, amount_type, create_time, deduction_note)
+        Deduction.objects.add(shop_id, order_id, finance_type, amount, amount_type, create_time, deduction_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

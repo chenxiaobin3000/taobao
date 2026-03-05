@@ -17,6 +17,14 @@ export function delRefund(data) {
   })
 }
 
+export function delAllRefund(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getRefundList(data) {
   return request({
     url: `${path}/getList`,

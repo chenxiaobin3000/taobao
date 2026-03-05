@@ -17,6 +17,14 @@ export function delTransfer(data) {
   })
 }
 
+export function delAllTransfer(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getTransferList(data) {
   return request({
     url: `${path}/getList`,

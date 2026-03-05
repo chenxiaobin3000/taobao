@@ -5,6 +5,7 @@
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
+        <el-button type="danger" size="mini" style="float:right;width:60px;" @click="handleDeleteAll()">清空</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -58,7 +59,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { OrderStatus } from '@/utils/const'
-import { getFakeList, delFake } from '@/api/original/fake'
+import { getFakeList, delFake, delAllFake } from '@/api/original/fake'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -145,6 +146,21 @@ export default {
       }).then(() => {
         delFake({
           id: row.id
+        }).then(() => {
+          this.$message({ type: 'success', message: '删除成功!' })
+          this.getFakeList()
+        })
+      })
+    },
+    handleDeleteAll() {
+      this.$confirm('确定要清空数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delAllFake({
+          id: this.listQuery.id,
+          uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getFakeList()

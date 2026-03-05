@@ -22,6 +22,7 @@ def addList(request):
     # 批量添加
     for polymerize in polymerizes:
         order_id = polymerize['o']
+        finance_type = polymerize['f']
         amount = polymerize['a']
         amount_type = int(polymerize['t'])
         create_time = polymerize['c']
@@ -37,11 +38,11 @@ def addList(request):
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
             if UserPolymerizeDiscard.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserPolymerizeDiscard.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+            UserPolymerizeDiscard.objects.add(user_id, shop_id, order_id, finance_type, amount, amount_type, create_time, polymerize_note)
         else:
             if UserPolymerize.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
-            UserPolymerize.objects.add(user_id, shop_id, order_id, amount, amount_type, create_time, polymerize_note)
+            UserPolymerize.objects.add(user_id, shop_id, order_id, finance_type, amount, amount_type, create_time, polymerize_note)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -51,6 +52,19 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserPolymerize.objects.delete(pk)
+    response = {
+        'code': 0,
+        'msg': 'success'
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
+def deleteAll(request):
+    post = json.loads(request.body)
+    id = int(post.get('id'))
+    user_id = int(post.get('uid'))
+    UserPolymerize.objects.deleteAll(user_id, id)
     response = {
         'code': 0,
         'msg': 'success'

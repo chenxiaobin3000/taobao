@@ -6,6 +6,7 @@
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
+        <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -66,7 +67,7 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan, OrderStatus } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { getOrderList, addOrderList, delOrder } from '@/api/original/order'
+import { getOrderList, addOrderList, delOrder, delAllOrder } from '@/api/original/order'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -219,6 +220,21 @@ export default {
       }).then(() => {
         delOrder({
           id: row.id
+        }).then(() => {
+          this.$message({ type: 'success', message: '删除成功!' })
+          this.getOrderList()
+        })
+      })
+    },
+    handleDeleteAll() {
+      this.$confirm('确定要清空数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delAllOrder({
+          id: this.listQuery.id,
+          uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getOrderList()

@@ -6,6 +6,7 @@
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
+        <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -14,9 +15,14 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="类型" width="80">
+      <el-table-column align="center" label="财务类型" width="80">
         <template slot-scope="scope">
-          {{ num2type(scope.row.amount_type) }}
+          {{ num2ftype(scope.row.finance_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="扣费类型" width="80">
+        <template slot-scope="scope">
+          {{ num2dtype(scope.row.amount_type) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="金额" width="80">
@@ -44,7 +50,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getDeductionList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5</pre>
+      <pre style="text-align:center;font-size:13px;">时间1  |  类型5  |  金额7  |  备注15</pre>
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -54,9 +60,9 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { DefaultOrder, ImportCount, ImportSpan, DeductionType } from '@/utils/const'
+import { DefaultOrder, ImportCount, ImportSpan, DeductionType, FinanceType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { getDeductionList, addDeductionList, delDeduction } from '@/api/original/deduction'
+import { getDeductionList, addDeductionList, delDeduction, delAllDeduction } from '@/api/original/deduction'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -131,8 +137,11 @@ export default {
         this.getDeductionList()
       })
     },
-    num2type(num) {
+    num2dtype(num) {
       return DeductionType.num2text(num)
+    },
+    num2ftype(num) {
+      return FinanceType.num2text(num)
     },
     handleChange() {
       this.getDeductionList()
@@ -141,50 +150,83 @@ export default {
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
-      const order_id = header[4]
-      const order_id2 = header[17]
+      const create_time = header[0]
+      const finance_type = header[4]
       const amount = header[7]
-      const create_time = header[1]
-      const deduction_note = header[16]
+      const deduction_note = header[15]
       const d = []
       results.forEach(v => {
-        if (v[amount] > 0 && v[deduction_note].length > 4) {
+        if (v[amount] > 0) {
+          if (v[deduction_note].length < 2) {
+            this.$message({ type: 'error', message: '没有备注信息!' })
+            console.log(v)
+            return
+          }
           const note = v[deduction_note]
           const type = DeductionType.text2num(note)
-          let oid = v[order_id] ? v[order_id].substring(5) : v[order_id2]
-          // 订单号修正
-          if (oid.length !== 19) {
-            // 尝试第二个订单号
-            if (v[order_id2].length === 19) {
-              oid = v[order_id2]
-            } else {
-              // 尝试从备注()抓取订单号
-              const first = note.indexOf('(') + 1
-              const second = note.indexOf(')')
+          // 从备注抓取订单号
+          let oid = ''
+          let first = 0
+          let second = 0
+          switch (type) {
+            case DeductionType.FU_WU_FEI: // 基础软件服务费
+            case DeductionType.XIN_XIANG: // 品牌新享淘宝新客营销
+            case DeductionType.XIN_KE: // 淘宝新客礼金技术服务费
+            case DeductionType.TI_YAN: // 消费者体验提升计划服务费
+            case DeductionType.TAO_JIN_BI: // 淘金币软件服务费
+            case DeductionType.XIAN_YONG_HOU_FU: // 先用后付技术服务费()
+            case DeductionType.XIAN_YONG_TIAO_ZHANG: // 先用后付技术服务费-
+            case DeductionType.KUA_JING_JI_CHU: // 淘宝天猫跨境服务基础费
+            case DeductionType.KUA_JING_ZENG_ZHI: // 淘宝天猫跨境服务增值费
+            case DeductionType.KUA_JING_DA_JIAN: // 出海增长计划中大件跨境服务增值费
+            case DeductionType.TAO_TE: // 淘特营销推广服务费
+            case DeductionType.XIAN_SHI: // 限时红包代商家垫付扣回
+            case DeductionType.XIN_PIN: // 品牌新享淘宝新品营销
+            case DeductionType.XIN_XIANG_FU_WU: // 品牌新享-淘宝营销托管
+            case DeductionType.XIAO_FEI_QUAN: // 消费券代付资金扣回
+            case DeductionType.GUAN_KONG: // 保证金管控资金使用
+              first = note.indexOf('(') + 1
+              second = note.indexOf(')')
               if (first !== -1 && second !== -1 && second - first === 19) {
                 oid = note.substring(first, second)
+              } else {
+                this.$message({ type: 'error', message: '备注信息格式异常!' })
+                console.log(v)
+                return
               }
-            }
-          }
-          // 没有订单编号的，用默认编号
-          let first = 0
-          switch (type) {
-            case DeductionType.YAN_CHI_FA_HUO:
-            case DeductionType.XU_JIA_FA_HUO:
-            case DeductionType.WU_LIU_YI_CHANG:
+              break
+
+            // 无订单信息
+            case DeductionType.GONG_YI: // 公益宝贝捐赠
+            case DeductionType.YAN_CHI_FA_HUO: // 延迟发货赔付
+            case DeductionType.XU_JIA_FA_HUO: // 虚假发货赔付
+            case DeductionType.WU_LIU_YI_CHANG: // 物流异常赔付
+            case DeductionType.QUE_HUO: // 缺货赔付
+            case DeductionType.HUA_BEI: // 花呗服务费
               oid = DefaultOrder
               break
-            case DeductionType.DA_KUAN:
-              // 尝试从备注<关联订单号：>抓取订单号
-              first = note.indexOf('关联订单号：')
-              if (first !== -1) {
-                oid = note.substring(first + 6)
-              } else {
-                oid = DefaultOrder
-              }
+
+            // 不处理
+            case DeductionType.TUI_KUAN: // 退款
+            case DeductionType.ZHUAN_ZHANG: // 转账
+            case DeductionType.BAO_ZHENG_JIN: // 保证金
+            case DeductionType.DA_KUAN: // 小额打款
+              oid = DefaultOrder
+              break
+
+            case DeductionType.OTHER: // 异常
+              this.$message({ type: 'error', message: '备注信息异常!' })
+              console.log(v)
+              return
+          }
+          if (oid.length !== 19) {
+            this.$message({ type: 'error', message: '关联订单号异常!' })
+            console.log(v)
+            return
           }
           d.push({
             o: oid,
+            f: FinanceType.text2num(v[finance_type]),
             a: v[amount],
             t: type,
             c: v[create_time],
@@ -195,7 +237,7 @@ export default {
       // 预校验数据
       for (let i = 0; i < d.length; ++i) {
         if (d[i].t === DeductionType.OTHER || d[i].o.length !== 19) {
-          this.$message({ type: 'error', message: '异常数据!' + i })
+          this.$message({ type: 'error', message: '异常数据!' })
           console.log(d[i])
           return
         }
@@ -239,6 +281,21 @@ export default {
       }).then(() => {
         delDeduction({
           id: row.id
+        }).then(() => {
+          this.$message({ type: 'success', message: '删除成功!' })
+          this.getDeductionList()
+        })
+      })
+    },
+    handleDeleteAll() {
+      this.$confirm('确定要清空数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delAllDeduction({
+          id: this.listQuery.id,
+          uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getDeductionList()

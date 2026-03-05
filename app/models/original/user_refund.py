@@ -21,6 +21,9 @@ class UserRefundManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
+    def deleteAll(self, user_id, shop_id):
+        return self.filter(user_id=user_id, shop_id=shop_id).delete()
+
     def getByIdAndTime(self, user_id, shop_id, order_id, refund_id, product_id, apply_time):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, order_id=order_id, refund_id=refund_id, product_id=product_id, apply_time=apply_time).first())
 

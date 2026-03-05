@@ -17,6 +17,14 @@ export function delPolymerize(data) {
   })
 }
 
+export function delAllPolymerize(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getPolymerizeList(data) {
   return request({
     url: `${path}/getList`,

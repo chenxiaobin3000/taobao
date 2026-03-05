@@ -4,11 +4,14 @@ from django.forms.models import model_to_dict
 
 # 扣费表
 class UserDeductionManager(models.Manager):
-    def add(self, user_id, shop_id, order_id, amount, amount_type, create_time, deduction_note):
-        return self.create(user_id=user_id, shop_id=shop_id, order_id=order_id, amount=amount, amount_type=amount_type, create_time=create_time, deduction_note=deduction_note)
+    def add(self, user_id, shop_id, order_id, finance_type, amount, amount_type, create_time, deduction_note):
+        return self.create(user_id=user_id, shop_id=shop_id, order_id=order_id, finance_type=finance_type, amount=amount, amount_type=amount_type, create_time=create_time, deduction_note=deduction_note)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
+
+    def deleteAll(self, user_id, shop_id):
+        return self.filter(user_id=user_id, shop_id=shop_id).delete()
 
     def getByCTime(self, user_id, shop_id, order_id, amount_type, create_time):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first())
@@ -23,12 +26,12 @@ class UserDeductionManager(models.Manager):
 
     def encoder(self, deduction):
         if deduction:
-            return model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'deduction_note'])
+            return model_to_dict(deduction, fields=['id', 'order_id', 'finance_type', 'amount', 'amount_type', 'create_time', 'deduction_note'])
         return None
 
     def encoderList(self, deductions):
         if deductions:
-            return [model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'amount_type', 'create_time', 'deduction_note']) for deduction in deductions]
+            return [model_to_dict(deduction, fields=['id', 'order_id', 'finance_type', 'amount', 'amount_type', 'create_time', 'deduction_note']) for deduction in deductions]
         return None
     
 class UserDeduction(models.Model):
@@ -36,6 +39,7 @@ class UserDeduction(models.Model):
     user_id = models.IntegerField(db_index = True) # 用户id
     shop_id = models.IntegerField(db_index = True) # 店铺id
     order_id = models.CharField(max_length=20, db_index=True) # 订单id
+    finance_type = models.IntegerField(db_index=True) # 财务类型
     amount = models.DecimalField(max_digits=10, decimal_places=2) # 金额
     amount_type = models.IntegerField(db_index=True) # 扣费类型
     create_time = models.DateTimeField(db_index=True) # 创建时间

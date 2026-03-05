@@ -10,6 +10,9 @@ class UserTransferManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
+    def deleteAll(self, user_id, shop_id):
+        return self.filter(user_id=user_id, shop_id=shop_id).delete()
+
     def getByCTime(self, user_id, shop_id, create_time):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, create_time=create_time).first())
 

@@ -10,6 +10,9 @@ class UserPromotionDetailManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
+    def deleteAll(self, user_id, shop_id):
+        return self.filter(user_id=user_id, shop_id=shop_id).delete()
+
     def getByIdAndDate(self, user_id, shop_id, promotion_date, good_id):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, promotion_date=promotion_date, good_id=good_id).first())
 

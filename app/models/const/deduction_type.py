@@ -10,12 +10,16 @@ class DeductionType:
     TI_YAN = 4              # 消费者体验提升计划服务费
     TAO_JIN_BI = 5          # 淘金币软件服务费
     XIAN_YONG_HOU_FU = 6    # 先用后付技术服务费(
-    XIAN_YONG_TIAO_ZHANG = 7  # 先用后付技术服务费-
+    XIAN_YONG_TIAO_ZHANG = 7 # 先用后付技术服务费-
     KUA_JING_JI_CHU = 8     # 淘宝天猫跨境服务基础费
     KUA_JING_ZENG_ZHI = 9   # 淘宝天猫跨境服务增值费
     KUA_JING_DA_JIAN = 10   # 出海增长计划中大件跨境服务增值费
     TAO_TE = 11             # 淘特营销推广服务费
     XIAN_SHI = 12           # 限时红包代商家垫付扣回
+    XIN_PIN = 13            # 品牌新享淘宝新品营销
+    XIN_XIANG_FU_WU = 14    # 品牌新享-淘宝营销托管
+    XIAO_FEI_QUAN = 15      # 消费券代付资金扣回
+    GUAN_KONG = 16         # 保证金管控资金使用
 
     # 无订单信息
     GONG_YI = 100           # 公益宝贝捐赠
@@ -28,4 +32,7 @@ class DeductionType:
     # 不处理
     TUI_KUAN = 200          # 转账
     ZHUAN_ZHANG = 201       # 退款
+    BAO_ZHENG_JIN = 202     # 淘宝消费者保证金
+    DA_KUAN = 203           # 支付宝转账小额打款
+    
     OTHER = 1000            # 异常

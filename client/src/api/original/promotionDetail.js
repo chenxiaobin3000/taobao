@@ -17,6 +17,14 @@ export function delPromotionDetail(data) {
   })
 }
 
+export function delAllPromotionDetail(data) {
+  return request({
+    url: `${path}/delAll`,
+    method: 'post',
+    data
+  })
+}
+
 export function getPromotionDetailList(data) {
   return request({
     url: `${path}/getList`,

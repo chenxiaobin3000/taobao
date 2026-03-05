@@ -43,6 +43,19 @@ def delete(request):
 
 @require_POST
 @transaction.atomic
+def deleteAll(request):
+    post = json.loads(request.body)
+    id = int(post.get('id'))
+    user_id = int(post.get('uid'))
+    UserPromotion.objects.deleteAll(user_id, id)
+    response = {
+        'code': 0,
+        'msg': 'success'
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))

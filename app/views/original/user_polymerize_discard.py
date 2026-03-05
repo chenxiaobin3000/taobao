@@ -23,7 +23,7 @@ def deleteAll(request):
     post = json.loads(request.body)
     id = int(post.get('id'))
     user_id = int(post.get('uid'))
-    UserPolymerizeDiscard.objects.deleteAll(id, user_id)
+    UserPolymerizeDiscard.objects.deleteAll(user_id, id)
     response = {
         'code': 0,
         'msg': 'success'

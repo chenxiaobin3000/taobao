@@ -6,6 +6,7 @@
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
+        <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -14,9 +15,14 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="类型" width="80">
+      <el-table-column align="center" label="财务类型" width="80">
         <template slot-scope="scope">
-          {{ num2type(scope.row.amount_type) }}
+          {{ num2ftype(scope.row.finance_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="扣费类型" width="80">
+        <template slot-scope="scope">
+          {{ num2dtype(scope.row.amount_type) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="金额" width="80">
@@ -44,7 +50,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getPolymerizeList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5</pre>
+      <pre style="text-align:center;font-size:13px;">时间1  |  订单编号3  |  类型4  |  金额6  |  备注8</pre>
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -54,9 +60,9 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan, DeductionType } from '@/utils/const'
+import { ImportCount, ImportSpan, DeductionType, FinanceType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { getPolymerizeList, addPolymerizeList, delPolymerize } from '@/api/original/polymerize'
+import { getPolymerizeList, addPolymerizeList, delPolymerize, delAllPolymerize } from '@/api/original/polymerize'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -130,8 +136,11 @@ export default {
         this.getPolymerizeList()
       })
     },
-    num2type(num) {
+    num2dtype(num) {
       return DeductionType.num2text(num)
+    },
+    num2ftype(num) {
+      return FinanceType.num2text(num)
     },
     handleChange() {
       this.getPolymerizeList()
@@ -141,14 +150,21 @@ export default {
     },
     async handleSuccess({ results, header }) {
       const order_id = header[2]
+      const finance_type = header[3]
       const amount = header[5]
       const create_time = header[0]
       const polymerize_note = header[7]
       const p = []
       results.forEach(v => {
-        if (v[amount] > 0 && v[polymerize_note].length > 4) {
+        if (v[amount] > 0) {
+          if (v[polymerize_note].length < 2) {
+            this.$message({ type: 'error', message: '没有备注信息!' + v[order_id] })
+            console.log(v)
+            return
+          }
           p.push({
             o: v[order_id],
+            f: FinanceType.text2num(v[finance_type]),
             a: v[amount],
             t: DeductionType.text2num(v[polymerize_note]),
             c: v[create_time],
@@ -203,6 +219,21 @@ export default {
       }).then(() => {
         delPolymerize({
           id: row.id
+        }).then(() => {
+          this.$message({ type: 'success', message: '删除成功!' })
+          this.getPolymerizeList()
+        })
+      })
+    },
+    handleDeleteAll() {
+      this.$confirm('确定要清空数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delAllPolymerize({
+          id: this.listQuery.id,
+          uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
           this.getPolymerizeList()
