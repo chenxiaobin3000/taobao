@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.original.user_refund import UserRefund
+from app.models.original.user_refund_gift import UserRefundGift
 from app.models.system.good import Good
 from app.models.const.good_type import GoodType
 
@@ -38,6 +39,13 @@ def addList(request):
 
         # 过滤赠品
         if product_id in gifts:
+            # 已存在更新状态
+            find_object = UserRefundGift.objects.getByIdAndTime(user_id, shop_id, order_id, refund_id, product_id,  apply_time)
+            if find_object:
+                if find_object.actual_pay != actual_pay or find_object.refund_pay != refund_pay or find_object.refund_platform != refund_platform or find_object.refund_type != refund_type or find_object.refund_status != refund_status or find_object.timeout_time != timeout_time or find_object.complete_time != complete_time:
+                    UserRefundGift.objects.set(find_object['id'], actual_pay, refund_pay, refund_platform,  refund_type, refund_status, timeout_time, complete_time)
+            else:
+                UserRefundGift.objects.add(user_id, shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, pay_time, apply_time, timeout_time, complete_time)
             continue
 
         # 已存在更新状态

@@ -1,5 +1,5 @@
 from django.urls import path
-from app.views.original import user_deduction, user_deduction_discard, user_fake, user_order, user_polymerize, user_polymerize_discard, user_promotion_detail, user_promotion, user_purchase, user_refund, user_transfer
+from app.views.original import user_deduction, user_deduction_discard, user_fake, user_order, user_polymerize, user_polymerize_discard, user_promotion_detail, user_promotion, user_purchase, user_refund_gift, user_refund, user_transfer
 
 url_original = [
     # 扣费
@@ -58,6 +58,11 @@ url_original = [
     path('api/user_refund/del', user_refund.delete),
     path('api/user_refund/delAll', user_refund.deleteAll),
     path('api/user_refund/getList', user_refund.getList),
+
+    # 退货过滤
+    path('api/user_refund_gift/del', user_refund_gift.delete),
+    path('api/user_refund_gift/delAll', user_refund_gift.deleteAll),
+    path('api/user_refund_gift/getList', user_refund_gift.getList),
 
     # 小额打款
     path('api/user_transfer/addList', user_transfer.addList),

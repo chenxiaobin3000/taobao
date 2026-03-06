@@ -25,18 +25,21 @@ export default {
     name: 'original_deduction', meta: { title: '扣费管理', roles: [3005] }
   }, {
     path: 'deductionDiscard', component: () => import('@/views/original/deductionDiscard'),
-    name: 'original_deductionDiscard', meta: { title: '扣费(废弃)', roles: [3006] }
+    name: 'original_deductionDiscard', meta: { title: '扣费(过滤)', roles: [3006] }
   }, {
     path: 'polymerize', component: () => import('@/views/original/polymerize'),
     name: 'original_polymerize', meta: { title: '聚合管理', roles: [3007] }
   }, {
     path: 'polymerizeDiscard', component: () => import('@/views/original/polymerizeDiscard'),
-    name: 'original_polymerizeDiscard', meta: { title: '聚合(废弃)', roles: [3008] }
+    name: 'original_polymerizeDiscard', meta: { title: '聚合(过滤)', roles: [3008] }
   }, {
     path: 'refund', component: () => import('@/views/original/refund'),
     name: 'original_refund', meta: { title: '退货管理', roles: [3009] }
   }, {
+    path: 'refundGift', component: () => import('@/views/original/refundGift'),
+    name: 'original_refund_gift', meta: { title: '退货(过滤)', roles: [3010] }
+  }, {
     path: 'transfer', component: () => import('@/views/original/transfer'),
-    name: 'original_transfer', meta: { title: '小额打款', roles: [3010] }
+    name: 'original_transfer', meta: { title: '小额打款', roles: [3011] }
   }]
 }
