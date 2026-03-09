@@ -70,7 +70,8 @@ export const DeductionType = {
   BAO_ZHENG_JIN: 202, // 淘宝消费者保证金
   DA_KUAN: 203, // 支付宝转账小额打款
 
-  OTHER: 1000, // 异常
+  FILTER: 1000, // 过滤
+  OTHER: 1001, // 异常
 
   text2num(text) {
     if (text.indexOf('基础软件服务费') !== -1) {
@@ -198,7 +199,12 @@ export const FinanceType = {
   TRANSFER: 4, // 转账
   REFUND: 5, // 退款
   OTHER: 6, // 其他
-  ERROR: 7, // 异常
+
+  DEDUCTION: 7, // 扣款
+  COLLECTION: 8, // 交易收款
+  CASH: 9, // 提现
+
+  ERROR: 10, // 异常
 
   text2num(text) {
     if (text === '保证金') {
@@ -213,6 +219,12 @@ export const FinanceType = {
       return this.REFUND
     } else if (text === '其他') {
       return this.OTHER
+    } else if (text === '扣款') {
+      return this.DEDUCTION
+    } else if (text === '交易收款') {
+      return this.COLLECTION
+    } else if (text === '提现') {
+      return this.CASH
     } else { // 异常
       return this.ERROR
     }
@@ -231,6 +243,12 @@ export const FinanceType = {
         return '退款'
       case this.OTHER:
         return '其他'
+      case this.DEDUCTION:
+        return '扣款'
+      case this.COLLECTION:
+        return '收款'
+      case this.CASH:
+        return '提现'
     }
     return '异常'
   },

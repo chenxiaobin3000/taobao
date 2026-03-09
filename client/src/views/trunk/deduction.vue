@@ -165,7 +165,7 @@ export default {
             } else {
               // 尝试从备注()抓取订单号
               const first = note.indexOf('(') + 1
-              const second = note.indexOf(')')
+              const second = note.indexOf(')', first)
               if (first !== -1 && second !== -1 && second - first === 19) {
                 oid = note.substring(first, second)
               }

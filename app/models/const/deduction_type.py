@@ -34,5 +34,6 @@ class DeductionType:
     ZHUAN_ZHANG = 201       # 退款
     BAO_ZHENG_JIN = 202     # 淘宝消费者保证金
     DA_KUAN = 203           # 支付宝转账小额打款
-    
-    OTHER = 1000            # 异常
+
+    FILTER = 1000           # 过滤
+    OTHER = 1001            # 异常

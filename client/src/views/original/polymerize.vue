@@ -155,16 +155,19 @@ export default {
       const create_time = header[0]
       const polymerize_note = header[7]
       const p = []
+      let stop = false
       results.forEach(v => {
-        if (v[amount] > 0) {
+        const ftype = FinanceType.text2num(v[finance_type])
+        if (v[amount] > 0 && ftype !== FinanceType.CASH && !stop) {
           if (v[polymerize_note].length < 2) {
+            stop = true
             this.$message({ type: 'error', message: '没有备注信息!' + v[order_id] })
             console.log(v)
             return
           }
           p.push({
             o: v[order_id],
-            f: FinanceType.text2num(v[finance_type]),
+            f: ftype,
             a: v[amount],
             t: DeductionType.text2num(v[polymerize_note]),
             c: v[create_time],
@@ -172,6 +175,9 @@ export default {
           })
         }
       })
+      if (stop) {
+        return
+      }
       // 预校验数据
       for (let i = 0; i < p.length; ++i) {
         if (p[i].t === DeductionType.OTHER || p[i].o.length !== 19) {
