@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
+    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
@@ -52,7 +52,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getOrderList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getUserOrderList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <pre style="text-align:center;font-size:13px;">订单编号1  |  状态3  |  创建时间4  |  名称5  |  备注6  |  金额7</pre>
@@ -67,7 +67,7 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan, OrderStatus } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { getOrderList, addOrderList, delOrder, delAllOrder } from '@/api/original/order'
+import { getUserOrderList, addUserOrderList, delUserOrder, delAllUserOrder } from '@/api/original/order'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -98,7 +98,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getOrderList()
+      this.getUserOrderList()
     }
   },
   mounted: function() {
@@ -113,9 +113,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getOrderList() {
+    getUserOrderList() {
       this.loading = true
-      getOrderList(
+      getUserOrderList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -134,14 +134,14 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getOrderList()
+        this.getUserOrderList()
       })
     },
     num2type(num) {
       return OrderStatus.num2text(num)
     },
     handleChange() {
-      this.getOrderList()
+      this.getUserOrderList()
     },
     handleExcel() {
       this.dialogVisible = true
@@ -181,14 +181,14 @@ export default {
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {
-          addOrderList({
+          addUserOrderList({
             id: this.listQuery.id,
             uid: this.userdata.user.id,
             o: o.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
-              this.getOrderList()
+              this.getUserOrderList()
               this.dialogVisible = false
             } else {
               this.$message({ type: 'success', message: '正在导入!' })
@@ -197,13 +197,13 @@ export default {
           await sleep(ImportSpan)
         }
       } else {
-        addOrderList({
+        addUserOrderList({
           id: this.listQuery.id,
           uid: this.userdata.user.id,
           o: o
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })
-          this.getOrderList()
+          this.getUserOrderList()
           this.dialogVisible = false
         })
       }
@@ -214,11 +214,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delOrder({
+        delUserOrder({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getOrderList()
+          this.getUserOrderList()
         })
       })
     },
@@ -228,12 +228,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delAllOrder({
+        delAllUserOrder({
           id: this.listQuery.id,
           uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getOrderList()
+          this.getUserOrderList()
         })
       })
     },

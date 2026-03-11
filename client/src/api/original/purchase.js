@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 const path = '/user_purchase'
 
-export function addPurchaseList(data) {
+export function addUserPurchaseList(data) {
   return request({
     url: `${path}/addList`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addPurchaseList(data) {
   })
 }
 
-export function setPurchase(data) {
+export function setUserPurchase(data) {
   return request({
     url: `${path}/set`,
     method: 'post',
@@ -17,7 +17,7 @@ export function setPurchase(data) {
   })
 }
 
-export function delPurchase(data) {
+export function delUserPurchase(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -25,7 +25,7 @@ export function delPurchase(data) {
   })
 }
 
-export function delAllPurchase(data) {
+export function delAllUserPurchase(data) {
   return request({
     url: `${path}/delAll`,
     method: 'post',
@@ -33,7 +33,7 @@ export function delAllPurchase(data) {
   })
 }
 
-export function getPurchaseList(data) {
+export function getUserPurchaseList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

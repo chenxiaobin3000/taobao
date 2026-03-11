@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 const path = '/user_order'
 
-export function addOrderList(data) {
+export function addUserOrderList(data) {
   return request({
     url: `${path}/addList`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addOrderList(data) {
   })
 }
 
-export function delOrder(data) {
+export function delUserOrder(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -17,7 +17,7 @@ export function delOrder(data) {
   })
 }
 
-export function delAllOrder(data) {
+export function delAllUserOrder(data) {
   return request({
     url: `${path}/delAll`,
     method: 'post',
@@ -25,7 +25,7 @@ export function delAllOrder(data) {
   })
 }
 
-export function getOrderList(data) {
+export function getUserOrderList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

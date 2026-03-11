@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 const path = '/user_refund'
 
-export function addRefundList(data) {
+export function addUserRefundList(data) {
   return request({
     url: `${path}/addList`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addRefundList(data) {
   })
 }
 
-export function delRefund(data) {
+export function delUserRefund(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -17,7 +17,7 @@ export function delRefund(data) {
   })
 }
 
-export function delAllRefund(data) {
+export function delAllUserRefund(data) {
   return request({
     url: `${path}/delAll`,
     method: 'post',
@@ -25,7 +25,7 @@ export function delAllRefund(data) {
   })
 }
 
-export function getRefundList(data) {
+export function getUserRefundList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 const path = '/transfer'
 
-export function addTransferList(data) {
+export function mergeTransfer(data) {
   return request({
-    url: `${path}/addList`,
+    url: `${path}/merge`,
     method: 'post',
     data
   })

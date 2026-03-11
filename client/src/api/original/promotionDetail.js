@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 const path = '/user_promotion_detail'
 
-export function addPromotionDetailList(data) {
+export function addUserPromotionDetailList(data) {
   return request({
     url: `${path}/addList`,
     method: 'post',
@@ -9,7 +9,7 @@ export function addPromotionDetailList(data) {
   })
 }
 
-export function delPromotionDetail(data) {
+export function delUserPromotionDetail(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -17,7 +17,7 @@ export function delPromotionDetail(data) {
   })
 }
 
-export function delAllPromotionDetail(data) {
+export function delAllUserPromotionDetail(data) {
   return request({
     url: `${path}/delAll`,
     method: 'post',
@@ -25,7 +25,7 @@ export function delAllPromotionDetail(data) {
   })
 }
 
-export function getPromotionDetailList(data) {
+export function getUserPromotionDetailList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

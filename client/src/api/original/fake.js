@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 const path = '/user_fake'
 
-export function delFake(data) {
+export function delUserFake(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -9,7 +9,7 @@ export function delFake(data) {
   })
 }
 
-export function delAllFake(data) {
+export function delAllUserFake(data) {
   return request({
     url: `${path}/delAll`,
     method: 'post',
@@ -17,7 +17,7 @@ export function delAllFake(data) {
   })
 }
 
-export function getFakeList(data) {
+export function getUserFakeList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

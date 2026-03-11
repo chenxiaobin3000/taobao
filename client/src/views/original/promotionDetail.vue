@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
+    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
@@ -87,7 +87,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getPromotionDetailList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getUserPromotionDetailList" />
 
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <pre style="text-align:center;font-size:13px;">日期1  |  编号2  |  展现量5  |  点击量6  |  消耗7</pre>
@@ -105,7 +105,7 @@ import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
 import { xlsx_date_str } from '@/utils/xlsx'
-import { getPromotionDetailList, addPromotionDetailList, delPromotionDetail, delAllPromotionDetail } from '@/api/original/promotionDetail'
+import { getUserPromotionDetailList, addUserPromotionDetailList, delUserPromotionDetail, delAllUserPromotionDetail } from '@/api/original/promotionDetail'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -136,7 +136,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getPromotionDetailList()
+      this.getUserPromotionDetailList()
     }
   },
   mounted: function() {
@@ -151,9 +151,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getPromotionDetailList() {
+    getUserPromotionDetailList() {
       this.loading = true
-      getPromotionDetailList(
+      getUserPromotionDetailList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -172,11 +172,11 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getPromotionDetailList()
+        this.getUserPromotionDetailList()
       })
     },
     handleChange() {
-      this.getPromotionDetailList()
+      this.getUserPromotionDetailList()
     },
     handleExcel() {
       this.dialogVisible = true
@@ -219,14 +219,14 @@ export default {
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)
         for (let i = 0; i <= length; ++i) {
-          addPromotionDetailList({
+          addUserPromotionDetailList({
             id: this.listQuery.id,
             uid: this.userdata.user.id,
             p: p.slice(i * ImportCount, (i + 1) * ImportCount)
           }).then(() => {
             if (i === length) {
               this.$message({ type: 'success', message: '导入成功!' })
-              this.getPromotionDetailList()
+              this.getUserPromotionDetailList()
               this.dialogVisible = false
             } else {
               this.$message({ type: 'success', message: '正在导入!' })
@@ -235,13 +235,13 @@ export default {
           await sleep(ImportSpan)
         }
       } else {
-        addPromotionDetailList({
+        addUserPromotionDetailList({
           id: this.listQuery.id,
           uid: this.userdata.user.id,
           p: p
         }).then(() => {
           this.$message({ type: 'success', message: '导入成功!' })
-          this.getPromotionDetailList()
+          this.getUserPromotionDetailList()
           this.dialogVisible = false
         })
       }
@@ -252,11 +252,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delPromotionDetail({
+        delUserPromotionDetail({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getPromotionDetailList()
+          this.getUserPromotionDetailList()
         })
       })
     },
@@ -266,12 +266,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delAllPromotionDetail({
+        delAllUserPromotionDetail({
           id: this.listQuery.id,
           uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getPromotionDetailList()
+          this.getUserPromotionDetailList()
         })
       })
     }

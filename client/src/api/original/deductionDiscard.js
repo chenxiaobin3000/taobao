@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 const path = '/user_deduction_discard'
 
-export function delDeductionDiscard(data) {
+export function delUserDeductionDiscard(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -9,7 +9,7 @@ export function delDeductionDiscard(data) {
   })
 }
 
-export function delAllDeductionDiscard(data) {
+export function delAllUserDeductionDiscard(data) {
   return request({
     url: `${path}/delAll`,
     method: 'post',
@@ -17,7 +17,7 @@ export function delAllDeductionDiscard(data) {
   })
 }
 
-export function getDeductionDiscardList(data) {
+export function getUserDeductionDiscardList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

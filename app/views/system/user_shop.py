@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.user_shop import UserShop
+from app.models.system.shop import Shop
+from app.models.system.user import User
 
 @require_POST
 @transaction.atomic
@@ -47,5 +49,31 @@ def getList(request):
             'total': total,
             'list': userShops
         }
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
+def getListByShop(request):
+    post = json.loads(request.body)
+    pk = int(post.get('id'))
+    shop = Shop.objects.find(pk)
+
+    # 所有用户信息
+    users = User.objects.getList(shop['company_id'], 1, 1000)
+
+     # 管理员信息
+    userShops = UserShop.objects.getListByShop(pk)
+    for userShop in userShops:
+        del userShop['id']
+        del userShop['shop_id']
+        for user in users:
+            if user['id'] == userShop['user_id']:
+                userShop['name'] = user['name']
+                break
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': userShops
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

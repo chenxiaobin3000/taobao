@@ -25,14 +25,6 @@ export function delShop(data) {
   })
 }
 
-export function getShop(data) {
-  return request({
-    url: `${path}/get`,
-    method: 'post',
-    data
-  })
-}
-
 export function getShopList(data) {
   return request({
     url: `${path}/getList`,

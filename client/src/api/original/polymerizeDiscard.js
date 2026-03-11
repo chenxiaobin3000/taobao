@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 const path = '/user_polymerize_discard'
 
-export function delPolymerizeDiscard(data) {
+export function delUserPolymerizeDiscard(data) {
   return request({
     url: `${path}/del`,
     method: 'post',
@@ -9,7 +9,7 @@ export function delPolymerizeDiscard(data) {
   })
 }
 
-export function delAllPolymerizeDiscard(data) {
+export function delAllUserPolymerizeDiscard(data) {
   return request({
     url: `${path}/delAll`,
     method: 'post',
@@ -17,7 +17,7 @@ export function delAllPolymerizeDiscard(data) {
   })
 }
 
-export function getPolymerizeDiscardList(data) {
+export function getUserPolymerizeDiscardList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

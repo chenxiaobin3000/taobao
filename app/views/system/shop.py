@@ -67,37 +67,6 @@ def delete(request):
 
 @require_POST
 @transaction.atomic
-def get(request):
-    post = json.loads(request.body)
-    pk = int(post.get('id'))
-    shop = Shop.objects.find(pk)
-
-    # 平台信息
-    market = Market.objects.find(shop['market_id'])
-    shop['market_name'] = market.name
-
-    # 所有用户信息
-    users = User.objects.getList(shop['company_id'], 1, 1000)
-
-    # 管理员信息
-    userShops = UserShop.objects.getListByShop(shop['id'])
-    for userShop in userShops:
-        del userShop['id']
-        del userShop['users']
-        for user in users:
-            if user['id'] == userShop['user_id']:
-                userShop['name'] = user['name']
-                break
-    shop['users'] = userShops
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': shop
-    }
-    return JsonResponse(response, encoder=MyJSONEncoder)
-
-@require_POST
-@transaction.atomic
 def getList(request):
     post = json.loads(request.body)
     company_id = int(post.get('id'))

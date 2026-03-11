@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="80px">
+    <el-form :model="listQuery" label-position="left" label-width="50px">
       <el-row>
         <el-col :span="8">
           <el-form-item label="店铺:" prop="shopName">
@@ -10,7 +10,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="开始日期:" prop="startDate">
+          <el-form-item label="开始日期:" prop="startDate" label-width="80px">
             <el-date-picker v-model="temp.start_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
             <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
           </el-form-item>

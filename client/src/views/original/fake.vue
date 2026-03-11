@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="70px" style="width: 100%; padding: 0 1% 0 1%;">
+    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
@@ -51,7 +51,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getFakeList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getUserFakeList" />
   </div>
 </template>
 
@@ -59,7 +59,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { OrderStatus } from '@/utils/const'
-import { getFakeList, delFake, delAllFake } from '@/api/original/fake'
+import { getUserFakeList, delUserFake, delAllUserFake } from '@/api/original/fake'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -89,7 +89,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getFakeList()
+      this.getUserFakeList()
     }
   },
   mounted: function() {
@@ -104,9 +104,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getFakeList() {
+    getUserFakeList() {
       this.loading = true
-      getFakeList(
+      getUserFakeList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -125,14 +125,14 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getFakeList()
+        this.getUserFakeList()
       })
     },
     num2type(num) {
       return OrderStatus.num2text(num)
     },
     handleChange() {
-      this.getFakeList()
+      this.getUserFakeList()
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
@@ -140,11 +140,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delFake({
+        delUserFake({
           id: row.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getFakeList()
+          this.getUserFakeList()
         })
       })
     },
@@ -154,12 +154,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delAllFake({
+        delAllUserFake({
           id: this.listQuery.id,
           uid: this.userdata.user.id
         }).then(() => {
           this.$message({ type: 'success', message: '删除成功!' })
-          this.getFakeList()
+          this.getUserFakeList()
         })
       })
     }

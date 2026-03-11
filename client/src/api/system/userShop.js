@@ -24,3 +24,11 @@ export function getUserShopList(data) {
     data
   })
 }
+
+export function getUserListByShop(data) {
+  return request({
+    url: `${path}/getListByShop`,
+    method: 'post',
+    data
+  })
+}

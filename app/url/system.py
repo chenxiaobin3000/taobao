@@ -53,13 +53,13 @@ url_system = [
     path('api/shop/add', shop.add),
     path('api/shop/set', shop.set),
     path('api/shop/del', shop.delete),
-    path('api/shop/get', shop.get),
     path('api/shop/getList', shop.getList),
 
     # 用户-店铺
     path('api/userShop/add', user_shop.add),
     path('api/userShop/del', user_shop.delete),
     path('api/userShop/getList', user_shop.getList),
+    path('api/userShop/getListByShop', user_shop.getListByShop),
 
     # 用户
     path('api/user/add', user.add),
