@@ -32,6 +32,9 @@ class UserOrderManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time')[left:right])
 
+    def getAll(self, user_id, shop_id):
+        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time'))
+
     def encoder(self, order):
         if order:
             return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'])

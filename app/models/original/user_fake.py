@@ -32,6 +32,9 @@ class UserFakeManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time')[left:right])
 
+    def getAll(self, user_id, shop_id):
+        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time'))
+
     def getListByDay(self, user_id, shop_id, start_date, end_date):
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id, create_time__range=(start_date, end_date)).aggregate(models.Sum('payment'), models.Count('id')))
 

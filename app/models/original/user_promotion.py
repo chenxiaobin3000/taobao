@@ -24,6 +24,9 @@ class UserPromotionManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_date')[left:right])
 
+    def getAll(self, user_id, shop_id):
+        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_date'))
+
     def encoder(self, promotion):
         if promotion:
             return model_to_dict(promotion, fields=['id', 'create_date', 'payment', 'promotion_type', 'promotion_note'])

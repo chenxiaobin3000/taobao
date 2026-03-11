@@ -26,6 +26,9 @@ class UserPurchaseManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time')[left:right])
 
+    def getAll(self, user_id, shop_id):
+        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time'))
+
     def encoderList(self, purchases):
         if purchases:
             return [model_to_dict(purchase, fields=['id', 'shop_id', 'purchase_id', 'order_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note']) for purchase in purchases]

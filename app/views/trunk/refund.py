@@ -4,40 +4,30 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.refund import Refund
-from app.models.system.good import Good
-from app.models.const.good_type import GoodType
+from app.models.original.user_refund import UserRefund
 
 @require_POST
 @transaction.atomic
 def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    refunds = post.get('r')
-
-    # 获取赠品列表
-    gifts = []
-    goods = Good.objects.getByType(shop_id, GoodType.GIFT)
-    for good in goods:
-        gifts.append(good['good_id'])
+    user_id = int(post.get('uid'))
+    refunds = UserRefund.objects.getAll(user_id, shop_id)
 
     # 批量添加
     for refund in refunds:
-        refund_id = refund['uid']
-        order_id = refund['oid']
-        product_id = refund['pid']
-        actual_pay = refund['ap']
-        refund_pay = refund['rp']
-        refund_platform = refund['rl']
-        refund_type = refund['rt']
-        refund_status = refund['rs']
-        pay_time = refund['pt']
-        apply_time = refund['at']
-        timeout_time = refund['tt'] if 'tt' in refund else None
-        complete_time = refund['ct'] if 'ct' in refund else None
-
-        # 过滤赠品
-        if product_id in gifts:
-            continue
+        refund_id = refund['refund_id']
+        order_id = refund['order_id']
+        product_id = refund['product_id']
+        actual_pay = refund['actual_pay']
+        refund_pay = refund['refund_pay']
+        refund_platform = refund['refund_platform']
+        refund_type = refund['refund_type']
+        refund_status = refund['refund_status']
+        pay_time = refund['pay_time']
+        apply_time = refund['apply_time']
+        timeout_time = refund['timeout_time']
+        complete_time = refund['complete_time']
 
         # 已存在更新状态
         find_object = Refund.objects.getByIdAndTime(shop_id, order_id, refund_id, product_id, apply_time)

@@ -24,6 +24,9 @@ class UserPolymerizeManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time')[left:right])
 
+    def getAll(self, user_id, shop_id):
+        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time'))
+
     def encoder(self, polymerize):
         if polymerize:
             return model_to_dict(polymerize, fields=['id', 'order_id', 'finance_type', 'amount', 'amount_type', 'create_time', 'polymerize_note'])

@@ -35,6 +35,9 @@ class UserRefundManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-apply_time')[left:right])
 
+    def getAll(self, user_id, shop_id):
+        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-apply_time'))
+
     def encoder(self, refund):
         if refund:
             return model_to_dict(refund, fields=['id', 'shop_id', 'refund_id', 'order_id', 'product_id', 'actual_pay', 'refund_pay', 'refund_platform', 'refund_type', 'refund_status', 'pay_time', 'apply_time', 'timeout_time', 'complete_time'])
