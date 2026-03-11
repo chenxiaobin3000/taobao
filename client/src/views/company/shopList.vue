@@ -1,5 +1,10 @@
 <template>
   <div class="app-container">
+    <el-form>
+      <el-form-item>
+        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
+      </el-form-item>
+    </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="店铺名称">
         <template slot-scope="scope">
@@ -89,30 +94,13 @@ export default {
   },
   computed: {
     ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
+      search: state => state.header.search
     })
   },
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
       this.getShopList()
-    },
-    create() {
-      this.resetTemp()
-      this.temp.marketId = this.marketList[0].id
-      // 生成用户列表
-      this.routes = []
-      for (let i = 0; i < this.userList.length; ++i) {
-        const tmp = this.userList[i]
-        this.routes.push({
-          id: tmp.id,
-          label: tmp.name
-        })
-      }
-      this.isNew = true
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
     }
   },
   mounted: function() {
@@ -167,6 +155,22 @@ export default {
         this.marketList = response.data.data.list
         this.getShopList()
       })
+    },
+    handleCreate() {
+      this.resetTemp()
+      this.temp.marketId = this.marketList[0].id
+      // 生成用户列表
+      this.routes = []
+      for (let i = 0; i < this.userList.length; ++i) {
+        const tmp = this.userList[i]
+        this.routes.push({
+          id: tmp.id,
+          label: tmp.name
+        })
+      }
+      this.isNew = true
+      this.dialogStatus = 'create'
+      this.dialogVisible = true
     },
     createData() {
       addShop({

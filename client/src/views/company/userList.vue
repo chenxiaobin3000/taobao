@@ -1,5 +1,10 @@
 <template>
   <div class="app-container">
+    <el-form>
+      <el-form-item>
+        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
+      </el-form-item>
+    </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column label="用户名称" width="160px" align="center">
         <template slot-scope="{row}">
@@ -108,34 +113,13 @@ export default {
   },
   computed: {
     ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
+      search: state => state.header.search
     })
   },
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
       this.getUserList()
-    },
-    create() {
-      this.resetTemp()
-      this.temp.id = this.userdata.user.id
-
-      // 默认角色
-      this.temp.role_id = this.roleList[0].id
-
-      // 生成店铺列表
-      this.routes = []
-      for (let i = 0; i < this.shopList.length; ++i) {
-        const tmp = this.shopList[i]
-        this.routes.push({
-          id: tmp.id,
-          label: tmp.name
-        })
-      }
-
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
     }
   },
   mounted: function() {
@@ -208,6 +192,26 @@ export default {
         }
       }
       return '异常'
+    },
+    handleCreate() {
+      this.resetTemp()
+      this.temp.id = this.userdata.user.id
+
+      // 默认角色
+      this.temp.role_id = this.roleList[0].id
+
+      // 生成店铺列表
+      this.routes = []
+      for (let i = 0; i < this.shopList.length; ++i) {
+        const tmp = this.shopList[i]
+        this.routes.push({
+          id: tmp.id,
+          label: tmp.name
+        })
+      }
+
+      this.dialogStatus = 'create'
+      this.dialogVisible = true
     },
     createData() {
       addUser({

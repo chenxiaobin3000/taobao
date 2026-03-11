@@ -1,5 +1,10 @@
 <template>
   <div class="app-container">
+    <el-form>
+      <el-form-item>
+        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
+      </el-form-item>
+    </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="角色名称">
         <template slot-scope="scope">
@@ -62,22 +67,13 @@ export default {
   },
   computed: {
     ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
+      search: state => state.header.search
     })
   },
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
       this.getRoleList()
-    },
-    create() {
-      this.resetTemp()
-      this.$nextTick(() => {
-        this.$refs.tree.setCheckedKeys([])
-      })
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
     }
   },
   mounted: function() {
@@ -109,6 +105,14 @@ export default {
         this.loading = false
         Promise.reject(error)
       })
+    },
+    handleCreate() {
+      this.resetTemp()
+      this.$nextTick(() => {
+        this.$refs.tree.setCheckedKeys([])
+      })
+      this.dialogStatus = 'create'
+      this.dialogVisible = true
     },
     createData() {
       const checkedKeys = this.$refs.tree.getCheckedKeys()

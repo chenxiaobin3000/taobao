@@ -5,6 +5,7 @@
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
+        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -107,20 +108,13 @@ export default {
   },
   computed: {
     ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
+      search: state => state.header.search
     })
   },
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
       this.getShopList()
-    },
-    create() {
-      this.resetTemp()
-      this.temp.user_id = this.userList[0].id
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
     }
   },
   mounted: function() {
@@ -189,6 +183,12 @@ export default {
     },
     handleChange() {
       this.getMiscList()
+    },
+    handleCreate() {
+      this.resetTemp()
+      this.temp.user_id = this.userList[0].id
+      this.dialogStatus = 'create'
+      this.dialogVisible = true
     },
     createData() {
       addMisc({

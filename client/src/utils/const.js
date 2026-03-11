@@ -110,7 +110,7 @@ export const DeductionType = {
       return this.GUAN_KONG
     } else if (text.indexOf('限时礼金软件服务费') !== -1) {
       return this.XIAN_SHI_LI_JIN
-
+      // ---------------------
     } else if (text.indexOf('公益宝贝捐赠') !== -1) {
       return this.GONG_YI
     } else if (text.indexOf('卖家延迟发货赔付红包') !== -1) {
@@ -123,7 +123,7 @@ export const DeductionType = {
       return this.QUE_HUO
     } else if (text.indexOf('花呗分期免息营销') !== -1) {
       return this.HUA_BEI
-
+      // ---------------------
     } else if (text.indexOf('退款') !== -1) {
       return this.TUI_KUAN
     } else if (text.indexOf('支付宝转账小额打款') !== -1) { // 要在转账之前
@@ -134,7 +134,7 @@ export const DeductionType = {
       return this.BAO_ZHENG_JIN
     } else if (text.indexOf('万相台无界版自动充值') !== -1) {
       return this.CHONG_ZHI
-
+      // ---------------------
     } else { // 异常
       return this.OTHER
     }

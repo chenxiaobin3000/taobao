@@ -85,17 +85,13 @@ export default {
   },
   computed: {
     ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
+      search: state => state.header.search
     })
   },
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
       this.getDeductionList()
-    },
-    create() {
-      this.$message({ type: 'error', message: '不支持新建!' })
     }
   },
   mounted: function() {

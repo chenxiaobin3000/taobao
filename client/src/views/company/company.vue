@@ -31,16 +31,12 @@ export default {
   },
   computed: {
     ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
+      search: state => state.header.search
     })
   },
   watch: {
     search(newVal, oldVal) {
       this.$message({ type: 'error', message: '该页面不支持搜索操作!' })
-    },
-    create() {
-      this.$message({ type: 'error', message: '该页面不支持新增操作!' })
     }
   },
   created() {

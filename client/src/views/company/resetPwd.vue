@@ -51,17 +51,13 @@ export default {
   },
   computed: {
     ...mapState({
-      search: state => state.header.search,
-      create: state => state.header.create
+      search: state => state.header.search
     })
   },
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
       this.getUserList()
-    },
-    create() {
-      this.$message({ type: 'error', message: '该页面不支持新增用户，请到用户列表页面操作!' })
     }
   },
   created() {
