@@ -8,7 +8,7 @@ from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic
-def addList(request):
+def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     polymerizes = post.get('p')

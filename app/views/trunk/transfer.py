@@ -4,25 +4,25 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.transfer import Transfer
+from app.models.original.user_transfer import UserTransfer
 
 @require_POST
 @transaction.atomic
-def addList(request):
+def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    transfers = post.get('t')
+    user_id = int(post.get('uid'))
+    transfers = UserTransfer.objects.getAll(user_id, shop_id)
 
-    # 批量添加
+    # 批量合并
     for transfer in transfers:
-        user_name = transfer['n']
-        payee_name = transfer['p']
-        order_id = transfer['o']
-        amount = transfer['a']
-        create_time = transfer['c']
-        transfer_note= transfer['tn']
+        create_time = transfer['create_time']
         if Transfer.objects.getByCTime(shop_id, create_time):
             continue
-        Transfer.objects.add(shop_id, user_name, payee_name, order_id, amount, create_time, transfer_note)
+        Transfer.objects.add(shop_id, transfer['user_name'], transfer['payee_name'], transfer['order_id'], transfer['amount'], create_time, transfer['transfer_note'])
+
+    # 清空临时数据
+    UserTransfer.objects.deleteAll(user_id, shop_id)
 
     response = {
         'code': 0,

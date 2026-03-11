@@ -9,6 +9,18 @@ from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic
+def merge(request):
+    post = json.loads(request.body)
+    pk = int(post.get('id'))
+    Fake.objects.delete(pk)
+    response = {
+        'code': 0,
+        'msg': 'success'
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))

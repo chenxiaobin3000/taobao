@@ -9,7 +9,7 @@ from app.models.const.good_type import GoodType
 
 @require_POST
 @transaction.atomic
-def addList(request):
+def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     refunds = post.get('r')

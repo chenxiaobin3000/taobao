@@ -7,7 +7,7 @@ from app.models.trunk.promotion import Promotion
 
 @require_POST
 @transaction.atomic
-def addList(request):
+def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     promotions = post.get('p')

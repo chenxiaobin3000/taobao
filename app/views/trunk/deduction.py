@@ -8,7 +8,7 @@ from app.models.const.deduction_type import DeductionType
 
 @require_POST
 @transaction.atomic
-def addList(request):
+def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     deductions = post.get('d')
