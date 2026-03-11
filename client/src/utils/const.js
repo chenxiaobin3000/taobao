@@ -55,6 +55,7 @@ export const DeductionType = {
   XIN_XIANG_FU_WU: 14, // 品牌新享-淘宝营销托管
   XIAO_FEI_QUAN: 15, // 消费券代付资金扣回
   GUAN_KONG: 16, // 保证金管控资金使用
+  XIAN_SHI_LI_JIN: 17, // 限时礼金软件服务费
 
   // 无订单信息
   GONG_YI: 100, // 公益宝贝捐赠
@@ -69,9 +70,10 @@ export const DeductionType = {
   ZHUAN_ZHANG: 201, // 转账
   BAO_ZHENG_JIN: 202, // 淘宝消费者保证金
   DA_KUAN: 203, // 支付宝转账小额打款
+  CHONG_ZHI: 204, // 万相台无界版自动充值
+  ONLINE: 205, // 在线支付
 
-  FILTER: 1000, // 过滤
-  OTHER: 1001, // 异常
+  OTHER: 1000, // 异常
 
   text2num(text) {
     if (text.indexOf('基础软件服务费') !== -1) {
@@ -106,6 +108,9 @@ export const DeductionType = {
       return this.XIAO_FEI_QUAN
     } else if (text.indexOf('保证金管控资金使用') !== -1) {
       return this.GUAN_KONG
+    } else if (text.indexOf('限时礼金软件服务费') !== -1) {
+      return this.XIAN_SHI_LI_JIN
+
     } else if (text.indexOf('公益宝贝捐赠') !== -1) {
       return this.GONG_YI
     } else if (text.indexOf('卖家延迟发货赔付红包') !== -1) {
@@ -118,6 +123,7 @@ export const DeductionType = {
       return this.QUE_HUO
     } else if (text.indexOf('花呗分期免息营销') !== -1) {
       return this.HUA_BEI
+
     } else if (text.indexOf('退款') !== -1) {
       return this.TUI_KUAN
     } else if (text.indexOf('支付宝转账小额打款') !== -1) { // 要在转账之前
@@ -126,6 +132,9 @@ export const DeductionType = {
       return this.ZHUAN_ZHANG
     } else if (text.indexOf('淘宝消费者保证金') !== -1) {
       return this.BAO_ZHENG_JIN
+    } else if (text.indexOf('万相台无界版自动充值') !== -1) {
+      return this.CHONG_ZHI
+
     } else { // 异常
       return this.OTHER
     }
@@ -164,6 +173,8 @@ export const DeductionType = {
         return '消费券代付'
       case this.GUAN_KONG:
         return '管控资金使用'
+      case this.XIAN_SHI_LI_JIN:
+        return '限时礼金'
 
       case this.GONG_YI:
         return '公益宝贝捐赠'
@@ -186,6 +197,10 @@ export const DeductionType = {
         return '保证金'
       case this.DA_KUAN:
         return '小额打款'
+      case this.CHONG_ZHI:
+        return '万相台充值'
+      case this.ONLINE:
+        return '在线支付'
     }
     return '异常'
   }

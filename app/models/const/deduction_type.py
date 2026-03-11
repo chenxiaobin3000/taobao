@@ -19,7 +19,8 @@ class DeductionType:
     XIN_PIN = 13            # 品牌新享淘宝新品营销
     XIN_XIANG_FU_WU = 14    # 品牌新享-淘宝营销托管
     XIAO_FEI_QUAN = 15      # 消费券代付资金扣回
-    GUAN_KONG = 16         # 保证金管控资金使用
+    GUAN_KONG = 16          # 保证金管控资金使用
+    XIAN_SHI_LI_JIN = 17    # 限时礼金软件服务费
 
     # 无订单信息
     GONG_YI = 100           # 公益宝贝捐赠
@@ -34,6 +35,7 @@ class DeductionType:
     ZHUAN_ZHANG = 201       # 退款
     BAO_ZHENG_JIN = 202     # 淘宝消费者保证金
     DA_KUAN = 203           # 支付宝转账小额打款
+    CHONG_ZHI = 204         # 万相台无界版自动充值
+    ONLINE = 205            # 在线支付
 
-    FILTER = 1000           # 过滤
-    OTHER = 1001            # 异常
+    OTHER = 1000            # 异常

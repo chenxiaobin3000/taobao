@@ -35,7 +35,7 @@ def addList(request):
             return JsonResponse(response, encoder=MyJSONEncoder)
 
         # 不处理的数据放废弃表
-        if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
+        if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type or DeductionType.BAO_ZHENG_JIN == amount_type or DeductionType.DA_KUAN == amount_type or DeductionType.CHONG_ZHI == amount_type or DeductionType.ONLINE == amount_type or DeductionType.OTHER == amount_type:
             if UserDeductionDiscard.objects.getByCTime(user_id, shop_id, order_id, amount_type, create_time):
                 continue
             UserDeductionDiscard.objects.add(user_id, shop_id, order_id, finance_type, amount, amount_type, create_time, deduction_note)

@@ -153,27 +153,29 @@ export default {
       const create_time = header[0]
       const finance_type = header[4]
       const amount = header[6]
+      const good_name = header[14]
       const deduction_note = header[15]
       const d = []
       let stop = false
       results.forEach(v => {
         if (v[amount] > 0 && !stop) {
           let oid = ''
-          let dtype = DeductionType.text2num(note)
-          const note = v[deduction_note]
-          console.log(note)
+          let dtype = DeductionType.OTHER
+          let note = v[deduction_note]
           const ftype = FinanceType.text2num(v[finance_type])
           if (note.length < 2) {
             // 忽略在线支付
             if (ftype === FinanceType.ONLINE) {
-              dtype = DeductionType.FILTER
-              oid = DefaultOrder
+              dtype = DeductionType.ONLINE
+              note = v[good_name]
             } else {
               stop = true
               this.$message({ type: 'error', message: '没有备注信息!' })
               console.log(v)
               return
             }
+          } else {
+            dtype = DeductionType.text2num(note)
           }
           // 从备注抓取订单号
           let first = 0
@@ -193,6 +195,7 @@ export default {
             case DeductionType.XIN_XIANG_FU_WU: // 品牌新享-淘宝营销托管
             case DeductionType.XIAO_FEI_QUAN: // 消费券代付资金扣回
             case DeductionType.GUAN_KONG: // 保证金管控资金使用
+            case DeductionType.XIAN_SHI_LI_JIN: // 限时礼金软件服务费
               first = note.indexOf('(') + 1
               second = note.indexOf(')', first)
               if (first !== -1 && second !== -1 && second - first === 19) {
@@ -207,9 +210,8 @@ export default {
 
             case DeductionType.TI_YAN: // 消费者体验提升计划服务费
               first = note.indexOf('订单号') + 3
-              second = note.indexOf('，', first)
-              if (first !== -1 && second !== -1 && second - first === 19) {
-                oid = note.substring(first, second)
+              if (first !== -1) {
+                oid = note.substring(first, first + 19)
               } else {
                 stop = true
                 this.$message({ type: 'error', message: '备注信息格式异常!' })
@@ -246,6 +248,8 @@ export default {
             case DeductionType.ZHUAN_ZHANG: // 转账
             case DeductionType.BAO_ZHENG_JIN: // 保证金
             case DeductionType.DA_KUAN: // 小额打款
+            case DeductionType.CHONG_ZHI: // 万相台无界版自动充值
+            case DeductionType.ONLINE: // 在线支付
               oid = DefaultOrder
               break
 
@@ -254,9 +258,6 @@ export default {
               this.$message({ type: 'error', message: '备注信息异常!' })
               console.log(v)
               return
-
-            case DeductionType.FILTER: // 过滤
-              break
           }
           if (oid.length !== 19) {
             this.$message({ type: 'error', message: '关联订单号异常!' })
