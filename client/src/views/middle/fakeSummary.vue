@@ -2,18 +2,20 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px">
       <el-row>
-        <el-col :span="8">
+        <el-col :span="6">
           <el-form-item label="店铺:" prop="shopName">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="6">
           <el-form-item label="开始日期:" prop="startDate" label-width="80px">
             <el-date-picker v-model="temp.start_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
-            <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
           </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -75,6 +77,7 @@
         </el-form-item>
         <el-form-item label="刷单总金额">
           <el-input v-model="temp.fake_amount" />
+          <div>校验: 5 x {{ temp.fake_num }} = {{ 5 * temp.fake_num }}, 10 x {{ temp.fake_num }} = {{ 10 * temp.fake_num }}</div>
         </el-form-item>
         <el-form-item label="刷单订单数">
           <el-input v-model="temp.fake_num" />

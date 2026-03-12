@@ -35,9 +35,6 @@ class UserFakeManager(models.Manager):
     def getAll(self, user_id, shop_id):
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time'))
 
-    def getListByDay(self, user_id, shop_id, start_date, end_date):
-        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id, create_time__range=(start_date, end_date)).aggregate(models.Sum('payment'), models.Count('id')))
-
     def encoder(self, order):
         if order:
             return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'])

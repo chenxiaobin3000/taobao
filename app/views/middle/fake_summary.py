@@ -6,7 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.fake_summary import FakeSummary
-from app.models.original.user_fake import UserFake
+from app.models.trunk.fake import Fake
 
 @require_POST
 @transaction.atomic
@@ -32,12 +32,15 @@ def flush(request):
     for i in range(0, days):
         start = start_date + timedelta(days=i)
         end = start_date + timedelta(days=i+1)
-        # 已经生成的就跳过
-        if FakeSummary.objects.getByDate(shop_id, start):
-            continue
-        data = UserFake.objects.getListByDay(shop_id, start, end)
+        data = Fake.objects.getListByDay(shop_id, start, end)
         if data and data['payment__sum'] and data['id__count'] > 0:
-            FakeSummary.objects.add(shop_id, start, data['payment__sum'], data['id__count'], 0, 0, 0, 0, '')
+            find_object = FakeSummary.objects.getByDate(shop_id, start)
+            if find_object:
+                # 已经生成的判断是否需要修改
+                if find_object['order_amount'] != data['payment__sum'] or find_object['order_num'] != data['id__count']:
+                    FakeSummary.objects.fix(find_object['id'], data['payment__sum'], data['id__count'])
+            else:
+                FakeSummary.objects.add(shop_id, start, data['payment__sum'], data['id__count'], 0, 0, 0, 0, '')
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

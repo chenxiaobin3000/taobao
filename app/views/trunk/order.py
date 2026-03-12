@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.order import Order
 from app.models.original.user_order import UserOrder
+from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic

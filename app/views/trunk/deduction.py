@@ -18,9 +18,9 @@ def merge(request):
     if deductions:
         # 批量添加
         for deduction in deductions:
-            order_id = deduction['o']
-            amount_type = int(deduction['t'])
-            create_time = deduction['c']
+            order_id = deduction['order_id']
+            amount_type = int(deduction['amount_type'])
+            create_time = deduction['create_time']
             if Deduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
                 continue
             Deduction.objects.add(shop_id, order_id, deduction['finance_type'], deduction['amount'], amount_type, create_time, deduction['deduction_note'])

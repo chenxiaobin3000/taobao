@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.fake import Fake
 from app.models.original.user_fake import UserFake
+from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic

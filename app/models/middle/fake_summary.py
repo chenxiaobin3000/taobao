@@ -7,6 +7,12 @@ class FakeSummaryManager(models.Manager):
     def add(self, shop_id, create_date, order_amount, order_num, fake_amount, fake_num, commission, freight, fake_note):
         return self.create(shop_id=shop_id, create_date=create_date, order_amount=order_amount, order_num=order_num, fake_amount=fake_amount, fake_num=fake_num, commission=commission, freight=freight, fake_note=fake_note)
 
+    def fix(self, pk, order_amount, order_num):
+        fake = self.get(pk=pk)
+        fake.order_amount = order_amount
+        fake.order_num = order_num
+        return fake.save()
+
     def set(self, pk, fake_amount, fake_num, commission, freight, fake_note):
         fake = self.get(pk=pk)
         fake.fake_amount = fake_amount
@@ -15,7 +21,7 @@ class FakeSummaryManager(models.Manager):
         fake.freight = freight
         fake.fake_note = fake_note
         return fake.save()
-    
+
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
