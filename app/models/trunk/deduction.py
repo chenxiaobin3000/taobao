@@ -21,6 +21,9 @@ class DeductionManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
+    def getAll(self, shop_id, start_date):
+        return
+
     def encoder(self, deduction):
         if deduction:
             return model_to_dict(deduction, fields=['id', 'order_id', 'finance_type', 'amount', 'amount_type', 'create_time', 'deduction_note'])
