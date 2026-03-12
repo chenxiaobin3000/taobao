@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.refund import Refund
 from app.models.original.user_refund import UserRefund
+from app.models.original.user_refund_gift import UserRefundGift
 
 @require_POST
 @transaction.atomic
@@ -37,8 +38,9 @@ def merge(request):
             else:
                 Refund.objects.add(shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, refund['pay_time'], apply_time, timeout_time, complete_time)
 
-            # 清空临时数据
-            UserRefund.objects.deleteAll(user_id, shop_id)
+        # 清空临时数据
+        UserRefund.objects.deleteAll(user_id, shop_id)
+        UserRefundGift.objects.deleteAll(user_id, shop_id)
 
     response = {
         'code': 0,

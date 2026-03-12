@@ -4,39 +4,35 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.deduction import Deduction
-from app.models.const.deduction_type import DeductionType
+from app.models.original.user_deduction import UserDeduction
+from app.models.original.user_deduction_discard import UserDeductionDiscard
 
 @require_POST
 @transaction.atomic
 def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    deductions = post.get('d')
+    user_id = int(post.get('uid'))
+    deductions = UserDeduction.objects.getAll(user_id, shop_id)
+
+    if deductions:
+        # 批量添加
+        for deduction in deductions:
+            order_id = deduction['o']
+            amount_type = int(deduction['t'])
+            create_time = deduction['c']
+            if Deduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+                continue
+            Deduction.objects.add(shop_id, order_id, deduction['finance_type'], deduction['amount'], amount_type, create_time, deduction['deduction_note'])
+
+        # 清空临时数据
+        UserDeduction.objects.deleteAll(user_id, shop_id)
+        UserDeductionDiscard.objects.deleteAll(user_id, shop_id)
+
     response = {
         'code': 0,
         'msg': 'success'
     }
-
-    # 批量添加
-    for deduction in deductions:
-        order_id = deduction['o']
-        finance_type = deduction['f']
-        amount = deduction['a']
-        amount_type = int(deduction['t'])
-        create_time = deduction['c']
-        deduction_note = deduction['n']
-
-        # 未知数据类型返回失败
-        if DeductionType.OTHER == amount_type:
-            response['code'] = -1
-            response['msg'] = '异常数据'
-            return JsonResponse(response, encoder=MyJSONEncoder)
-
-        # 插入数据
-        if Deduction.objects.getByCTime(shop_id, order_id, amount_type, create_time):
-            continue
-        Deduction.objects.add(shop_id, order_id, finance_type, amount, amount_type, create_time, deduction_note)
-
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST

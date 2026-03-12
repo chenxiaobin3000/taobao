@@ -4,39 +4,35 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.polymerize import Polymerize
-from app.models.const.deduction_type import DeductionType
+from app.models.original.user_polymerize import UserPolymerize
+from app.models.original.user_polymerize_discard import UserPolymerizeDiscard
 
 @require_POST
 @transaction.atomic
 def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    polymerizes = post.get('p')
+    user_id = int(post.get('uid'))
+    polymerizes = UserPolymerize.objects.getAll(user_id, shop_id)
+
+    if polymerizes:
+        # 批量添加
+        for polymerize in polymerizes:
+            order_id = polymerize['order_id']
+            amount_type = polymerize['amount_type']
+            create_time = polymerize['create_time']
+            if Polymerize.objects.getByCTime(shop_id, order_id, amount_type, create_time):
+                continue
+            Polymerize.objects.add(shop_id, order_id, polymerize['finance_type'], polymerize['amount'], amount_type, create_time, polymerize['polymerize_note'])
+
+        # 清空临时数据
+        UserPolymerize.objects.deleteAll(user_id, shop_id)
+        UserPolymerizeDiscard.objects.deleteAll(user_id, shop_id)
+
     response = {
         'code': 0,
         'msg': 'success'
     }
-
-    # 批量添加
-    for polymerize in polymerizes:
-        order_id = polymerize['o']
-        finance_type = polymerize['f']
-        amount = polymerize['a']
-        amount_type = int(polymerize['t'])
-        create_time = polymerize['c']
-        polymerize_note = polymerize['n']
-
-        # 未知数据类型返回失败
-        if DeductionType.OTHER == amount_type:
-            response['code'] = -1
-            response['msg'] = '异常数据'
-            return JsonResponse(response, encoder=MyJSONEncoder)
-        
-        # 插入数据
-        if Polymerize.objects.getByCTime(shop_id, order_id, amount_type, create_time):
-            continue
-        Polymerize.objects.add(shop_id, order_id, finance_type, amount, amount_type, create_time, polymerize_note)
-
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST

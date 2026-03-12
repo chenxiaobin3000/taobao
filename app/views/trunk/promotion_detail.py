@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.promotion_detail import PromotionDetail
+from app.models.original.user_promotion_detail import UserPromotionDetail
 from app.models.system.good import Good
 
 @require_POST
@@ -11,34 +12,25 @@ from app.models.system.good import Good
 def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    polymerizes = post.get('p')
+    user_id = int(post.get('uid'))
+    polymerizes = UserPromotionDetail.objects.getAll(user_id, shop_id)
+
+    if polymerizes:
+        # 批量添加
+        for polymerize in polymerizes:
+            promotion_date = polymerize['promotion_date']
+            good_id = polymerize['good_id']
+            if PromotionDetail.objects.getByIdAndDate(shop_id, promotion_date, good_id):
+                continue
+            PromotionDetail.objects.add(shop_id, promotion_date, good_id, polymerize['show_num'], polymerize['click_num'], polymerize['click_rate'], polymerize['cost'], polymerize['average_cost'], polymerize['thousand_cost'], polymerize['deal_amount'], polymerize['deal_num'], polymerize['deal_cost'], polymerize['shop_cart'], polymerize['favorites'], polymerize['roi'])
+
+        # 清空临时数据
+        UserPromotionDetail.objects.deleteAll(user_id, shop_id)
+
     response = {
         'code': 0,
         'msg': 'success'
     }
-
-    # 批量添加
-    for polymerize in polymerizes:
-        promotion_date = polymerize['pd']
-        good_id = polymerize['id']
-        show_num = int(polymerize['sn'])
-        click_num = int(polymerize['cn'])
-        click_rate = polymerize['cr']
-        cost = polymerize['co']
-        average_cost = polymerize['ac']
-        thousand_cost = polymerize['tc']
-        deal_amount = polymerize['da']
-        deal_num = int(polymerize['dn'])
-        deal_cost = polymerize['dc']
-        shop_cart = int(polymerize['sc'])
-        favorites = int(polymerize['fa'])
-        roi = polymerize['roi']
-
-        # 不存在就插入
-        find_object = PromotionDetail.objects.getByIdAndDate(shop_id, promotion_date, good_id)
-        if not find_object:
-            PromotionDetail.objects.add(shop_id, promotion_date, good_id, show_num, click_num, click_rate, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
-
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST

@@ -3,16 +3,36 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.const.good_type import GoodType
 from app.models.trunk.fake import Fake
-from app.models.system.good import Good
+from app.models.original.user_fake import UserFake
 
 @require_POST
 @transaction.atomic
 def merge(request):
     post = json.loads(request.body)
-    pk = int(post.get('id'))
-    Fake.objects.delete(pk)
+    shop_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
+    orders = UserFake.objects.getAll(user_id, shop_id)
+
+    if orders:
+        # 批量添加
+        for order in orders:
+            order_id = order['order_id']
+            procure = order['procure']
+            order_status = order['order_status']
+            procure_ids = order['procure_ids']
+            order_note = order['order_note']
+
+            # 已存在更新订单状态
+            find_object = Fake.objects.getById(shop_id, order_id)
+            if find_object:
+                Fake.objects.set(find_object['id'], procure, order_status, procure_ids, order_note)
+            else:
+                Fake.objects.add(shop_id, order_id, order['payment'], procure, order_status, order['create_time'], order['good_ids'], procure_ids, order_note)
+
+        # 清空临时数据
+        UserFake.objects.deleteAll(user_id, shop_id)
+
     response = {
         'code': 0,
         'msg': 'success'

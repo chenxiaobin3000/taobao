@@ -4,23 +4,27 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.promotion import Promotion
+from app.models.original.user_promotion import UserPromotion
 
 @require_POST
 @transaction.atomic
 def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    promotions = post.get('p')
+    user_id = int(post.get('uid'))
+    promotions = UserPromotion.objects.getAll(user_id, shop_id)
 
-    # 批量添加
-    for promotion in promotions:
-        create_date = promotion['d']
-        payment = promotion['p']
-        promotion_type = promotion['t']
-        promotion_note = promotion['n']
-        if Promotion.objects.getByCDate(shop_id, create_date, promotion_type):
-            continue
-        Promotion.objects.add(shop_id, create_date, payment, promotion_type, promotion_note)
+    if promotions:
+        # 批量添加
+        for promotion in promotions:
+            create_date = promotion['create_date']
+            promotion_type = promotion['promotion_type']
+            if Promotion.objects.getByCDate(shop_id, create_date, promotion_type):
+                continue
+            Promotion.objects.add(shop_id, create_date, promotion['payment'], promotion_type, promotion['promotion_note'])
+
+        # 清空临时数据
+        UserPromotion.objects.deleteAll(user_id, shop_id)
 
     response = {
         'code': 0,

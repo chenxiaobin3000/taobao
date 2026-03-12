@@ -36,9 +36,9 @@ def addList(request):
         roi = polymerize['roi']
 
         # 不存在就插入
-        find_object = UserPromotionDetail.objects.getByIdAndDate(user_id, shop_id, promotion_date, good_id)
-        if not find_object:
-            UserPromotionDetail.objects.add(user_id, shop_id, promotion_date, good_id, show_num, click_num, click_rate, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
+        if UserPromotionDetail.objects.getByIdAndDate(user_id, shop_id, promotion_date, good_id):
+            continue
+        UserPromotionDetail.objects.add(user_id, shop_id, promotion_date, good_id, show_num, click_num, click_rate, cost, average_cost, thousand_cost, deal_amount, deal_num, deal_cost, shop_cart, favorites, roi)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

@@ -2,21 +2,21 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="8">
+        <el-col :span="6">
           <el-form-item label="店铺:" prop="shopName">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
               <el-option v-for="item in shopList" :key="'S' + item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="6">
           <el-form-item label="来源:" prop="fromName">
             <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择店铺" @change="handleChangeUser">
               <el-option v-for="item in userList" :key="'U' + item.user_id" :label="item.name" :value="item.user_id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="12">
           <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
         </el-col>
       </el-row>
