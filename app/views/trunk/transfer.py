@@ -14,15 +14,16 @@ def merge(request):
     user_id = int(post.get('uid'))
     transfers = UserTransfer.objects.getAll(user_id, shop_id)
 
-    # 批量合并
-    for transfer in transfers:
-        create_time = transfer['create_time']
-        if Transfer.objects.getByCTime(shop_id, create_time):
-            continue
-        Transfer.objects.add(shop_id, transfer['user_name'], transfer['payee_name'], transfer['order_id'], transfer['amount'], create_time, transfer['transfer_note'])
+    if transfers:
+        # 批量合并
+        for transfer in transfers:
+            create_time = transfer['create_time']
+            if Transfer.objects.getByCTime(shop_id, create_time):
+                continue
+            Transfer.objects.add(shop_id, transfer['user_name'], transfer['payee_name'], transfer['order_id'], transfer['amount'], create_time, transfer['transfer_note'])
 
-    # 清空临时数据
-    UserTransfer.objects.deleteAll(user_id, shop_id)
+        # 清空临时数据
+        UserTransfer.objects.deleteAll(user_id, shop_id)
 
     response = {
         'code': 0,

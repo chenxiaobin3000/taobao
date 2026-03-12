@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 const path = '/deduction'
 
-export function addDeductionList(data) {
+export function mergeDeduction(data) {
   return request({
-    url: `${path}/addList`,
+    url: `${path}/merge`,
     method: 'post',
     data
   })

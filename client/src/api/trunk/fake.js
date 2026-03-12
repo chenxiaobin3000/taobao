@@ -1,6 +1,14 @@
 import request from '@/utils/request'
 const path = '/fake'
 
+export function mergeFake(data) {
+  return request({
+    url: `${path}/merge`,
+    method: 'post',
+    data
+  })
+}
+
 export function delFake(data) {
   return request({
     url: `${path}/del`,

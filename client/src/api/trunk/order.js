@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 const path = '/order'
 
-export function addOrderList(data) {
+export function mergeOrder(data) {
   return request({
-    url: `${path}/addList`,
+    url: `${path}/merge`,
     method: 'post',
     data
   })

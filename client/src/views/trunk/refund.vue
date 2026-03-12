@@ -1,12 +1,25 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
+              <el-option v-for="item in shopList" :key="'S' + item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="来源:" prop="fromName">
+            <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择店铺" @change="handleChangeUser">
+              <el-option v-for="item in userList" :key="'U' + item.user_id" :label="item.name" :value="item.user_id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="订单编码" width="160">
@@ -67,25 +80,20 @@
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getRefundList" />
-
-    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5</pre>
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import UploadExcelComponent from '@/components/UploadExcel'
-import { NoneTime, ImportCount, ImportSpan, RefundStatus, RefundType } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
-import { getRefundList, addRefundList, delRefund } from '@/api/trunk/refund'
+import { NoneTime, RefundStatus, RefundType } from '@/utils/const'
+import { getRefundList, mergeRefund, delRefund } from '@/api/trunk/refund'
+import { getUserRefundList } from '@/api/original/refund'
 import { getShopList } from '@/api/system/shop'
+import { getUserListByShop } from '@/api/system/userShop'
 
 export default {
-  components: { Pagination, UploadExcelComponent },
+  components: { Pagination },
   data() {
     return {
       userdata: {},
@@ -94,13 +102,14 @@ export default {
       total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
+      userList: [], // 本店铺所有负责人列表
       listQuery: {
         id: 0,
+        uid: 0,
         page: 1,
         num: 10,
         search: null
       },
-      dialogVisible: false,
       NoneTime: NoneTime
     }
   },
@@ -122,7 +131,6 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = 0
     this.getShopList()
   },
   methods: {
@@ -147,7 +155,29 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
+        this.getUserListByShop()
+      })
+    },
+    getUserListByShop() {
+      getUserListByShop(
+        this.listQuery
+      ).then(response => {
+        this.userList = response.data.data
+        this.userList.unshift({ user_id: 0, name: '☆ 主干 ☆' })
         this.getRefundList()
+      })
+    },
+    getUserRefundList() {
+      this.loading = true
+      getUserRefundList(
+        this.listQuery
+      ).then(response => {
+        this.total = response.data.data.total
+        this.list = response.data.data.list
+        this.loading = false
+      }).catch(error => {
+        this.loading = false
+        Promise.reject(error)
       })
     },
     num2type(num) {
@@ -156,78 +186,32 @@ export default {
     num2status(num) {
       return RefundStatus.num2text(num)
     },
-    handleChange() {
+    handleChangeShop() {
+      this.listQuery.uid = 0
       this.getRefundList()
     },
-    handleExcel() {
-      this.dialogVisible = true
+    handleChangeUser() {
+      if (this.listQuery.uid === 0) {
+        this.getRefundList()
+      } else {
+        this.getUserRefundList()
+      }
     },
-    async handleSuccess({ results, header }) {
-      const order_id = header[0]
-      const refund_id = header[1]
-      const pay_time = header[2]
-      const complete_time = header[3]
-      const actual_pay = header[4]
-      const refund_pay = header[5]
-      const apply_time = header[10]
-      const timeout_time = header[11]
-      const refund_status = header[12]
-      const refund_type = header[13]
-      const product_id = header[14]
-      const refund_platform = header[16]
-      const r = []
-      results.forEach(v => {
-        r.push({
-          uid: v[refund_id],
-          oid: v[order_id],
-          pid: v[product_id],
-          ap: v[actual_pay],
-          rp: v[refund_pay],
-          rl: v[refund_platform],
-          rt: RefundType.text2num(v[refund_type]),
-          rs: RefundStatus.text2num(v[refund_status]),
-          pt: v[pay_time],
-          at: v[apply_time],
-          tt: v[timeout_time] === '' ? NoneTime : v[timeout_time],
-          ct: v[complete_time] === '' ? NoneTime : v[complete_time]
+    handleMerge() {
+      this.$confirm('确定要合并数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        mergeRefund({
+          id: this.listQuery.id,
+          uid: this.listQuery.uid
+        }).then(() => {
+          this.$message({ type: 'success', message: '合并成功!' })
+          this.listQuery.uid = 0
+          this.getRefundList()
         })
       })
-      let length = r.length
-      // 预校验数据
-      for (let i = 0; i < length; ++i) {
-        if (r[i].rt === RefundType.OTHER || r[i].rs === RefundStatus.OTHER) {
-          this.$message({ type: 'error', message: '数据异常!' })
-          console.log(r[i])
-          return
-        }
-      }
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addRefundList({
-            id: this.listQuery.id,
-            r: r.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getRefundList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addRefundList({
-          id: this.listQuery.id,
-          r: r
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getRefundList()
-          this.dialogVisible = false
-        })
-      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

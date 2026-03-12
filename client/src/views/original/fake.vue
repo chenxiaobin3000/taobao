@@ -99,7 +99,6 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = 0
     this.listQuery.uid = this.userdata.user.id
     this.getShopList()
   },

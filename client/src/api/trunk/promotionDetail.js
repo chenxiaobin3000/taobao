@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 const path = '/promotion_detail'
 
-export function addPromotionDetailList(data) {
+export function mergePromotionDetail(data) {
   return request({
-    url: `${path}/addList`,
+    url: `${path}/merge`,
     method: 'post',
     data
   })

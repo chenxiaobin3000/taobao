@@ -124,7 +124,6 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = 0
     this.resetTemp()
     this.getShopList()
   },

@@ -1,12 +1,25 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
+              <el-option v-for="item in shopList" :key="'S' + item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="来源:" prop="fromName">
+            <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择店铺" @change="handleChangeUser">
+              <el-option v-for="item in userList" :key="'U' + item.user_id" :label="item.name" :value="item.user_id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="订单编号" width="160">
@@ -59,8 +72,10 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { OrderStatus } from '@/utils/const'
-import { getFakeList, delFake } from '@/api/trunk/fake'
+import { getFakeList, mergeFake, delFake } from '@/api/trunk/fake'
+import { getUserFakeList } from '@/api/original/fake'
 import { getShopList } from '@/api/system/shop'
+import { getUserListByShop } from '@/api/system/userShop'
 
 export default {
   components: { Pagination },
@@ -72,8 +87,10 @@ export default {
       total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
+      userList: [], // 本店铺所有负责人列表
       listQuery: {
         id: 0,
+        uid: 0,
         page: 1,
         num: 10,
         search: null
@@ -98,7 +115,6 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = 0
     this.getShopList()
   },
   methods: {
@@ -123,14 +139,60 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
+        this.getUserListByShop()
+      })
+    },
+    getUserListByShop() {
+      getUserListByShop(
+        this.listQuery
+      ).then(response => {
+        this.userList = response.data.data
+        this.userList.unshift({ user_id: 0, name: '☆ 主干 ☆' })
         this.getFakeList()
+      })
+    },
+    getUserFakeList() {
+      this.loading = true
+      getUserFakeList(
+        this.listQuery
+      ).then(response => {
+        this.total = response.data.data.total
+        this.list = response.data.data.list
+        this.loading = false
+      }).catch(error => {
+        this.loading = false
+        Promise.reject(error)
       })
     },
     num2type(num) {
       return OrderStatus.num2text(num)
     },
-    handleChange() {
+    handleChangeShop() {
+      this.listQuery.uid = 0
       this.getFakeList()
+    },
+    handleChangeUser() {
+      if (this.listQuery.uid === 0) {
+        this.getFakeList()
+      } else {
+        this.getUserFakeList()
+      }
+    },
+    handleMerge() {
+      this.$confirm('确定要合并数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        mergeFake({
+          id: this.listQuery.id,
+          uid: this.listQuery.uid
+        }).then(() => {
+          this.$message({ type: 'success', message: '合并成功!' })
+          this.listQuery.uid = 0
+          this.getFakeList()
+        })
+      })
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

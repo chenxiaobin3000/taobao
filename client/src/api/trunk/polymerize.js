@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 const path = '/polymerize'
 
-export function addPolymerizeList(data) {
+export function mergePolymerize(data) {
   return request({
-    url: `${path}/addList`,
+    url: `${path}/merge`,
     method: 'post',
     data
   })

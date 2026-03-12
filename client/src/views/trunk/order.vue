@@ -1,12 +1,25 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
+              <el-option v-for="item in shopList" :key="'S' + item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="来源:" prop="fromName">
+            <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择店铺" @change="handleChangeUser">
+              <el-option v-for="item in userList" :key="'U' + item.user_id" :label="item.name" :value="item.user_id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="订单编号" width="160">
@@ -52,25 +65,20 @@
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getOrderList" />
-
-    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5</pre>
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan, OrderStatus } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
-import { getOrderList, addOrderList, delOrder } from '@/api/trunk/order'
+import { OrderStatus } from '@/utils/const'
+import { getOrderList, mergeOrder, delOrder } from '@/api/trunk/order'
+import { getUserOrderList } from '@/api/original/order'
 import { getShopList } from '@/api/system/shop'
+import { getUserListByShop } from '@/api/system/userShop'
 
 export default {
-  components: { Pagination, UploadExcelComponent },
+  components: { Pagination },
   data() {
     return {
       userdata: {},
@@ -79,13 +87,14 @@ export default {
       total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
+      userList: [], // 本店铺所有负责人列表
       listQuery: {
         id: 0,
+        uid: 0,
         page: 1,
         num: 10,
         search: null
-      },
-      dialogVisible: false
+      }
     }
   },
   computed: {
@@ -106,7 +115,6 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = 0
     this.getShopList()
   },
   methods: {
@@ -131,77 +139,60 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
+        this.getUserListByShop()
+      })
+    },
+    getUserListByShop() {
+      getUserListByShop(
+        this.listQuery
+      ).then(response => {
+        this.userList = response.data.data
+        this.userList.unshift({ user_id: 0, name: '☆ 主干 ☆' })
         this.getOrderList()
+      })
+    },
+    getUserOrderList() {
+      this.loading = true
+      getUserOrderList(
+        this.listQuery
+      ).then(response => {
+        this.total = response.data.data.total
+        this.list = response.data.data.list
+        this.loading = false
+      }).catch(error => {
+        this.loading = false
+        Promise.reject(error)
       })
     },
     num2type(num) {
       return OrderStatus.num2text(num)
     },
-    handleChange() {
+    handleChangeShop() {
+      this.listQuery.uid = 0
       this.getOrderList()
     },
-    handleExcel() {
-      this.dialogVisible = true
+    handleChangeUser() {
+      if (this.listQuery.uid === 0) {
+        this.getOrderList()
+      } else {
+        this.getUserOrderList()
+      }
     },
-    async handleSuccess({ results, header }) {
-      const order_id = header[0]
-      const payment = header[6]
-      const order_status = header[2]
-      const create_time = header[3]
-      const product_name = header[4]
-      const order_note = header[5]
-      const o = []
-      results.forEach(v => {
-        o.push({
-          id: v[order_id],
-          pa: v[payment],
-          pr: 0,
-          st: OrderStatus.text2num(v[order_status]),
-          ct: v[create_time],
-          na: v[product_name],
-          pi: '',
-          no: v[order_note]
+    handleMerge() {
+      this.$confirm('确定要合并数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        mergeOrder({
+          id: this.listQuery.id,
+          uid: this.listQuery.uid
+        }).then(() => {
+          this.$message({ type: 'success', message: '合并成功!' })
+          this.listQuery.uid = 0
+          this.getOrderList()
         })
       })
-      // 提取采购价
-      let length = o.length
-      for (let i = 0; i < length; ++i) {
-        const ext = this.extract(o[i].no)
-        if (!ext[0]) {
-          this.$message({ type: 'error', message: '数据异常!' })
-          console.log(o[i])
-          return
-        }
-        o[i].pr = ext[1]
-        o[i].pi = ext[2]
-      }
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addOrderList({
-            id: this.listQuery.id,
-            o: o.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getOrderList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addOrderList({
-          id: this.listQuery.id,
-          o: o
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getOrderList()
-          this.dialogVisible = false
-        })
-      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
@@ -216,54 +207,6 @@ export default {
           this.getOrderList()
         })
       })
-    },
-    // 从备注提取采购金额和订单号
-    extract(note) {
-      const ret = [false, -1, '']
-      // 空数据直接返回0
-      if (note === undefined) {
-        return [true, 0, '0000000000000000000']
-      }
-      // 校验人工审核
-      let count = 0
-      const notes = note.split('|')
-      for (let i = 0; i < notes.length; ++i) {
-        if (notes[i].length > 19) {
-          ++count
-        }
-      }
-      if (count > 2 && note.indexOf('元-利润:0元') === -1) {
-        console.log(notes.length)
-        console.log('未经人工校验:' + note)
-        return ret
-      }
-      const data = notes[0].trim()
-      // 忽略长度小于订单编号的数据
-      if (data.length < 20) {
-        console.log('异常数据:' + note)
-        return ret
-      }
-      // 按标准格式查找: tb:id-采购价:0元-利润:0元 |
-      const first = data.indexOf(':')
-      if (first === -1) {
-        console.log('没有找到账号信息:' + data)
-        return ret
-      }
-      const second = data.indexOf('-采购价:', first + 1)
-      if (second === -1 || second - first !== 20) {
-        console.log('没有找到-采购价:' + data)
-        return ret
-      }
-      // 查找采购价
-      const third = data.indexOf('元-利润:', second + 5)
-      if (third === -1) {
-        console.log('没有找到元-利润:' + data)
-        return ret
-      }
-      ret[0] = true
-      ret[1] = data.substring(second + 5, third)
-      ret[2] = data.substring(first + 1, second)
-      return ret
     }
   }
 }

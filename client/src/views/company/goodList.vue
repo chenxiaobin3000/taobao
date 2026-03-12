@@ -141,7 +141,6 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = 0
     this.typeList = GoodType.getList()
     this.statusList = GoodStatus.getList()
     this.resetTemp()

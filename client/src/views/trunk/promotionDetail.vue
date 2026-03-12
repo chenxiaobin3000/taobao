@@ -1,12 +1,25 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
+              <el-option v-for="item in shopList" :key="'S' + item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="来源:" prop="fromName">
+            <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择店铺" @change="handleChangeUser">
+              <el-option v-for="item in userList" :key="'U' + item.user_id" :label="item.name" :value="item.user_id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="推广日期" width="120">
@@ -87,26 +100,19 @@
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getPromotionDetailList" />
-
-    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5</pre>
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
-import { xlsx_date_str } from '@/utils/xlsx'
-import { getPromotionDetailList, addPromotionDetailList, delPromotionDetail } from '@/api/trunk/promotionDetail'
+import { getPromotionDetailList, mergePromotionDetail, delPromotionDetail } from '@/api/trunk/promotionDetail'
+import { getUserPromotionDetailList } from '@/api/original/promotionDetail'
 import { getShopList } from '@/api/system/shop'
+import { getUserListByShop } from '@/api/system/userShop'
 
 export default {
-  components: { Pagination, UploadExcelComponent },
+  components: { Pagination },
   data() {
     return {
       userdata: {},
@@ -115,13 +121,14 @@ export default {
       total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
+      userList: [], // 本店铺所有负责人列表
       listQuery: {
         id: 0,
+        uid: 0,
         page: 1,
         num: 10,
         search: null
-      },
-      dialogVisible: false
+      }
     }
   },
   computed: {
@@ -142,7 +149,6 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = 0
     this.getShopList()
   },
   methods: {
@@ -167,77 +173,57 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
+        this.getUserListByShop()
+      })
+    },
+    getUserListByShop() {
+      getUserListByShop(
+        this.listQuery
+      ).then(response => {
+        this.userList = response.data.data
+        this.userList.unshift({ user_id: 0, name: '☆ 主干 ☆' })
         this.getPromotionDetailList()
       })
     },
-    handleChange() {
+    getUserPromotionDetailList() {
+      this.loading = true
+      getUserPromotionDetailList(
+        this.listQuery
+      ).then(response => {
+        this.total = response.data.data.total
+        this.list = response.data.data.list
+        this.loading = false
+      }).catch(error => {
+        this.loading = false
+        Promise.reject(error)
+      })
+    },
+    handleChangeShop() {
+      this.listQuery.uid = 0
       this.getPromotionDetailList()
     },
-    handleExcel() {
-      this.dialogVisible = true
+    handleChangeUser() {
+      if (this.listQuery.uid === 0) {
+        this.getPromotionDetailList()
+      } else {
+        this.getUserPromotionDetailList()
+      }
     },
-    async handleSuccess({ results, header }) {
-      const promotion_date = header[0]
-      const good_id = header[1]
-      const show_num = header[4]
-      const click_num = header[5]
-      const click_rate = header[7]
-      const cost = header[6]
-      const average_cost = header[8]
-      const thousand_cost = header[9]
-      const deal_amount = header[18]
-      const deal_num = header[19]
-      const deal_cost = header[25]
-      const shop_cart = header[26]
-      const favorites = header[30]
-      const roi = header[23]
-      const p = []
-      results.forEach(v => {
-        p.push({
-          pd: xlsx_date_str(v[promotion_date]),
-          id: v[good_id],
-          sn: v[show_num] ? v[show_num] : 0,
-          cn: v[click_num] ? v[click_num] : 0,
-          cr: v[click_rate] ? v[click_rate] : 0,
-          co: v[cost] ? v[cost] : 0,
-          ac: v[average_cost] ? v[average_cost] : 0,
-          tc: v[thousand_cost] ? v[thousand_cost] : 0,
-          da: v[deal_amount] ? v[deal_amount] : 0,
-          dn: v[deal_num] ? v[deal_num] : 0,
-          dc: v[deal_cost] ? v[deal_cost] : 0,
-          sc: v[shop_cart] ? v[shop_cart] : 0,
-          fa: v[favorites] ? v[favorites] : 0,
-          roi: v[roi] ? v[roi] : 0
+    handleMerge() {
+      this.$confirm('确定要合并数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        mergePromotionDetail({
+          id: this.listQuery.id,
+          uid: this.listQuery.uid
+        }).then(() => {
+          this.$message({ type: 'success', message: '合并成功!' })
+          this.listQuery.uid = 0
+          this.getPromotionDetailList()
         })
       })
-      let length = p.length
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addPromotionDetailList({
-            id: this.listQuery.id,
-            p: p.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getPromotionDetailList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addPromotionDetailList({
-          id: this.listQuery.id,
-          p: p
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getPromotionDetailList()
-          this.dialogVisible = false
-        })
-      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
