@@ -34,7 +34,7 @@ class FakeSummaryManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-ctime')[left:right])
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_date')[left:right])
 
     def encoder(self, fake):
         if fake:

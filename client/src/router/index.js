@@ -7,11 +7,11 @@ Vue.use(Router)
 import Layout from '@/layout'
 
 /* Router Modules */
-import originalRouter from './modules/original'
 import companyRouter from './modules/company'
-import systemRouter from './modules/system'
 import middleRouter from './modules/middle'
+import originalRouter from './modules/original'
 import reportRouter from './modules/report'
+import systemRouter from './modules/system'
 import trunkRouter from './modules/trunk'
 
 /**
@@ -64,9 +64,9 @@ export const asyncRoutes = [
 
   /** when your routing map is too long, you can split it into small modules **/
   reportRouter,
+  middleRouter,
   trunkRouter,
   originalRouter,
-  middleRouter,
   companyRouter,
   systemRouter,
 

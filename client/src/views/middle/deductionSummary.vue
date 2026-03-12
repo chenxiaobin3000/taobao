@@ -1,12 +1,23 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="6">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="开始日期:" prop="startDate" label-width="80px">
+            <el-date-picker v-model="start_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="订单编号" width="160">

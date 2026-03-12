@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="50px">
+    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
         <el-col :span="6">
           <el-form-item label="店铺:" prop="shopName">
@@ -11,7 +11,7 @@
         </el-col>
         <el-col :span="6">
           <el-form-item label="开始日期:" prop="startDate" label-width="80px">
-            <el-date-picker v-model="temp.start_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+            <el-date-picker v-model="start_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -73,28 +73,29 @@
     <el-dialog title="修改刷单信息" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
         <el-form-item label="真实数据">
-          <div>金额: {{ temp.order_amount }}, 订单数: {{ temp.order_num }}</div>
+          <div style="color:rgba(255,0,0,0.5)">金额: {{ temp.order_amount }} ( {{ 5 * temp.order_num }} ) | 订单数: {{ temp.order_num }}</div>
         </el-form-item>
-        <el-form-item label="刷单总金额">
+        <el-form-item label="总金额">
           <el-input v-model="temp.fake_amount" />
-          <div>校验: 5 x {{ temp.fake_num }} = {{ 5 * temp.fake_num }}, 10 x {{ temp.fake_num }} = {{ 10 * temp.fake_num }}</div>
+          <div style="color:rgba(255,0,0,0.5)">5元: {{ 5 * temp.fake_num }}</div>
         </el-form-item>
-        <el-form-item label="刷单订单数">
+        <el-form-item label="订单数">
           <el-input v-model="temp.fake_num" />
         </el-form-item>
         <el-form-item label="总佣金">
           <el-input v-model="temp.commission" />
-          <div>校验: 3 x {{ temp.fake_num }} = {{ 3 * temp.fake_num }}</div>
+          <div style="color:rgba(255,0,0,0.5)">3元: {{ 3 * temp.fake_num }}</div>
         </el-form-item>
         <el-form-item label="总运费">
           <el-input v-model="temp.freight" />
-          <div>校验: 2 x {{ temp.fake_num }} = {{ 2 * temp.fake_num }}</div>
+          <div style="color:rgba(255,0,0,0.5)">2元: {{ 2 * temp.fake_num }}</div>
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="temp.fake_note" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
+        <el-button type="primary" style="float:left" @click="autoData()">自动填入</el-button>
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
         <el-button type="primary" @click="updateData()">确定</el-button>
       </div>
@@ -118,6 +119,7 @@ export default {
       total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
+      start_date: 0,
       listQuery: {
         id: 0,
         page: 1,
@@ -145,6 +147,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    this.start_date = new Date().toLocaleDateString().replace(/\//g, '-')
     this.resetTemp()
     this.getShopList()
   },
@@ -156,8 +159,7 @@ export default {
         fake_num: 0,
         commission: 0,
         freight: 0,
-        fake_note: '',
-        start_date: new Date().toLocaleDateString().replace(/\//g, '-')
+        fake_note: ''
       }
     },
     getFakeSummaryList() {
@@ -190,7 +192,7 @@ export default {
     handleFlush() {
       flushFakeSummary({
         id: this.listQuery.id,
-        sdate: this.temp.start_date
+        sdate: this.start_date
       }).then(() => {
         this.$message({ type: 'success', message: '刷新成功!' })
         this.getFakeSummaryList()
@@ -199,6 +201,12 @@ export default {
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
       this.dialogVisible = true
+    },
+    autoData() {
+      this.temp.fake_amount = this.temp.order_amount
+      this.temp.fake_num = this.temp.order_num
+      this.temp.commission = this.temp.order_num * 3
+      this.temp.freight = this.temp.order_num * 2
     },
     updateData() {
       setFakeSummary({
