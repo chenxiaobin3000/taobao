@@ -57,6 +57,7 @@ export default {
       total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
+      start_date: 0,
       listQuery: {
         id: 0,
         page: 1,
@@ -82,6 +83,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    this.start_date = new Date().toLocaleDateString().replace(/\//g, '-')
     this.getShopList()
   },
   methods: {
@@ -115,7 +117,8 @@ export default {
     },
     handleFlush() {
       flushDeductionSummary({
-        id: this.listQuery.id
+        id: this.listQuery.id,
+        sdate: this.start_date
       }).then(() => {
         this.$message({ type: 'success', message: '刷新成功!' })
         this.getDeductionSummaryList()

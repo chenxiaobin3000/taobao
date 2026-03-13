@@ -26,14 +26,40 @@ def flush(request):
         return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 获取所有的扣费和聚合数据
-    Deduction.objects.getAll(shop_id, start_date)
-    Polymerize.objects.getAll(shop_id, start_date)
+    deductions = Deduction.objects.getAll(shop_id, start_date)
+    polymerizes = Polymerize.objects.getAll(shop_id, start_date)
 
-    # 已经存在，且金额一样就跳过
-    order_id = 0
-    amount = 0
-    deduction_detail = ''
-    DeductionSummary.objects.add(shop_id, order_id, amount, deduction_detail)
+    # 汇总所有数据
+    datas = {}
+    amounts = {}
+    if deductions:
+        for deduction in deductions:
+            oid = deduction['order_id']
+            if oid in datas:
+                datas[oid] = datas[oid] + '|' + str(deduction['amount_type']) + '-' + str(deduction['amount'])
+                amounts[oid] += deduction['amount']
+            else:
+                datas[oid] = str(deduction['amount_type']) + '-' + str(deduction['amount'])
+                amounts[oid] = deduction['amount']
+
+    if polymerizes:
+        for polymerize in polymerizes:
+            oid = polymerize['order_id']
+            if oid in datas:
+                datas[oid] = datas[oid] + '|' + str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
+                amounts[oid] += deduction['amount']
+            else:
+                datas[oid] = str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
+                amounts[oid] = deduction['amount']
+
+    for key, value in datas.items():
+        # 已经存在，且金额一样就跳过
+        find_object = DeductionSummary.objects.getById(shop_id, key)
+        if find_object:
+            if find_object['amount'] == amounts[key]:
+                DeductionSummary.objects.set(find_object['id'], amounts[key], value)
+        else:
+            DeductionSummary.objects.add(shop_id, key, amounts[key], value)
 
     response = {
         'code': 0,

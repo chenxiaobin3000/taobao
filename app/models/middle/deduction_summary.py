@@ -7,6 +7,12 @@ class DeductionSummaryManager(models.Manager):
     def add(self, shop_id, order_id, amount, deduction_detail):
         return self.create(shop_id=shop_id, order_id=order_id, amount=amount, deduction_detail=deduction_detail)
 
+    def set(self, pk, amount, deduction_detail):
+        deduction = self.get(pk=pk)
+        deduction.amount = amount
+        deduction.deduction_detail = deduction_detail
+        return deduction.save()
+
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
