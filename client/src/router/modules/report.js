@@ -29,5 +29,8 @@ export default {
   }, {
     path: 'orderReport', component: () => import('@/views/report/orderReport'),
     name: 'middle_orderReport', meta: { title: '订单汇总', roles: [5007] }
+  }, {
+    path: 'omissionReport', component: () => import('@/views/report/omissionReport'),
+    name: 'middle_omissionReport', meta: { title: '遗漏汇总', roles: [5008] }
   }]
 }

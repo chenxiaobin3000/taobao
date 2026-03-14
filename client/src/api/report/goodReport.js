@@ -3,7 +3,7 @@ const path = '/good_report'
 
 export function getGoodReport(data) {
   return request({
-    url: `${path}/get`,
+    url: `${path}/getList`,
     method: 'post',
     data
   })

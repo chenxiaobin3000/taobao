@@ -44,7 +44,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { getCostReportList } from '@/api/report/costReport'
+import { getCostReport } from '@/api/report/costReport'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -77,9 +77,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getCostReportList() {
+    getCostReport() {
       this.loading = true
-      getCostReportList(
+      getCostReport(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -98,7 +98,7 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getCostReportList()
+        this.getCostReport()
       })
     }
   }

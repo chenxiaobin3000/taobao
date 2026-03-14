@@ -44,7 +44,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { getFakeReport } from '@/api/report/fakeReport'
+import { getOmissionReport } from '@/api/report/omissionReport'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -54,7 +54,13 @@ export default {
       tableHeight: 600,
       list: null,
       loading: false,
-      shopList: [] // 本公司所有店铺列表
+      shopList: [], // 本公司所有店铺列表
+      listQuery: {
+        id: 0,
+        page: 1,
+        num: 10,
+        search: null
+      }
     }
   },
   computed: {
@@ -77,9 +83,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getFakeReport() {
+    getOmissionReport() {
       this.loading = true
-      getFakeReport(
+      getOmissionReport(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -98,7 +104,7 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getFakeReport()
+        this.getOmissionReport()
       })
     }
   }

@@ -44,7 +44,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { getFakeReportList } from '@/api/report/fakeReport'
+import { getFakeReport } from '@/api/report/fakeReport'
 import { getShopList } from '@/api/system/shop'
 
 export default {
@@ -77,9 +77,9 @@ export default {
     this.getShopList()
   },
   methods: {
-    getFakeReportList() {
+    getFakeReport() {
       this.loading = true
-      getFakeReportList(
+      getFakeReport(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -98,7 +98,7 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getFakeReportList()
+        this.getFakeReport()
       })
     }
   }
