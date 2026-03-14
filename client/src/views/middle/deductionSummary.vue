@@ -44,6 +44,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
+import { DeductionType } from '@/utils/const'
 import { getDeductionSummaryList, flushDeductionSummary } from '@/api/middle/deductionSummary'
 import { getShopList } from '@/api/system/shop'
 
@@ -95,6 +96,23 @@ export default {
         this.total = response.data.data.total
         this.list = response.data.data.list
         // 处理扣款明细
+        this.list.forEach(v => {
+          let datas = ''
+          const details = v.deduction_detail.split('|')
+          for (let i = 0; i < details.length; ++i) {
+            const deductions = details[i].split('-')
+            if (deductions.length !== 2) {
+              this.$message({ type: 'error', message: '数据异常!' })
+              break
+            }
+            datas = datas + DeductionType.num2text(parseInt(deductions[0])) + ':' + deductions[1] + ' | '
+          }
+          if (datas.length > 3) {
+            v.deduction_detail = datas.substring(0, datas.length - 3)
+          } else {
+            v.deduction_detail = datas
+          }
+        })
         this.loading = false
       }).catch(error => {
         this.loading = false
