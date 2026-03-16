@@ -8,51 +8,42 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="打款人" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.user_name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="收款人" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.payee_name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="订单编码" width="160">
+      <el-table-column align="center" label="订单编号" width="160">
         <template slot-scope="scope">
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款金额" width="80">
+      <el-table-column align="center" label="扣款金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款时间" width="160">
+      <el-table-column align="center" label="扣款明细">
         <template slot-scope="scope">
-          {{ scope.row.create_time }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="备注">
-        <template slot-scope="scope">
-          {{ scope.row.transfer_note }}
+          {{ scope.row.deduction_detail }}
         </template>
       </el-table-column>
     </el-table>
+
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getOmissionReport" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
+import Pagination from '@/components/Pagination'
+import { DeductionType } from '@/utils/const'
 import { getOmissionReport } from '@/api/report/omissionReport'
 import { getShopList } from '@/api/system/shop'
 
 export default {
+  components: { Pagination },
   data() {
     return {
       userdata: {},
       tableHeight: 600,
       list: null,
+      total: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
       listQuery: {
@@ -90,6 +81,24 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list
+        // 处理扣款明细
+        this.list.forEach(v => {
+          let datas = ''
+          const details = v.deduction_detail.split('|')
+          for (let i = 0; i < details.length; ++i) {
+            const deductions = details[i].split('-')
+            if (deductions.length !== 2) {
+              this.$message({ type: 'error', message: '数据异常!' })
+              break
+            }
+            datas = datas + DeductionType.num2text(parseInt(deductions[0])) + ':' + deductions[1] + ' | '
+          }
+          if (datas.length > 3) {
+            v.deduction_detail = datas.substring(0, datas.length - 3)
+          } else {
+            v.deduction_detail = datas
+          }
+        })
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -106,6 +115,9 @@ export default {
         this.listQuery.id = this.shopList[0].id
         this.getOmissionReport()
       })
+    },
+    handleChange() {
+      this.getOmissionReport()
     }
   }
 }

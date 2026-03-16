@@ -10,11 +10,17 @@ from app.models.report.omission import Omission
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    data = Omission().getList(shop_id)
+    page = int(post.get('page'))
+    num = int(post.get('num'))
+    total = Omission().total(shop_id)
+    data = Omission().getList(shop_id, page, num)
 
     response = {
         'code': 0,
         'msg': 'success',
-        'data': data
+        'data': {
+            'total': total,
+            'list': data
+        }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
