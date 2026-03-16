@@ -1,60 +1,107 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-      </el-form-item>
+      <el-row>
+        <el-col :span="6">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="状态:" prop="orderStatus">
+            <el-select v-model="listQuery.status" class="filter-item" placeholder="请选择状态" @change="handleChangeStatus">
+              <el-option v-for="item in statusList" :key="'S' + item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="3">
+          <div>金额: {{ payment ? payment : 0 }} 元 </div>
+        </el-col>
+        <el-col :span="3">
+          <div>采购: {{ procure ? procure : 0 }} 元 </div>
+        </el-col>
+        <el-col :span="6">
+          <div>扣费: {{ amount ? amount : 0 }} 元</div>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="打款人" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.user_name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="收款人" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.payee_name }}
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="订单编码" width="160">
         <template slot-scope="scope">
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款金额" width="80">
+      <el-table-column align="center" label="金额" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.payment }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="扣费" width="80">
         <template slot-scope="scope">
           {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="打款时间" width="160">
+      <el-table-column align="center" label="采购" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="状态" width="200">
+        <template slot-scope="scope">
+          {{ num2type(scope.row.order_status) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="日期" width="160">
         <template slot-scope="scope">
           {{ scope.row.create_time }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="备注">
+      <el-table-column align="center" label="商品" width="160">
         <template slot-scope="scope">
-          {{ scope.row.transfer_note }}
+          {{ scope.row.good_names }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="明细">
+        <template slot-scope="scope">
+          {{ scope.row.deduction_detail }}
         </template>
       </el-table-column>
     </el-table>
+
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getOrderReport" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import { getFakeReport } from '@/api/report/fakeReport'
+import Pagination from '@/components/Pagination'
+import { OrderStatus } from '@/utils/const'
+import { getOrderReport } from '@/api/report/orderReport'
 import { getShopList } from '@/api/system/shop'
 
 export default {
+  components: { Pagination },
   data() {
     return {
       userdata: {},
       tableHeight: 600,
       list: null,
+      total: 0,
+      payment: 0,
+      procure: 0,
+      amount: 0,
       loading: false,
-      shopList: [] // 本公司所有店铺列表
+      shopList: [], // 本公司所有店铺列表
+      statusList: [], // 本订单状态列表
+      listQuery: {
+        id: 0,
+        status: 0,
+        page: 1,
+        num: 10,
+        search: null
+      }
     }
   },
   computed: {
@@ -74,15 +121,19 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    this.statusList = OrderStatus.getList()
     this.getShopList()
   },
   methods: {
-    getFakeReport() {
+    getOrderReport() {
       this.loading = true
-      getFakeReport(
+      getOrderReport(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
+        this.payment = response.data.data.payment
+        this.procure = response.data.data.procure
+        this.amount = response.data.data.amount
         this.list = response.data.data.list
         this.loading = false
       }).catch(error => {
@@ -98,8 +149,18 @@ export default {
       }).then(response => {
         this.shopList = response.data.data.list
         this.listQuery.id = this.shopList[0].id
-        this.getFakeReport()
+        this.listQuery.status = this.statusList[0].id
+        this.getOrderReport()
       })
+    },
+    num2type(num) {
+      return OrderStatus.num2text(num)
+    },
+    handleChangeShop() {
+      this.getOrderReport()
+    },
+    handleChangeStatus() {
+      this.getOrderReport()
     }
   }
 }

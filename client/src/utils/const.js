@@ -396,6 +396,21 @@ export const OrderStatus = {
         return '等待买家付款'
     }
     return '异常'
+  },
+  getList() {
+    return [{
+      id: this.OTHER, name: '全部'
+    }, {
+      id: this.SUCCESS, name: '交易成功'
+    }, {
+      id: this.CLOSE, name: '交易关闭'
+    }, {
+      id: this.SHIPPED, name: '已发货'
+    }, {
+      id: this.PAID, name: '待发货'
+    }, {
+      id: this.UNPAID, name: '待付款'
+    }]
   }
 }
 

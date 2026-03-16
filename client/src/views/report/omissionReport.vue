@@ -10,10 +10,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="3">
-          <div>本页面: {{ single }} 元</div>
+          <div>本页面: {{ single ? single : 0 }} 元</div>
         </el-col>
         <el-col :span="15">
-          <div>总计: {{ amount }} 元</div>
+          <div>总计: {{ amount ? amount : 0 }} 元</div>
         </el-col>
       </el-row>
     </el-form>
