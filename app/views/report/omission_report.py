@@ -19,7 +19,8 @@ def getList(request):
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': total,
+            'total': total['total'],
+            'amount': total['amount'],
             'list': data
         }
     }

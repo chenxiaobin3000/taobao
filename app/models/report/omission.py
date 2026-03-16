@@ -7,7 +7,7 @@ class Omission(Model):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT count(id)
+                SELECT count(id) as total, sum(amount) as amount
                 FROM t_deduction_summary
                 WHERE NOT EXISTS (
                     SELECT id
@@ -16,7 +16,7 @@ class Omission(Model):
                     and t_deduction_summary.shop_id = t_order.shop_id
                     and t_deduction_summary.order_id = t_order.order_id
                 )""", [shop_id])
-            return cursor.fetchone()[0]
+            return self.dictfetchall(cursor)[0]
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num

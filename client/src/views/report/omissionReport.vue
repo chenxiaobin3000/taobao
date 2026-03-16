@@ -1,11 +1,21 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-      </el-form-item>
+      <el-row>
+        <el-col :span="6">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="3">
+          <div>本页面: {{ single }} 元</div>
+        </el-col>
+        <el-col :span="15">
+          <div>总计: {{ amount }} 元</div>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="订单编号" width="160">
@@ -44,6 +54,8 @@ export default {
       tableHeight: 600,
       list: null,
       total: 0,
+      amount: 0,
+      single: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
       listQuery: {
@@ -80,9 +92,12 @@ export default {
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
+        this.amount = response.data.data.amount
+        this.single = 0
         this.list = response.data.data.list
         // 处理扣款明细
         this.list.forEach(v => {
+          this.single += v.amount
           let datas = ''
           const details = v.deduction_detail.split('|')
           for (let i = 0; i < details.length; ++i) {
@@ -99,6 +114,7 @@ export default {
             v.deduction_detail = datas
           }
         })
+        this.single = this.single.toFixed(2)
         this.loading = false
       }).catch(error => {
         this.loading = false
