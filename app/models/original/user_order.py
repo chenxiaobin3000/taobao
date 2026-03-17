@@ -50,7 +50,7 @@ class UserOrder(models.Model):
     user_id = models.IntegerField(db_index = True) # 用户id
     shop_id = models.IntegerField(db_index = True) # 店铺id
     order_id = models.CharField(max_length=20, db_index=True) # 订单id
-    payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
+    payment = models.DecimalField(max_digits=10, decimal_places=2) # 付款金额
     procure = models.DecimalField(max_digits=10, decimal_places=2) # 采购金额
     order_status = models.IntegerField(db_index=True) # 状态
     create_time = models.DateTimeField(db_index=True) # 创建时间

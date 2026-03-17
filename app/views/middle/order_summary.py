@@ -5,9 +5,11 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
+from app.models.middle.order_summary import OrderSummary
 from app.models.middle.deduction_summary import DeductionSummary
-from app.models.trunk.deduction import Deduction
-from app.models.trunk.polymerize import Polymerize
+from app.models.trunk.order import Order
+from app.models.trunk.refund import Refund
+from app.models.trunk.transfer import Transfer
 
 @require_POST
 @transaction.atomic
@@ -25,41 +27,41 @@ def flush(request):
         response['msg'] = '开始日期要早于当前时间'
         return JsonResponse(response, encoder=MyJSONEncoder)
 
-    # 获取所有扣费和聚合数据
-    deductions = Deduction.objects.getAll(shop_id, start_date)
-    polymerizes = Polymerize.objects.getAll(shop_id, start_date)
+    # 生成所有订单数据
+    orders = Order.objects.getAll(shop_id, start_date)
+    if orders:
+        for order in orders:
+            order_id = order['order_id']
+            data = {
+                'refund_customer': 0,
+                'refund_platform': 0,
+                'deduction': 0,
+                'deduction_detail': ''
+            }
 
-    # 汇总所有数据
-    datas = {}
-    amounts = {}
-    if deductions:
-        for deduction in deductions:
-            oid = deduction['order_id']
-            if oid in datas:
-                datas[oid] = datas[oid] + '|' + str(deduction['amount_type']) + '-' + str(deduction['amount'])
-                amounts[oid] += deduction['amount']
-            else:
-                datas[oid] = str(deduction['amount_type']) + '-' + str(deduction['amount'])
-                amounts[oid] = deduction['amount']
+            # 退款
+            refunds = Refund.objects.getById(shop_id, order_id)
+            if refunds:
+                for refund in refunds:
+                    data['refund_customer'] = refund['refund_pay']
+                    data['refund_platform'] = refund['refund_platform']
 
-    if polymerizes:
-        for polymerize in polymerizes:
-            oid = polymerize['order_id']
-            if oid in datas:
-                datas[oid] = datas[oid] + '|' + str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
-                amounts[oid] += deduction['amount']
-            else:
-                datas[oid] = str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
-                amounts[oid] = deduction['amount']
+            # 打款
 
-    for key, value in datas.items():
+            # 扣款
+            deduction = DeductionSummary.objects.getById(shop_id, order_id)
+            if deduction:
+                data['deduction'] = deduction['amount']
+                data['deduction_detail'] = deduction['deduction_detail']
+
+
         # 已经存在，且金额一样就跳过
-        find_object = DeductionSummary.objects.getById(shop_id, key)
+        find_object = OrderSummary.objects.getById(shop_id, key)
         if find_object:
             if find_object['amount'] == amounts[key]:
-                DeductionSummary.objects.set(find_object['id'], amounts[key], value)
+                OrderSummary.objects.set(find_object['id'], amounts[key], value)
         else:
-            DeductionSummary.objects.add(shop_id, key, amounts[key], value)
+            OrderSummary.objects.add(shop_id, key, amounts[key], value)
 
     response = {
         'code': 0,

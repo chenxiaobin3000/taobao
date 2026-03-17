@@ -29,6 +29,9 @@ class OrderManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
+    def getAll(self, shop_id, start_date):
+        return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date))
+
     def encoder(self, order):
         if order:
             return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'])
@@ -43,7 +46,7 @@ class Order(models.Model):
     objects = OrderManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
     order_id = models.CharField(max_length=20, db_index=True) # 订单id
-    payment = models.DecimalField(max_digits=10, decimal_places=2) # 应付
+    payment = models.DecimalField(max_digits=10, decimal_places=2) # 付款金额
     procure = models.DecimalField(max_digits=10, decimal_places=2) # 采购金额
     order_status = models.IntegerField(db_index=True) # 状态
     create_time = models.DateTimeField(db_index=True) # 创建时间
