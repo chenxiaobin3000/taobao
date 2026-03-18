@@ -16,14 +16,31 @@
             </el-select>
           </el-form-item>
         </el-col>
+        <el-col :span="12">
+          <div>1</div>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="3">
-          <div>金额: {{ payment ? payment : 0 }} 元 </div>
+          <div>付款: {{ payment ? payment : 0 }} 元 </div>
         </el-col>
         <el-col :span="3">
-          <div>采购: {{ procure ? procure : 0 }} 元 </div>
+          <div>退款: {{ refund_customer ? refund_customer : 0 }} 元 </div>
         </el-col>
-        <el-col :span="6">
-          <div>扣费: {{ amount ? amount : 0 }} 元</div>
+        <el-col :span="3">
+          <div>退平台: {{ refund_platform ? refund_platform : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <div>采购: {{ procure ? procure : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <div>采购退: {{ refund_procure ? refund_procure : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <div>打款: {{ transfer ? transfer : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <div>扣费: {{ deduction ? deduction : 0 }} 元</div>
         </el-col>
       </el-row>
     </el-form>
@@ -90,8 +107,12 @@ export default {
       list: null,
       total: 0,
       payment: 0,
+      refund_customer: 0,
+      refund_platform: 0,
       procure: 0,
-      amount: 0,
+      refund_procure: 0,
+      transfer: 0,
+      deduction: 0,
       loading: false,
       shopList: [], // 本公司所有店铺列表
       statusList: [], // 本订单状态列表
@@ -133,8 +154,12 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.payment = response.data.data.payment
+        this.refund_customer = response.data.data.refund_customer
+        this.refund_platform = response.data.data.refund_platform
         this.procure = response.data.data.procure
-        this.amount = response.data.data.amount
+        this.refund_procure = response.data.data.refund_procure
+        this.transfer = response.data.data.transfer
+        this.deduction = response.data.data.deduction
         this.list = response.data.data.list
         this.loading = false
       }).catch(error => {

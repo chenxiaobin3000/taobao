@@ -25,9 +25,54 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="付款金额" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.payment }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="给用户退款" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_customer }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="给平台退款" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_platform }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="采购金额" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="采购退款" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="打款金额" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.transfer }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="状态" width="80">
+        <template slot-scope="scope">
+          {{ num2status(scope.row.order_status) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="创建时间" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.create_time }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="商品" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.good_ids }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="扣款金额" width="80">
         <template slot-scope="scope">
-          {{ scope.row.amount }}
+          {{ scope.row.deduction }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="扣款明细">

@@ -46,8 +46,12 @@ def getList(request):
         'data': {
             'total': total['total'],
             'payment': total['payment'],
+            'refund_customer': total['refund_customer'],
+            'refund_platform': total['refund_platform'],
             'procure': total['procure'],
-            'amount': total['amount'],
+            'refund_procure': total['refund_procure'],
+            'transfer': total['transfer'],
+            'deduction': total['deduction'],
             'list': datas
         }
     }

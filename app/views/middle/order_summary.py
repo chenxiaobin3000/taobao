@@ -72,13 +72,18 @@ def flush(request):
                 data['deduction'] = deduction['amount']
                 data['deduction_detail'] = deduction['deduction_detail']
 
+            # 采购退款
+            refund_procure = 0
+            if data['refund_customer'] > 0:
+                refund_procure = order['procure']
+
             # 已经存在，且数据一样就跳过
             find_object = OrderSummary.objects.getById(shop_id, order_id)
             if find_object:
-                if find_object['payment'] != order['payment'] or find_object['refund_customer'] != data['refund_customer'] or find_object['refund_platform'] != data['refund_platform'] or find_object['procure'] != order['procure'] or find_object['refund_procure'] != order['procure'] or find_object['transfer'] != data['transfer'] or find_object['order_status'] != ['order_status'] or find_object['create_time'] != order['create_time'] or find_object['good_ids'] != order['good_ids'] or find_object['deduction'] != deduction:
-                    OrderSummary.objects.set(find_object['id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], order['procure'], data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
+                if find_object['payment'] != order['payment'] or find_object['refund_customer'] != data['refund_customer'] or find_object['refund_platform'] != data['refund_platform'] or find_object['procure'] != order['procure'] or find_object['refund_procure'] != refund_procure or find_object['transfer'] != data['transfer'] or find_object['order_status'] != ['order_status'] or find_object['create_time'] != order['create_time'] or find_object['good_ids'] != order['good_ids'] or find_object['deduction'] != deduction:
+                    OrderSummary.objects.set(find_object['id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
             else:
-                OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], order['procure'], data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
+                OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 
