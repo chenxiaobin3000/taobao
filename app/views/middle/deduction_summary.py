@@ -51,10 +51,10 @@ def flush(request):
             oid = polymerize['order_id']
             if oid in datas:
                 datas[oid] = datas[oid] + '|' + str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
-                amounts[oid] += deduction['amount']
+                amounts[oid] += polymerize['amount']
             else:
                 datas[oid] = str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
-                amounts[oid] = deduction['amount']
+                amounts[oid] = polymerize['amount']
 
     for key, value in datas.items():
         # 已经存在，且金额一样就跳过

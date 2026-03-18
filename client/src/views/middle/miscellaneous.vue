@@ -124,6 +124,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    this.listQuery.id = this.$store.getters.shop
     this.resetTemp()
     this.getShopList()
   },
@@ -158,7 +159,9 @@ export default {
         num: 1000
       }).then(response => {
         this.shopList = response.data.data.list
-        this.listQuery.id = this.shopList[0].id
+        if (this.listQuery.id === 0) {
+          this.listQuery.id = this.shopList[0].id
+        }
         this.getUserList()
       })
     },
@@ -181,6 +184,7 @@ export default {
       return '异常'
     },
     handleChange() {
+      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getMiscList()
     },
     handleCreate() {
