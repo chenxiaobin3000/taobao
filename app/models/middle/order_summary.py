@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.forms.models import model_to_dict
+from app.models.report.order import Order
 
 # 订单汇总表
 class OrderSummaryManager(models.Manager):
@@ -9,17 +10,17 @@ class OrderSummaryManager(models.Manager):
 
     def set(self, pk, payment, refund_customer, refund_platform, procure, refund_procure, transfer, order_status, create_time, good_ids, deduction, deduction_detail):
         order = self.get(pk=pk)
-        order.payment=payment
-        order.refund_customer=refund_customer
-        order.refund_platform=refund_platform
-        order.procure=procure
-        order.refund_procure=refund_procure
+        order.payment = payment
+        order.refund_customer = refund_customer
+        order.refund_platform = refund_platform
+        order.procure = procure
+        order.refund_procure = refund_procure
         order.transfer = transfer
-        order.order_status=order_status
-        order.create_time=create_time
-        order.good_ids=good_ids
-        order.deduction=deduction
-        order.deduction_detail=deduction_detail
+        order.order_status = order_status
+        order.create_time = create_time
+        order.good_ids = good_ids
+        order.deduction = deduction
+        order.deduction_detail = deduction_detail
         return order.save()
 
     def delete(self, pk):
@@ -34,16 +35,19 @@ class OrderSummaryManager(models.Manager):
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-ctime')[left:right])
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
+
+    def getAll(self, shop_id, order_status, start_date, end_date):
+        return Order().total(shop_id, order_status, start_date, end_date)
 
     def encoder(self, order):
         if order:
-            return model_to_dict(order, fields=['id', '', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'good_ids', 'deduction', 'deduction_detail'])
+            return model_to_dict(order, fields=['id', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'good_ids', 'deduction', 'deduction_detail'])
         return None
 
     def encoderList(self, ordera):
         if ordera:
-            return [model_to_dict(order, fields=['id', '', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'good_ids', 'deduction', 'deduction_detail']) for order in ordera]
+            return [model_to_dict(order, fields=['id', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'good_ids', 'deduction', 'deduction_detail']) for order in ordera]
         return None
 
 class OrderSummary(models.Model):

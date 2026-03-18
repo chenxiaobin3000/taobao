@@ -85,6 +85,9 @@ def flush(request):
             else:
                 OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
 
+    # 刷新日报
+    OrderSummary.objects.getAll(shop_id, order_status, start_date, now_date)
+
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST

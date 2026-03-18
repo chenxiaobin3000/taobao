@@ -7,14 +7,18 @@ class Omission(Model):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT count(id) as total, sum(amount) as amount
+                SELECT
+                    COUNT(id) as total,
+                    SUM(amount) as amount
                 FROM t_deduction_summary
-                WHERE t_deduction_summary.shop_id = %s
-                and NOT EXISTS (
-                    SELECT id
-                    FROM t_order
-                    WHERE t_order.shop_id = %s 
-                    and t_deduction_summary.order_id = t_order.order_id
+                WHERE
+                    t_deduction_summary.shop_id = %s
+                    AND NOT EXISTS (
+                        SELECT id
+                        FROM t_order
+                        WHERE
+                            t_order.shop_id = %s 
+                            AND t_deduction_summary.order_id = t_order.order_id
                 )""", [shop_id, shop_id])
             return self.dictfetchall(cursor)[0]
 
@@ -25,12 +29,14 @@ class Omission(Model):
                 """
                 SELECT *
                 FROM t_deduction_summary
-                WHERE t_deduction_summary.shop_id = %s
-                and NOT EXISTS (
-                    SELECT id
-                    FROM t_order
-                    WHERE t_order.shop_id = %s 
-                    and t_deduction_summary.order_id = t_order.order_id
+                WHERE
+                    t_deduction_summary.shop_id = %s
+                    AND NOT EXISTS (
+                        SELECT id
+                        FROM t_order
+                        WHERE
+                            t_order.shop_id = %s 
+                            AND t_deduction_summary.order_id = t_order.order_id
                 )
                 ORDER BY t_deduction_summary.ctime DESC
                 LIMIT %s

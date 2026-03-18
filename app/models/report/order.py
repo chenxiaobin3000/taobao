@@ -8,16 +8,17 @@ class Order(Model):
             cursor.execute(
                 """
                 SELECT
-                    count(t_order_summary.id) as total,
-                    sum(t_order_summary.payment) as payment,
-                    sum(t_order_summary.refund_customer) as refund_customer,
-                    sum(t_order_summary.refund_platform) as refund_platform,
-                    sum(t_order_summary.procure) as procure,
-                    sum(t_order_summary.refund_procure) as refund_procure,
-                    sum(t_order_summary.transfer) as transfer,
-                    sum(t_order_summary.deduction) as deduction
+                    COUNT(id) as total,
+                    SUM(payment) as payment,
+                    SUM(refund_customer) as refund_customer,
+                    SUM(refund_platform) as refund_platform,
+                    SUM(procure) as procure,
+                    SUM(refund_procure) as refund_procure,
+                    SUM(transfer) as transfer,
+                    SUM(deduction) as deduction
                 FROM t_order_summary
-                WHERE t_order_summary.shop_id = %s""", [shop_id])
+                WHERE
+                    shop_id = %s""", [shop_id])
             return self.dictfetchall(cursor)[0]
 
     def totalByStatus(self, shop_id, status):
@@ -25,17 +26,18 @@ class Order(Model):
             cursor.execute(
                 """
                 SELECT
-                    count(t_order_summary.id) as total,
-                    sum(t_order_summary.payment) as payment,
-                    sum(t_order_summary.refund_customer) as refund_customer,
-                    sum(t_order_summary.refund_platform) as refund_platform,
-                    sum(t_order_summary.procure) as procure,
-                    sum(t_order_summary.refund_procure) as refund_procure,
-                    sum(t_order_summary.transfer) as transfer,
-                    sum(t_order_summary.deduction) as deduction
+                    COUNT(id) as total,
+                    SUM(payment) as payment,
+                    SUM(refund_customer) as refund_customer,
+                    SUM(refund_platform) as refund_platform,
+                    SUM(procure) as procure,
+                    SUM(refund_procure) as refund_procure,
+                    SUM(transfer) as transfer,
+                    SUM(deduction) as deduction
                 FROM t_order_summary
-                WHERE t_order_summary.shop_id = %s
-                and t_order_summary.order_status = %s""", [shop_id, status])
+                WHERE
+                    shop_id = %s
+                    and order_status = %s""", [shop_id, status])
             return self.dictfetchall(cursor)[0]
 
     def getList(self, shop_id, page, num):
@@ -45,8 +47,9 @@ class Order(Model):
                 """
                 SELECT *
                 FROM t_order_summary
-                WHERE t_order_summary.shop_id = %s
-                ORDER BY t_order_summary.create_time DESC
+                WHERE
+                    shop_id = %s
+                ORDER BY create_time DESC
                 LIMIT %s
                 OFFSET %s""", [shop_id, num, left])
             return self.dictfetchall(cursor)
@@ -58,9 +61,34 @@ class Order(Model):
                 """
                 SELECT *
                 FROM t_order_summary
-                WHERE t_order_summary.shop_id = %s
-                and t_order_summary.order_status = %s
-                ORDER BY t_order_summary.create_time DESC
+                WHERE
+                    shop_id = %s
+                    AND order_status = %s
+                ORDER BY create_time DESC
                 LIMIT %s
                 OFFSET %s""", [shop_id, status, num, left])
+            return self.dictfetchall(cursor)
+
+    def groupByDate(self, shop_id, order_status, start_date, end_date):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    strftime('%Y-%m-%%d', create_time) AS create_date,
+                    SUM(payment) AS payment,
+                    SUM(refund_customer) AS refund_customer,
+                    SUM(refund_platform) AS refund_platform,
+                    SUM(procure) AS procure,
+                    SUM(refund_procure) AS refund_procure,
+                    SUM(transfer) AS transfer,
+                    SUM(deduction) AS deduction
+                FROM t_order_summary
+                WHERE
+                    shop_id = %s
+                    AND order_status = %s
+                    AND create_time > start_date
+                    AND create_time < end_date
+                GROUP BY create_date
+                ORDER BY create_date DESC
+                """, [shop_id, order_status, start_date, end_date])
             return self.dictfetchall(cursor)
