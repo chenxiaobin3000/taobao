@@ -1,5 +1,5 @@
 from django.urls import path
-from app.views.middle import deduction_summary, fake_summary, miscellaneous
+from app.views.middle import deduction_summary, fake_summary, miscellaneous, order_summary
 
 url_middle = [
     # 扣款
@@ -16,4 +16,8 @@ url_middle = [
     path('api/misc/set', miscellaneous.set),
     path('api/misc/del', miscellaneous.delete),
     path('api/misc/getList', miscellaneous.getList),
+
+    # 扣款
+    path('api/order_summary/flush', order_summary.flush),
+    path('api/order_summary/getList', order_summary.getList),
 ]

@@ -21,6 +21,9 @@ class TransferManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
+    def getAll(self, shop_id):
+        return self.encoderList(self.filter(shop_id=shop_id))
+
     def encoder(self, transfer):
         if transfer:
             return model_to_dict(transfer, fields=['id', 'shop_id', 'user_name', 'payee_name', 'order_id', 'amount', 'create_time', 'transfer_note'])

@@ -27,7 +27,7 @@
       </el-table-column>
       <el-table-column align="center" label="订单状态" width="80">
         <template slot-scope="scope">
-          {{ num2type(scope.row.order_status) }}
+          {{ num2status(scope.row.order_status) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="时间" width="160">
@@ -136,7 +136,7 @@ export default {
         this.getUserOrderList()
       })
     },
-    num2type(num) {
+    num2status(num) {
       return OrderStatus.num2text(num)
     },
     handleChange() {

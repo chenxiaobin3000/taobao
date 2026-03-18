@@ -16,6 +16,10 @@ def flush(request):
     shop_id = int(post.get('id'))
     now_date = timezone.now()
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
+    response = {
+        'code': 0,
+        'msg': 'success'
+    }
 
     # 计算开始日期至今的数据
     duration = now_date - start_date
@@ -61,10 +65,6 @@ def flush(request):
         else:
             DeductionSummary.objects.add(shop_id, key, amounts[key], value)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST

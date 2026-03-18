@@ -16,8 +16,7 @@ def flush(request):
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': None
+        'msg': 'success'
     }
 
     # 计算开始日期至今的数据

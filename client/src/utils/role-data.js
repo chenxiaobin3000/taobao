@@ -66,9 +66,11 @@ export const MyRoleData = [{
   children: [{
     id: 6001, label: '杂项信息'
   }, {
-    id: 6002, label: '刷单管理'
+    id: 6002, label: '订单管理'
   }, {
-    id: 6003, label: '扣款管理'
+    id: 6003, label: '刷单管理'
+  }, {
+    id: 6004, label: '扣款管理'
   }]
 }, {
   id: 2000, label: '公司管理',

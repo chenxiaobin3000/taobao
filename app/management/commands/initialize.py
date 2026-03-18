@@ -64,6 +64,7 @@ class Command(BaseCommand):
             Permission.objects.add(i, 6001)
             Permission.objects.add(i, 6002)
             Permission.objects.add(i, 6003)
+            Permission.objects.add(i, 6004)
 
         Shop.objects.add(1, 1, '德国KSTE', 500)
         Shop.objects.add(1, 1, '挪威VER', 500)
