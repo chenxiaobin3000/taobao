@@ -1,14 +1,5 @@
 <template>
   <div>
-    <!--
-    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-      </el-form-item>
-    </el-form>-->
-
     <!-- 销售数据 -->
     <el-row :gutter="40" class="panel-group">
       <div v-for="data in userdata.market" :key="'F'+data.id">

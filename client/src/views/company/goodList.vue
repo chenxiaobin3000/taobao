@@ -141,6 +141,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    this.listQuery.id = this.$store.getters.shop
     this.typeList = GoodType.getList()
     this.statusList = GoodStatus.getList()
     this.resetTemp()
@@ -178,7 +179,9 @@ export default {
         num: 1000
       }).then(response => {
         this.shopList = response.data.data.list
-        this.listQuery.id = this.shopList[0].id
+        if (this.listQuery.id === 0) {
+          this.listQuery.id = this.shopList[0].id
+        }
         this.getGoodList()
       })
     },
@@ -189,6 +192,7 @@ export default {
       return GoodType.num2text(num)
     },
     handleChange() {
+      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getGoodList()
     },
     handleExcel() {

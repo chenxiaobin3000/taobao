@@ -110,6 +110,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    this.listQuery.id = this.$store.getters.shop
     this.getShopList()
   },
   methods: {
@@ -133,7 +134,9 @@ export default {
         num: 1000
       }).then(response => {
         this.shopList = response.data.data.list
-        this.listQuery.id = this.shopList[0].id
+        if (this.listQuery.id === 0) {
+          this.listQuery.id = this.shopList[0].id
+        }
         this.getUserListByShop()
       })
     },
@@ -166,6 +169,7 @@ export default {
       return FinanceType.num2text(num)
     },
     handleChangeShop() {
+      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.listQuery.uid = 0
       this.getPolymerizeList()
     },

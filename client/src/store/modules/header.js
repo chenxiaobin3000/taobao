@@ -1,14 +1,14 @@
 const state = {
   search: '', // 搜索
-  create: false // 新增
+  shop: 0 // 当前店铺
 }
 
 const mutations = {
   SET_HEADER_SEARCH: (state, search) => {
     state.search = search
   },
-  SET_HEADER_CREATE: (state) => {
-    state.create = !state.create
+  SET_HEADER_SHOP: (state, shop) => {
+    state.shop = shop
   }
 }
 
@@ -16,8 +16,8 @@ const actions = {
   search({ commit }, search) {
     commit('SET_HEADER_SEARCH', search)
   },
-  create({ commit }) {
-    commit('SET_HEADER_CREATE')
+  shop({ commit }, shop) {
+    commit('SET_HEADER_SHOP', shop)
   }
 }
 

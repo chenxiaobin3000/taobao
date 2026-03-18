@@ -121,6 +121,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
+    this.listQuery.id = this.$store.getters.shop
     this.statusList = OrderStatus.getList()
     this.getShopList()
   },
@@ -148,7 +149,9 @@ export default {
         num: 1000
       }).then(response => {
         this.shopList = response.data.data.list
-        this.listQuery.id = this.shopList[0].id
+        if (this.listQuery.id === 0) {
+          this.listQuery.id = this.shopList[0].id
+        }
         this.listQuery.status = this.statusList[0].id
         this.getOrderReport()
       })
@@ -157,6 +160,7 @@ export default {
       return OrderStatus.num2text(num)
     },
     handleChangeShop() {
+      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getOrderReport()
     },
     handleChangeStatus() {
