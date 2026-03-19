@@ -9,11 +9,11 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="3">
-          <div>本页面: {{ single ? single : 0 }} 元</div>
-        </el-col>
-        <el-col :span="15">
+        <el-col :span="4">
           <div>总计: {{ amount ? amount : 0 }} 元</div>
+        </el-col>
+        <el-col :span="14">
+          <div>本页面: {{ single ? single : 0 }} 元</div>
         </el-col>
       </el-row>
     </el-form>

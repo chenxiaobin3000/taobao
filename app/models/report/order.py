@@ -74,7 +74,7 @@ class Order(Model):
             cursor.execute(
                 """
                 SELECT
-                    strftime('%Y-%m-%%d', create_time) AS create_date,
+                    strftime('%%Y-%%m-%%d', create_time) AS create_date,
                     SUM(payment) AS payment,
                     SUM(refund_customer) AS refund_customer,
                     SUM(refund_platform) AS refund_platform,
@@ -86,8 +86,8 @@ class Order(Model):
                 WHERE
                     shop_id = %s
                     AND order_status = %s
-                    AND create_time > start_date
-                    AND create_time < end_date
+                    AND create_time > %s
+                    AND create_time < %s
                 GROUP BY create_date
                 ORDER BY create_date DESC
                 """, [shop_id, order_status, start_date, end_date])

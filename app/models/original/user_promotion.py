@@ -13,7 +13,7 @@ class UserPromotionManager(models.Manager):
     def deleteAll(self, user_id, shop_id):
         return self.filter(user_id=user_id, shop_id=shop_id).delete()
 
-    def getByCDate(self, user_id, shop_id, create_date, promotion_type):
+    def getByDate(self, user_id, shop_id, create_date, promotion_type):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first())
 
     def total(self, user_id, shop_id):

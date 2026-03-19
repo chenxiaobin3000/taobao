@@ -19,7 +19,7 @@ def addList(request):
         payment = promotion['p']
         promotion_type = promotion['t']
         promotion_note = promotion['n']
-        if UserPromotion.objects.getByCDate(user_id, shop_id, create_date, promotion_type):
+        if UserPromotion.objects.getByDate(user_id, shop_id, create_date, promotion_type):
             continue
         UserPromotion.objects.add(user_id, shop_id, create_date, payment, promotion_type, promotion_note)
 

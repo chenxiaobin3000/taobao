@@ -9,38 +9,37 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="18">
           <el-form-item label="状态:" prop="orderStatus">
             <el-select v-model="listQuery.status" class="filter-item" placeholder="请选择状态" @change="handleChangeStatus">
               <el-option v-for="item in statusList" :key="'S' + item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
-          <div>1</div>
+      </el-row>
+      <el-row>
+        <el-col :span="6">
+          <div>付款: {{ payment ? payment : 0 }} 元 </div>
+        </el-col>
+        <el-col :span="6">
+          <div>退款: {{ refund_customer ? refund_customer : 0 }} 元 </div>
+        </el-col>
+        <el-col :span="6">
+          <div>退平台: {{ refund_platform ? refund_platform : 0 }} 元</div>
+        </el-col>
+        <el-col :span="6">
+          <div>扣费: {{ deduction ? deduction : 0 }} 元</div>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="3">
-          <div>付款: {{ payment ? payment : 0 }} 元 </div>
-        </el-col>
-        <el-col :span="3">
-          <div>退款: {{ refund_customer ? refund_customer : 0 }} 元 </div>
-        </el-col>
-        <el-col :span="3">
-          <div>退平台: {{ refund_platform ? refund_platform : 0 }} 元</div>
-        </el-col>
-        <el-col :span="3">
+        <el-col :span="6">
           <div>采购: {{ procure ? procure : 0 }} 元</div>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="6">
           <div>采购退: {{ refund_procure ? refund_procure : 0 }} 元</div>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="12">
           <div>打款: {{ transfer ? transfer : 0 }} 元</div>
-        </el-col>
-        <el-col :span="3">
-          <div>扣费: {{ deduction ? deduction : 0 }} 元</div>
         </el-col>
       </el-row>
     </el-form>
@@ -50,19 +49,39 @@
           {{ scope.row.order_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="金额" width="80">
+      <el-table-column align="center" label="付款" width="80">
         <template slot-scope="scope">
           {{ scope.row.payment }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="扣费" width="80">
+      <el-table-column align="center" label="退客户" width="80">
         <template slot-scope="scope">
-          {{ scope.row.amount }}
+          {{ scope.row.refund_customer }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="退平台" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_platform }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="采购" width="80">
         <template slot-scope="scope">
           {{ scope.row.procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="采购退" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.refund_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="扣费" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.deduction }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="打款" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.transfer }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="状态" width="200">

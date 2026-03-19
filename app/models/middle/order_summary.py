@@ -38,7 +38,7 @@ class OrderSummaryManager(models.Manager):
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
     def getAll(self, shop_id, order_status, start_date, end_date):
-        return Order().total(shop_id, order_status, start_date, end_date)
+        return Order().groupByDate(shop_id, order_status, start_date, end_date)
 
     def encoder(self, order):
         if order:

@@ -19,7 +19,7 @@ def merge(request):
         for promotion in promotions:
             create_date = promotion['create_date']
             promotion_type = promotion['promotion_type']
-            if Promotion.objects.getByCDate(shop_id, create_date, promotion_type):
+            if Promotion.objects.getByDate(shop_id, create_date, promotion_type):
                 continue
             Promotion.objects.add(shop_id, create_date, promotion['payment'], promotion_type, promotion['promotion_note'])
 

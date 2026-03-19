@@ -6,10 +6,12 @@ from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.order_summary import OrderSummary
+from app.models.middle.day_summary import DaySummary
 from app.models.middle.deduction_summary import DeductionSummary
 from app.models.trunk.order import Order
 from app.models.trunk.refund import Refund
 from app.models.trunk.transfer import Transfer
+from app.models.const.order_status import OrderStatus
 
 @require_POST
 @transaction.atomic
@@ -86,7 +88,12 @@ def flush(request):
                 OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
 
     # 刷新日报
-    OrderSummary.objects.getAll(shop_id, order_status, start_date, now_date)
+    DaySummary.objects.deleteByDate(shop_id, start_date)
+    for status in [OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.SUCCESS, OrderStatus.CLOSE]:
+        days = OrderSummary.objects.getAll(shop_id, status, start_date, now_date)
+        if days:
+            for day in days:
+                DaySummary.objects.add(shop_id, day['create_date'], status, day['payment'], day['refund_customer'], day['refund_platform'], day['procure'], day['refund_procure'], day['transfer'], day['deduction'])
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

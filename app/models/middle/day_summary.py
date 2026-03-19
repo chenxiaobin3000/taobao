@@ -4,8 +4,8 @@ from django.forms.models import model_to_dict
 
 # 日报汇总表
 class DaySummaryManager(models.Manager):
-    def add(self, shop_id, create_date, payment, refund_customer, refund_platform, procure, refund_procure, transfer, deduction):
-        return self.create(shop_id=shop_id, create_date=create_date, payment=payment, refund_customer=refund_customer, refund_platform=refund_platform, procure=procure, refund_procure=refund_procure, transfer=transfer, deduction=deduction)
+    def add(self, shop_id, create_date, order_status, payment, refund_customer, refund_platform, procure, refund_procure, transfer, deduction):
+        return self.create(shop_id=shop_id, create_date=create_date, order_status=order_status, payment=payment, refund_customer=refund_customer, refund_platform=refund_platform, procure=procure, refund_procure=refund_procure, transfer=transfer, deduction=deduction)
 
     def set(self, pk, payment, refund_customer, refund_platform, procure, refund_procure, transfer, deduction):
         order = self.get(pk=pk)
@@ -21,6 +21,12 @@ class DaySummaryManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
+    def deleteByDate(self, shop_id, create_date):
+        return self.filter(shop_id=shop_id, create_date__gte=create_date).delete()
+
+    def getByDate(self, shop_id, create_date, order_status):
+        return self.encoder(self.filter(shop_id=shop_id, create_date=create_date, order_status=order_status).first())
+
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 
@@ -31,18 +37,19 @@ class DaySummaryManager(models.Manager):
 
     def encoder(self, order):
         if order:
-            return model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction'])
+            return model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'order_status', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction'])
         return None
 
     def encoderList(self, ordera):
         if ordera:
-            return [model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction']) for order in ordera]
+            return [model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'order_status', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction']) for order in ordera]
         return None
 
 class DaySummary(models.Model):
     objects = DaySummaryManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
     create_date = models.DateField(db_index=True) # 交易日期
+    order_status = models.IntegerField(db_index=True) # 状态
     payment = models.DecimalField(max_digits=10, decimal_places=2) # 付款金额
     refund_customer = models.DecimalField(max_digits=10, decimal_places=2) # 给用户退款
     refund_platform = models.DecimalField(max_digits=10, decimal_places=2) # 给平台退款

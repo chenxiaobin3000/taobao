@@ -10,7 +10,7 @@ class PromotionManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def getByCDate(self, shop_id, create_date, promotion_type):
+    def getByDate(self, shop_id, create_date, promotion_type):
         return self.encoder(self.filter(shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first())
 
     def total(self, shop_id):
@@ -20,6 +20,9 @@ class PromotionManager(models.Manager):
         left = (page - 1) * num
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_date')[left:right])
+
+    def getListByDate(self, shop_id, create_date):
+        return self.encoderList(self.filter(shop_id=shop_id, create_date=create_date))
 
     def encoder(self, promotion):
         if promotion:
