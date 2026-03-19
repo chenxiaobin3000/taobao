@@ -120,7 +120,9 @@ export default {
   },
   mounted: function() {
     setTimeout(() => {
-      this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 78
+      if (this.$refs.table) {
+        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 78
+      }
     }, 1000)
   },
   created() {
