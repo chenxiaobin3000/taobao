@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.day_summary import DaySummary
+from app.models.middle.fake_summary import FakeSummary
 from app.models.trunk.promotion import Promotion
 from app.models.const.order_status import OrderStatus
 
@@ -29,27 +30,89 @@ def getList(request):
         return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 按天生成数据
+    pending = 0 # 未完结
+    settled = 0 # 已完结
+    refund = 0 # 退款
+    procure = 0 # 采购
+    refund_procure = 0 # 采购退款
+    transfer = 0 # 打款
+    deduction = 0 # 扣款
+    promotion = 0 # 推广
+    fake = 0 # 刷单成本
     datas = []
     for i in range(0, days):
         start = start_date + timedelta(days=i)
-        DaySummary.objects.getByDate(OrderStatus.PAID)
-        DaySummary.objects.getByDate(OrderStatus.SHIPPED)
-        DaySummary.objects.getByDate(OrderStatus.SUCCESS)
-        DaySummary.objects.getByDate(OrderStatus.CLOSE)
+        data = { 'create_date': start.strftime('%Y-%m-%d'), 'pending': 0, 'settled': 0, 'refund': 0, 'procure': 0, 'refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0 }
+
+        # 待发货
+        paid = DaySummary.objects.getByDate(shop_id, start, OrderStatus.PAID)
+        if paid:
+            data['pending'] += paid['payment']
+
+        # 已发货
+        shipped = DaySummary.objects.getByDate(shop_id, start, OrderStatus.SHIPPED)
+        if shipped:
+            data['pending'] += shipped['payment']
+            data['refund'] += shipped['refund_customer']
+            data['refund'] += shipped['refund_platform']
+            data['procure'] += shipped['procure']
+            data['refund_procure'] += shipped['refund_procure']
+
+        # 已结算
+        success = DaySummary.objects.getByDate(shop_id, start, OrderStatus.SUCCESS)
+        if success:
+            data['settled'] += success['payment']
+            data['refund'] += success['refund_customer']
+            data['refund'] += success['refund_platform']
+            data['procure'] += success['procure']
+            data['refund_procure'] += success['refund_procure']
+            data['transfer'] += success['transfer']
+            data['deduction'] += success['deduction']
+
+        # 已关闭
+        close = DaySummary.objects.getByDate(shop_id, start, OrderStatus.CLOSE)
+        if close:
+            data['settled'] += close['payment']
+            data['refund'] += close['refund_customer']
+            data['refund'] += close['refund_platform']
+            data['procure'] += close['procure']
+            data['refund_procure'] += close['refund_procure']
+            data['transfer'] += close['transfer']
+            data['deduction'] += close['deduction']
 
         # 推广
-        Promotion.objects.getByDate(shop_id, start)
+        promotions = Promotion.objects.getListByDate(shop_id, start)
+        if promotions:
+            for temp in promotions:
+                data['promotion'] += temp['payment']
+
+        # 刷单
+        fake_data = FakeSummary.objects.getByDate(shop_id, start)
+        if fake_data:
+            data['fake'] = fake_data['commission'] + fake_data['freight']
+
+        # 统计
+        pending += data['pending']
+        settled += data['settled']
+        refund += data['refund']
+        procure += data['procure']
+        refund_procure += data['refund_procure']
+        transfer += data['transfer']
+        deduction += data['deduction']
+        promotion += data['promotion']
+        fake += data['fake']
+        datas.insert(0, data)
 
     response['data'] = {
-        'pending': 0,
-        'settled': 0,
-        'refund': 0,
-        'procure': 0,
-        'refund_procure': 0,
-        'transfer': 0,
-        'deduction': 0,
-        'promotion': 0,
-        'fake': 0,
+        'pending': pending,
+        'settled': settled,
+        'refund': refund,
+        'procure': procure,
+        'refund_procure': refund_procure,
+        'transfer': transfer,
+        'deduction': deduction,
+        'promotion': promotion,
+        'fake': fake,
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -92,3 +92,25 @@ class Order(Model):
                 ORDER BY create_date DESC
                 """, [shop_id, order_status, start_date, end_date])
             return self.dictfetchall(cursor)
+
+    def groupByMonth(self, shop_id, order_status):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    strftime('%%Y-%%m', create_time) AS create_month,
+                    SUM(payment) AS payment,
+                    SUM(refund_customer) AS refund_customer,
+                    SUM(refund_platform) AS refund_platform,
+                    SUM(procure) AS procure,
+                    SUM(refund_procure) AS refund_procure,
+                    SUM(transfer) AS transfer,
+                    SUM(deduction) AS deduction
+                FROM t_order_summary
+                WHERE
+                    shop_id = %s
+                    AND order_status = %s
+                GROUP BY create_month
+                ORDER BY create_month DESC
+                """, [shop_id, order_status])
+            return self.dictfetchall(cursor)
