@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-const path = '/yesr_report'
+const path = '/year_report'
 
 export function getYearReport(data) {
   return request({
