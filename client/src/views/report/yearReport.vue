@@ -174,11 +174,6 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.listQuery.sdate = new Date()
-    this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
-    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 31
-    this.listQuery.sdate.setTime(seconds)
-    this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
     this.getShopList()
   },
   methods: {
@@ -203,8 +198,9 @@ export default {
         this.profit = this.profit.toFixed(2)
         this.expect = this.expect.toFixed(2)
 
-        this.list = response.data.data.list
-        this.list.forEach(v => {
+        // 预处理数据
+        const data = response.data.data.list
+        Object.entries(data).forEach(([k, v]) => {
           v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.refund)
           v.profit = parseFloat(v.settled) - parseFloat(v.refund) - parseFloat(v.procure) + parseFloat(v.refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake)
           v.expect = parseFloat(v.pending) + v.profit
@@ -212,6 +208,34 @@ export default {
           v.profit = v.profit.toFixed(2)
           v.expect = v.expect.toFixed(2)
         })
+
+        // 按年份统计插入数据
+        this.list = []
+        const currentYear = new Date().getFullYear()
+        const currentMonth = new Date().getMonth()
+        for (let y = 2025; y <= currentYear; ++y) {
+          // let amount = 0
+          // let profit = 0
+          // let expect = 0
+          // let pending = 0
+          // let settled = 0
+          // let refund = 0
+          // let procure = 0
+          // let refund_procure = 0
+          // let transfer = 0
+          // let deduction = 0
+          // let promotion = 0
+          // let fake = 0
+          for (let m = 0; m < 12; ++m) {
+            if (y === currentYear && m >= currentMonth) {
+              break
+            }
+            // 插入月数据
+            this.list.unshift(data[y + '-' + (m + 1)])
+          }
+          // 插入年数据
+        }
+
         this.loading = false
       }).catch(error => {
         this.loading = false

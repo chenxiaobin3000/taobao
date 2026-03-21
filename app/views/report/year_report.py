@@ -117,6 +117,16 @@ def getList(request):
     # 统计
     values = datas.values()
     for value in values:
+        value['pending'] = round(value['pending'], 2)
+        value['settled'] = round(value['settled'], 2)
+        value['refund'] = round(value['refund'], 2)
+        value['procure'] = round(value['procure'], 2)
+        value['refund_procure'] = round(value['refund_procure'], 2)
+        value['transfer'] = round(value['transfer'], 2)
+        value['deduction'] = round(value['deduction'], 2)
+        value['promotion'] = round(value['promotion'], 2)
+        value['fake'] = round(value['fake'], 2)
+
         pending += value['pending']
         settled += value['settled']
         refund += value['refund']
@@ -128,15 +138,15 @@ def getList(request):
         fake += value['fake']
 
     response['data'] = {
-        'pending': pending,
-        'settled': settled,
-        'refund': refund,
-        'procure': procure,
-        'refund_procure': refund_procure,
-        'transfer': transfer,
-        'deduction': deduction,
-        'promotion': promotion,
-        'fake': fake,
+        'pending': round(pending, 2),
+        'settled': round(settled, 2),
+        'refund': round(refund, 2),
+        'procure': round(procure, 2),
+        'refund_procure': round(refund_procure, 2),
+        'transfer': round(transfer, 2),
+        'deduction': round(deduction, 2),
+        'promotion': round(promotion, 2),
+        'fake': round(fake, 2),
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
