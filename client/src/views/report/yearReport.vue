@@ -51,7 +51,7 @@
         </el-col>
       </el-row>
     </el-form>
-    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row :row-class-name="rowClassName" @row-click="handleRowClick">
       <el-table-column align="center" label="日期" width="90">
         <template slot-scope="scope">
           {{ scope.row.create_date }}
@@ -214,26 +214,60 @@ export default {
         const currentYear = new Date().getFullYear()
         const currentMonth = new Date().getMonth()
         for (let y = 2025; y <= currentYear; ++y) {
-          // let amount = 0
-          // let profit = 0
-          // let expect = 0
-          // let pending = 0
-          // let settled = 0
-          // let refund = 0
-          // let procure = 0
-          // let refund_procure = 0
-          // let transfer = 0
-          // let deduction = 0
-          // let promotion = 0
-          // let fake = 0
+          let pending = 0
+          let settled = 0
+          let refund = 0
+          let procure = 0
+          let refund_procure = 0
+          let transfer = 0
+          let deduction = 0
+          let promotion = 0
+          let fake = 0
           for (let m = 0; m < 12; ++m) {
             if (y === currentYear && m >= currentMonth) {
               break
             }
             // 插入月数据
-            this.list.unshift(data[y + '-' + (m + 1)])
+            let key = ''
+            if (m > 8) {
+              key = y + '-' + (m + 1)
+            } else {
+              key = y + '-0' + (m + 1)
+            }
+            const temp = data[key]
+            temp.create_date = y + '年' + (m + 1) + '月'
+            temp.isShow = 0
+            pending += temp.pending
+            settled += temp.settled
+            refund += temp.refund
+            procure += temp.procure
+            refund_procure += temp.refund_procure
+            transfer += temp.transfer
+            deduction += temp.deduction
+            promotion += temp.promotion
+            fake += temp.fake
+            this.list.unshift(temp)
           }
           // 插入年数据
+          const amount = pending + settled + refund
+          const profit = settled - refund - procure + refund_procure - promotion - transfer - deduction - fake
+          const expect = pending + profit
+          this.list.unshift({
+            create_date: y + '年',
+            amount: amount.toFixed(2),
+            profit: profit.toFixed(2),
+            expect: expect.toFixed(2),
+            pending: pending,
+            settled: settled,
+            refund: refund,
+            procure: procure,
+            refund_procure: refund_procure,
+            transfer: transfer,
+            deduction: deduction,
+            promotion: promotion,
+            fake: fake,
+            isShow: 1
+          })
         }
 
         this.loading = false
@@ -255,10 +289,46 @@ export default {
         this.getYearReport()
       })
     },
+    rowClassName({ row, rowIndex }) {
+      if (row.isShow !== 0) {
+        if (row.create_date.indexOf('月') !== -1) {
+          return 'month-row'
+        } else {
+          return 'year-row'
+        }
+      } else {
+        return 'hidden-row'
+      }
+    },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getYearReport()
+    },
+    handleRowClick(row, column, event) {
+      // 只处理年
+      if (row.create_date.indexOf('月') === -1) {
+        const year = row.create_date
+        this.list.forEach(v => {
+          if (v.create_date.indexOf('月') !== -1 && v.create_date.indexOf(year) !== -1) {
+            v.isShow = v.isShow === 0 ? 1 : 0
+          }
+        })
+      }
     }
   }
 }
 </script>
+
+<style lang="scss">
+.el-table .year-row {
+  background-color: rgba(200, 200, 200, 0.3);
+}
+
+.el-table .month-row {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.el-table .hidden-row {
+  display: none;
+}
+</style>
