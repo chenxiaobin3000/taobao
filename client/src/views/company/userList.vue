@@ -6,17 +6,17 @@
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column label="用户名称" width="160px" align="center">
+      <el-table-column label="用户名称" width="120px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="账号名称" width="160px" align="center">
+      <el-table-column label="账号名称" width="120px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.account }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="手机号" width="160px" align="center">
+      <el-table-column label="手机号" width="120px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.phone }}</span>
         </template>

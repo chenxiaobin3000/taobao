@@ -27,7 +27,7 @@ class UserShopManager(models.Manager):
         if userShops:
             return [model_to_dict(userShop, fields=['id', 'user_id', 'shop_id']) for userShop in userShops]
         return None
-    
+
 class UserShop(models.Model):
     objects = UserShopManager()
     user_id = models.IntegerField(db_index = True) # 用户id

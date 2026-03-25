@@ -97,7 +97,7 @@ import UploadExcelComponent from '@/components/UploadExcel'
 import { GoodStatus, GoodType } from '@/utils/const'
 import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
 import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/goodAlias'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination, UploadExcelComponent },
@@ -147,7 +147,7 @@ export default {
     this.typeList = GoodType.getList()
     this.statusList = GoodStatus.getList()
     this.resetTemp()
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     resetTemp() {
@@ -174,13 +174,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

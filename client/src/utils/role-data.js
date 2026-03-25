@@ -1,5 +1,5 @@
 export const MyRoleData = [{
-  id: 5000, label: '报表管理',
+  id: 5000, label: '统计报表',
   children: [{
     id: 5001, label: '年报汇总'
   }, {
@@ -16,7 +16,7 @@ export const MyRoleData = [{
     id: 5007, label: '遗漏汇总'
   }]
 }, {
-  id: 4000, label: '核心管理',
+  id: 4000, label: '存档数据',
   children: [{
     id: 4001, label: '订单管理'
   }, {
@@ -35,7 +35,7 @@ export const MyRoleData = [{
     id: 4010, label: '小额打款'
   }]
 }, {
-  id: 3000, label: '数据管理',
+  id: 3000, label: '原始数据',
   children: [{
     id: 3001, label: '订单管理'
   }, {
@@ -60,9 +60,9 @@ export const MyRoleData = [{
     id: 3011, label: '小额打款'
   }]
 }, {
-  id: 6000, label: '辅助管理',
+  id: 6000, label: '辅助工具',
   children: [{
-    id: 6001, label: '杂项信息'
+    id: 6001, label: '杂项管理'
   }, {
     id: 6002, label: '订单管理'
   }, {
@@ -71,7 +71,7 @@ export const MyRoleData = [{
     id: 6004, label: '扣款管理'
   }]
 }, {
-  id: 2000, label: '公司管理',
+  id: 2000, label: '公司数据',
   children: [{
     id: 2001, label: '公司信息'
   }, {

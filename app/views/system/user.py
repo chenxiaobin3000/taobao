@@ -96,10 +96,11 @@ def getInfo(request):
     # 店铺信息
     dataShop = []
     userShops = UserShop.objects.getList(user['id'], 1, 1000)
-    for userShop in userShops:
-        shop = Shop.objects.find(userShop['shop_id'])
-        del shop['company_id']
-        dataShop.append(shop)
+    if userShops:
+        for userShop in userShops:
+            shop = Shop.objects.find(userShop['shop_id'])
+            del shop['company_id']
+            dataShop.append(shop)
 
     # 权限信息
     permissions = Permission.objects.getList(user['role_id'], 1, 1000)

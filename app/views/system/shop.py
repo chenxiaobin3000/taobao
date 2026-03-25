@@ -104,3 +104,28 @@ def getList(request):
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
+def getOwnList(request):
+    post = json.loads(request.body)
+    company_id = int(post.get('id'))
+    user_id = int(post.get('uid'))
+    shops = Shop.objects.getList(company_id, 1, 1000)
+    userShops = UserShop.objects.getList(user_id, 1, 1000)
+    datas = []
+
+    # 获取平台、管理员信息
+    if userShops:
+        for data in shops:
+            for userShop in userShops:
+                if data['id'] == userShop['shop_id']:
+                    datas.append(data)
+                    break
+
+    response = {
+        'code': 0,
+        'msg': 'success',
+        'data': datas
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)

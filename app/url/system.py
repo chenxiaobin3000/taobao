@@ -54,6 +54,7 @@ url_system = [
     path('api/shop/set', shop.set),
     path('api/shop/del', shop.delete),
     path('api/shop/getList', shop.getList),
+    path('api/shop/getOwnList', shop.getOwnList),
 
     # 用户-店铺
     path('api/userShop/add', user_shop.add),

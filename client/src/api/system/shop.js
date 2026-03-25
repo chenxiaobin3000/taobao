@@ -32,3 +32,11 @@ export function getShopList(data) {
     data
   })
 }
+
+export function getOwnShopList(data) {
+  return request({
+    url: `${path}/getOwnList`,
+    method: 'post',
+    data
+  })
+}
