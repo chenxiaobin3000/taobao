@@ -60,7 +60,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { OrderStatus } from '@/utils/const'
 import { getUserFakeList, delUserFake, delAllUserFake } from '@/api/original/fake'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination },
@@ -103,7 +103,7 @@ export default {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
     this.listQuery.uid = this.userdata.user.id
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     getUserFakeList() {
@@ -119,13 +119,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

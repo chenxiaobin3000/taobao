@@ -76,7 +76,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 import { getUserList } from '@/api/system/user'
 import { getMiscList, addMisc, setMisc, delMisc } from '@/api/middle/miscellaneous'
 
@@ -114,7 +114,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getShopList()
+      this.getOwnShopList()
     }
   },
   mounted: function() {
@@ -128,7 +128,7 @@ export default {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
     this.resetTemp()
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     resetTemp() {
@@ -154,13 +154,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

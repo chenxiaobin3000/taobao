@@ -89,7 +89,7 @@ import Pagination from '@/components/Pagination'
 import { NoneTime, RefundStatus, RefundType } from '@/utils/const'
 import { getRefundList, mergeRefund, delRefund } from '@/api/trunk/refund'
 import { getUserRefundList } from '@/api/original/refund'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 import { getUserListByShop } from '@/api/system/userShop'
 
 export default {
@@ -134,7 +134,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     getRefundList() {
@@ -150,13 +150,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

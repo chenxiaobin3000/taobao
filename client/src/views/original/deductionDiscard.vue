@@ -55,7 +55,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { DeductionType, FinanceType } from '@/utils/const'
 import { getUserDeductionDiscardList, delUserDeductionDiscard, delAllUserDeductionDiscard } from '@/api/original/deductionDiscard'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination },
@@ -98,7 +98,7 @@ export default {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
     this.listQuery.uid = this.userdata.user.id
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     getUserDeductionDiscardList() {
@@ -114,13 +114,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

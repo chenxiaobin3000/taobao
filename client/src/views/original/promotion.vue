@@ -54,7 +54,7 @@ import { ImportCount, ImportSpan, PromotionType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
 import { xlsx_date_str } from '@/utils/xlsx'
 import { getUserPromotionList, addUserPromotionList, delUserPromotion, delAllUserPromotion } from '@/api/original/promotion'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination, UploadExcelComponent },
@@ -98,7 +98,7 @@ export default {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
     this.listQuery.uid = this.userdata.user.id
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     getUserPromotionList() {
@@ -114,13 +114,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

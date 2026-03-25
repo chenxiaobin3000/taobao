@@ -44,7 +44,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import { DeductionType } from '@/utils/const'
 import { getOmissionReport } from '@/api/report/omissionReport'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination },
@@ -86,7 +86,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     getOmissionReport() {
@@ -124,13 +124,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

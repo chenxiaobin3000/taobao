@@ -140,7 +140,7 @@
 <script>
 import { mapState } from 'vuex'
 import { getDayReport } from '@/api/report/dayReport'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 
 export default {
   data() {
@@ -194,7 +194,7 @@ export default {
     const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 31
     this.listQuery.sdate.setTime(seconds)
     this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     getDayReport() {
@@ -233,13 +233,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }

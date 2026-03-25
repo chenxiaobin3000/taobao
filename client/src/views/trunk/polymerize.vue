@@ -69,7 +69,7 @@ import Pagination from '@/components/Pagination'
 import { DeductionType, FinanceType } from '@/utils/const'
 import { getPolymerizeList, mergePolymerize, delPolymerize } from '@/api/trunk/polymerize'
 import { getUserPolymerizeList } from '@/api/original/polymerize'
-import { getShopList } from '@/api/system/shop'
+import { getOwnShopList } from '@/api/system/shop'
 import { getUserListByShop } from '@/api/system/userShop'
 
 export default {
@@ -113,7 +113,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.getShopList()
+    this.getOwnShopList()
   },
   methods: {
     getPolymerizeList() {
@@ -129,13 +129,12 @@ export default {
         Promise.reject(error)
       })
     },
-    getShopList() {
-      getShopList({
+    getOwnShopList() {
+      getOwnShopList({
         id: this.userdata.company.id,
-        page: 1,
-        num: 1000
+        uid: this.userdata.user.id
       }).then(response => {
-        this.shopList = response.data.data.list
+        this.shopList = response.data.data
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }
