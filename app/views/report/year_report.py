@@ -6,6 +6,8 @@ from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
 from app.models.report.order import Order
+from app.models.report.fake import Fake
+from app.models.report.promotion import Promotion
 from app.models.const.order_status import OrderStatus
 
 @require_POST
@@ -103,16 +105,19 @@ def getList(request):
             response['msg'] = '数据异常，请联系管理员'
             return JsonResponse(response, encoder=MyJSONEncoder)
 
-    #     # 推广
-    #     promotions = Promotion.objects.getListByDate(shop_id, start)
-    #     if promotions:
-    #         for temp in promotions:
-    #             data['promotion'] += temp['payment']
+        # 推广
+        promotions = Promotion().groupByMonth(shop_id)
+        for temp in promotions:
+            key_month = temp['create_month']
+            if key_month in datas:
+                datas[key_month]['promotion'] = temp['payment']
 
-    #     # 刷单
-    #     fake_data = FakeSummary.objects.getByDate(shop_id, start)
-    #     if fake_data:
-    #         data['fake'] = fake_data['commission'] + fake_data['freight']
+        # 刷单
+        fakes = Fake().groupByMonth(shop_id)
+        for temp in fakes:
+            key_month = temp['create_month']
+            if key_month in datas:
+                datas[key_month]['fake'] = temp['commission'] + temp['freight']
 
     # 统计
     values = datas.values()

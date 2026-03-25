@@ -291,9 +291,7 @@ export default {
     },
     rowClassName({ row, rowIndex }) {
       if (row.isShow !== 0) {
-        if (row.create_date.indexOf('月') !== -1) {
-          return 'month-row'
-        } else {
+        if (row.create_date.indexOf('月') === -1) {
           return 'year-row'
         }
       } else {
@@ -321,11 +319,7 @@ export default {
 
 <style lang="scss">
 .el-table .year-row {
-  background-color: rgba(200, 200, 200, 0.3);
-}
-
-.el-table .month-row {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(220, 220, 220, 0.3);
 }
 
 .el-table .hidden-row {

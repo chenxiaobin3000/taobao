@@ -59,7 +59,6 @@ class Command(BaseCommand):
             Permission.objects.add(i, 5005)
             Permission.objects.add(i, 5006)
             Permission.objects.add(i, 5007)
-            Permission.objects.add(i, 5008)
             Permission.objects.add(i, 6000)
             Permission.objects.add(i, 6001)
             Permission.objects.add(i, 6002)
