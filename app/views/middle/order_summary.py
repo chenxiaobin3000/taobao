@@ -35,7 +35,7 @@ def flush(request):
 
     # 小额打款数据
     transfers = {}
-    datas = Transfer.objects.getAll(shop_id)
+    datas = Transfer.objects.getListByDate(shop_id, start_date)
     if datas:
         for data in datas:
             order_id = data['order_id']
@@ -45,7 +45,7 @@ def flush(request):
                 transfers[order_id] = data['amount']
 
     # 生成所有订单数据
-    orders = Order.objects.getAll(shop_id, start_date)
+    orders = Order.objects.getListByDate(shop_id, start_date)
     if orders:
         for order in orders:
             order_id = order['order_id']

@@ -29,7 +29,7 @@ class OrderManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
-    def getAll(self, shop_id, start_date):
+    def getListByDate(self, shop_id, start_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date))
 
     def encoder(self, order):

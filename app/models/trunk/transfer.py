@@ -21,8 +21,8 @@ class TransferManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
-    def getAll(self, shop_id):
-        return self.encoderList(self.filter(shop_id=shop_id))
+    def getListByDate(self, shop_id, create_date):
+        return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=create_date))
 
     def encoder(self, transfer):
         if transfer:
