@@ -62,7 +62,7 @@
           <el-tree ref="tree" :data="routes" node-key="id" show-checkbox @check="handleShopChange" />
         </el-form-item>
         <el-form-item v-if="dialogStatus==='create'" label="说明">
-          <div style="width: 240px">新用户注册后，默认密码为: 123456</div>
+          <div style="width: 240px">新用户注册后，默认密码为: 888888</div>
         </el-form-item>
         <el-form-item v-else label="说明">
           <div style="width: 220px">修改用户名只影响系统内部显示，登陆账号不会变化</div>

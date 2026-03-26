@@ -25,7 +25,7 @@ def addList(request):
     # 批量添加
     for order in orders:
         order_id = order['id']
-        payment = order['pa']
+        payment = float(order['pa'])
         procure = order['pr']
         order_status = int(order['st'])
         create_time = order['ct']

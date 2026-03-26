@@ -232,6 +232,19 @@ export default {
               }
               break
 
+            case DeductionType.JI_YUN_WU_LIU: // 商家集运物流服务费
+            case DeductionType.JI_YUN_CAO_ZUO_FEI: // 商家集运中转操作费
+              first = note.indexOf('交易单号：') + 5
+              if (first !== -1) {
+                oid = note.substring(first, first + 19)
+              } else {
+                stop = true
+                this.$message({ type: 'error', message: '备注信息格式异常!' })
+                console.log(v)
+                return
+              }
+              break
+
             // 无订单信息
             case DeductionType.GONG_YI: // 公益宝贝捐赠
             case DeductionType.YAN_CHI_FA_HUO: // 延迟发货赔付

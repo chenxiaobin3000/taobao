@@ -56,6 +56,8 @@ export const DeductionType = {
   XIAO_FEI_QUAN: 15, // 消费券代付资金扣回
   GUAN_KONG: 16, // 保证金管控资金使用
   XIAN_SHI_LI_JIN: 17, // 限时礼金软件服务费
+  JI_YUN_WU_LIU: 18, // 商家集运物流服务费
+  JI_YUN_CAO_ZUO_FEI: 19, // 商家集运中转操作费
 
   // 无订单信息
   GONG_YI: 100, // 公益宝贝捐赠
@@ -110,6 +112,10 @@ export const DeductionType = {
       return this.GUAN_KONG
     } else if (text.indexOf('限时礼金软件服务费') !== -1) {
       return this.XIAN_SHI_LI_JIN
+    } else if (text.indexOf('商家集运物流服务费') !== -1) {
+      return this.JI_YUN_WU_LIU
+    } else if (text.indexOf('商家集运中转操作费') !== -1) {
+      return this.JI_YUN_CAO_ZUO_FEI
       // ---------------------
     } else if (text.indexOf('公益宝贝捐赠') !== -1) {
       return this.GONG_YI
@@ -175,6 +181,10 @@ export const DeductionType = {
         return '管控资金使用'
       case this.XIAN_SHI_LI_JIN:
         return '限时礼金'
+      case this.JI_YUN_WU_LIU:
+        return '集运物流'
+      case this.JI_YUN_CAO_ZUO_FEI:
+        return '集运操作费'
 
       case this.GONG_YI:
         return '公益宝贝捐赠'

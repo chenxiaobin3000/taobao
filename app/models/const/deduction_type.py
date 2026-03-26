@@ -21,6 +21,8 @@ class DeductionType:
     XIAO_FEI_QUAN = 15      # 消费券代付资金扣回
     GUAN_KONG = 16          # 保证金管控资金使用
     XIAN_SHI_LI_JIN = 17    # 限时礼金软件服务费
+    JI_YUN_WU_LIU = 18      # 商家集运物流服务费
+    JI_YUN_CAO_ZUO_FEI = 19 # 商家集运中转操作费
 
     # 无订单信息
     GONG_YI = 100           # 公益宝贝捐赠

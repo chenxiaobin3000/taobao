@@ -173,14 +173,28 @@ export default {
       // 提取采购价
       let length = o.length
       for (let i = 0; i < length; ++i) {
-        const ext = this.extract(o[i].no)
-        if (!ext[0]) {
-          this.$message({ type: 'error', message: '数据异常!' })
+        // 异常状态
+        if (o[i].st === OrderStatus.OTHER) {
+          this.$message({ type: 'error', message: '订单状态异常!' })
           console.log(o[i])
           return
         }
-        o[i].pr = ext[1]
-        o[i].pi = ext[2]
+        const ext = this.extract(o[i].no)
+        if (ext[0]) {
+          o[i].pr = ext[1]
+          o[i].pi = ext[2]
+        } else {
+          // 忽略未付款或订单关闭
+          if (o[i].st === OrderStatus.CLOSE || o[i].st === OrderStatus.UNPAID) {
+            continue
+          }
+          // 小于30认定为刷单
+          if (parseFloat(o[i].pa) > 30) {
+            this.$message({ type: 'error', message: '订单备注解析异常!' })
+            console.log(o[i])
+            return
+          }
+        }
       }
       if (length > ImportCount) {
         length = parseInt(length / ImportCount)

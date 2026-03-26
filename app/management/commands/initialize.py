@@ -95,10 +95,8 @@ class Command(BaseCommand):
         UserShop.objects.add(3, 4)
         UserShop.objects.add(3, 5)
 
-        User.objects.add('管理员', '01234567890', 1, 1)
-        Account.objects.add('admin', '21218cca77804d2ba1922c33e0151105', 1)
-        User.objects.add('小月', '01234567891', 1, 1)
-        Account.objects.add('chenxb', '21218cca77804d2ba1922c33e0151105', 2)
-        User.objects.add('小天使', '01234567892', 1, 2)
+        User.objects.add('小月', '13000000001', 1, 1)
+        Account.objects.add('chenxb', '3c278fb4abd387f394292f67ea7d3ad8', 2)
+        User.objects.add('小天使', '13000000002', 1, 2)
         Account.objects.add('huangx', '21218cca77804d2ba1922c33e0151105', 3)
         print("init success")
