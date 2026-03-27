@@ -17,28 +17,26 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row>
-        <el-col :span="6">
+      <el-row style="font-size: small;">
+        <el-col :span="4">
           <div>付款: {{ payment ? payment : 0 }} 元 </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="3">
           <div>退款: {{ refund_customer ? refund_customer : 0 }} 元 </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="4">
           <div>退平台: {{ refund_platform ? refund_platform : 0 }} 元</div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="3">
           <div>扣费: {{ deduction ? deduction : 0 }} 元</div>
         </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="6">
+        <el-col :span="3">
           <div>采购: {{ procure ? procure : 0 }} 元</div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="4">
           <div>采购退: {{ refund_procure ? refund_procure : 0 }} 元</div>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="3">
           <div>打款: {{ transfer ? transfer : 0 }} 元</div>
         </el-col>
       </el-row>

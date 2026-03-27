@@ -23,46 +23,58 @@
           <el-button type="primary" size="mini" style="width:80px" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
-      <el-row>
-        <el-col :span="4">
+      <el-row style="font-size: small;">
+        <el-col :span="3">
           <div :style="{ color: expect < 0 ? 'red' : 'green' }">预估: {{ expect }} 元 </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <div :style="{ color: profit < 0 ? 'red' : 'green' }">利润: {{ profit }} 元 </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <div>成交: {{ amount }} 元 </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <div>未完结: {{ pending ? pending : 0 }} 元 </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <div>已完结: {{ settled ? settled : 0 }} 元 </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <div>退款: {{ refund ? refund : 0 }} 元</div>
         </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="4">
-          <div>推广: {{ promotion ? promotion : 0 }} 元</div>
-        </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <div>采购: {{ procure ? procure : 0 }} 元 </div>
         </el-col>
         <el-col :span="3">
           <div>采购退: {{ refund_procure ? refund_procure : 0 }} 元 </div>
         </el-col>
-        <el-col :span="4">
+      </el-row>
+      <el-row style="font-size: small;">
+        <el-col :span="3">
+          <div>关闭: {{ close ? close : 0 }} 元 </div>
+        </el-col>
+        <el-col :span="3">
+          <div>关闭退: {{ close_refund ? close_refund : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <div>关闭采: {{ close_procure ? close_procure : 0 }} 元 </div>
+        </el-col>
+        <el-col :span="3">
+          <div>关闭采退: {{ close_refund_procure ? close_refund_procure : 0 }} 元 </div>
+        </el-col>
+        <el-col :span="3">
+          <div>推广: {{ promotion ? promotion : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
           <div>扣费: {{ deduction ? deduction : 0 }} 元</div>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="2">
           <div>刷拥: {{ fake ? fake : 0 }} 元</div>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="2">
           <div>刷扣: {{ fake_deduction ? fake_deduction : 0 }} 元</div>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="2">
           <div>打款: {{ transfer ? transfer : 0 }} 元</div>
         </el-col>
       </el-row>
@@ -111,6 +123,26 @@
       <el-table-column align="center" label="采购退款" width="100">
         <template slot-scope="scope">
           {{ scope.row.refund_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="已关闭" width="100">
+        <template slot-scope="scope">
+          {{ scope.row.close }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="关闭退款" width="100">
+        <template slot-scope="scope">
+          {{ scope.row.close_refund }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="关闭采购" width="100">
+        <template slot-scope="scope">
+          {{ scope.row.close_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="关闭采购退" width="100">
+        <template slot-scope="scope">
+          {{ scope.row.close_refund_procure }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="打款" width="100">
@@ -164,6 +196,10 @@ export default {
       refund: 0, // 退款
       procure: 0, // 采购
       refund_procure: 0, // 采购退款
+      close: 0, // 关闭
+      close_refund: 0, // 关闭退款
+      close_procure: 0, // 关闭采购
+      close_refund_procure: 0, // 关闭采购退款
       transfer: 0, // 打款
       deduction: 0, // 扣款
       promotion: 0, // 推广
@@ -216,6 +252,10 @@ export default {
         this.refund = response.data.data.refund
         this.procure = response.data.data.procure
         this.refund_procure = response.data.data.refund_procure
+        this.close = response.data.data.close
+        this.close_refund = response.data.data.close_refund
+        this.close_procure = response.data.data.close_procure
+        this.close_refund_procure = response.data.data.close_refund_procure
         this.transfer = response.data.data.transfer
         this.deduction = response.data.data.deduction
         this.promotion = response.data.data.promotion

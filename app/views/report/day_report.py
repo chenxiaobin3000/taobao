@@ -33,10 +33,12 @@ def getList(request):
     pending = 0 # 未完结
     settled = 0 # 已完结
     refund = 0 # 退款
-    close = 0 # 关闭
-    close_refund = 0 # 关闭退款
     procure = 0 # 采购
     refund_procure = 0 # 采购退款
+    close = 0 # 关闭
+    close_refund = 0 # 关闭退款
+    close_procure = 0 # 关闭采购
+    close_refund_procure = 0 # 关闭采购退款
     transfer = 0 # 打款
     deduction = 0 # 扣款
     promotion = 0 # 推广
@@ -45,7 +47,7 @@ def getList(request):
     datas = []
     for i in range(0, days):
         start = start_date + timedelta(days=i)
-        data = { 'create_date': start.strftime('%Y-%m-%d'), 'pending': 0, 'settled': 0, 'refund': 0, 'close': 0, 'close_refund': 0, 'procure': 0, 'refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
+        data = { 'create_date': start.strftime('%Y-%m-%d'), 'pending': 0, 'settled': 0, 'refund': 0, 'procure': 0, 'refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
 
         # 待发货
         paid = DaySummary.objects.getByDate(shop_id, start, OrderStatus.PAID)
@@ -79,8 +81,8 @@ def getList(request):
             data['close'] += close_data['payment']
             data['close_refund'] += close_data['refund_customer']
             data['close_refund'] += close_data['refund_platform']
-            data['procure'] += close_data['procure']
-            data['refund_procure'] += close_data['refund_procure']
+            data['close_procure'] += close_data['procure']
+            data['close_refund_procure'] += close_data['refund_procure']
             data['transfer'] += close_data['transfer']
             data['deduction'] += close_data['deduction']
             data['fake_deduction'] += close_data['fake']
@@ -100,10 +102,12 @@ def getList(request):
         pending += data['pending']
         settled += data['settled']
         refund += data['refund']
-        close += data['close']
-        close_refund += data['close_refund']
         procure += data['procure']
         refund_procure += data['refund_procure']
+        close += data['close']
+        close_refund += data['close_refund']
+        close_procure += data['procure']
+        close_refund_procure += data['refund_procure']
         transfer += data['transfer']
         deduction += data['deduction']
         promotion += data['promotion']
@@ -115,10 +119,12 @@ def getList(request):
         'pending': pending,
         'settled': settled,
         'refund': refund,
-        'close': close,
-        'close_refund': close_refund,
         'procure': procure,
         'refund_procure': refund_procure,
+        'close': close,
+        'close_refund': close_refund,
+        'close_procure': close_procure,
+        'close_refund_procure': close_refund_procure,
         'transfer': transfer,
         'deduction': deduction,
         'promotion': promotion,

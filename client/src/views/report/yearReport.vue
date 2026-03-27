@@ -10,7 +10,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row>
+      <el-row style="font-size: small;">
         <el-col :span="4">
           <div :style="{ color: expect < 0 ? 'red' : 'green' }">预估: {{ expect }} 元 </div>
         </el-col>
@@ -30,7 +30,7 @@
           <div>退款: {{ refund ? refund : 0 }} 元</div>
         </el-col>
       </el-row>
-      <el-row>
+      <el-row style="font-size: small;">
         <el-col :span="4">
           <div>推广: {{ promotion ? promotion : 0 }} 元</div>
         </el-col>
