@@ -50,17 +50,20 @@
         <el-col :span="4">
           <div>采购: {{ procure ? procure : 0 }} 元 </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <div>采购退: {{ refund_procure ? refund_procure : 0 }} 元 </div>
-        </el-col>
-        <el-col :span="4">
-          <div>打款: {{ transfer ? transfer : 0 }} 元</div>
         </el-col>
         <el-col :span="4">
           <div>扣费: {{ deduction ? deduction : 0 }} 元</div>
         </el-col>
-        <el-col :span="4">
-          <div>刷单: {{ fake ? fake : 0 }} 元</div>
+        <el-col :span="3">
+          <div>刷拥: {{ fake ? fake : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <div>刷扣: {{ fake_deduction ? fake_deduction : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <div>打款: {{ transfer ? transfer : 0 }} 元</div>
         </el-col>
       </el-row>
     </el-form>
@@ -125,9 +128,14 @@
           {{ scope.row.promotion }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="刷单" width="100">
+      <el-table-column align="center" label="刷单佣金" width="100">
         <template slot-scope="scope">
           {{ scope.row.fake }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="刷单扣款" width="100">
+        <template slot-scope="scope">
+          {{ scope.row.fake_deduction }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注">
@@ -160,6 +168,7 @@ export default {
       deduction: 0, // 扣款
       promotion: 0, // 推广
       fake: 0, // 刷单
+      fake_deduction: 0, // 刷单扣款
       loading: false,
       shopList: [], // 本公司所有店铺列表
       listQuery: {
@@ -211,8 +220,9 @@ export default {
         this.deduction = response.data.data.deduction
         this.promotion = response.data.data.promotion
         this.fake = response.data.data.fake
+        this.fake_deduction = response.data.data.fake_deduction
         this.amount = parseFloat(this.pending) + parseFloat(this.settled) + parseFloat(this.refund)
-        this.profit = parseFloat(this.settled) - parseFloat(this.refund) - parseFloat(this.procure) + parseFloat(this.refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake)
+        this.profit = parseFloat(this.settled) - parseFloat(this.refund) - parseFloat(this.procure) + parseFloat(this.refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
         this.expect = parseFloat(this.pending) + this.profit
         this.amount = this.amount.toFixed(2)
         this.profit = this.profit.toFixed(2)
@@ -221,7 +231,7 @@ export default {
         this.list = response.data.data.list
         this.list.forEach(v => {
           v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.refund)
-          v.profit = parseFloat(v.settled) - parseFloat(v.refund) - parseFloat(v.procure) + parseFloat(v.refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake)
+          v.profit = parseFloat(v.settled) - parseFloat(v.refund) - parseFloat(v.procure) + parseFloat(v.refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
           v.expect = parseFloat(v.pending) + v.profit
           v.amount = v.amount.toFixed(2)
           v.profit = v.profit.toFixed(2)

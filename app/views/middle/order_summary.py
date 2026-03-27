@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -9,6 +9,7 @@ from app.models.middle.order_summary import OrderSummary
 from app.models.middle.day_summary import DaySummary
 from app.models.middle.deduction_summary import DeductionSummary
 from app.models.trunk.order import Order
+from app.models.trunk.fake import Fake
 from app.models.trunk.refund import Refund
 from app.models.trunk.transfer import Transfer
 from app.models.const.order_status import OrderStatus
@@ -87,13 +88,28 @@ def flush(request):
             else:
                 OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
 
+    # 按天统计刷单扣款
+    fake_deduction = {}
+    for i in range(0, days):
+        start = start_date + timedelta(days=i)
+        end = start_date + timedelta(days=i+1)
+        fakes = Fake.objects.getListByDay(shop_id, start, end)
+        if fakes:
+            temp = 0
+            for fake in fakes:
+                deduction = DeductionSummary.objects.getById(shop_id, fake['order_id'])
+                if deduction:
+                    temp += deduction['amount']
+            fake_deduction[start.strftime("%Y-%m-%d")] = temp
+
     # 刷新日报
     DaySummary.objects.deleteByDate(shop_id, start_date)
     for status in [OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.SUCCESS, OrderStatus.CLOSE]:
         days = OrderSummary.objects.getAll(shop_id, status, start_date, now_date)
         if days:
             for day in days:
-                DaySummary.objects.add(shop_id, day['create_date'], status, day['payment'], day['refund_customer'], day['refund_platform'], day['procure'], day['refund_procure'], day['transfer'], day['deduction'])
+                temp = fake_deduction[day['create_date']] if day['create_date'] in fake_deduction else 0
+                DaySummary.objects.add(shop_id, day['create_date'], status, day['payment'], day['refund_customer'], day['refund_platform'], day['procure'], day['refund_procure'], day['transfer'], day['deduction'], temp)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
 

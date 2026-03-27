@@ -4,19 +4,8 @@ from django.forms.models import model_to_dict
 
 # 日报汇总表
 class DaySummaryManager(models.Manager):
-    def add(self, shop_id, create_date, order_status, payment, refund_customer, refund_platform, procure, refund_procure, transfer, deduction):
-        return self.create(shop_id=shop_id, create_date=create_date, order_status=order_status, payment=payment, refund_customer=refund_customer, refund_platform=refund_platform, procure=procure, refund_procure=refund_procure, transfer=transfer, deduction=deduction)
-
-    def set(self, pk, payment, refund_customer, refund_platform, procure, refund_procure, transfer, deduction):
-        order = self.get(pk=pk)
-        order.payment = payment
-        order.refund_customer = refund_customer
-        order.refund_platform = refund_platform
-        order.procure = procure
-        order.refund_procure = refund_procure
-        order.transfer = transfer
-        order.deduction = deduction
-        return order.save()
+    def add(self, shop_id, create_date, order_status, payment, refund_customer, refund_platform, procure, refund_procure, transfer, deduction, fake):
+        return self.create(shop_id=shop_id, create_date=create_date, order_status=order_status, payment=payment, refund_customer=refund_customer, refund_platform=refund_platform, procure=procure, refund_procure=refund_procure, transfer=transfer, deduction=deduction, fake=fake)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -37,12 +26,12 @@ class DaySummaryManager(models.Manager):
 
     def encoder(self, order):
         if order:
-            return model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'order_status', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction'])
+            return model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'order_status', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction', 'fake'])
         return None
 
     def encoderList(self, ordera):
         if ordera:
-            return [model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'order_status', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction']) for order in ordera]
+            return [model_to_dict(order, fields=['id', 'shop_id', 'create_date', 'order_status', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'deduction', 'fake']) for order in ordera]
         return None
 
 class DaySummary(models.Model):
@@ -57,6 +46,7 @@ class DaySummary(models.Model):
     refund_procure = models.DecimalField(max_digits=10, decimal_places=2) # 采购退款
     transfer = models.DecimalField(max_digits=10, decimal_places=2) # 打款金额
     deduction = models.DecimalField(max_digits=10, decimal_places=2) # 扣款金额
+    fake = models.DecimalField(max_digits=10, decimal_places=2) # 刷单扣款金额
     ctime = models.DateTimeField(default=timezone.now)
 
     class Meta(object):

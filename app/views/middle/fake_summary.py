@@ -31,7 +31,7 @@ def flush(request):
     for i in range(0, days):
         start = start_date + timedelta(days=i)
         end = start_date + timedelta(days=i+1)
-        data = Fake.objects.getListByDay(shop_id, start, end)
+        data = Fake.objects.getPaySumByDay(shop_id, start, end)
         if data and data['payment__sum'] and data['id__count'] > 0:
             find_object = FakeSummary.objects.getByDate(shop_id, start)
             if find_object:

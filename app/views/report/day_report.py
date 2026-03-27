@@ -33,16 +33,19 @@ def getList(request):
     pending = 0 # 未完结
     settled = 0 # 已完结
     refund = 0 # 退款
+    close = 0 # 关闭
+    close_refund = 0 # 关闭退款
     procure = 0 # 采购
     refund_procure = 0 # 采购退款
     transfer = 0 # 打款
     deduction = 0 # 扣款
     promotion = 0 # 推广
     fake = 0 # 刷单成本
+    fake_deduction = 0 # 刷单扣款
     datas = []
     for i in range(0, days):
         start = start_date + timedelta(days=i)
-        data = { 'create_date': start.strftime('%Y-%m-%d'), 'pending': 0, 'settled': 0, 'refund': 0, 'procure': 0, 'refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0 }
+        data = { 'create_date': start.strftime('%Y-%m-%d'), 'pending': 0, 'settled': 0, 'refund': 0, 'close': 0, 'close_refund': 0, 'procure': 0, 'refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
 
         # 待发货
         paid = DaySummary.objects.getByDate(shop_id, start, OrderStatus.PAID)
@@ -68,17 +71,19 @@ def getList(request):
             data['refund_procure'] += success['refund_procure']
             data['transfer'] += success['transfer']
             data['deduction'] += success['deduction']
+            data['fake_deduction'] += success['fake']
 
         # 已关闭
-        close = DaySummary.objects.getByDate(shop_id, start, OrderStatus.CLOSE)
-        if close:
-            data['settled'] += close['payment']
-            data['refund'] += close['refund_customer']
-            data['refund'] += close['refund_platform']
-            data['procure'] += close['procure']
-            data['refund_procure'] += close['refund_procure']
-            data['transfer'] += close['transfer']
-            data['deduction'] += close['deduction']
+        close_data = DaySummary.objects.getByDate(shop_id, start, OrderStatus.CLOSE)
+        if close_data:
+            data['close'] += close_data['payment']
+            data['close_refund'] += close_data['refund_customer']
+            data['close_refund'] += close_data['refund_platform']
+            data['procure'] += close_data['procure']
+            data['refund_procure'] += close_data['refund_procure']
+            data['transfer'] += close_data['transfer']
+            data['deduction'] += close_data['deduction']
+            data['fake_deduction'] += close_data['fake']
 
         # 推广
         promotions = Promotion.objects.getListByDate(shop_id, start)
@@ -95,24 +100,30 @@ def getList(request):
         pending += data['pending']
         settled += data['settled']
         refund += data['refund']
+        close += data['close']
+        close_refund += data['close_refund']
         procure += data['procure']
         refund_procure += data['refund_procure']
         transfer += data['transfer']
         deduction += data['deduction']
         promotion += data['promotion']
         fake += data['fake']
+        fake_deduction += data['fake_deduction']
         datas.insert(0, data)
 
     response['data'] = {
         'pending': pending,
         'settled': settled,
         'refund': refund,
+        'close': close,
+        'close_refund': close_refund,
         'procure': procure,
         'refund_procure': refund_procure,
         'transfer': transfer,
         'deduction': deduction,
         'promotion': promotion,
         'fake': fake,
+        'fake_deduction': fake_deduction,
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
