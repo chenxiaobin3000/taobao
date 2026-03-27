@@ -89,11 +89,6 @@ class Command(BaseCommand):
         UserShop.objects.add(2, 3)
         UserShop.objects.add(2, 4)
         UserShop.objects.add(2, 5)
-        UserShop.objects.add(3, 1)
-        UserShop.objects.add(3, 2)
-        UserShop.objects.add(3, 3)
-        UserShop.objects.add(3, 4)
-        UserShop.objects.add(3, 5)
 
         User.objects.add('小月', '13000000001', 1, 1)
         Account.objects.add('chenxb', '3c278fb4abd387f394292f67ea7d3ad8', 1)

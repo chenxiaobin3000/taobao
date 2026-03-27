@@ -203,6 +203,10 @@ export default {
       }
     },
     handleMerge() {
+      if (this.listQuery.uid === 0) {
+        this.$message({ type: 'error', message: '不能合并主干!' })
+        return
+      }
       this.$confirm('确定要合并数据吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
