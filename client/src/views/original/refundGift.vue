@@ -19,9 +19,9 @@
           {{ scope.row.refund_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="120">
+      <el-table-column align="center" label="商品名称" width="120">
         <template slot-scope="scope">
-          {{ scope.row.product_id }}
+          {{ scope.row.product_name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="实付" width="80">

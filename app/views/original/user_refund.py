@@ -97,6 +97,14 @@ def getList(request):
     num = int(post.get('num'))
     total = UserRefund.objects.total(user_id, shop_id)
     refunds = UserRefund.objects.getList(user_id, shop_id, page, num)
+
+    # 商品id转换商品名称
+    if refunds:
+        for refund in refunds:
+            find_object = Good.objects.getById(shop_id, refund['product_id'])
+            if find_object:
+                refund['product_name'] = find_object['short_name']
+
     response = {
         'code': 0,
         'msg': 'success',
