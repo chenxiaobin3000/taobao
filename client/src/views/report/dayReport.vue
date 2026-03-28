@@ -25,57 +25,66 @@
       </el-row>
       <el-row style="font-size: small;">
         <el-col :span="3">
-          <div :style="{ color: expect < 0 ? 'red' : 'green' }">预估: {{ expect }} 元 </div>
+          <div :style="{ color: expect < 0 ? 'red' : 'green' }">预估: {{ expect }}</div>
         </el-col>
         <el-col :span="3">
-          <div :style="{ color: profit < 0 ? 'red' : 'green' }">利润: {{ profit }} 元 </div>
+          <div :style="{ color: profit < 0 ? 'red' : 'green' }">利润: {{ profit }}</div>
         </el-col>
         <el-col :span="3">
-          <div>成交: {{ amount }} 元 </div>
+          <div>未完结: {{ pending ? pending : 0 }}</div>
         </el-col>
         <el-col :span="3">
-          <div>未完结: {{ pending ? pending : 0 }} 元 </div>
+          <div>已完结: {{ settled ? settled : 0 }}</div>
         </el-col>
-        <el-col :span="3">
-          <div>已完结: {{ settled ? settled : 0 }} 元 </div>
+        <el-col :span="2">
+          <div>已关闭: {{ close ? close : 0 }}</div>
         </el-col>
-        <el-col :span="3">
-          <div>退款: {{ refund ? refund : 0 }} 元</div>
+        <el-col :span="2">
+          <div>未完采: {{ pending_procure ? pending_procure : 0 }}</div>
         </el-col>
-        <el-col :span="3">
-          <div>采购: {{ procure ? procure : 0 }} 元 </div>
+        <el-col :span="2">
+          <div>完结采: {{ settled_procure ? settled_procure : 0 }}</div>
         </el-col>
-        <el-col :span="3">
-          <div>采购退: {{ refund_procure ? refund_procure : 0 }} 元 </div>
+        <el-col :span="2">
+          <div>关闭采: {{ close_procure ? close_procure : 0 }}</div>
+        </el-col>
+        <el-col :span="2">
+          <div>扣费: {{ deduction ? deduction : 0 }}</div>
+        </el-col>
+        <el-col :span="2">
+          <div>刷扣: {{ fake_deduction ? fake_deduction : 0 }}</div>
         </el-col>
       </el-row>
       <el-row style="font-size: small;">
         <el-col :span="3">
-          <div>关闭: {{ close ? close : 0 }} 元 </div>
+          <div>成交: {{ amount }}</div>
         </el-col>
         <el-col :span="3">
-          <div>关闭退: {{ close_refund ? close_refund : 0 }} 元</div>
+          <div>推广: {{ promotion ? promotion : 0 }}</div>
         </el-col>
         <el-col :span="3">
-          <div>关闭采: {{ close_procure ? close_procure : 0 }} 元 </div>
+          <div>未完退: {{ pending_refund ? pending_refund : 0 }}</div>
         </el-col>
         <el-col :span="3">
-          <div>关闭采退: {{ close_refund_procure ? close_refund_procure : 0 }} 元 </div>
-        </el-col>
-        <el-col :span="3">
-          <div>推广: {{ promotion ? promotion : 0 }} 元</div>
-        </el-col>
-        <el-col :span="3">
-          <div>扣费: {{ deduction ? deduction : 0 }} 元</div>
+          <div>完结退: {{ settled_refund ? settled_refund : 0 }}</div>
         </el-col>
         <el-col :span="2">
-          <div>刷拥: {{ fake ? fake : 0 }} 元</div>
+          <div>关闭退: {{ close_refund ? close_refund : 0 }}</div>
         </el-col>
         <el-col :span="2">
-          <div>刷扣: {{ fake_deduction ? fake_deduction : 0 }} 元</div>
+          <div>未采退: {{ pending_refund_procure ? pending_refund_procure : 0 }}</div>
         </el-col>
         <el-col :span="2">
-          <div>打款: {{ transfer ? transfer : 0 }} 元</div>
+          <div>已采退: {{ settled_refund_procure ? settled_refund_procure : 0 }}</div>
+        </el-col>
+        <el-col :span="2">
+          <div>关采退: {{ close_refund_procure ? close_refund_procure : 0 }}</div>
+        </el-col>
+        <el-col :span="2">
+          <div>打款: {{ transfer ? transfer : 0 }}</div>
+        </el-col>
+        <el-col :span="2">
+          <div>刷拥: {{ fake ? fake : 0 }}</div>
         </el-col>
       </el-row>
     </el-form>
@@ -85,87 +94,102 @@
           {{ scope.row.create_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="利润" width="100">
+      <el-table-column align="center" label="利润" width="70">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="预估" width="100">
+      <el-table-column align="center" label="预估" width="70">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.expect < 0 ? 'red' : 'green' }">{{ scope.row.expect }}</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="总金额" width="100">
+      <el-table-column align="center" label="总金额" width="70">
         <template slot-scope="scope">
           {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="未完结" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.pending }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="已完结" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.settled }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="退款" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.refund }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="采购" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.procure }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="采购退款" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.refund_procure }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="已关闭" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.close }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="关闭退款" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.close_refund }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="关闭采购" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.close_procure }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="关闭采购退" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.close_refund_procure }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="打款" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.transfer }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="扣款" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.deduction }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="推广" width="100">
+      <el-table-column align="center" label="推广" width="70">
         <template slot-scope="scope">
           {{ scope.row.promotion }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="刷单佣金" width="100">
+      <el-table-column align="center" label="未完结" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.pending }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="未完退款" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.pending_refund }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="未完采购" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.pending_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="未完采退" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.pending_refund_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="已完结" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.settled }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="已完退款" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.settled_refund }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="已完采购" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.settled_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="已完采退" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.settled_refund_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="已关闭" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.close }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="关闭退款" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.close_refund }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="关闭采购" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.close_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="关闭采退" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.close_refund_procure }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="打款" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.transfer }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="扣款" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.deduction }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="刷单佣金" width="70">
         <template slot-scope="scope">
           {{ scope.row.fake }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="刷单扣款" width="100">
+      <el-table-column align="center" label="刷单扣款" width="70">
         <template slot-scope="scope">
           {{ scope.row.fake_deduction }}
         </template>
@@ -192,10 +216,13 @@ export default {
       profit: 0, // 利润
       amount: 0, // 成交
       pending: 0, // 未结算
+      pending_refund: 0, // 未结算退款
+      pending_procure: 0, // 未结算采购
+      pending_refund_procure: 0, // 未结算采购退款
       settled: 0, // 已结算
-      refund: 0, // 退款
-      procure: 0, // 采购
-      refund_procure: 0, // 采购退款
+      settled_refund: 0, // 已结算退款
+      settled_procure: 0, // 已结算采购
+      settled_refund_procure: 0, // 已结算采购退款
       close: 0, // 关闭
       close_refund: 0, // 关闭退款
       close_procure: 0, // 关闭采购
@@ -248,10 +275,13 @@ export default {
         this.listQuery
       ).then(response => {
         this.pending = response.data.data.pending
+        this.pending_refund = response.data.data.pending_refund
+        this.pending_procure = response.data.data.pending_procure
+        this.pending_refund_procure = response.data.data.pending_refund_procure
         this.settled = response.data.data.settled
-        this.refund = response.data.data.refund
-        this.procure = response.data.data.procure
-        this.refund_procure = response.data.data.refund_procure
+        this.settled_refund = response.data.data.settled_refund
+        this.settled_procure = response.data.data.settled_procure
+        this.settled_refund_procure = response.data.data.settled_refund_procure
         this.close = response.data.data.close
         this.close_refund = response.data.data.close_refund
         this.close_procure = response.data.data.close_procure
@@ -261,18 +291,21 @@ export default {
         this.promotion = response.data.data.promotion
         this.fake = response.data.data.fake
         this.fake_deduction = response.data.data.fake_deduction
-        this.amount = parseFloat(this.pending) + parseFloat(this.settled) + parseFloat(this.refund)
-        this.profit = parseFloat(this.settled) - parseFloat(this.refund) - parseFloat(this.procure) + parseFloat(this.refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
-        this.expect = parseFloat(this.pending) + this.profit
+        // 成交
+        this.amount = parseFloat(this.pending) + parseFloat(this.settled) + parseFloat(this.close)
+        // 利润
+        this.profit = parseFloat(this.settled) - parseFloat(this.settled_refund) - parseFloat(this.settled_procure) + parseFloat(this.settled_refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
+        // 预估
+        this.expect = parseFloat(this.pending) - parseFloat(this.pending_refund) - parseFloat(this.pending_procure) + parseFloat(this.pending_refund_procure) + this.profit
         this.amount = this.amount.toFixed(2)
         this.profit = this.profit.toFixed(2)
         this.expect = this.expect.toFixed(2)
 
         this.list = response.data.data.list
         this.list.forEach(v => {
-          v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.refund)
-          v.profit = parseFloat(v.settled) - parseFloat(v.refund) - parseFloat(v.procure) + parseFloat(v.refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
-          v.expect = parseFloat(v.pending) + v.profit
+          v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
+          v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
+          v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
           v.amount = v.amount.toFixed(2)
           v.profit = v.profit.toFixed(2)
           v.expect = v.expect.toFixed(2)

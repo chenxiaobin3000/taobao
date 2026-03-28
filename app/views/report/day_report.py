@@ -31,10 +31,13 @@ def getList(request):
 
     # 按天生成数据
     pending = 0 # 未完结
+    pending_refund = 0 # 未完结退款
+    pending_procure = 0 # 未完结采购
+    pending_refund_procure = 0 # 未完结采购退款
     settled = 0 # 已完结
-    refund = 0 # 退款
-    procure = 0 # 采购
-    refund_procure = 0 # 采购退款
+    settled_refund = 0 # 已完结退款
+    settled_procure = 0 # 已完结采购
+    settled_refund_procure = 0 # 已完结采购退款
     close = 0 # 关闭
     close_refund = 0 # 关闭退款
     close_procure = 0 # 关闭采购
@@ -47,7 +50,7 @@ def getList(request):
     datas = []
     for i in range(0, days):
         start = start_date + timedelta(days=i)
-        data = { 'create_date': start.strftime('%Y-%m-%d'), 'pending': 0, 'settled': 0, 'refund': 0, 'procure': 0, 'refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
+        data = { 'create_date': start.strftime('%Y-%m-%d'), 'pending': 0, 'pending_refund': 0, 'pending_procure': 0, 'pending_refund_procure': 0, 'settled': 0, 'settled_refund': 0, 'settled_procure': 0, 'settled_refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
 
         # 待发货
         paid = DaySummary.objects.getByDate(shop_id, start, OrderStatus.PAID)
@@ -58,19 +61,19 @@ def getList(request):
         shipped = DaySummary.objects.getByDate(shop_id, start, OrderStatus.SHIPPED)
         if shipped:
             data['pending'] += shipped['payment']
-            data['refund'] += shipped['refund_customer']
-            data['refund'] += shipped['refund_platform']
-            data['procure'] += shipped['procure']
-            data['refund_procure'] += shipped['refund_procure']
+            data['pending_refund'] += shipped['refund_customer']
+            data['pending_refund'] += shipped['refund_platform']
+            data['pending_procure'] += shipped['procure']
+            data['pending_refund_procure'] += shipped['refund_procure']
 
         # 已结算
         success = DaySummary.objects.getByDate(shop_id, start, OrderStatus.SUCCESS)
         if success:
             data['settled'] += success['payment']
-            data['refund'] += success['refund_customer']
-            data['refund'] += success['refund_platform']
-            data['procure'] += success['procure']
-            data['refund_procure'] += success['refund_procure']
+            data['settled_refund'] += success['refund_customer']
+            data['settled_refund'] += success['refund_platform']
+            data['settled_procure'] += success['procure']
+            data['settled_refund_procure'] += success['refund_procure']
             data['transfer'] += success['transfer']
             data['deduction'] += success['deduction']
             data['fake_deduction'] += success['fake']
@@ -100,14 +103,17 @@ def getList(request):
 
         # 统计
         pending += data['pending']
+        pending_refund += data['pending_refund']
+        pending_procure += data['pending_procure']
+        pending_refund_procure += data['pending_refund_procure']
         settled += data['settled']
-        refund += data['refund']
-        procure += data['procure']
-        refund_procure += data['refund_procure']
+        settled_refund += data['settled_refund']
+        settled_procure += data['settled_procure']
+        settled_refund_procure += data['settled_refund_procure']
         close += data['close']
         close_refund += data['close_refund']
-        close_procure += data['procure']
-        close_refund_procure += data['refund_procure']
+        close_procure += data['close_procure']
+        close_refund_procure += data['close_refund_procure']
         transfer += data['transfer']
         deduction += data['deduction']
         promotion += data['promotion']
@@ -117,10 +123,13 @@ def getList(request):
 
     response['data'] = {
         'pending': pending,
+        'pending_refund': pending_refund,
+        'pending_procure': pending_procure,
+        'pending_refund_procure': pending_refund_procure,
         'settled': settled,
-        'refund': refund,
-        'procure': procure,
-        'refund_procure': refund_procure,
+        'settled_refund': settled_refund,
+        'settled_procure': settled_procure,
+        'settled_refund_procure': settled_refund_procure,
         'close': close,
         'close_refund': close_refund,
         'close_procure': close_procure,

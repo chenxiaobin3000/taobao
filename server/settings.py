@@ -116,7 +116,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 显示sql
-#LOGGING = {
+# LOGGING = {
 #    'version': 1,
 #    'disable_existing_loggers': False,
 #    'handlers': {
@@ -131,4 +131,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #            'level': 'DEBUG',
 #        },
 #    },
-#}
+# }
