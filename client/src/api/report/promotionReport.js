@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/good_rader'
+const path = '/promotion_report'
 
-export function getGoodRader(data) {
+export function getPromotionReport(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

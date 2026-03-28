@@ -7,7 +7,7 @@ export const MyRoleData = [{
   }, {
     id: 5003, label: '商品汇总'
   }, {
-    id: 5004, label: '商品雷达'
+    id: 5004, label: '推广汇总'
   }, {
     id: 5005, label: '成本汇总'
   }, {

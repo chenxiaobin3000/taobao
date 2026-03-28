@@ -18,8 +18,8 @@ export default {
     path: 'goodReport', component: () => import('@/views/report/goodReport'),
     name: 'middle_goodReport', meta: { title: '商品汇总', roles: [5003] }
   }, {
-    path: 'goodRadar', component: () => import('@/views/report/goodRadar'),
-    name: 'middle_goodRadar', meta: { title: '商品雷达', roles: [5004] }
+    path: 'promotionReport', component: () => import('@/views/report/promotionReport'),
+    name: 'middle_promotionReport', meta: { title: '推广汇总', roles: [5004] }
   }, {
     path: 'costReport', component: () => import('@/views/report/costReport'),
     name: 'middle_costReport', meta: { title: '成本汇总', roles: [5005] }
