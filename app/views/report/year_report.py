@@ -27,7 +27,7 @@ def getList(request):
     # 生成月份列表
     datas = {}
     while start_date < now_date:
-        datas[start_date.strftime('%Y-%m')] = { 'pending': 0, 'settled': 0, 'refund': 0, 'procure': 0, 'refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0 }
+        datas[start_date.strftime('%Y-%m')] = { 'pending': 0, 'pending_refund': 0, 'pending_procure': 0, 'pending_refund_procure': 0, 'settled': 0, 'settled_refund': 0, 'settled_procure': 0, 'settled_refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
         month = month + 1
         if month > 12:
             month = 1
@@ -36,14 +36,22 @@ def getList(request):
 
     # 按月生成数据
     pending = 0 # 未完结
+    pending_refund = 0 # 未完结退款
+    pending_procure = 0 # 未完结采购
+    pending_refund_procure = 0 # 未完结采购退款
     settled = 0 # 已完结
-    refund = 0 # 退款
-    procure = 0 # 采购
-    refund_procure = 0 # 采购退款
+    settled_refund = 0 # 已完结退款
+    settled_procure = 0 # 已完结采购
+    settled_refund_procure = 0 # 已完结采购退款
+    close = 0 # 关闭
+    close_refund = 0 # 关闭退款
+    close_procure = 0 # 关闭采购
+    close_refund_procure = 0 # 关闭采购退款
     transfer = 0 # 打款
     deduction = 0 # 扣款
     promotion = 0 # 推广
     fake = 0 # 刷单成本
+    fake_deduction = 0 # 刷单扣款
 
     # 待发货
     paids = Order().groupByMonth(shop_id, OrderStatus.PAID)
@@ -62,10 +70,10 @@ def getList(request):
         key_month = shipped['create_month']
         if key_month in datas:
             datas[key_month]['pending'] += shipped['payment']
-            datas[key_month]['refund'] += shipped['refund_customer']
-            datas[key_month]['refund'] += shipped['refund_platform']
-            datas[key_month]['procure'] += shipped['procure']
-            datas[key_month]['refund_procure'] += shipped['refund_procure']
+            datas[key_month]['pending_refund'] += shipped['refund_customer']
+            datas[key_month]['pending_refund'] += shipped['refund_platform']
+            datas[key_month]['pending_procure'] += shipped['procure']
+            datas[key_month]['pending_refund_procure'] += shipped['refund_procure']
         else:
             response['code'] = -1
             response['msg'] = '数据异常，请联系管理员'
@@ -77,12 +85,13 @@ def getList(request):
         key_month = success['create_month']
         if key_month in datas:
             datas[key_month]['settled'] += success['payment']
-            datas[key_month]['refund'] += success['refund_customer']
-            datas[key_month]['refund'] += success['refund_platform']
-            datas[key_month]['procure'] += success['procure']
-            datas[key_month]['refund_procure'] += success['refund_procure']
+            datas[key_month]['settled_refund'] += success['refund_customer']
+            datas[key_month]['settled_refund'] += success['refund_platform']
+            datas[key_month]['settled_procure'] += success['procure']
+            datas[key_month]['settled_refund_procure'] += success['refund_procure']
             datas[key_month]['transfer'] += success['transfer']
             datas[key_month]['deduction'] += success['deduction']
+            datas[key_month]['fake_deduction'] += success['fake']
         else:
             response['code'] = -1
             response['msg'] = '数据异常，请联系管理员'
@@ -90,16 +99,17 @@ def getList(request):
 
     # 已关闭
     closes = Order().groupByMonth(shop_id, OrderStatus.CLOSE)
-    for close in closes:
+    for close_data in closes:
         key_month = success['create_month']
         if key_month in datas:
-            datas[key_month]['settled'] += close['payment']
-            datas[key_month]['refund'] += close['refund_customer']
-            datas[key_month]['refund'] += close['refund_platform']
-            datas[key_month]['procure'] += close['procure']
-            datas[key_month]['refund_procure'] += close['refund_procure']
-            datas[key_month]['transfer'] += close['transfer']
-            datas[key_month]['deduction'] += close['deduction']
+            datas[key_month]['close'] += close_data['payment']
+            datas[key_month]['close_refund'] += close_data['refund_customer']
+            datas[key_month]['close_refund'] += close_data['refund_platform']
+            datas[key_month]['close_procure'] += close_data['procure']
+            datas[key_month]['close_refund_procure'] += close_data['refund_procure']
+            datas[key_month]['transfer'] += close_data['transfer']
+            datas[key_month]['deduction'] += close_data['deduction']
+            datas[key_month]['fake_deduction'] += close_data['fake']
         else:
             response['code'] = -1
             response['msg'] = '数据异常，请联系管理员'
@@ -123,35 +133,59 @@ def getList(request):
     values = datas.values()
     for value in values:
         value['pending'] = round(value['pending'], 2)
+        value['pending_refund'] = round(value['pending_refund'], 2)
+        value['pending_procure'] = round(value['pending_procure'], 2)
+        value['pending_refund_procure'] = round(value['pending_refund_procure'], 2)
         value['settled'] = round(value['settled'], 2)
-        value['refund'] = round(value['refund'], 2)
-        value['procure'] = round(value['procure'], 2)
-        value['refund_procure'] = round(value['refund_procure'], 2)
+        value['settled_refund'] = round(value['settled_refund'], 2)
+        value['settled_procure'] = round(value['settled_procure'], 2)
+        value['settled_refund_procure'] = round(value['settled_refund_procure'], 2)
+        value['close'] = round(value['close'], 2)
+        value['close_refund'] = round(value['close_refund'], 2)
+        value['close_procure'] = round(value['close_procure'], 2)
+        value['close_refund_procure'] = round(value['close_refund_procure'], 2)
         value['transfer'] = round(value['transfer'], 2)
         value['deduction'] = round(value['deduction'], 2)
         value['promotion'] = round(value['promotion'], 2)
         value['fake'] = round(value['fake'], 2)
+        value['fake_deduction'] = round(value['fake_deduction'], 2)
 
         pending += value['pending']
+        pending_refund += value['pending_refund']
+        pending_procure += value['pending_procure']
+        pending_refund_procure += value['pending_refund_procure']
         settled += value['settled']
-        refund += value['refund']
-        procure += value['procure']
-        refund_procure += value['refund_procure']
+        settled_refund += value['settled_refund']
+        settled_procure += value['settled_procure']
+        settled_refund_procure += value['settled_refund_procure']
+        close += value['close']
+        close_refund += value['close_refund']
+        close_procure += value['close_procure']
+        close_refund_procure += value['close_refund_procure']
         transfer += value['transfer']
         deduction += value['deduction']
         promotion += value['promotion']
         fake += value['fake']
+        fake_deduction += value['fake_deduction']
 
     response['data'] = {
         'pending': round(pending, 2),
+        'pending_refund': round(pending_refund, 2),
+        'pending_procure': round(pending_procure, 2),
+        'pending_refund_procure': round(pending_refund_procure, 2),
         'settled': round(settled, 2),
-        'refund': round(refund, 2),
-        'procure': round(procure, 2),
-        'refund_procure': round(refund_procure, 2),
+        'settled_refund': round(settled_refund, 2),
+        'settled_procure': round(settled_procure, 2),
+        'settled_refund_procure': round(settled_refund_procure, 2),
+        'close': round(close, 2),
+        'close_refund': round(close_refund, 2),
+        'close_procure': round(close_procure, 2),
+        'close_refund_procure': round(close_refund_procure, 2),
         'transfer': round(transfer, 2),
         'deduction': round(deduction, 2),
         'promotion': round(promotion, 2),
         'fake': round(fake, 2),
+        'fake_deduction': round(fake_deduction, 2),
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

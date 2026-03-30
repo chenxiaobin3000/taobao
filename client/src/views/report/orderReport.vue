@@ -111,7 +111,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { OrderStatus } from '@/utils/const'
+import { DeductionType, OrderStatus } from '@/utils/const'
 import { getOrderReport } from '@/api/report/orderReport'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -180,6 +180,29 @@ export default {
         this.transfer = response.data.data.transfer
         this.deduction = response.data.data.deduction
         this.list = response.data.data.list
+        // 处理扣款明细
+        if (this.list) {
+          this.list.forEach(v => {
+            if (!v.deduction_detail) {
+              return
+            }
+            let datas = ''
+            const details = v.deduction_detail.split('|')
+            for (let i = 0; i < details.length; ++i) {
+              const deductions = details[i].split('-')
+              if (deductions.length !== 2) {
+                this.$message({ type: 'error', message: '数据异常!' })
+                break
+              }
+              datas = datas + DeductionType.num2text(parseInt(deductions[0])) + ':' + deductions[1] + ' | '
+            }
+            if (datas.length > 3) {
+              v.deduction_detail = datas.substring(0, datas.length - 3)
+            } else {
+              v.deduction_detail = datas
+            }
+          })
+        }
         this.loading = false
       }).catch(error => {
         this.loading = false

@@ -98,15 +98,16 @@ class Order(Model):
             cursor.execute(
                 """
                 SELECT
-                    strftime('%%Y-%%m', create_time) AS create_month,
+                    strftime('%%Y-%%m', create_date) AS create_month,
                     SUM(payment) AS payment,
                     SUM(refund_customer) AS refund_customer,
                     SUM(refund_platform) AS refund_platform,
                     SUM(procure) AS procure,
                     SUM(refund_procure) AS refund_procure,
                     SUM(transfer) AS transfer,
-                    SUM(deduction) AS deduction
-                FROM t_order_summary
+                    SUM(deduction) AS deduction,
+                    SUM(fake) AS fake
+                FROM t_day_summary
                 WHERE
                     shop_id = %s
                     AND order_status = %s
