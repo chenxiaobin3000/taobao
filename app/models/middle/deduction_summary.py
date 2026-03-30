@@ -29,12 +29,12 @@ class DeductionSummaryManager(models.Manager):
 
     def encoder(self, deduction):
         if deduction:
-            return model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'deduction_detail'])
+            return model_to_dict(deduction, fields=['id', 'shop_id', 'order_id', 'amount', 'deduction_detail'])
         return None
 
     def encoderList(self, deductions):
         if deductions:
-            return [model_to_dict(deduction, fields=['id', 'order_id', 'amount', 'deduction_detail']) for deduction in deductions]
+            return [model_to_dict(deduction, fields=['id', 'shop_id', 'order_id', 'amount', 'deduction_detail']) for deduction in deductions]
         return None
 
 class DeductionSummary(models.Model):

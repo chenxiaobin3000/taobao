@@ -29,14 +29,14 @@ class MiscellaneousManager(models.Manager):
 
     def encoderList(self, miscs):
         if miscs:
-            return [model_to_dict(misc, fields=['id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note']) for misc in miscs]
+            return [model_to_dict(misc, fields=['id', 'shop_id', 'create_date', 'user_id', 'project_name', 'amount', 'misc_note']) for misc in miscs]
         return None
     
 class Miscellaneous(models.Model):
     objects = MiscellaneousManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id
     create_date = models.DateField(db_index=True) # 创建日期
-    user_id = models.IntegerField(db_index=True) # 负责人人
+    user_id = models.IntegerField(db_index=True) # 负责人
     project_name = models.CharField(max_length=32, db_index=True) # 项目名称
     amount = models.DecimalField(max_digits=6, decimal_places=2) # 金额
     misc_note = models.CharField(max_length=32) # 备注
