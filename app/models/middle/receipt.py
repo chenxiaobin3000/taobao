@@ -22,7 +22,7 @@ class ReceiptManager(models.Manager):
         if miscs:
             return [model_to_dict(misc, fields=['id', 'shop_id', 'create_date', 'user_id', 'receipt_id', 'receipt_name', 'receipt_note']) for misc in miscs]
         return None
-    
+
 class Receipt(models.Model):
     objects = ReceiptManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id

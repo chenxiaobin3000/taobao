@@ -228,7 +228,7 @@ export default {
       }).then(() => {
         this.$message({ type: 'success', message: '导入成功!' })
         this.getGoodList()
-        this.dialogVisible = false
+        this.dialogExcelVisible = false
       })
     },
     handleUpdate(row) {
