@@ -104,7 +104,6 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { xlsx_date_str } from '@/utils/xlsx'
 import { getUserPromotionDetailList, addUserPromotionDetailList, delUserPromotionDetail, delAllUserPromotionDetail } from '@/api/original/promotionDetail'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -203,7 +202,7 @@ export default {
       const p = []
       results.forEach(v => {
         p.push({
-          pd: xlsx_date_str(v[promotion_date]),
+          pd: v[promotion_date],
           id: v[good_id],
           sn: v[show_num] ? v[show_num] : 0,
           cn: v[click_num] ? v[click_num] : 0,

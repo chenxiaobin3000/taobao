@@ -62,7 +62,6 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { xlsx_time_str } from '@/utils/xlsx'
 import { getUserTransferList, addUserTransferList, delUserTransfer, delAllUserTransfer } from '@/api/original/transfer'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -157,7 +156,7 @@ export default {
           p: v[payee_name],
           o: v[order_id],
           a: v[amount],
-          c: xlsx_time_str(v[create_time]),
+          c: v[create_time],
           tn: v[transfer_note]
         })
       })

@@ -52,7 +52,6 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { ImportCount, ImportSpan, PromotionType } from '@/utils/const'
 import { sleep } from '@/utils/sleep'
-import { xlsx_date_str } from '@/utils/xlsx'
 import { getUserPromotionList, addUserPromotionList, delUserPromotion, delAllUserPromotion } from '@/api/original/promotion'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -145,7 +144,7 @@ export default {
       results.forEach(v => {
         if (v[output] === '支出') {
           p.push({
-            d: xlsx_date_str(v[create_date]),
+            d: v[create_date],
             p: v[payment],
             t: PromotionType.text2num(v[promotion_note]),
             n: v[promotion_note]

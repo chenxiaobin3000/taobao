@@ -17,6 +17,14 @@ export function setFakeSummary(data) {
   })
 }
 
+export function batchFakeSummary(data) {
+  return request({
+    url: `${path}/batch`,
+    method: 'post',
+    data
+  })
+}
+
 export function getFakeSummaryList(data) {
   return request({
     url: `${path}/getList`,

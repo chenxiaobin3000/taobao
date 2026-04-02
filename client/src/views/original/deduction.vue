@@ -174,7 +174,12 @@ export default {
               return
             }
           } else {
-            dtype = DeductionType.text2num(note)
+            if (ftype === FinanceType.TRANSFER && note === '收款') {
+              dtype = DeductionType.ZHUAN_ZHANG
+              note = '刷单'
+            } else {
+              dtype = DeductionType.text2num(note)
+            }
           }
           // 从备注抓取订单号
           let first = 0

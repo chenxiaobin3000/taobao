@@ -525,7 +525,8 @@ export const RefundType = {
   REFUND: 5, // 退款
   SHIPPED: 6, // 退运费
   REPAIR: 7, // 维修
-  OTHER: 8, // 异常
+  DIFFERENCE: 8, // 邮费退差
+  OTHER: 9, // 异常
 
   text2num(text) {
     if (text === '仅退款') {
@@ -542,6 +543,8 @@ export const RefundType = {
       return this.SHIPPED
     } else if (text === '维修') {
       return this.REPAIR
+    } else if (text === '邮费退差') {
+      return this.DIFFERENCE
     } else { // 异常
       return this.OTHER
     }
@@ -562,6 +565,8 @@ export const RefundType = {
         return '退运费'
       case this.REPAIR:
         return '维修'
+      case this.DIFFERENCE:
+        return '邮费退差'
     }
     return '异常'
   }

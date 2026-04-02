@@ -63,6 +63,34 @@ def set(request):
 
 @require_POST
 @transaction.atomic
+def batch(request):
+    post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
+    response = {
+        'code': 0,
+        'msg': 'success'
+    }
+
+    # 计算开始日期至今的数据
+    duration = timezone.now() - start_date
+    days = duration.days
+    if days < 1:
+        response['code'] = -1
+        response['msg'] = '开始日期要早于当前时间'
+        return JsonResponse(response, encoder=MyJSONEncoder)
+
+    # 按天生成数据
+    for i in range(0, days):
+        start = start_date + timedelta(days=i)
+        find_object = FakeSummary.objects.getByDate(shop_id, start)
+        if find_object and find_object['commission'] < 0.01:
+            FakeSummary.objects.set(find_object['id'], find_object['order_amount'], find_object['order_num'], find_object['order_num'] * 3, find_object['order_num'] * 2, '')
+
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))

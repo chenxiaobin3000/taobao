@@ -9,6 +9,7 @@ url_middle = [
     # 刷单
     path('api/fake_summary/flush', fake_summary.flush),
     path('api/fake_summary/set', fake_summary.set),
+        path('api/fake_summary/batch', fake_summary.batch),
     path('api/fake_summary/getList', fake_summary.getList),
 
     # 杂项

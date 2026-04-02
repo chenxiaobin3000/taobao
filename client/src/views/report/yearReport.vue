@@ -277,9 +277,9 @@ export default {
         this.profit = parseFloat(this.settled) - parseFloat(this.settled_refund) - parseFloat(this.settled_procure) + parseFloat(this.settled_refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
         // 预估
         this.expect = parseFloat(this.pending) - parseFloat(this.pending_refund) - parseFloat(this.pending_procure) + parseFloat(this.pending_refund_procure) + this.profit
-        this.amount = this.amount.toFixed(2)
-        this.profit = this.profit.toFixed(2)
-        this.expect = this.expect.toFixed(2)
+        this.amount = this.amount.toFixed(1)
+        this.profit = this.profit.toFixed(1)
+        this.expect = this.expect.toFixed(1)
 
         // 预处理数据
         const data = response.data.data.list
@@ -287,9 +287,9 @@ export default {
           v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
           v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
           v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
-          v.amount = v.amount.toFixed(2)
-          v.profit = v.profit.toFixed(2)
-          v.expect = v.expect.toFixed(2)
+          v.amount = v.amount.toFixed(1)
+          v.profit = v.profit.toFixed(1)
+          v.expect = v.expect.toFixed(1)
         })
 
         // 按年份统计插入数据
@@ -353,9 +353,9 @@ export default {
           const expect = pending - pending_refund - pending_procure + pending_refund_procure + profit
           this.list.unshift({
             create_date: y + '年',
-            amount: amount.toFixed(2),
-            profit: profit.toFixed(2),
-            expect: expect.toFixed(2),
+            amount: amount.toFixed(1),
+            profit: profit.toFixed(1),
+            expect: expect.toFixed(1),
             pending: pending,
             pending_refund: pending_refund,
             pending_procure: pending_procure,
@@ -376,7 +376,6 @@ export default {
             isShow: 1
           })
         }
-
         this.loading = false
       }).catch(error => {
         this.loading = false

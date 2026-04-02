@@ -16,6 +16,7 @@
         </el-col>
         <el-col :span="12">
           <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
+          <el-button type="danger" size="mini" style="float:right;width:80px;margin-right:10px;" @click="batchData()">批量填入</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -42,17 +43,17 @@
       </el-table-column>
       <el-table-column align="center" label="总金额" width="160">
         <template slot-scope="scope">
-          {{ scope.row.fake_amount }}
+          <div :style="{ color: scope.row.commission < 0.01 ? 'red' : 'green' }">{{ scope.row.fake_amount }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="总佣金" width="160">
         <template slot-scope="scope">
-          {{ scope.row.commission }}
+          <div :style="{ color: scope.row.commission < 0.01 ? 'red' : 'green' }">{{ scope.row.commission }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="总运费" width="160">
         <template slot-scope="scope">
-          {{ scope.row.freight }}
+          <div :style="{ color: scope.row.commission < 0.01 ? 'red' : 'green' }">{{ scope.row.freight }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注">
@@ -106,7 +107,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { getFakeSummaryList, flushFakeSummary, setFakeSummary } from '@/api/middle/fakeSummary'
+import { getFakeSummaryList, flushFakeSummary, setFakeSummary, batchFakeSummary } from '@/api/middle/fakeSummary'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {
@@ -225,6 +226,21 @@ export default {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getFakeSummaryList()
         this.dialogVisible = false
+      })
+    },
+    batchData() {
+      this.$confirm('确定要批量填入吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        batchFakeSummary({
+          id: this.listQuery.id,
+          sdate: this.start_date
+        }).then(() => {
+          this.$message({ type: 'success', message: '修改成功!' })
+          this.getFakeSummaryList()
+        })
       })
     }
   }
