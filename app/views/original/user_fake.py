@@ -3,7 +3,6 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.const.good_type import GoodType
 from app.models.original.user_fake import UserFake
 from app.models.system.good import Good
 

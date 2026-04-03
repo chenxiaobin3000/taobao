@@ -4,10 +4,10 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
+from app.models.const.order_status import OrderStatus
 from app.models.middle.day_summary import DaySummary
 from app.models.middle.fake_summary import FakeSummary
 from app.models.trunk.promotion import Promotion
-from app.models.const.order_status import OrderStatus
 
 @require_POST
 @transaction.atomic

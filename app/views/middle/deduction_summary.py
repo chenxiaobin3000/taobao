@@ -5,9 +5,14 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
+from app.models.const.omission_order import OmissionOrder
+from app.models.const.omission_source import OmissionSource
 from app.models.middle.deduction_summary import DeductionSummary
+from app.models.middle.omission import Omission
 from app.models.trunk.deduction import Deduction
 from app.models.trunk.polymerize import Polymerize
+from app.models.trunk.order import Order
+from app.models.trunk.fake import Fake
 
 @require_POST
 @transaction.atomic
@@ -33,12 +38,27 @@ def flush(request):
     deductions = Deduction.objects.getAll(shop_id, start_date)
     polymerizes = Polymerize.objects.getAll(shop_id, start_date)
 
+    # 清除遗漏数据
+    Omission.objects.deleteByDate(shop_id, start_date)
+
     # 汇总所有数据
     datas = {}
     amounts = {}
     if deductions:
         for deduction in deductions:
             oid = deduction['order_id']
+            # 处理无订单扣费
+            if oid == OmissionOrder.VALUE:
+                Omission.objects.add(shop_id, OmissionSource.DEDUCTION, oid, deduction['amount'], deduction['create_time'], deduction['deduction_detail'])
+                continue
+
+            # 校验是否存在关联订单
+            if not Order.objects.getById(shop_id, oid):
+                if not Fake.objects.getById(shop_id, oid):
+                    response['code'] = -1
+                    response['msg'] = '存在未关联扣款:' + oid
+                    return JsonResponse(response, encoder=MyJSONEncoder)
+
             if oid in datas:
                 datas[oid] = datas[oid] + '|' + str(deduction['amount_type']) + '-' + str(deduction['amount'])
                 amounts[oid] += deduction['amount']
@@ -49,6 +69,18 @@ def flush(request):
     if polymerizes:
         for polymerize in polymerizes:
             oid = polymerize['order_id']
+            # 处理无订单聚合
+            if oid == OmissionOrder.VALUE:
+                Omission.objects.add(shop_id, OmissionSource.POLYMERIZE, oid, polymerize['amount'], polymerize['create_time'], polymerize['deduction_detail'])
+                continue
+
+            # 校验是否存在关联订单
+            if not Order.objects.getById(shop_id, oid):
+                if not Fake.objects.getById(shop_id, oid):
+                    response['code'] = -1
+                    response['msg'] = '存在未关联聚合:' + oid
+                    return JsonResponse(response, encoder=MyJSONEncoder)
+
             if oid in datas:
                 datas[oid] = datas[oid] + '|' + str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
                 amounts[oid] += polymerize['amount']

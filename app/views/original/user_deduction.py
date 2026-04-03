@@ -3,9 +3,9 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
+from app.models.const.deduction_type import DeductionType
 from app.models.original.user_deduction import UserDeduction
 from app.models.original.user_deduction_discard import UserDeductionDiscard
-from app.models.const.deduction_type import DeductionType
 
 @require_POST
 @transaction.atomic

@@ -5,10 +5,10 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
+from app.models.const.order_status import OrderStatus
 from app.models.report.order import Order
 from app.models.report.fake import Fake
 from app.models.report.promotion import Promotion
-from app.models.const.order_status import OrderStatus
 
 @require_POST
 @transaction.atomic

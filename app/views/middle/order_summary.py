@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
+from app.models.const.order_status import OrderStatus
 from app.models.middle.order_summary import OrderSummary
 from app.models.middle.day_summary import DaySummary
 from app.models.middle.deduction_summary import DeductionSummary
@@ -12,7 +13,6 @@ from app.models.trunk.order import Order
 from app.models.trunk.fake import Fake
 from app.models.trunk.refund import Refund
 from app.models.trunk.transfer import Transfer
-from app.models.const.order_status import OrderStatus
 from app.models.system.good import Good
 
 @require_POST
