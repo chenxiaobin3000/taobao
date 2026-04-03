@@ -179,7 +179,7 @@ export default {
           console.log(o[i])
           return
         }
-        const ext = this.extract(o[i].no)
+        const ext = this.extract(o[i].no, o[i].id)
         if (ext[0]) {
           o[i].pr = ext[1]
           o[i].pi = ext[2]
@@ -188,7 +188,7 @@ export default {
           if (o[i].st === OrderStatus.CLOSE || o[i].st === OrderStatus.UNPAID) {
             continue
           }
-          // 小于30认定为刷单
+          // 金额小于30认定为刷单，忽略备注
           if (parseFloat(o[i].pa) > 30) {
             this.$message({ type: 'error', message: '订单备注解析异常!' })
             console.log(o[i])
@@ -256,7 +256,7 @@ export default {
       })
     },
     // 从备注提取采购金额和订单号
-    extract(note) {
+    extract(note, id) {
       const ret = [false, -1, '']
       // 空数据直接返回0
       if (note === undefined) {
@@ -272,30 +272,29 @@ export default {
       }
       if (count > 2 && note.indexOf('元-利润:0元') === -1) {
         console.log(notes.length)
-        console.log('未经人工校验:' + note)
+        console.log('未经人工校验:' + id + ',' + note)
         return ret
       }
       const data = notes[0].trim()
       // 忽略长度小于订单编号的数据
       if (data.length < 20) {
-        console.log('异常数据:' + note)
         return ret
       }
       // 按标准格式查找: tb:id-采购价:0元-利润:0元 |
       const first = data.indexOf(':')
       if (first === -1) {
-        console.log('没有找到账号信息:' + data)
+        console.log('没有找到账号信息:' + id + ',' + note)
         return ret
       }
       const second = data.indexOf('-采购价:', first + 1)
       if (second === -1 || second - first !== 20) {
-        console.log('没有找到-采购价:' + data)
+        console.log('没有找到-采购价:' + id + ',' + note)
         return ret
       }
       // 查找采购价
       const third = data.indexOf('元-利润:', second + 5)
       if (third === -1) {
-        console.log('没有找到元-利润:' + data)
+        console.log('没有找到元-利润:' + id + ',' + note)
         return ret
       }
       ret[0] = true

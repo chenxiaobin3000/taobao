@@ -222,6 +222,16 @@ export default {
           as: alias
         })
       })
+      // 校验是否重复id
+      for (let i = 0; i < g.length - 1; ++i) {
+        for (let j = i + 1; j < g.length; ++j) {
+          if (g[i].i === g[j].i) {
+            this.$message({ type: 'error', message: '商品编号重复!' })
+            console.log(g[i].i)
+            return
+          }
+        }
+      }
       addGoodList({
         id: this.listQuery.id,
         g: g

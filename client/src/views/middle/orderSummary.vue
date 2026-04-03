@@ -55,7 +55,7 @@
           {{ scope.row.transfer }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="状态" width="80">
+      <el-table-column align="center" label="状态" width="200">
         <template slot-scope="scope">
           {{ num2status(scope.row.order_status) }}
         </template>
@@ -67,7 +67,7 @@
       </el-table-column>
       <el-table-column align="center" label="商品" width="80">
         <template slot-scope="scope">
-          {{ scope.row.good_ids }}
+          {{ scope.row.good_names }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="扣款金额" width="80">

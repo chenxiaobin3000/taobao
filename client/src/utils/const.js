@@ -66,6 +66,7 @@ export const DeductionType = {
   WU_LIU_YI_CHANG: 103, // 淘宝物流轨迹异常红包
   QUE_HUO: 104, // 淘宝缺货赔付红包
   HUA_BEI: 105, // 花呗分期免息营销
+  WU_LIU_CHAO_SHI: 106, // 淘宝物流轨迹超时红包
 
   // 不处理
   TUI_KUAN: 200, // 退款
@@ -129,6 +130,8 @@ export const DeductionType = {
       return this.QUE_HUO
     } else if (text.indexOf('花呗分期免息营销') !== -1) {
       return this.HUA_BEI
+    } else if (text.indexOf('淘宝物流轨迹超时红包') !== -1) {
+      return this.WU_LIU_CHAO_SHI
       // ---------------------
     } else if (text.indexOf('退款') !== -1) {
       return this.TUI_KUAN
@@ -198,6 +201,8 @@ export const DeductionType = {
         return '缺货赔付'
       case this.HUA_BEI:
         return '花呗服务费'
+      case this.WU_LIU_CHAO_SHI:
+        return '物流轨迹超时'
 
       case this.TUI_KUAN:
         return '退款'

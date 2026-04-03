@@ -25,6 +25,7 @@ def getList(request):
         total = Order().totalByStatus(shop_id, status)
         datas = Order().getListByStatus(shop_id, status, page, num)
 
+    # 解析商品名称
     if datas:
         for data in datas:
             goods = data['good_ids']

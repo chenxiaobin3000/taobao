@@ -13,6 +13,7 @@ from app.models.trunk.fake import Fake
 from app.models.trunk.refund import Refund
 from app.models.trunk.transfer import Transfer
 from app.models.const.order_status import OrderStatus
+from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic
@@ -121,13 +122,30 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = OrderSummary.objects.total(shop_id)
-    fakes = OrderSummary.objects.getList(shop_id, page, num)
+    datas = OrderSummary.objects.getList(shop_id, page, num)
+
+    # 解析商品名称
+    if datas:
+        for data in datas:
+            goods = data['good_ids']
+            if not goods:
+                continue
+            gids = goods.split('|')
+            data['good_names'] = ''
+            for gid in gids:
+                if gid:
+                    good = Good.objects.getById(shop_id, gid)
+                    if good:
+                        data['good_names'] = good['short_name'] + ' | '
+            if len(data['good_names']) > 3:
+                data['good_names'] = data['good_names'][:-3]
+
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': fakes
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

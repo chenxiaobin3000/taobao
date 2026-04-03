@@ -100,7 +100,7 @@ def getList(request):
     # 已关闭
     closes = Order().groupByMonth(shop_id, OrderStatus.CLOSE)
     for close_data in closes:
-        key_month = success['create_month']
+        key_month = close_data['create_month']
         if key_month in datas:
             datas[key_month]['close'] += close_data['payment']
             datas[key_month]['close_refund'] += close_data['refund_customer']

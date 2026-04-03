@@ -257,6 +257,7 @@ export default {
             case DeductionType.WU_LIU_YI_CHANG: // 物流异常赔付
             case DeductionType.QUE_HUO: // 缺货赔付
             case DeductionType.HUA_BEI: // 花呗服务费
+            case DeductionType.WU_LIU_CHAO_SHI: // 花呗服务费
               oid = DefaultOrder
               break
 
