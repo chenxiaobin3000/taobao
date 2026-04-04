@@ -94,14 +94,14 @@
           {{ scope.row.create_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="利润" width="70">
-        <template slot-scope="scope">
-          <div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="预估" width="70">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.expect < 0 ? 'red' : 'green' }">{{ scope.row.expect }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="利润" width="70">
+        <template slot-scope="scope">
+          <div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="总金额" width="70">

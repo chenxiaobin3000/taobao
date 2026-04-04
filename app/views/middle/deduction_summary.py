@@ -49,7 +49,7 @@ def flush(request):
             oid = deduction['order_id']
             # 处理无订单扣费
             if oid == OmissionOrder.VALUE:
-                Omission.objects.add(shop_id, OmissionSource.DEDUCTION, oid, deduction['amount'], deduction['create_time'], deduction['deduction_detail'])
+                Omission.objects.add(shop_id, OmissionSource.DEDUCTION, oid, deduction['amount'], deduction['create_time'], deduction['deduction_note'])
                 continue
 
             # 校验是否存在关联订单
@@ -71,7 +71,7 @@ def flush(request):
             oid = polymerize['order_id']
             # 处理无订单聚合
             if oid == OmissionOrder.VALUE:
-                Omission.objects.add(shop_id, OmissionSource.POLYMERIZE, oid, polymerize['amount'], polymerize['create_time'], polymerize['deduction_detail'])
+                Omission.objects.add(shop_id, OmissionSource.POLYMERIZE, oid, polymerize['amount'], polymerize['create_time'], polymerize['polymerize_note'])
                 continue
 
             # 校验是否存在关联订单

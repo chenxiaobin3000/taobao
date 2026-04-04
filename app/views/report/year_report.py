@@ -132,23 +132,23 @@ def getList(request):
     # 统计
     values = datas.values()
     for value in values:
-        value['pending'] = round(value['pending'], 2)
-        value['pending_refund'] = round(value['pending_refund'], 2)
-        value['pending_procure'] = round(value['pending_procure'], 2)
-        value['pending_refund_procure'] = round(value['pending_refund_procure'], 2)
-        value['settled'] = round(value['settled'], 2)
-        value['settled_refund'] = round(value['settled_refund'], 2)
-        value['settled_procure'] = round(value['settled_procure'], 2)
-        value['settled_refund_procure'] = round(value['settled_refund_procure'], 2)
-        value['close'] = round(value['close'], 2)
-        value['close_refund'] = round(value['close_refund'], 2)
-        value['close_procure'] = round(value['close_procure'], 2)
-        value['close_refund_procure'] = round(value['close_refund_procure'], 2)
-        value['transfer'] = round(value['transfer'], 2)
-        value['deduction'] = round(value['deduction'], 2)
-        value['promotion'] = round(value['promotion'], 2)
-        value['fake'] = round(value['fake'], 2)
-        value['fake_deduction'] = round(value['fake_deduction'], 2)
+        value['pending'] = round(value['pending'], 1)
+        value['pending_refund'] = round(value['pending_refund'], 1)
+        value['pending_procure'] = round(value['pending_procure'], 1)
+        value['pending_refund_procure'] = round(value['pending_refund_procure'], 1)
+        value['settled'] = round(value['settled'], 1)
+        value['settled_refund'] = round(value['settled_refund'], 1)
+        value['settled_procure'] = round(value['settled_procure'], 1)
+        value['settled_refund_procure'] = round(value['settled_refund_procure'], 1)
+        value['close'] = round(value['close'], 1)
+        value['close_refund'] = round(value['close_refund'], 1)
+        value['close_procure'] = round(value['close_procure'], 1)
+        value['close_refund_procure'] = round(value['close_refund_procure'], 1)
+        value['transfer'] = round(value['transfer'], 1)
+        value['deduction'] = round(value['deduction'], 1)
+        value['promotion'] = round(value['promotion'], 1)
+        value['fake'] = round(value['fake'], 1)
+        value['fake_deduction'] = round(value['fake_deduction'], 1)
 
         pending += value['pending']
         pending_refund += value['pending_refund']
@@ -169,23 +169,23 @@ def getList(request):
         fake_deduction += value['fake_deduction']
 
     response['data'] = {
-        'pending': round(pending, 2),
-        'pending_refund': round(pending_refund, 2),
-        'pending_procure': round(pending_procure, 2),
-        'pending_refund_procure': round(pending_refund_procure, 2),
-        'settled': round(settled, 2),
-        'settled_refund': round(settled_refund, 2),
-        'settled_procure': round(settled_procure, 2),
-        'settled_refund_procure': round(settled_refund_procure, 2),
-        'close': round(close, 2),
-        'close_refund': round(close_refund, 2),
-        'close_procure': round(close_procure, 2),
-        'close_refund_procure': round(close_refund_procure, 2),
-        'transfer': round(transfer, 2),
-        'deduction': round(deduction, 2),
-        'promotion': round(promotion, 2),
-        'fake': round(fake, 2),
-        'fake_deduction': round(fake_deduction, 2),
+        'pending': round(pending, 1),
+        'pending_refund': round(pending_refund, 1),
+        'pending_procure': round(pending_procure, 1),
+        'pending_refund_procure': round(pending_refund_procure, 1),
+        'settled': round(settled, 1),
+        'settled_refund': round(settled_refund, 1),
+        'settled_procure': round(settled_procure, 1),
+        'settled_refund_procure': round(settled_refund_procure, 1),
+        'close': round(close, 1),
+        'close_refund': round(close_refund, 1),
+        'close_procure': round(close_procure, 1),
+        'close_refund_procure': round(close_refund_procure, 1),
+        'transfer': round(transfer, 1),
+        'deduction': round(deduction, 1),
+        'promotion': round(promotion, 1),
+        'fake': round(fake, 1),
+        'fake_deduction': round(fake_deduction, 1),
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -14,7 +14,7 @@ class OmissionManager(models.Manager):
         return self.filter(shop_id=shop_id, create_time__gte=create_time).delete()
 
     def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+        return self.filter(shop_id=shop_id).aggregate(models.Sum('amount'), models.Count('id'))
 
     def getList(self, shop_id, page, num):
         left = (page - 1) * num

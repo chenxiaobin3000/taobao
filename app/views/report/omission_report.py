@@ -14,13 +14,14 @@ def getList(request):
     num = int(post.get('num'))
     total = Omission.objects.total(shop_id)
     data = Omission.objects.getList(shop_id, page, num)
+    print(total)
 
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
-            'total': total['total'],
-            'amount': total['amount'],
+            'total': total['id__count'],
+            'amount': total['amount__sum'],
             'list': data
         }
     }

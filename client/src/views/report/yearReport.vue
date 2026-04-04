@@ -81,14 +81,14 @@
           {{ scope.row.create_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="利润" width="70">
-        <template slot-scope="scope">
-          <div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="预估" width="70">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.expect < 0 ? 'red' : 'green' }">{{ scope.row.expect }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="利润" width="70">
+        <template slot-scope="scope">
+          <div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="总金额" width="70">
@@ -356,23 +356,23 @@ export default {
             amount: amount.toFixed(1),
             profit: profit.toFixed(1),
             expect: expect.toFixed(1),
-            pending: pending,
-            pending_refund: pending_refund,
-            pending_procure: pending_procure,
-            pending_refund_procure: pending_refund_procure,
-            settled: settled,
-            settled_refund: settled_refund,
-            settled_procure: settled_procure,
-            settled_refund_procure: settled_refund_procure,
-            close: close,
-            close_refund: close_refund,
-            close_procure: close_procure,
-            close_refund_procure: close_refund_procure,
-            transfer: transfer,
-            deduction: deduction,
-            promotion: promotion,
-            fake: fake,
-            fake_deduction: fake_deduction,
+            pending: pending.toFixed(1),
+            pending_refund: pending_refund.toFixed(1),
+            pending_procure: pending_procure.toFixed(1),
+            pending_refund_procure: pending_refund_procure.toFixed(1),
+            settled: settled.toFixed(1),
+            settled_refund: settled_refund.toFixed(1),
+            settled_procure: settled_procure.toFixed(1),
+            settled_refund_procure: settled_refund_procure.toFixed(1),
+            close: close.toFixed(1),
+            close_refund: close_refund.toFixed(1),
+            close_procure: close_procure.toFixed(1),
+            close_refund_procure: close_refund_procure.toFixed(1),
+            transfer: transfer.toFixed(1),
+            deduction: deduction.toFixed(1),
+            promotion: promotion.toFixed(1),
+            fake: fake.toFixed(1),
+            fake_deduction: fake_deduction.toFixed(1),
             isShow: 1
           })
         }
