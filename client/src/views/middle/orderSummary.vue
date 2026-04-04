@@ -60,7 +60,7 @@
           {{ num2status(scope.row.order_status) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="创建时间" width="80">
+      <el-table-column align="center" label="创建时间" width="160">
         <template slot-scope="scope">
           {{ scope.row.create_time }}
         </template>

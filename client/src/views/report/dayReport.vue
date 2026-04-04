@@ -109,6 +109,11 @@
           {{ scope.row.amount }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="毛利" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.income }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="推广" width="70">
         <template slot-scope="scope">
           {{ scope.row.promotion }}
@@ -213,6 +218,7 @@ export default {
       tableHeight: 600,
       list: null,
       expect: 0, // 预估
+      income: 0, // 毛利
       profit: 0, // 利润
       amount: 0, // 成交
       pending: 0, // 未结算
@@ -293,20 +299,25 @@ export default {
         this.fake_deduction = response.data.data.fake_deduction
         // 成交
         this.amount = parseFloat(this.pending) + parseFloat(this.settled) + parseFloat(this.close)
+        // 毛利
+        this.income = parseFloat(this.pending) + parseFloat(this.settled)
         // 利润
         this.profit = parseFloat(this.settled) - parseFloat(this.settled_refund) - parseFloat(this.settled_procure) + parseFloat(this.settled_refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
         // 预估
         this.expect = parseFloat(this.pending) - parseFloat(this.pending_refund) - parseFloat(this.pending_procure) + parseFloat(this.pending_refund_procure) + this.profit
         this.amount = this.amount.toFixed(2)
+        this.income = this.income.toFixed(2)
         this.profit = this.profit.toFixed(2)
         this.expect = this.expect.toFixed(2)
 
         this.list = response.data.data.list
         this.list.forEach(v => {
           v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
+          v.income = parseFloat(v.pending) + parseFloat(v.settled)
           v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
           v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
           v.amount = v.amount.toFixed(2)
+          v.income = v.income.toFixed(2)
           v.profit = v.profit.toFixed(2)
           v.expect = v.expect.toFixed(2)
         })

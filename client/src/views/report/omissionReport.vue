@@ -18,6 +18,11 @@
       </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+      <el-table-column align="center" label="创建时间" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.create_time }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="订单编号" width="160">
         <template slot-scope="scope">
           {{ scope.row.order_id }}
