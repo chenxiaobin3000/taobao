@@ -1,4 +1,4 @@
-# Taobao Django Project
+# Admin
 
 ## 项目概述
 电商/财务管理系统，使用 Django 5.2.8 + SQLite 数据库。
