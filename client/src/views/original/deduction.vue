@@ -182,6 +182,7 @@ export default {
             }
           }
           // 从备注抓取订单号
+          let key = 0
           let first = 0
           let second = 0
           switch (dtype) {
@@ -191,7 +192,6 @@ export default {
             case DeductionType.TAO_JIN_BI: // 淘金币软件服务费
             case DeductionType.XIAN_YONG_HOU_FU: // 先用后付技术服务费()
             case DeductionType.KUA_JING_JI_CHU: // 淘宝天猫跨境服务基础费
-            case DeductionType.KUA_JING_ZENG_ZHI: // 淘宝天猫跨境服务增值费
             case DeductionType.KUA_JING_DA_JIAN: // 出海增长计划中大件跨境服务增值费
             case DeductionType.TAO_TE: // 淘特营销推广服务费
             case DeductionType.XIAN_SHI: // 限时红包代商家垫付扣回
@@ -200,7 +200,12 @@ export default {
             case DeductionType.XIAO_FEI_QUAN: // 消费券代付资金扣回
             case DeductionType.GUAN_KONG: // 保证金管控资金使用
             case DeductionType.XIAN_SHI_LI_JIN: // 限时礼金软件服务费
-              first = note.indexOf('(') + 1
+              key = note.indexOf('(KY_ITEM)')
+              if (key === -1) {
+                first = note.indexOf('(') + 1
+              } else {
+                first = note.indexOf('(', key + 1) + 1
+              }
               second = note.indexOf(')', first)
               if (first !== -1 && second !== -1 && second - first === 19) {
                 oid = note.substring(first, second)
@@ -237,6 +242,19 @@ export default {
               }
               break
 
+            case DeductionType.KUA_JING_ZENG_ZHI: // 淘宝天猫跨境服务增值费
+              first = note.indexOf('(') + 1
+              second = note.indexOf('_', first)
+              if (first !== -1 && second !== -1 && second - first === 19) {
+                oid = note.substring(first, second)
+              } else {
+                stop = true
+                this.$message({ type: 'error', message: '备注信息格式异常!' })
+                console.log(v)
+                return
+              }
+              break
+
             case DeductionType.JI_YUN_WU_LIU: // 商家集运物流服务费
             case DeductionType.JI_YUN_CAO_ZUO_FEI: // 商家集运中转操作费
               first = note.indexOf('交易单号：') + 5
@@ -257,7 +275,8 @@ export default {
             case DeductionType.WU_LIU_YI_CHANG: // 物流异常赔付
             case DeductionType.QUE_HUO: // 缺货赔付
             case DeductionType.HUA_BEI: // 花呗服务费
-            case DeductionType.WU_LIU_CHAO_SHI: // 花呗服务费
+            case DeductionType.WU_LIU_CHAO_SHI: // 物流轨迹超时
+            case DeductionType.YAN_CHI_HUAN_HUO: // 延迟换货补偿红包
               oid = DefaultOrder
               break
 

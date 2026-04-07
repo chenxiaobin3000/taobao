@@ -32,6 +32,7 @@ class DeductionType:
     QUE_HUO = 104           # 淘宝缺货赔付红包
     HUA_BEI = 105           # 花呗分期免息营销
     WU_LIU_CHAO_SHI = 106   # 淘宝物流轨迹超时红包
+    YAN_CHI_HUAN_HUO = 107  # 延迟换货补偿红包
 
     # 不处理
     TUI_KUAN = 200          # 转账
