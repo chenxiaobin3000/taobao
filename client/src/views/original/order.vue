@@ -188,8 +188,8 @@ export default {
           if (o[i].st === OrderStatus.CLOSE || o[i].st === OrderStatus.UNPAID) {
             continue
           }
-          // 金额小于30认定为刷单，忽略备注
-          if (parseFloat(o[i].pa) > 30) {
+          // 金额小于6认定为刷单，忽略备注
+          if (parseFloat(o[i].pa) > 6) {
             this.$message({ type: 'error', message: '订单备注解析异常!' })
             console.log(o[i])
             return

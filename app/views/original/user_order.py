@@ -58,8 +58,8 @@ def addList(request):
             good_ids = ''
             is_supplement = False
             for product in products:
-                # 组合刷单处理
-                if payment <= 30 and len(product) < 10:
+                # 忽略刷单订单中的赠品
+                if payment <= 6 and len(product) < 10:
                     continue
                 # 查询商品表
                 good = Good.objects.getByName(shop_id, product)
@@ -77,8 +77,8 @@ def addList(request):
                     good_ids = good_ids + good['good_id'] + '|'
                 if good['good_type'] == GoodType.SUPPLEMENT:
                     is_supplement = True
-            # 不是补差价，且单价低于30，认定刷单
-            if payment <= 30 and not is_supplement:
+            # 不是补差价，且单价低于6，认定刷单
+            if payment <= 6 and not is_supplement:
                 UserFake.objects.add(user_id, shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
             else:
                 UserOrder.objects.add(user_id, shop_id, order_id, payment, procure, order_status, create_time, good_ids, procure_ids, order_note)
