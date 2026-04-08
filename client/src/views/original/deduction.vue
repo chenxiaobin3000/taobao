@@ -248,10 +248,15 @@ export default {
               if (first !== -1 && second !== -1 && second - first === 19) {
                 oid = note.substring(first, second)
               } else {
-                stop = true
-                this.$message({ type: 'error', message: '备注信息格式异常!' })
-                console.log(v)
-                return
+                second = note.indexOf(')', first)
+                if (first !== -1 && second !== -1 && second - first === 19) {
+                  oid = note.substring(first, second)
+                } else {
+                  stop = true
+                  this.$message({ type: 'error', message: '备注信息格式异常!' })
+                  console.log(v)
+                  return
+                }
               }
               break
 
