@@ -238,8 +238,9 @@ export const FinanceType = {
   DEDUCTION: 7, // 扣款
   COLLECTION: 8, // 交易收款
   CASH: 9, // 提现
+  PUBLIC: 10, // 公共缴费
 
-  ERROR: 10, // 异常
+  ERROR: 11, // 异常
 
   text2num(text) {
     if (text === '保证金') {
@@ -260,6 +261,8 @@ export const FinanceType = {
       return this.COLLECTION
     } else if (text === '提现') {
       return this.CASH
+    } else if (text === '公共缴费') {
+      return this.PUBLIC
     } else { // 异常
       return this.ERROR
     }
@@ -284,16 +287,32 @@ export const FinanceType = {
         return '收款'
       case this.CASH:
         return '提现'
+      case this.PUBLIC:
+        return '公共缴费'
     }
     return '异常'
   },
   getList() {
     return [{
-      id: this.SALE, name: '在售'
+      id: this.MARGIN, name: '保证金'
     }, {
-      id: this.REMOVE, name: '下架'
+      id: this.SHARE, name: '分账'
     }, {
-      id: this.DELETE, name: '删除'
+      id: this.ONLINE, name: '在线支付'
+    }, {
+      id: this.ONLINE, name: '转账'
+    }, {
+      id: this.TRANSFER, name: '退款'
+    }, {
+      id: this.OTHER, name: '其他'
+    }, {
+      id: this.DEDUCTION, name: '扣款'
+    }, {
+      id: this.COLLECTION, name: '收款'
+    }, {
+      id: this.CASH, name: '提现'
+    }, {
+      id: this.PUBLIC, name: '公共缴费'
     }]
   }
 }

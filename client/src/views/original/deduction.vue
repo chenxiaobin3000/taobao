@@ -162,6 +162,10 @@ export default {
           let dtype = DeductionType.OTHER
           let note = v[deduction_note]
           const ftype = FinanceType.text2num(v[finance_type])
+          if (ftype === FinanceType.PUBLIC) {
+            // 忽略公共缴费
+            return
+          }
           if (note.length < 2) {
             // 忽略在线支付
             if (ftype === FinanceType.ONLINE) {

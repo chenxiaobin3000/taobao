@@ -55,9 +55,8 @@ def flush(request):
             # 校验是否存在关联订单
             if not Order.objects.getById(shop_id, oid):
                 if not Fake.objects.getById(shop_id, oid):
-                    response['code'] = -1
-                    response['msg'] = '存在未关联扣款:' + oid
-                    return JsonResponse(response, encoder=MyJSONEncoder)
+                    Omission.objects.add(shop_id, OmissionSource.DEDUCTION, oid, deduction['amount'], deduction['create_time'], deduction['deduction_note'])
+                    continue
 
             if oid in datas:
                 datas[oid] = datas[oid] + '|' + str(deduction['amount_type']) + '-' + str(deduction['amount'])
@@ -77,9 +76,8 @@ def flush(request):
             # 校验是否存在关联订单
             if not Order.objects.getById(shop_id, oid):
                 if not Fake.objects.getById(shop_id, oid):
-                    response['code'] = -1
-                    response['msg'] = '存在未关联聚合:' + oid
-                    return JsonResponse(response, encoder=MyJSONEncoder)
+                    Omission.objects.add(shop_id, OmissionSource.POLYMERIZE, oid, polymerize['amount'], polymerize['create_time'], polymerize['polymerize_note'])
+                    continue
 
             if oid in datas:
                 datas[oid] = datas[oid] + '|' + str(polymerize['amount_type']) + '-' + str(polymerize['amount'])
