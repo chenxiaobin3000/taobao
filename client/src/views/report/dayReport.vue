@@ -23,7 +23,7 @@
           <el-button type="primary" size="mini" style="width:80px" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
-      <el-row style="font-size: small;">
+      <el-row style="font-size:small">
         <el-col :span="3">
           <div :style="{ color: expect < 0 ? 'red' : 'green' }">预估: {{ expect }}</div>
         </el-col>
@@ -55,7 +55,7 @@
           <div>刷扣: {{ fake_deduction ? fake_deduction : 0 }}</div>
         </el-col>
       </el-row>
-      <el-row style="font-size: small;">
+      <el-row style="font-size:small">
         <el-col :span="3">
           <div>成交: {{ amount }}</div>
         </el-col>

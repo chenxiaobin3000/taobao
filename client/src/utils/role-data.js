@@ -1,19 +1,21 @@
 export const MyRoleData = [{
   id: 5000, label: '统计报表',
   children: [{
-    id: 5001, label: '年报汇总'
+    id: 5001, label: '业绩大屏'
   }, {
-    id: 5002, label: '日报汇总'
+    id: 5002, label: '年报汇总'
   }, {
-    id: 5003, label: '商品汇总'
+    id: 5003, label: '日报汇总'
   }, {
-    id: 5004, label: '推广汇总'
+    id: 5004, label: '商品汇总'
   }, {
-    id: 5005, label: '成本汇总'
+    id: 5005, label: '推广汇总'
   }, {
-    id: 5006, label: '订单汇总'
+    id: 5006, label: '成本汇总'
   }, {
-    id: 5007, label: '遗漏汇总'
+    id: 5007, label: '订单汇总'
+  }, {
+    id: 5008, label: '遗漏汇总'
   }]
 }, {
   id: 4000, label: '存档数据',

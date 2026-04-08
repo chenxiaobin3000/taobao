@@ -1,7 +1,10 @@
 from django.urls import path
-from app.views.report import cost_report, day_report, fake_report, good_report, order_report, omission_report, promotion_report, year_report
+from app.views.report import board_report, cost_report, day_report, fake_report, good_report, order_report, omission_report, promotion_report, year_report
 
 url_report = [
+    # 大屏报表
+    path('api/board_report/getList', board_report.getList),
+
     # 成本报表
     path('api/cost_report/getList', cost_report.getList),
 

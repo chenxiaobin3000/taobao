@@ -17,7 +17,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row style="font-size: small;">
+      <el-row style="font-size:small">
         <el-col :span="4">
           <div>付款: {{ payment ? payment : 0 }} 元 </div>
         </el-col>

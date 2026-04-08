@@ -1,13 +1,13 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
+    <el-form label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="6">
-          <el-form-item label="店铺:" prop="shopName">
-            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-            </el-select>
-          </el-form-item>
+        <el-col :span="24">
+          <el-checkbox-group v-model="checkedShops" @change="handleChange">
+            <el-checkbox v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id">
+              <div style="font-size:small">{{ item.name }}</div>
+            </el-checkbox>
+          </el-checkbox-group>
         </el-col>
       </el-row>
       <el-row style="font-size:small">
@@ -195,7 +195,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { getYearReport } from '@/api/report/yearReport'
+import { getBoardReport } from '@/api/report/boardReport'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {
@@ -226,10 +226,8 @@ export default {
       fake: 0, // 刷单
       fake_deduction: 0, // 刷单扣款
       loading: false,
-      shopList: [], // 本公司所有店铺列表
-      listQuery: {
-        id: 0
-      }
+      checkedShops: [], // 选中的店铺
+      shopList: [] // 本公司所有店铺列表
     }
   },
   computed: {
@@ -251,15 +249,20 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = this.$store.getters.shop
     this.getOwnShopList()
   },
   methods: {
-    getYearReport() {
+    getBoardReport() {
       this.loading = true
-      getYearReport(
-        this.listQuery
-      ).then(response => {
+      const ids = []
+      this.shopList.forEach(v => {
+        if (this.checkedShops.includes(v.name)) {
+          ids.push(v.id)
+        }
+      })
+      getBoardReport({
+        ids: ids
+      }).then(response => {
         this.pending = response.data.data.pending
         this.pending_refund = response.data.data.pending_refund
         this.pending_procure = response.data.data.pending_procure
@@ -401,10 +404,11 @@ export default {
         uid: this.userdata.user.id
       }).then(response => {
         this.shopList = response.data.data
-        if (this.listQuery.id === 0) {
-          this.listQuery.id = this.shopList[0].id
-        }
-        this.getYearReport()
+        this.shopList.forEach(v => {
+          this.checkedShops.push(v.name)
+          v.checked = true
+        })
+        this.getBoardReport()
       })
     },
     rowClassName({ row, rowIndex }) {
@@ -416,9 +420,9 @@ export default {
         return 'hidden-row'
       }
     },
-    handleChange() {
-      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
-      this.getYearReport()
+    handleChange(value) {
+      this.checkedShops = value
+      this.getBoardReport()
     },
     handleRowClick(row, column, event) {
       // 只处理年
