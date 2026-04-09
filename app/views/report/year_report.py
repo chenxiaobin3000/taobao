@@ -15,26 +15,11 @@ from app.models.report.promotion import Promotion
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    year = 2025
-    month = 1
-    start_date = datetime(year, month, 1)
-    now_date = timezone.now()
     response = {
         'code': 0,
         'msg': 'success'
     }
 
-    # 生成月份列表
-    datas = {}
-    while start_date < now_date:
-        datas[start_date.strftime('%Y-%m')] = { 'pending': 0, 'pending_refund': 0, 'pending_procure': 0, 'pending_refund_procure': 0, 'settled': 0, 'settled_refund': 0, 'settled_procure': 0, 'settled_refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
-        month = month + 1
-        if month > 12:
-            month = 1
-            year = year + 1
-        start_date = datetime(year, month, 1)
-
-    # 按月生成数据
     pending = 0 # 未完结
     pending_refund = 0 # 未完结退款
     pending_procure = 0 # 未完结采购
@@ -52,6 +37,20 @@ def getList(request):
     promotion = 0 # 推广
     fake = 0 # 刷单成本
     fake_deduction = 0 # 刷单扣款
+
+    # 生成月份列表
+    year = 2025
+    month = 1
+    start_date = datetime(year, month, 1)
+    now_date = timezone.now()
+    datas = {}
+    while start_date < now_date:
+        datas[start_date.strftime('%Y-%m')] = { 'pending': 0, 'pending_refund': 0, 'pending_procure': 0, 'pending_refund_procure': 0, 'settled': 0, 'settled_refund': 0, 'settled_procure': 0, 'settled_refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
+        month = month + 1
+        if month > 12:
+            month = 1
+            year = year + 1
+        start_date = datetime(year, month, 1)
 
     # 待发货
     paids = Order().groupByMonth(shop_id, OrderStatus.PAID)
@@ -115,19 +114,19 @@ def getList(request):
             response['msg'] = '数据异常，请联系管理员'
             return JsonResponse(response, encoder=MyJSONEncoder)
 
-        # 推广
-        promotions = Promotion().groupByMonth(shop_id)
-        for temp in promotions:
-            key_month = temp['create_month']
-            if key_month in datas:
-                datas[key_month]['promotion'] = temp['payment']
+    # 推广
+    promotions = Promotion().groupByMonth(shop_id)
+    for temp in promotions:
+        key_month = temp['create_month']
+        if key_month in datas:
+            datas[key_month]['promotion'] = temp['payment']
 
-        # 刷单
-        fakes = Fake().groupByMonth(shop_id)
-        for temp in fakes:
-            key_month = temp['create_month']
-            if key_month in datas:
-                datas[key_month]['fake'] = temp['commission'] + temp['freight']
+    # 刷单
+    fakes = Fake().groupByMonth(shop_id)
+    for temp in fakes:
+        key_month = temp['create_month']
+        if key_month in datas:
+            datas[key_month]['fake'] = temp['commission'] + temp['freight']
 
     # 统计
     values = datas.values()

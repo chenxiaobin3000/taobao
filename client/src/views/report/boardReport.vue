@@ -4,7 +4,7 @@
       <el-row>
         <el-col :span="24">
           <el-checkbox-group v-model="checkedShops" @change="handleChange">
-            <el-checkbox v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id">
+            <el-checkbox v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" class="myCheckBox">
               <div style="font-size:small">{{ item.name }}</div>
             </el-checkbox>
           </el-checkbox-group>
@@ -81,6 +81,11 @@
           {{ scope.row.create_date }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="店铺" width="100">
+        <template slot-scope="scope">
+          {{ scope.row.name }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="预估" width="70">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.expect < 0 ? 'red' : 'green' }">{{ scope.row.expect }}</div>
@@ -101,7 +106,7 @@
           {{ scope.row.income }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="推广" width="70">
+      <el-table-column align="center" label="推广" width="80">
         <template slot-scope="scope">
           {{ scope.row.promotion }}
         </template>
@@ -126,7 +131,7 @@
           {{ scope.row.pending_refund_procure }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已完结" width="70">
+      <el-table-column align="center" label="已完结" width="80">
         <template slot-scope="scope">
           {{ scope.row.settled }}
         </template>
@@ -136,7 +141,7 @@
           {{ scope.row.settled_refund }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已完采购" width="70">
+      <el-table-column align="center" label="已完采购" width="80">
         <template slot-scope="scope">
           {{ scope.row.settled_procure }}
         </template>
@@ -146,12 +151,12 @@
           {{ scope.row.settled_refund_procure }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已关闭" width="70">
+      <el-table-column align="center" label="已关闭" width="80">
         <template slot-scope="scope">
           {{ scope.row.close }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="关闭退款" width="70">
+      <el-table-column align="center" label="关闭退款" width="80">
         <template slot-scope="scope">
           {{ scope.row.close_refund }}
         </template>
@@ -253,13 +258,17 @@ export default {
   },
   methods: {
     getBoardReport() {
-      this.loading = true
       const ids = []
       this.shopList.forEach(v => {
         if (this.checkedShops.includes(v.name)) {
           ids.push(v.id)
         }
       })
+      if (ids.length === 0) {
+        this.$message({ type: 'error', message: '至少要选中一个店铺!' })
+        return
+      }
+      this.loading = true
       getBoardReport({
         ids: ids
       }).then(response => {
@@ -295,15 +304,17 @@ export default {
 
         // 预处理数据
         const data = response.data.data.list
-        Object.entries(data).forEach(([k, v]) => {
-          v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
-          v.income = parseFloat(v.pending) + parseFloat(v.settled)
-          v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
-          v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
-          v.amount = v.amount.toFixed(1)
-          v.income = v.income.toFixed(1)
-          v.profit = v.profit.toFixed(1)
-          v.expect = v.expect.toFixed(1)
+        Object.values(data).forEach(tmp => {
+          Object.values(tmp).forEach(v => {
+            v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
+            v.income = parseFloat(v.pending) + parseFloat(v.settled)
+            v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
+            v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
+            v.amount = v.amount.toFixed(1)
+            v.income = v.income.toFixed(1)
+            v.profit = v.profit.toFixed(1)
+            v.expect = v.expect.toFixed(1)
+          })
         })
 
         // 按年份统计插入数据
@@ -311,6 +322,7 @@ export default {
         const currentYear = new Date().getFullYear()
         const currentMonth = new Date().getMonth()
         for (let y = 2025; y <= currentYear; ++y) {
+          // 全年所有店铺数据
           let pending = 0
           let pending_refund = 0
           let pending_procure = 0
@@ -339,27 +351,99 @@ export default {
             } else {
               key = y + '-0' + (m + 1)
             }
-            const temp = data[key]
-            temp.create_date = y + '年' + (m + 1) + '月'
-            temp.isShow = 0
-            pending += temp.pending
-            pending_refund += temp.pending_refund
-            pending_procure += temp.pending_procure
-            pending_refund_procure += temp.pending_refund_procure
-            settled += temp.settled
-            settled_refund += temp.settled_refund
-            settled_procure += temp.settled_procure
-            settled_refund_procure += temp.settled_refund_procure
-            close += temp.close
-            close_refund += temp.close_refund
-            close_procure += temp.close_procure
-            close_refund_procure += temp.close_refund_procure
-            transfer += temp.transfer
-            deduction += temp.deduction
-            promotion += temp.promotion
-            fake += temp.fake
-            fake_deduction += temp.fake_deduction
-            this.list.unshift(temp)
+            // 当月所有店铺数据
+            let month_pending = 0
+            let month_pending_refund = 0
+            let month_pending_procure = 0
+            let month_pending_refund_procure = 0
+            let month_settled = 0
+            let month_settled_refund = 0
+            let month_settled_procure = 0
+            let month_settled_refund_procure = 0
+            let month_close = 0
+            let month_close_refund = 0
+            let month_close_procure = 0
+            let month_close_refund_procure = 0
+            let month_transfer = 0
+            let month_deduction = 0
+            let month_promotion = 0
+            let month_fake = 0
+            let month_fake_deduction = 0
+            this.shopList.forEach(v => {
+              if (!this.checkedShops.includes(v.name)) {
+                return
+              }
+              const temp = data[key][v.id]
+              temp.name = v.name
+              temp.create_date = y + '年' + (m + 1) + '月'
+              temp.is_show = 0
+              pending += temp.pending
+              pending_refund += temp.pending_refund
+              pending_procure += temp.pending_procure
+              pending_refund_procure += temp.pending_refund_procure
+              settled += temp.settled
+              settled_refund += temp.settled_refund
+              settled_procure += temp.settled_procure
+              settled_refund_procure += temp.settled_refund_procure
+              close += temp.close
+              close_refund += temp.close_refund
+              close_procure += temp.close_procure
+              close_refund_procure += temp.close_refund_procure
+              transfer += temp.transfer
+              deduction += temp.deduction
+              promotion += temp.promotion
+              fake += temp.fake
+              fake_deduction += temp.fake_deduction
+
+              month_pending += temp.pending
+              month_pending_refund += temp.pending_refund
+              month_pending_procure += temp.pending_procure
+              month_pending_refund_procure += temp.pending_refund_procure
+              month_settled += temp.settled
+              month_settled_refund += temp.settled_refund
+              month_settled_procure += temp.settled_procure
+              month_settled_refund_procure += temp.settled_refund_procure
+              month_close += temp.close
+              month_close_refund += temp.close_refund
+              month_close_procure += temp.close_procure
+              month_close_refund_procure += temp.close_refund_procure
+              month_transfer += temp.transfer
+              month_deduction += temp.deduction
+              month_promotion += temp.promotion
+              month_fake += temp.fake
+              month_fake_deduction += temp.fake_deduction
+              this.list.unshift(temp)
+            })
+            // 插入月汇总数据
+            const amount = month_pending + month_settled + month_close
+            const income = month_pending + month_settled
+            const profit = month_settled - month_settled_refund - month_settled_procure + month_settled_refund_procure - month_promotion - month_transfer - month_deduction - month_fake - month_fake_deduction
+            const expect = month_pending - month_pending_refund - month_pending_procure + month_pending_refund_procure + profit
+            this.list.unshift({
+              create_date: y + '年' + (m + 1) + '月汇总',
+              amount: amount.toFixed(1),
+              income: income.toFixed(1),
+              profit: profit.toFixed(1),
+              expect: expect.toFixed(1),
+              pending: month_pending.toFixed(1),
+              pending_refund: month_pending_refund.toFixed(1),
+              pending_procure: month_pending_procure.toFixed(1),
+              pending_refund_procure: month_pending_refund_procure.toFixed(1),
+              settled: month_settled.toFixed(1),
+              settled_refund: month_settled_refund.toFixed(1),
+              settled_procure: month_settled_procure.toFixed(1),
+              settled_refund_procure: month_settled_refund_procure.toFixed(1),
+              close: month_close.toFixed(1),
+              close_refund: month_close_refund.toFixed(1),
+              close_procure: month_close_procure.toFixed(1),
+              close_refund_procure: month_close_refund_procure.toFixed(1),
+              transfer: month_transfer.toFixed(1),
+              deduction: month_deduction.toFixed(1),
+              promotion: month_promotion.toFixed(1),
+              fake: month_fake.toFixed(1),
+              fake_deduction: month_fake_deduction.toFixed(1),
+              is_show: 0
+            })
           }
           // 插入年数据
           const amount = pending + settled + close
@@ -367,7 +451,7 @@ export default {
           const profit = settled - settled_refund - settled_procure + settled_refund_procure - promotion - transfer - deduction - fake - fake_deduction
           const expect = pending - pending_refund - pending_procure + pending_refund_procure + profit
           this.list.unshift({
-            create_date: y + '年',
+            create_date: y + '年汇总',
             amount: amount.toFixed(1),
             income: income.toFixed(1),
             profit: profit.toFixed(1),
@@ -389,7 +473,7 @@ export default {
             promotion: promotion.toFixed(1),
             fake: fake.toFixed(1),
             fake_deduction: fake_deduction.toFixed(1),
-            isShow: 1
+            is_show: 1
           })
         }
         this.loading = false
@@ -412,9 +496,12 @@ export default {
       })
     },
     rowClassName({ row, rowIndex }) {
-      if (row.isShow !== 0) {
-        if (row.create_date.indexOf('月') === -1) {
+      if (row.is_show !== 0) {
+        if (row.create_date.indexOf('年汇总') !== -1) {
           return 'year-row'
+        }
+        if (row.create_date.indexOf('月汇总') !== -1) {
+          return 'month-row'
         }
       } else {
         return 'hidden-row'
@@ -425,12 +512,22 @@ export default {
       this.getBoardReport()
     },
     handleRowClick(row, column, event) {
-      // 只处理年
-      if (row.create_date.indexOf('月') === -1) {
-        const year = row.create_date
+      if (row.create_date.indexOf('年汇总') !== -1) {
+        // 处理年汇总
+        const year = row.create_date.substring(0, 5)
         this.list.forEach(v => {
-          if (v.create_date.indexOf('月') !== -1 && v.create_date.indexOf(year) !== -1) {
-            v.isShow = v.isShow === 0 ? 1 : 0
+          if (v.create_date.indexOf('月汇总') !== -1 && v.create_date.indexOf(year) !== -1) {
+            v.is_show = v.is_show === 0 ? 1 : 0
+          } else if (v.create_date.indexOf('年汇总') === -1) {
+            v.is_show = 0
+          }
+        })
+      } else if (row.create_date.indexOf('月汇总') !== -1) {
+        // 处理月汇总
+        const month = row.create_date.substring(0, 7)
+        this.list.forEach(v => {
+          if (v.create_date.indexOf('月汇总') === -1 && v.create_date.indexOf(month) !== -1) {
+            v.is_show = v.is_show === 0 ? 1 : 0
           }
         })
       }
@@ -441,10 +538,40 @@ export default {
 
 <style lang="scss">
 .el-table .year-row {
-  background-color: rgba(220, 220, 220, 0.3);
+  background-color: rgba(180, 180, 180, 0.3);
+}
+
+.el-table .month-row {
+  background-color: rgba(235, 235, 235, 0.3);
 }
 
 .el-table .hidden-row {
   display: none;
+}
+
+/* 设置带边框的checkbox，选中后边框的颜色 */
+.myCheckBox.is-bordered.is-checked {
+  border-color: #888888;
+}
+
+/* 设置选中后的文字颜色 */
+.myCheckBox .el-checkbox__input.is-checked+.el-checkbox__label {
+  color: #000000;
+}
+
+/* 设置选中后对勾框的边框和背景颜色 */
+.myCheckBox .el-checkbox__input.is-checked .el-checkbox__inner, .myCheckBox .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+  border-color: #888888;
+  background-color:#888888;
+}
+
+/* 设置checkbox获得焦点后，对勾框的边框颜色 */
+.myCheckBox .el-checkbox__input.is-focus .el-checkbox__inner{
+  border-color: #888888;
+}
+
+/* 设置鼠标经过对勾框，对勾框边框的颜色 */
+.myCheckBox .el-checkbox__inner:hover{
+  border-color: #888888;
 }
 </style>

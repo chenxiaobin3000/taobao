@@ -338,7 +338,7 @@ export default {
             }
             const temp = data[key]
             temp.create_date = y + '年' + (m + 1) + '月'
-            temp.isShow = 0
+            temp.is_show = 0
             pending += temp.pending
             pending_refund += temp.pending_refund
             pending_procure += temp.pending_procure
@@ -386,7 +386,7 @@ export default {
             promotion: promotion.toFixed(1),
             fake: fake.toFixed(1),
             fake_deduction: fake_deduction.toFixed(1),
-            isShow: 1
+            is_show: 1
           })
         }
         this.loading = false
@@ -408,7 +408,7 @@ export default {
       })
     },
     rowClassName({ row, rowIndex }) {
-      if (row.isShow !== 0) {
+      if (row.is_show !== 0) {
         if (row.create_date.indexOf('月') === -1) {
           return 'year-row'
         }
@@ -426,7 +426,7 @@ export default {
         const year = row.create_date
         this.list.forEach(v => {
           if (v.create_date.indexOf('月') !== -1 && v.create_date.indexOf(year) !== -1) {
-            v.isShow = v.isShow === 0 ? 1 : 0
+            v.is_show = v.is_show === 0 ? 1 : 0
           }
         })
       }
