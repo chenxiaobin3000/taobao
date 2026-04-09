@@ -245,7 +245,7 @@ export default {
   mounted: function() {
     setTimeout(() => {
       if (this.$refs.table) {
-        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 10
+        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 20
       }
     }, 1000)
   },
