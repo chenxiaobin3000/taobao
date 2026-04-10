@@ -4,15 +4,17 @@ from django.forms.models import model_to_dict
 
 # 商品表
 class GoodManager(models.Manager):
-    def add(self, shop_id, good_id, name, short_name, good_type, good_status):
-        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name, good_type=good_type, good_status=good_status)
+    def add(self, shop_id, good_id, name, short_name, good_type, good_status, origin):
+        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name, good_type=good_type, good_status=good_status, origin=origin)
 
-    def set(self, pk, name, short_name, good_type, good_status):
+    def set(self, pk, name, short_name, good_type, good_status, origin, fake_date):
         good = self.get(pk=pk)
         good.name = name
         good.short_name = short_name
         good.good_type = good_type
         good.good_status = good_status
+        good.origin = origin
+        good.fake_date = fake_date
         return good.save()
 
     def delete(self, pk):
@@ -40,12 +42,12 @@ class GoodManager(models.Manager):
 
     def encoder(self, good):
         if good:
-            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status'])
+            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'fake_date'])
         return None
 
     def encoderList(self, goods):
         if goods:
-            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status']) for good in goods]
+            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'fake_date']) for good in goods]
         return None
 
 class Good(models.Model):
@@ -56,8 +58,8 @@ class Good(models.Model):
     short_name = models.CharField(max_length = 16) # 商品短名
     good_type = models.IntegerField(db_index = True) # 商品类型
     good_status = models.IntegerField(db_index = True) # 商品状态
-    # origin = models.CharField(max_length = 12, db_index = True) # 淘宝id
-    # fake_date = models.DateField(db_index=True) # 首次刷单日期
+    origin = models.CharField(max_length = 12, db_index = True) # 淘宝id
+    fake_date = models.DateField(db_index=True) # 首次刷单日期
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):

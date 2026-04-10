@@ -19,6 +19,11 @@
           {{ scope.row.good_id }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="外部编码" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.origin }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="商品类型" width="80">
         <template slot-scope="scope">
           {{ num2type(scope.row.good_type) }}
@@ -27,6 +32,11 @@
       <el-table-column align="center" label="商品状态" width="80">
         <template slot-scope="scope">
           {{ num2status(scope.row.good_status) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="首次刷单" width="80">
+        <template slot-scope="scope">
+          {{ num2status(scope.row.fake_date) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="完整名称">
@@ -52,6 +62,9 @@
         </el-form-item>
         <el-form-item label="商品名称">
           <el-input v-model="temp.short_name" />
+        </el-form-item>
+        <el-form-item label="外部编码">
+          <el-input v-model="temp.origin" />
         </el-form-item>
         <el-form-item label="商品类型">
           <el-select v-model="temp.good_type" class="filter-item" placeholder="请选择类型">
@@ -155,6 +168,7 @@ export default {
         id: 0,
         good_id: '',
         name: '',
+        origin: '',
         short_name: '',
         good_type: GoodType.NORMAL,
         good_status: GoodStatus.SALE,
@@ -204,12 +218,13 @@ export default {
       const id = header[1]
       const type = header[2]
       const status = header[3]
-      const name = header[4]
-      const alias1 = header[5]
-      const alias2 = header[6]
-      const alias3 = header[7]
-      const alias4 = header[8]
-      const alias5 = header[9]
+      const origin = header[4]
+      const name = header[5]
+      const alias1 = header[6]
+      const alias2 = header[7]
+      const alias3 = header[8]
+      const alias4 = header[9]
+      const alias5 = header[10]
       const g = []
       results.forEach(v => {
         const alias = [v[alias1], v[alias2], v[alias3], v[alias4], v[alias5]]
@@ -217,6 +232,7 @@ export default {
           i: v[id],
           n: v[name],
           sn: v[sname],
+          o: v[origin],
           t: v[type],
           s: v[status],
           as: alias
@@ -257,7 +273,8 @@ export default {
         name: this.temp.name,
         sname: this.temp.short_name,
         type: this.temp.good_type,
-        status: this.temp.good_status
+        status: this.temp.good_status,
+        origin: this.temp.origin
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getGoodList()

@@ -21,9 +21,9 @@ def addList(request):
     for good in goods:
         find_object = Good.objects.getById(shop_id, good['i'])
         if find_object:
-            Good.objects.set(find_object['id'], good['n'], good['sn'], good['t'], good['s'])
+            Good.objects.set(find_object['id'], good['n'], good['sn'], good['t'], good['s'], good['o'], '')
         else:
-            Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'])
+            Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'], good['o'])
 
         # 处理别名
         for alias in good['as']:
@@ -43,7 +43,8 @@ def set(request):
     short_name = post.get('sname')
     good_type = int(post.get('type'))
     good_status = int(post.get('status'))
-    Good.objects.set(pk, name, short_name, good_type, good_status)
+    origin = int(post.get('origin'))
+    Good.objects.set(pk, name, short_name, good_type, good_status, origin)
     response = {
         'code': 0,
         'msg': 'success'
