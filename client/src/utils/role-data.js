@@ -18,6 +18,17 @@ export const MyRoleData = [{
     id: 5008, label: '遗漏汇总'
   }]
 }, {
+  id: 6000, label: '辅助工具',
+  children: [{
+    id: 6001, label: '杂项管理'
+  }, {
+    id: 6002, label: '订单管理'
+  }, {
+    id: 6003, label: '刷单管理'
+  }, {
+    id: 6004, label: '扣款管理'
+  }]
+}, {
   id: 4000, label: '存档数据',
   children: [{
     id: 4001, label: '订单管理'
@@ -60,17 +71,6 @@ export const MyRoleData = [{
     id: 3010, label: '退货(过滤)'
   }, {
     id: 3011, label: '小额打款'
-  }]
-}, {
-  id: 6000, label: '辅助工具',
-  children: [{
-    id: 6001, label: '杂项管理'
-  }, {
-    id: 6002, label: '订单管理'
-  }, {
-    id: 6003, label: '刷单管理'
-  }, {
-    id: 6004, label: '扣款管理'
   }]
 }, {
   id: 2000, label: '公司数据',
