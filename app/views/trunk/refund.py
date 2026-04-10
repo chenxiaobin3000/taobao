@@ -69,11 +69,11 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = Refund.objects.total(shop_id)
-    refunds = Refund.objects.getList(shop_id, page, num)
+    datas = Refund.objects.getList(shop_id, page, num)
 
     # 商品id转换商品名称
-    if refunds:
-        for refund in refunds:
+    if datas:
+        for refund in datas:
             find_object = Good.objects.getById(shop_id, refund['product_id'])
             if find_object:
                 refund['product_name'] = find_object['short_name']
@@ -83,7 +83,7 @@ def getList(request):
         'msg': 'success',
         'data': {
             'total': total,
-            'list': refunds
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

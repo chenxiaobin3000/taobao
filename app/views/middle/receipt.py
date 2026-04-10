@@ -3,28 +3,36 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.trunk.transfer import Transfer
-from app.models.original.user_transfer import UserTransfer
+from app.models.middle.receipt import Receipt
 
 @require_POST
 @transaction.atomic
-def merge(request):
+def add(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
+    create_date = post.get('cdate')
     user_id = int(post.get('uid'))
-    transfers = UserTransfer.objects.getAll(user_id, shop_id)
+    project_name = post.get('name')
+    amount = post.get('amount')
+    misc_note = post.get('note')
+    Receipt.objects.add(shop_id, create_date, user_id, project_name, amount, misc_note)
+    response = {
+        'code': 0,
+        'msg': 'success'
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
 
-    if transfers:
-        # 批量合并
-        for transfer in transfers:
-            create_time = transfer['create_time']
-            if Transfer.objects.getByCTime(shop_id, create_time):
-                continue
-            Transfer.objects.add(shop_id, transfer['user_name'], transfer['payee_name'], transfer['order_id'], transfer['amount'], create_time, transfer['transfer_note'])
-
-        # 清空临时数据
-        UserTransfer.objects.deleteAll(user_id, shop_id)
-
+@require_POST
+@transaction.atomic
+def set(request):
+    post = json.loads(request.body)
+    pk = int(post.get('id'))
+    create_date = post.get('cdate')
+    user_id = int(post.get('uid'))
+    project_name = post.get('name')
+    amount = post.get('amount')
+    misc_note = post.get('note')
+    Receipt.objects.set(pk, create_date, user_id, project_name, amount, misc_note)
     response = {
         'code': 0,
         'msg': 'success'
@@ -36,7 +44,7 @@ def merge(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    Transfer.objects.delete(pk)
+    Receipt.objects.delete(pk)
     response = {
         'code': 0,
         'msg': 'success'
@@ -50,8 +58,8 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Transfer.objects.total(shop_id)
-    datas = Transfer.objects.getList(shop_id, page, num)
+    total = Receipt.objects.total(shop_id)
+    datas = Receipt.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',

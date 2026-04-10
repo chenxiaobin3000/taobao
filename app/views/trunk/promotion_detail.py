@@ -53,11 +53,11 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = PromotionDetail.objects.total(shop_id)
-    promotions = PromotionDetail.objects.getList(shop_id, page, num)
+    datas = PromotionDetail.objects.getList(shop_id, page, num)
 
     # 商品信息
-    if promotions:
-        for data in promotions:
+    if datas:
+        for data in datas:
             good = Good.objects.getById(shop_id, data['good_id'])
             if good:
                 data['good_name'] = good['short_name']
@@ -69,7 +69,7 @@ def getList(request):
         'msg': 'success',
         'data': {
             'total': total,
-            'list': promotions
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

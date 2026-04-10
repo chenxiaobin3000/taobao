@@ -79,13 +79,13 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = GoodAlias.objects.total(shop_id)
-    goods = GoodAlias.objects.getList(shop_id, page, num)
+    datas = GoodAlias.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': goods
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -13,16 +13,14 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = Omission.objects.total(shop_id)
-    data = Omission.objects.getList(shop_id, page, num)
-    print(total)
-
+    datas = Omission.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total['id__count'],
             'amount': total['amount__sum'],
-            'list': data
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

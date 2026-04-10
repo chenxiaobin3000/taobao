@@ -55,13 +55,13 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = Polymerize.objects.total(shop_id)
-    polymerizes = Polymerize.objects.getList(shop_id, page, num)
+    datas = Polymerize.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': polymerizes
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

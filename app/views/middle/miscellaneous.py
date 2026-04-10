@@ -59,13 +59,13 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = Miscellaneous.objects.total(shop_id)
-    miscs = Miscellaneous.objects.getList(shop_id, page, num)
+    datas = Miscellaneous.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': miscs
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

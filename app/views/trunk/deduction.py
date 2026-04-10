@@ -55,13 +55,13 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = Deduction.objects.total(shop_id)
-    deductions = Deduction.objects.getList(shop_id, page, num)
+    datas = Deduction.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': deductions
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

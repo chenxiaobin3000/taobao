@@ -64,13 +64,13 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = Purchase.objects.total(shop_id)
-    purchases = Purchase.objects.getList(shop_id, page, num)
+    datas = Purchase.objects.getList(shop_id, page, num)
     response = {
         'code': 0,
         'msg': 'success',
         'data': {
             'total': total,
-            'list': purchases
+            'list': datas
         }
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
