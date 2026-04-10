@@ -21,9 +21,6 @@ class FakeManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 
-    def getPaySumByDay(self, shop_id, start_date, end_date):
-        return self.filter(shop_id=shop_id, create_time__range=(start_date, end_date)).aggregate(models.Sum('payment'), models.Count('id'))
-
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 

@@ -37,7 +37,7 @@ def getList(request):
                 if gid:
                     good = Good.objects.getById(shop_id, gid)
                     if good:
-                        data['good_names'] = good['short_name'] + ' | '
+                        data['good_names'] = data['good_names'] + good['short_name'] + ' | '
             if len(data['good_names']) > 3:
                 data['good_names'] = data['good_names'][:-3]
 

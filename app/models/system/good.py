@@ -56,6 +56,8 @@ class Good(models.Model):
     short_name = models.CharField(max_length = 16) # 商品短名
     good_type = models.IntegerField(db_index = True) # 商品类型
     good_status = models.IntegerField(db_index = True) # 商品状态
+    # origin = models.CharField(max_length = 12, db_index = True) # 淘宝id
+    # fake_date = models.DateField(db_index=True) # 首次刷单日期
     ctime = models.DateTimeField(default = timezone.now)
 
     class Meta(object):

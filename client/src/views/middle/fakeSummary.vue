@@ -21,37 +21,37 @@
       </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="日期" width="160">
+      <el-table-column align="center" label="日期" width="90">
         <template slot-scope="scope">
           {{ scope.row.create_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="真实订单数" width="160">
+      <el-table-column align="center" label="真实订单数" width="90">
         <template slot-scope="scope">
           {{ scope.row.order_num }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="真实金额" width="160">
+      <el-table-column align="center" label="真实金额" width="90">
         <template slot-scope="scope">
           {{ scope.row.order_amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="刷单订单数" width="160">
+      <el-table-column align="center" label="刷单订单数" width="90">
         <template slot-scope="scope">
           {{ scope.row.fake_num }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="总金额" width="160">
+      <el-table-column align="center" label="总金额" width="90">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.commission < 0.01 ? 'red' : 'green' }">{{ scope.row.fake_amount }}</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="总佣金" width="160">
+      <el-table-column align="center" label="总佣金" width="90">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.commission < 0.01 ? 'red' : 'green' }">{{ scope.row.commission }}</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="总运费" width="160">
+      <el-table-column align="center" label="总运费" width="90">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.commission < 0.01 ? 'red' : 'green' }">{{ scope.row.freight }}</div>
         </template>
