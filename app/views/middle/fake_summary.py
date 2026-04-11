@@ -71,11 +71,23 @@ def set(request):
     commission = int(post.get('comm'))
     freight = int(post.get('freight'))
     fake_note = post.get('note')
-    data = FakeSummary.objects.set(pk, fake_amount, fake_num, commission, freight, fake_note)
+    FakeSummary.objects.set(pk, fake_amount, fake_num, commission, freight, fake_note)
     response = {
         'code': 0,
-        'msg': 'success',
-        'data': data
+        'msg': 'success'
+    }
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
+def setComplete(request):
+    post = json.loads(request.body)
+    pk = int(post.get('id'))
+    is_complete = int(post.get('c'))
+    FakeSummary.objects.setComplete(pk, is_complete)
+    response = {
+        'code': 0,
+        'msg': 'success'
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 

@@ -5,7 +5,7 @@ from django.forms.models import model_to_dict
 # 刷单汇总表
 class FakeSummaryManager(models.Manager):
     def add(self, shop_id, create_date, order_amount, order_num, fake_amount, fake_num, commission, freight, fake_note):
-        return self.create(shop_id=shop_id, create_date=create_date, order_amount=order_amount, order_num=order_num, fake_amount=fake_amount, fake_num=fake_num, commission=commission, freight=freight, fake_note=fake_note)
+        return self.create(shop_id=shop_id, create_date=create_date, order_amount=order_amount, order_num=order_num, fake_amount=fake_amount, fake_num=fake_num, commission=commission, freight=freight, is_complete=0, fake_note=fake_note)
 
     def fix(self, pk, order_amount, order_num, fake_note):
         fake = self.get(pk=pk)
@@ -23,6 +23,11 @@ class FakeSummaryManager(models.Manager):
         fake.fake_note = fake_note
         return fake.save()
 
+    def setComplete(self, pk, is_complete):
+        fake = self.get(pk=pk)
+        fake.is_complete = is_complete
+        return fake.save()
+    
     def batch(self, pk, fake_amount, fake_num, commission, freight):
         fake = self.get(pk=pk)
         fake.fake_amount = fake_amount
@@ -47,12 +52,12 @@ class FakeSummaryManager(models.Manager):
 
     def encoder(self, fake):
         if fake:
-            return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note'])
+            return model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'is_complete', 'fake_note'])
         return None
 
     def encoderList(self, fakes):
         if fakes:
-            return [model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'fake_note']) for fake in fakes]
+            return [model_to_dict(fake, fields=['id', 'shop_id', 'create_date', 'order_num', 'order_amount', 'fake_num', 'fake_amount', 'commission', 'freight', 'is_complete', 'fake_note']) for fake in fakes]
         return None
 
 class FakeSummary(models.Model):
@@ -65,6 +70,7 @@ class FakeSummary(models.Model):
     fake_num = models.IntegerField() # 刷单订单数
     commission = models.DecimalField(max_digits=6, decimal_places=2) # 佣金
     freight = models.DecimalField(max_digits=6, decimal_places=2) # 运费
+    is_complete = models.IntegerField() # 是否收菜
     fake_note = models.CharField(max_length=32) # 刷单备注
     ctime = models.DateTimeField(default=timezone.now)
 
