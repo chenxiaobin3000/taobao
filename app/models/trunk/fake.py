@@ -21,6 +21,10 @@ class FakeManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 
+    # 首次刷单时间
+    def getByGood(self, shop_id, good_ids):
+        return self.encoder(self.filter(shop_id=shop_id, good_ids=good_ids).order_by('create_time').first())
+
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 

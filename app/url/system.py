@@ -18,6 +18,7 @@ url_system = [
 
     # 商品
     path('api/good/addList', good.addList),
+    path('api/good/flush', good.flush),
     path('api/good/set', good.set),
     path('api/good/del', good.delete),
     path('api/good/getList', good.getList),

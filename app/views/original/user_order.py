@@ -58,7 +58,7 @@ def addList(request):
             good_ids = ''
             is_supplement = False
             for product in products:
-                # 忽略刷单订单中的赠品
+                # 忽略刷单订单中的赠品和补差价
                 if payment <= 6 and len(product) < 10:
                     continue
                 # 查询商品表

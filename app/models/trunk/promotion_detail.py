@@ -13,6 +13,10 @@ class PromotionDetailManager(models.Manager):
     def getByIdAndDate(self, shop_id, promotion_date, good_id):
         return self.encoder(self.filter(shop_id=shop_id, promotion_date=promotion_date, good_id=good_id).first())
 
+    # 首次推广时间
+    def getByGood(self, shop_id, good_id):
+        return self.encoder(self.filter(shop_id=shop_id, good_id=good_id).order_by('promotion_date').first())
+
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 

@@ -357,6 +357,39 @@ export const GoodStatus = {
   }
 }
 
+// 商品外部类型
+export const GoodOriginType = {
+  TAO_BAO: 1, // 淘宝
+  TIAN_MAO: 2, // 天猫
+  OTHER: 3, // 异常
+
+  text2num(text) {
+    if (text === '淘宝') {
+      return this.TAO_BAO
+    } else if (text === '天猫') {
+      return this.TIAN_MAO
+    } else { // 异常
+      return this.OTHER
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.TAO_BAO:
+        return '淘宝'
+      case this.TIAN_MAO:
+        return '天猫'
+    }
+    return '异常'
+  },
+  getList() {
+    return [{
+      id: this.TAO_BAO, name: '淘宝'
+    }, {
+      id: this.TIAN_MAO, name: '天猫'
+    }]
+  }
+}
+
 // 商品类型
 export const GoodType = {
   NORMAL: 1, // 商品

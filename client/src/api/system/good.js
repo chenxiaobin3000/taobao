@@ -9,6 +9,14 @@ export function addGoodList(data) {
   })
 }
 
+export function flushGood(data) {
+  return request({
+    url: `${path}/flush`,
+    method: 'post',
+    data
+  })
+}
+
 export function setGood(data) {
   return request({
     url: `${path}/set`,

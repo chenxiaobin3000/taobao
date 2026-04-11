@@ -6,37 +6,43 @@
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
+        <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleFlush()">刷新</el-button>
       </el-form-item>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="商品名称" width="160">
+      <el-table-column align="center" label="商品名称" width="100">
         <template slot-scope="scope">
           {{ scope.row.short_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编码" width="160">
+      <el-table-column align="center" label="商品编码" width="120">
         <template slot-scope="scope">
           {{ scope.row.good_id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="外部编码" width="160">
+      <el-table-column align="center" label="外部编码" width="120">
         <template slot-scope="scope">
-          {{ scope.row.origin }}
+          <a :href="jump(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品类型" width="80">
+      <el-table-column align="center" label="商品类型" width="70">
         <template slot-scope="scope">
           {{ num2type(scope.row.good_type) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品状态" width="80">
+      <el-table-column align="center" label="商品状态" width="70">
         <template slot-scope="scope">
           {{ num2status(scope.row.good_status) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="首次刷单" width="80">
+      <el-table-column align="center" label="首次刷单" width="90">
         <template slot-scope="scope">
-          {{ num2status(scope.row.fake_date) }}
+          {{ scope.row.fake_date }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="首次推广" width="90">
+        <template slot-scope="scope">
+          {{ scope.row.promotion_date }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="完整名称">
@@ -97,7 +103,8 @@
     </el-dialog>
 
     <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品1,赠品2,补差价3)  |  状态4(在售1,下架2,删除3)  |  完整名称5  |  别名(最多5个)</pre>
+      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品,赠品,补差价)  |  状态4(在售,下架,删除)</pre>
+      <pre style="text-align:center;font-size:13px;">外部编号5  |  外部类型6(淘宝,天猫)  |  完整名称7  |  别名8(最多5个)</pre>
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
@@ -107,8 +114,8 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { GoodStatus, GoodType } from '@/utils/const'
-import { getGoodList, addGoodList, delGood, setGood } from '@/api/system/good'
+import { GoodOriginType, GoodStatus, GoodType } from '@/utils/const'
+import { getGoodList, addGoodList, delGood, setGood, flushGood } from '@/api/system/good'
 import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/goodAlias'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -200,6 +207,15 @@ export default {
         this.getGoodList()
       })
     },
+    jump(url, type) {
+      switch (type) {
+        case GoodOriginType.TAO_BAO:
+          return 'https://item.taobao.com/item.htm?id=' + url
+        case GoodOriginType.TIAN_MAO:
+          return 'https://detail.tmall.com/item.htm?id=' + url
+      }
+      return ''
+    },
     num2status(num) {
       return GoodStatus.num2text(num)
     },
@@ -219,25 +235,46 @@ export default {
       const type = header[2]
       const status = header[3]
       const origin = header[4]
-      const name = header[5]
-      const alias1 = header[6]
-      const alias2 = header[7]
-      const alias3 = header[8]
-      const alias4 = header[9]
-      const alias5 = header[10]
+      const origin_type = header[5]
+      const name = header[6]
+      const alias1 = header[7]
+      const alias2 = header[8]
+      const alias3 = header[9]
+      const alias4 = header[10]
+      const alias5 = header[11]
       const g = []
+      let stop = false
       results.forEach(v => {
-        const alias = [v[alias1], v[alias2], v[alias3], v[alias4], v[alias5]]
+        const type_num = GoodType.text2num(v[type])
+        const status_num = GoodStatus.text2num(v[status])
+        const origin_num = GoodOriginType.text2num(v[origin_type])
+        if (type_num === GoodType.OTHER) {
+          console.log('商品类型异常:' + v[id])
+          stop = true
+        }
+        if (status_num === GoodStatus.OTHER) {
+          console.log('商品状态异常:' + v[id])
+          stop = true
+        }
+        if (origin_num === GoodOriginType.OTHER) {
+          console.log('外部编号异常:' + v[id])
+          stop = true
+        }
         g.push({
           i: v[id],
           n: v[name],
           sn: v[sname],
           o: v[origin],
-          t: v[type],
-          s: v[status],
-          as: alias
+          ot: origin_num,
+          t: type_num,
+          s: status_num,
+          as: [v[alias1], v[alias2], v[alias3], v[alias4], v[alias5]]
         })
       })
+      if (stop) {
+        this.$message({ type: 'error', message: '商品信息异常!' })
+        return
+      }
       // 校验是否重复id
       for (let i = 0; i < g.length - 1; ++i) {
         for (let j = i + 1; j < g.length; ++j) {
@@ -255,6 +292,14 @@ export default {
         this.$message({ type: 'success', message: '导入成功!' })
         this.getGoodList()
         this.dialogExcelVisible = false
+      })
+    },
+    handleFlush() {
+      flushGood({
+        id: this.listQuery.id
+      }).then(() => {
+        this.$message({ type: 'success', message: '刷新成功!' })
+        this.getGoodList()
       })
     },
     handleUpdate(row) {
