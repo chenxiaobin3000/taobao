@@ -111,6 +111,21 @@
           {{ scope.row.promotion }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="扣款" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.deduction }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="刷单佣金" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.fake }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="刷单扣款" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.fake_deduction }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="未完结" width="70">
         <template slot-scope="scope">
           {{ scope.row.pending }}
@@ -174,21 +189,6 @@
       <el-table-column align="center" label="打款" width="70">
         <template slot-scope="scope">
           {{ scope.row.transfer }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="扣款" width="70">
-        <template slot-scope="scope">
-          {{ scope.row.deduction }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="刷单佣金" width="70">
-        <template slot-scope="scope">
-          {{ scope.row.fake }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="刷单扣款" width="70">
-        <template slot-scope="scope">
-          {{ scope.row.fake_deduction }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注">
@@ -292,7 +292,7 @@ export default {
         // 成交
         this.amount = parseFloat(this.pending) + parseFloat(this.settled) + parseFloat(this.close)
         // 毛利
-        this.income = parseFloat(this.pending) + parseFloat(this.settled)
+        this.income = parseFloat(this.pending) - parseFloat(this.pending_procure) + parseFloat(this.settled) - parseFloat(this.settled_procure)
         // 利润
         this.profit = parseFloat(this.settled) - parseFloat(this.settled_refund) - parseFloat(this.settled_procure) + parseFloat(this.settled_refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
         // 预估
@@ -307,7 +307,7 @@ export default {
         Object.values(data).forEach(tmp => {
           Object.values(tmp).forEach(v => {
             v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
-            v.income = parseFloat(v.pending) + parseFloat(v.settled)
+            v.income = parseFloat(v.pending) - parseFloat(v.pending_refund) + parseFloat(v.settled) - parseFloat(v.settled_procure)
             v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
             v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
             v.amount = v.amount.toFixed(1)

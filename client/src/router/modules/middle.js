@@ -20,5 +20,8 @@ export default {
   }, {
     path: 'deductionSummary', component: () => import('@/views/middle/deductionSummary'),
     name: 'middle_deductionSummary', meta: { title: '扣款管理', roles: [6004] }
+  }, {
+    path: 'goodPrepare', component: () => import('@/views/middle/goodPrepare'),
+    name: 'middle_goodPrepare', meta: { title: '预备商品', roles: [6005] }
   }]
 }

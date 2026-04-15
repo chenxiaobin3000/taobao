@@ -63,6 +63,7 @@ class Command(BaseCommand):
         Permission.objects.add(1, 6002)
         Permission.objects.add(1, 6003)
         Permission.objects.add(1, 6004)
+        Permission.objects.add(1, 6005)
 
         Role.objects.add(1, '运营')
         Permission.objects.add(2, 2000)

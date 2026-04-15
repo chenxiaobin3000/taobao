@@ -38,7 +38,10 @@ class GoodManager(models.Manager):
 
     def getByName(self, shop_id, name):
         return self.encoder(self.filter(shop_id=shop_id, name=name).first())
-    
+
+    def getByOrigin(self, shop_id, origin):
+        return self.encoder(self.filter(shop_id=shop_id, origin=origin).first())
+
     def getByType(self, shop_id, good_type):
         return self.encoderList(self.filter(shop_id=shop_id, good_type=good_type))
 
@@ -52,12 +55,12 @@ class GoodManager(models.Manager):
 
     def encoder(self, good):
         if good:
-            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'fake_date', 'promotion_date'])
+            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'fake_date', 'promotion_date', 'ctime'])
         return None
 
     def encoderList(self, goods):
         if goods:
-            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'fake_date', 'promotion_date']) for good in goods]
+            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'fake_date', 'promotion_date', 'ctime']) for good in goods]
         return None
 
 class Good(models.Model):

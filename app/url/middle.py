@@ -1,5 +1,5 @@
 from django.urls import path
-from app.views.middle import deduction_summary, fake_summary, miscellaneous, order_summary, receipt_from, receipt_item, receipt_to
+from app.views.middle import deduction_summary, fake_summary, good_prepare, miscellaneous, order_summary, receipt_from, receipt_item, receipt_to
 
 url_middle = [
     # 扣款
@@ -12,6 +12,12 @@ url_middle = [
     path('api/fake_summary/setComplete', fake_summary.setComplete),
     path('api/fake_summary/batch', fake_summary.batch),
     path('api/fake_summary/getList', fake_summary.getList),
+
+    # 商品
+    path('api/good_prepare/addList', good_prepare.add),
+    path('api/good_prepare/flush', good_prepare.flush),
+    path('api/good_prepare/del', good_prepare.delete),
+    path('api/good_prepare/getList', good_prepare.getList),
 
     # 杂项
     path('api/misc/add', miscellaneous.add),

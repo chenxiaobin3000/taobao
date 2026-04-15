@@ -207,14 +207,8 @@ export default {
         this.getGoodList()
       })
     },
-    jump(url, type) {
-      switch (type) {
-        case GoodOriginType.TAO_BAO:
-          return 'https://item.taobao.com/item.htm?id=' + url
-        case GoodOriginType.TIAN_MAO:
-          return 'https://detail.tmall.com/item.htm?id=' + url
-      }
-      return ''
+    jump(id, type) {
+      return GoodOriginType.getUrl(id, type)
     },
     num2status(num) {
       return GoodStatus.num2text(num)

@@ -387,6 +387,15 @@ export const GoodOriginType = {
     }, {
       id: this.TIAN_MAO, name: '天猫'
     }]
+  },
+  getUrl(id, type) {
+    switch (type) {
+      case GoodOriginType.TAO_BAO:
+        return 'https://item.taobao.com/item.htm?id=' + id
+      case GoodOriginType.TIAN_MAO:
+        return 'https://detail.tmall.com/item.htm?id=' + id
+    }
+    return ''
   }
 }
 
