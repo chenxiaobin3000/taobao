@@ -66,15 +66,15 @@ class Command(BaseCommand):
         Permission.objects.add(1, 6005)
 
         Role.objects.add(1, '运营')
-        Permission.objects.add(2, 2000)
-        Permission.objects.add(2, 2001)
-        Permission.objects.add(2, 2003)
         Permission.objects.add(2, 3000)
         Permission.objects.add(2, 3001)
         Permission.objects.add(2, 3002)
         Permission.objects.add(2, 3009)
         Permission.objects.add(2, 3010)
         Permission.objects.add(2, 3011)
+        Permission.objects.add(2, 6000)
+        Permission.objects.add(2, 6003)
+        Permission.objects.add(2, 6005)
 
         Shop.objects.add(1, 1, '德国KSTE', 500)
         Shop.objects.add(1, 1, '挪威VER', 500)

@@ -25,7 +25,7 @@
           {{ num2type(scope.row.origin_type) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="创建时间" width="90">
+      <el-table-column align="center" label="创建时间" width="160">
         <template slot-scope="scope">
           {{ scope.row.ctime }}
         </template>
@@ -69,7 +69,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="updateData()">确定</el-button>
+        <el-button type="primary" @click="createData()">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -134,7 +134,7 @@ export default {
         id: 0,
         name: '',
         origin: '',
-        origin_type: 0,
+        origin_type: 1,
         good_note: ''
       }
     },
@@ -174,9 +174,16 @@ export default {
       this.getGoodPrepareList()
     },
     handleCreate() {
+      this.resetTemp()
+      this.dialogVisible = true
+    },
+    createData() {
       addGoodPrepare({
         id: this.listQuery.id,
-        g: this.temp
+        name: this.temp.name,
+        origin: this.temp.origin,
+        origin_type: this.temp.origin_type,
+        note: this.temp.good_note
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })
         this.getGoodPrepareList()

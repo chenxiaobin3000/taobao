@@ -14,7 +14,7 @@ url_middle = [
     path('api/fake_summary/getList', fake_summary.getList),
 
     # 商品
-    path('api/good_prepare/addList', good_prepare.add),
+    path('api/good_prepare/add', good_prepare.add),
     path('api/good_prepare/flush', good_prepare.flush),
     path('api/good_prepare/del', good_prepare.delete),
     path('api/good_prepare/getList', good_prepare.getList),

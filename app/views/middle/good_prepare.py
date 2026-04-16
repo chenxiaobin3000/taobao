@@ -31,10 +31,10 @@ def flush(request):
     if goods:
         for good in goods:
             # 首次创建时间
-            if not good['join_date']:
+            if good['join_date'] is None:
                 temp = Good.objects.getByOrigin(shop_id, good['origin'])
                 if temp:
-                    Good.objects.setJoinDate(good['id'], temp['ctime'])
+                    GoodPrepare.objects.setJoinDate(good['id'], temp['ctime'])
     response = {
         'code': 0,
         'msg': 'success'
