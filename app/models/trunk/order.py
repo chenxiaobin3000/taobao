@@ -30,7 +30,10 @@ class OrderManager(models.Manager):
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
     def getListByDate(self, shop_id, start_date):
-        return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date))
+        return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date).order_by('-create_time'))
+
+    def getListByDateRange(self, shop_id, start_date, end_date):
+        return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date, create_time__lt=end_date).order_by('-create_time'))
 
     def encoder(self, order):
         if order:

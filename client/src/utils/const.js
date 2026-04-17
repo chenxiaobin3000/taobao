@@ -317,6 +317,24 @@ export const FinanceType = {
   }
 }
 
+// 商品关注状态
+export const GoodFollowStatus = {
+  ALL: 1, // 全部
+  HAS_FOLLOW: 2, // 已关注
+  NOT_FOLLOW: 3, // 未关注
+  OTHER: 4, // 异常
+
+  getList() {
+    return [{
+      id: this.ALL, name: '全部'
+    }, {
+      id: this.HAS_FOLLOW, name: '已关注'
+    }, {
+      id: this.NOT_FOLLOW, name: '未关注'
+    }]
+  }
+}
+
 // 商品状态
 export const GoodStatus = {
   SALE: 1, // 在售

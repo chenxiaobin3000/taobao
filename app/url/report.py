@@ -1,5 +1,5 @@
 from django.urls import path
-from app.views.report import board_report, cost_report, day_report, fake_report, good_report, order_report, omission_report, promotion_report, year_report
+from app.views.report import board_report, cost_report, day_report, fake_report, good_follow, good_report, order_report, omission_report, promotion_report, year_report
 
 url_report = [
     # 大屏报表
@@ -13,6 +13,12 @@ url_report = [
 
     # 刷单报表
     path('api/fake_report/getList', fake_report.getList),
+
+    # 商品
+    path('api/good_follow/add', good_follow.add),
+    path('api/good_follow/set', good_follow.set),
+    path('api/good_follow/del', good_follow.delete),
+    path('api/good_follow/getList', good_follow.getList),
 
     # 商品报表
     path('api/good_report/getList', good_report.getList),

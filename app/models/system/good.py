@@ -53,6 +53,12 @@ class GoodManager(models.Manager):
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-ctime')[left:right])
 
+    def getListInIds(self, shop_id, ids):
+        return self.encoderList(self.filter(shop_id=shop_id, good_id__in=ids).order_by('-ctime'))
+
+    def getListNotInIds(self, shop_id, ids):
+        return self.encoderList(self.filter(shop_id=shop_id).exclude(good_id__in=ids).order_by('-ctime'))
+
     def encoder(self, good):
         if good:
             return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'fake_date', 'promotion_date', 'ctime'])
