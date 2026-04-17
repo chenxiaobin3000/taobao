@@ -2,7 +2,7 @@ from django.db import connection
 from app.models.model import Model
 
 # 订单表
-class Order(Model):
+class NativeOrder(Model):
     def total(self, shop_id):
         with connection.cursor() as cursor:
             cursor.execute(

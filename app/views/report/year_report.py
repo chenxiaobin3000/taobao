@@ -6,9 +6,9 @@ from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
-from app.models.report.order import Order
-from app.models.report.fake import Fake
-from app.models.report.promotion import Promotion
+from app.models.report.native_order import NativeOrder
+from app.models.report.native_fake import NativeFake
+from app.models.report.native_promotion import NativePromotion
 
 @require_POST
 @transaction.atomic
@@ -53,7 +53,7 @@ def getList(request):
         start_date = datetime(year, month, 1)
 
     # 待发货
-    paids = Order().groupByMonth(shop_id, OrderStatus.PAID)
+    paids = NativeOrder().groupByMonth(shop_id, OrderStatus.PAID)
     for paid in paids:
         key_month = paid['create_month']
         if key_month in datas:
@@ -64,7 +64,7 @@ def getList(request):
             return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 已发货
-    shippeds = Order().groupByMonth(shop_id, OrderStatus.SHIPPED)
+    shippeds = NativeOrder().groupByMonth(shop_id, OrderStatus.SHIPPED)
     for shipped in shippeds:
         key_month = shipped['create_month']
         if key_month in datas:
@@ -79,7 +79,7 @@ def getList(request):
             return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 已结算
-    successes = Order().groupByMonth(shop_id, OrderStatus.SUCCESS)
+    successes = NativeOrder().groupByMonth(shop_id, OrderStatus.SUCCESS)
     for success in successes:
         key_month = success['create_month']
         if key_month in datas:
@@ -97,7 +97,7 @@ def getList(request):
             return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 已关闭
-    closes = Order().groupByMonth(shop_id, OrderStatus.CLOSE)
+    closes = NativeOrder().groupByMonth(shop_id, OrderStatus.CLOSE)
     for close_data in closes:
         key_month = close_data['create_month']
         if key_month in datas:
@@ -115,14 +115,14 @@ def getList(request):
             return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 推广
-    promotions = Promotion().groupByMonth(shop_id)
+    promotions = NativePromotion().groupByMonth(shop_id)
     for temp in promotions:
         key_month = temp['create_month']
         if key_month in datas:
             datas[key_month]['promotion'] = temp['payment']
 
     # 刷单
-    fakes = Fake().groupByMonth(shop_id)
+    fakes = NativeFake().groupByMonth(shop_id)
     for temp in fakes:
         key_month = temp['create_month']
         if key_month in datas:

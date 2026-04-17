@@ -2,7 +2,7 @@ from django.db import connection
 from app.models.model import Model
 
 # 刷单表
-class Fake(Model):
+class NativeFake(Model):
     def groupByMonth(self, shop_id):
         with connection.cursor() as cursor:
             cursor.execute(

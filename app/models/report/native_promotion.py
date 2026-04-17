@@ -2,7 +2,7 @@ from django.db import connection
 from app.models.model import Model
 
 # 推广表
-class Promotion(Model):
+class NativePromotion(Model):
     def groupByMonth(self, shop_id):
         with connection.cursor() as cursor:
             cursor.execute(

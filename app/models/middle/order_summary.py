@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.forms.models import model_to_dict
-from app.models.report.order import Order
+from app.models.report.native_order import NativeOrder
 
 # 订单汇总表
 class OrderSummaryManager(models.Manager):
@@ -38,7 +38,7 @@ class OrderSummaryManager(models.Manager):
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
 
     def getAll(self, shop_id, order_status, start_date, end_date):
-        return Order().groupByDate(shop_id, order_status, start_date, end_date)
+        return NativeOrder().groupByDate(shop_id, order_status, start_date, end_date)
 
     def encoder(self, order):
         if order:

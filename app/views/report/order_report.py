@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
-from app.models.report.order import Order
+from app.models.report.native_order import NativeOrder
 from app.models.system.good import Good
 
 # 刷新订单中间表
@@ -19,11 +19,11 @@ def getList(request):
     total = []
     datas = None
     if status == OrderStatus.OTHER:
-        total = Order().total(shop_id)
-        datas = Order().getList(shop_id, page, num)
+        total = NativeOrder().total(shop_id)
+        datas = NativeOrder().getList(shop_id, page, num)
     else:
-        total = Order().totalByStatus(shop_id, status)
-        datas = Order().getListByStatus(shop_id, status, page, num)
+        total = NativeOrder().totalByStatus(shop_id, status)
+        datas = NativeOrder().getListByStatus(shop_id, status, page, num)
 
     # 解析商品名称
     if datas:
