@@ -6,9 +6,9 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.const.good_follow import GoodFollowStatus
 from app.models.system.good import Good
-from app.models.report.good_follow import GoodFollow
 from app.models.trunk.order import Order
-from app.models.trunk.promotion_detail import PromotionDetail
+from app.models.report.good_follow import GoodFollow
+from app.models.report.native_promotion_detail import NativePromotionDetail
 
 @require_POST
 @transaction.atomic
@@ -56,7 +56,7 @@ def getList(request):
         pass
 
     # 获取推广数据
-    promotions= PromotionDetail.objects.getListByDateRange(shop_id, start_date, end_date)
+    promotions= NativePromotionDetail().getListByDateRange(shop_id, start_date, end_date)
     if promotions:
         pass
 
