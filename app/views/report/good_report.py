@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timedelta
+from functools import cmp_to_key
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -24,22 +25,31 @@ def getList(request):
     }
 
     # 生成商品列表
-    good = []
+    datas = []
     match follow:
         case GoodFollowStatus.ALL:
-            good = Good.objects.getList(shop_id, 1, 1000)
+            goods = Good.objects.getList(shop_id, 1, 1000)
+            if goods:
+                for good in goods:
+                    datas.append(init_data(good['good_id'], good['short_name']))
 
         case GoodFollowStatus.HAS_FOLLOW:
             temps = GoodFollow.objects.getList(shop_id, 1, 1000)
             if temps:
                 ids = [temp['good_id'] for temp in temps]
-                good = Good.objects.getListInIds(shop_id, ids)
+                goods = Good.objects.getListInIds(shop_id, ids)
+                if goods:
+                    for good in goods:
+                        datas.append(init_data(good['good_id'], good['short_name']))
 
         case GoodFollowStatus.NOT_FOLLOW:
             temps = GoodFollow.objects.getList(shop_id, 1, 1000)
             if temps:
                 ids = [temp['good_id'] for temp in temps]
-                good = Good.objects.getListNotInIds(shop_id, ids)
+                goods = Good.objects.getListNotInIds(shop_id, ids)
+                if goods:
+                    for good in goods:
+                        datas.append(init_data(good['good_id'], good['short_name']))
 
         case _:
             response['code'] = -1
@@ -56,14 +66,29 @@ def getList(request):
         pass
 
     # 获取推广数据
-    promotions= NativePromotionDetail().getListByDateRange(shop_id, start_date, end_date)
+    promotions= NativePromotionDetail().getSumByDateRange(shop_id, start_date, end_date)
     if promotions:
-        pass
+        for pormotion in promotions:
+            for data in datas:
+                if data['good_id'] == pormotion['good_id']:
+                    data['cost'] = round(pormotion['cost'], 2)
+                    data['deal_amount'] = round(pormotion['deal_amount'], 2)
+                    data['deal_num'] = round(pormotion['deal_num'], 2)
+                    break
 
     # 按利润排序
-
-    datas = []
+    datas = sorted(datas, key = cmp_to_key(lambda a, b: b['cost'] - a['cost']))
+    print(datas)
     response['data'] = {
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
+
+def init_data(id, name):
+    return {
+        'good_id': id,
+        'name': name,
+        'cost': 0,
+        'deal_amount': 0,
+        'deal_num': 0
+    }

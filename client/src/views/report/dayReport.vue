@@ -20,7 +20,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-button type="primary" size="mini" style="width:80px" @click="handleSelect()">查询</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
       <el-row style="font-size:small">
