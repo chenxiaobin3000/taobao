@@ -33,13 +33,13 @@
     </el-form>
     <el-row>
       <el-col :span="20">
-        <el-table ref="table_good" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+        <el-table ref="table_good" v-loading="loading" :data="listGood" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
           <el-table-column align="center" label="商品编号" width="120">
             <template slot-scope="scope">
               {{ scope.row.good_id }}
             </template>
           </el-table-column>
-          <el-table-column align="center" label="名字" width="90">
+          <el-table-column align="center" label="名称" width="90">
             <template slot-scope="scope">
               {{ scope.row.name }}
             </template>
@@ -59,6 +59,31 @@
               {{ scope.row.deal_num }}
             </template>
           </el-table-column>
+          <el-table-column align="center" label="总金额" width="80">
+            <template slot-scope="scope">
+              {{ scope.row.all }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="实际金额" width="80">
+            <template slot-scope="scope">
+              {{ scope.row.payment }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="退款" width="80">
+            <template slot-scope="scope">
+              {{ scope.row.refund }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="采购" width="80">
+            <template slot-scope="scope">
+              {{ scope.row.procure }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="扣款" width="80">
+            <template slot-scope="scope">
+              {{ scope.row.deduction }}
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="备注">
             <template slot-scope="scope">
               {{ scope.row.transfer_note }}
@@ -67,10 +92,20 @@
         </el-table>
       </el-col>
       <el-col :span="4">
-        <el-table ref="table_follow" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-          <el-table-column align="center" label="打款人" width="80">
+        <el-table ref="table_follow" v-loading="loading" :data="listFollow" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+          <el-table-column align="center" label="商品编号" width="120">
             <template slot-scope="scope">
-              {{ scope.row.user_name }}
+              {{ scope.row.good_id }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="名称" width="90">
+            <template slot-scope="scope">
+              {{ scope.row.name }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="优先级" width="90">
+            <template slot-scope="scope">
+              {{ scope.row.priority }}
             </template>
           </el-table-column>
         </el-table>
@@ -83,6 +118,7 @@
 import { mapState } from 'vuex'
 import { GoodFollowStatus } from '@/utils/const'
 import { getGoodReport } from '@/api/report/goodReport'
+import { getGoodFollowList } from '@/api/report/goodFollow'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {
@@ -90,7 +126,8 @@ export default {
     return {
       userdata: {},
       tableHeight: 600,
-      list: null,
+      listGood: null,
+      listFollow: null,
       loading: false,
       shopList: [], // 本公司所有店铺列表
       followList: [], // 关注状态列表
@@ -136,11 +173,21 @@ export default {
       getGoodReport(
         this.listQuery
       ).then(response => {
-        this.list = response.data.data.list
+        this.listGood = response.data.data.list
         this.loading = false
       }).catch(error => {
         this.loading = false
         Promise.reject(error)
+      })
+    },
+    getGoodFollowList() {
+      getGoodFollowList({
+        id: this.listQuery.id,
+        page: 1,
+        num: 1000
+      }).then(response => {
+        this.listFollow = response.data.data.list
+        this.getGoodReport()
       })
     },
     getOwnShopList() {
@@ -152,7 +199,7 @@ export default {
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }
-        this.getGoodReport()
+        this.getGoodFollowList()
       })
     },
     handleChange() {

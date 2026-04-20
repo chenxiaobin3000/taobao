@@ -6,6 +6,6 @@ class OrderStatus:
     SUCCESS = 1 # 交易成功
     CLOSE = 2   # 交易关闭
     SHIPPED = 3 # 已发货：卖家已发货，等待买家确认
-    PAID = 4    # 未发货：买家已付款,等待卖家发货 5等待买家付款
+    PAID = 4    # 待发货：买家已付款,等待卖家发货 5等待买家付款
     UNPAID = 5  # 未付款：等待买家付款
     OTHER = 6   # 异常

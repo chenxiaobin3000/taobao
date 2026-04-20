@@ -32,9 +32,6 @@ class OrderManager(models.Manager):
     def getListByDate(self, shop_id, start_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date).order_by('-create_time'))
 
-    def getListByDateRange(self, shop_id, start_date, end_date):
-        return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date, create_time__lt=end_date).order_by('-create_time'))
-
     def encoder(self, order):
         if order:
             return model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'])
@@ -44,7 +41,7 @@ class OrderManager(models.Manager):
         if orders:
             return [model_to_dict(order, fields=['id', 'order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note']) for order in orders]
         return None
-    
+
 class Order(models.Model):
     objects = OrderManager()
     shop_id = models.IntegerField(db_index = True) # 店铺id

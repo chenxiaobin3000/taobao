@@ -40,6 +40,9 @@ class OrderSummaryManager(models.Manager):
     def getAll(self, shop_id, order_status, start_date, end_date):
         return NativeOrder().groupByDate(shop_id, order_status, start_date, end_date)
 
+    def getListByDate(self, shop_id, start_date, end_date):
+        return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date, create_time__lt=end_date).order_by('-create_time'))
+
     def encoder(self, order):
         if order:
             return model_to_dict(order, fields=['id', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'good_ids', 'deduction', 'deduction_detail'])
