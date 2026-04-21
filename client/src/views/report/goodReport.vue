@@ -100,12 +100,13 @@
           </el-table-column>
           <el-table-column align="center" label="名称" width="90">
             <template slot-scope="scope">
-              {{ scope.row.name }}
+              {{ scope.row.short_name }}
             </template>
           </el-table-column>
-          <el-table-column align="center" label="优先级" width="90">
+          <el-table-column align="center" label="优先级" width="70">
             <template slot-scope="scope">
-              {{ scope.row.priority }}
+              <a v-if="scope.row.show" :href="handleEdit(scope.row.good_id)">{{ scope.row.priority }}</a>
+              <el-input v-else v-model="temp.priority" />
             </template>
           </el-table-column>
         </el-table>
@@ -120,6 +121,7 @@ import { GoodFollowStatus } from '@/utils/const'
 import { getGoodReport } from '@/api/report/goodReport'
 import { getGoodFollowList } from '@/api/report/goodFollow'
 import { getOwnShopList } from '@/api/system/shop'
+import { getGoodList } from '@/api/system/good'
 
 export default {
   data() {
@@ -136,7 +138,8 @@ export default {
         follow: 1,
         sdate: 0,
         edate: 0
-      }
+      },
+      temp: {}
     }
   },
   computed: {
@@ -152,7 +155,7 @@ export default {
   mounted: function() {
     setTimeout(() => {
       if (this.$refs.table_follow) {
-        this.tableHeight = window.innerHeight - this.$refs.table_follow.$el.offsetTop - 78
+        this.tableHeight = window.innerHeight - this.$refs.table_good.$el.offsetTop - 78
       }
     }, 1000)
   },
@@ -165,9 +168,15 @@ export default {
     const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 31
     this.listQuery.sdate.setTime(seconds)
     this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
+    this.resetTemp()
     this.getOwnShopList()
   },
   methods: {
+    resetTemp() {
+      this.temp = {
+        priority: 0
+      }
+    },
     getGoodReport() {
       this.loading = true
       getGoodReport(
@@ -186,8 +195,22 @@ export default {
         page: 1,
         num: 1000
       }).then(response => {
-        this.listFollow = response.data.data.list
+        // this.listFollow = response.data.data.list
+        this.listFollow.forEach(v => {
+          v.priority = 0
+          v.show = true
+        })
         this.getGoodReport()
+      })
+    },
+    getGoodList() {
+      getGoodList({
+        id: this.listQuery.id,
+        page: 1,
+        num: 1000
+      }).then(response => {
+        this.listFollow = response.data.data.list
+        this.getGoodFollowList()
       })
     },
     getOwnShopList() {
@@ -199,7 +222,7 @@ export default {
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }
-        this.getGoodFollowList()
+        this.getGoodList()
       })
     },
     handleChange() {
@@ -208,6 +231,14 @@ export default {
     },
     handleSelect() {
       this.getGoodReport()
+    },
+    handleEdit(id) {
+      this.listFollow.forEach(v => {
+        if (v.good_id === id) {
+          console.log(id)
+          v.show = false
+        }
+      })
     }
   }
 }

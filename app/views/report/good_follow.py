@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.report.good_follow import GoodFollow
-from app.models.system.good import Good
 
 @require_POST
 @transaction.atomic
@@ -54,13 +53,6 @@ def getList(request):
     num = int(post.get('num'))
     total = GoodFollow.objects.total(shop_id)
     datas = GoodFollow.objects.getList(shop_id, page, num)
-
-    if datas:
-        for data in datas:
-            good = Good.objects.findById(shop_id, data.good_id)
-            if good:
-                data['name'] = good['short_name']
-
     response = {
         'code': 0,
         'msg': 'success',
