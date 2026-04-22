@@ -11,7 +11,7 @@
         </el-col>
         <el-col :span="5">
           <el-form-item label="关注:" prop="followName">
-            <el-select v-model="listQuery.follow" class="filter-item" placeholder="请选择" @change="handleChange">
+            <el-select v-model="listQuery.follow" class="filter-item" placeholder="请选择" @change="handleSelect">
               <el-option v-for="item in followList" :key="'F' + item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
@@ -183,7 +183,37 @@ export default {
       getGoodReport(
         this.listQuery
       ).then(response => {
-        this.listReport = response.data.data.list
+        switch (this.listQuery.follow) {
+          case GoodFollowStatus.ALL:
+            this.listReport = response.data.data.list
+            break
+
+          case GoodFollowStatus.HAS_FOLLOW:
+            this.listReport = []
+            response.data.data.list.forEach(v => {
+              for (let i = 0; i < this.listFollow.length; ++i) {
+                if (v.good_id === this.listFollow[i].good_id) {
+                  this.listReport.push(v)
+                }
+              }
+            })
+            break
+
+          default:
+            this.listReport = []
+            response.data.data.list.forEach(v => {
+              let find = false
+              for (let i = 0; i < this.listFollow.length; ++i) {
+                if (v.good_id === this.listFollow[i].good_id) {
+                  find = true
+                  break
+                }
+              }
+              if (!find) {
+                this.listReport.push(v)
+              }
+            })
+        }
         this.loading = false
       }).catch(error => {
         this.loading = false
