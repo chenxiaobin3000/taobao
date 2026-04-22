@@ -32,8 +32,8 @@
       </el-row>
     </el-form>
     <el-row>
-      <el-col :span="20">
-        <el-table ref="table_good" v-loading="loading" :data="listGood" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+      <el-col :span="19">
+        <el-table ref="table_good" v-loading="loading" :data="listReport" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
           <el-table-column align="center" label="商品编号" width="120">
             <template slot-scope="scope">
               {{ scope.row.good_id }}
@@ -91,8 +91,8 @@
           </el-table-column>
         </el-table>
       </el-col>
-      <el-col :span="4">
-        <el-table ref="table_follow" v-loading="loading" :data="listFollow" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+      <el-col :span="5">
+        <el-table ref="table_follow" v-loading="loading" :data="listGood" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
           <el-table-column align="center" label="商品编号" width="120">
             <template slot-scope="scope">
               {{ scope.row.good_id }}
@@ -103,10 +103,10 @@
               {{ scope.row.short_name }}
             </template>
           </el-table-column>
-          <el-table-column align="center" label="优先级" width="70">
+          <el-table-column align="center" label="优先级">
             <template slot-scope="scope">
-              <a v-if="scope.row.show" :href="handleEdit(scope.row.good_id)">{{ scope.row.priority }}</a>
-              <el-input v-else v-model="temp.priority" />
+              <a v-if="scope.row.show" @click="handleEdit(scope.row.good_id)">{{ scope.row.priority }}</a>
+              <el-input v-else v-model="temp.priority" @keyup.enter.native="handleSetPriority" />
             </template>
           </el-table-column>
         </el-table>
@@ -119,7 +119,7 @@
 import { mapState } from 'vuex'
 import { GoodFollowStatus } from '@/utils/const'
 import { getGoodReport } from '@/api/report/goodReport'
-import { getGoodFollowList } from '@/api/report/goodFollow'
+import { getGoodFollowList, addGoodFollow, setGoodFollow, delGoodFollow } from '@/api/report/goodFollow'
 import { getOwnShopList } from '@/api/system/shop'
 import { getGoodList } from '@/api/system/good'
 
@@ -128,6 +128,7 @@ export default {
     return {
       userdata: {},
       tableHeight: 600,
+      listReport: null,
       listGood: null,
       listFollow: null,
       loading: false,
@@ -182,7 +183,7 @@ export default {
       getGoodReport(
         this.listQuery
       ).then(response => {
-        this.listGood = response.data.data.list
+        this.listReport = response.data.data.list
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -195,11 +196,19 @@ export default {
         page: 1,
         num: 1000
       }).then(response => {
-        // this.listFollow = response.data.data.list
-        this.listFollow.forEach(v => {
-          v.priority = 0
-          v.show = true
-        })
+        this.listFollow = response.data.data.list
+        if (this.listFollow) {
+          this.listGood.forEach(v => {
+            v.priority = 0
+            v.show = true
+            for (let i = 0; i < this.listFollow.length; ++i) {
+              if (v.good_id === this.listFollow[i].good_id) {
+                v.priority = this.listFollow[i].priority
+                break
+              }
+            }
+          })
+        }
         this.getGoodReport()
       })
     },
@@ -209,7 +218,11 @@ export default {
         page: 1,
         num: 1000
       }).then(response => {
-        this.listFollow = response.data.data.list
+        this.listGood = response.data.data.list
+        this.listGood.forEach(v => {
+          v.priority = 0
+          v.show = true
+        })
         this.getGoodFollowList()
       })
     },
@@ -232,13 +245,62 @@ export default {
     handleSelect() {
       this.getGoodReport()
     },
-    handleEdit(id) {
-      this.listFollow.forEach(v => {
-        if (v.good_id === id) {
-          console.log(id)
+    handleEdit(good_id) {
+      this.listGood.forEach(v => {
+        if (v.good_id === good_id) {
           v.show = false
+          this.temp.id = 0
+          this.temp.good_id = good_id
+          this.temp.priority = v.priority
+          for (let i = 0; i < this.listFollow.length; ++i) {
+            if (v.good_id === this.listFollow[i].good_id) {
+              this.temp.id = this.listFollow[i].id
+            }
+          }
         }
       })
+    },
+    handleSetPriority() {
+      // 优先级必须在[0-10]之间
+      const priority = parseInt(this.temp.priority)
+      if (priority < 0 || priority > 10) {
+        this.$message({ type: 'error', message: '优先级必须在[0-10]之间!' })
+        return
+      }
+      if (this.temp.id === 0) {
+        addGoodFollow({
+          id: this.listQuery.id,
+          good_id: this.temp.good_id,
+          priority: priority
+        }).then(() => {
+          this.$message({ type: 'success', message: '修改成功!' })
+          this.getGoodFollowList()
+        })
+      } else {
+        this.listFollow.forEach(v => {
+          if (v.good_id === this.temp.good_id) {
+            if (priority === 0) {
+              // 优先级小于0直接删除
+              delGoodFollow({
+                id: this.temp.id
+              }).then(() => {
+                this.$message({ type: 'success', message: '修改成功!' })
+                this.getGoodFollowList()
+              })
+            } else {
+              setGoodFollow({
+                id: this.temp.id,
+                priority: priority
+              }).then(() => {
+                this.$message({ type: 'success', message: '修改成功!' })
+                this.getGoodFollowList()
+              })
+            }
+          }
+        })
+      }
+      this.temp.id = 0
+      this.temp.good_id = 0
     }
   }
 }

@@ -22,7 +22,7 @@
       </el-table-column>
       <el-table-column align="center" label="外部编码" width="120">
         <template slot-scope="scope">
-          <a :href="jump(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
+          <a :href="handleJump(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
         </template>
       </el-table-column>
       <el-table-column align="center" label="商品类型" width="70">
@@ -207,14 +207,14 @@ export default {
         this.getGoodList()
       })
     },
-    jump(id, type) {
-      return GoodOriginType.getUrl(id, type)
-    },
     num2status(num) {
       return GoodStatus.num2text(num)
     },
     num2type(num) {
       return GoodType.num2text(num)
+    },
+    handleJump(id, type) {
+      return GoodOriginType.getUrl(id, type)
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
