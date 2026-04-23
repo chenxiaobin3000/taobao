@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from decimal import Decimal
 from functools import cmp_to_key
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
@@ -90,15 +91,19 @@ def getList(request):
                     data['deal_num'] = round(pormotion['deal_num'], 2)
                     break
 
-    # 按利润排序
-    datas = sorted(datas, key = cmp_to_key(lambda a, b: b['cost'] - a['cost']))
     for data in datas:
         data['payment'] = round(data['payment'], 2)
         data['refund'] = round(data['refund'], 2)
         data['procure'] = round(data['procure'], 2)
         data['deduction'] = round(data['deduction'], 2)
         data['close'] = round(data['close'], 2)
-        data['all'] = round(data['payment'] + data['close'], 2)
+        data['all'] = round(data['payment'] + data['close'], 2) # 总金额
+        data['profit'] = round(data['payment'] - Decimal(data['cost']) - data['procure'] - data['deduction'], 2) # 利润
+        data['all_return'] = round(round(data['refund'] / (data['payment'] + data['close'] + data['refund'] + Decimal(0.01)), 3) * 100, 1) # 总退货率
+        data['return'] = round(round(data['refund'] / (data['payment'] + data['refund'] + Decimal(0.01)), 3) * 100, 1) # 净退货率
+
+    # 按利润排序
+    datas = sorted(datas, key = cmp_to_key(lambda a, b: b['profit'] - a['profit']))
     response['data'] = {
         'list': datas
     }

@@ -34,7 +34,7 @@
     <el-row>
       <el-col :span="19">
         <el-table ref="table_good" v-loading="loading" :data="listReport" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-          <el-table-column align="center" label="商品编号" width="120">
+          <el-table-column align="center" label="商品编号" width="110">
             <template slot-scope="scope">
               {{ scope.row.good_id }}
             </template>
@@ -42,6 +42,10 @@
           <el-table-column align="center" label="名称" width="90">
             <template slot-scope="scope">
               {{ scope.row.name }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="利润" width="80">
+            <template slot-scope="scope"><div :style="{ color: scope.row.expect < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
             </template>
           </el-table-column>
           <el-table-column align="center" label="花费" width="80">
@@ -64,9 +68,19 @@
               {{ scope.row.all }}
             </template>
           </el-table-column>
+          <el-table-column align="center" label="总退货率" width="80">
+            <template slot-scope="scope">
+              {{ scope.row.all_return }}%
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="实际金额" width="80">
             <template slot-scope="scope">
               {{ scope.row.payment }}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="净退货率" width="80">
+            <template slot-scope="scope">
+              {{ scope.row.return }}%
             </template>
           </el-table-column>
           <el-table-column align="center" label="退款" width="80">
@@ -92,8 +106,8 @@
         </el-table>
       </el-col>
       <el-col :span="5">
-        <el-table ref="table_follow" v-loading="loading" :data="listGood" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-          <el-table-column align="center" label="商品编号" width="120">
+        <el-table ref="table_follow" :key="isUpdate" v-loading="loading" :data="listGood" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+          <el-table-column align="center" label="商品编号" width="110">
             <template slot-scope="scope">
               {{ scope.row.good_id }}
             </template>
@@ -128,6 +142,7 @@ export default {
     return {
       userdata: {},
       tableHeight: 600,
+      isUpdate: true,
       listReport: null,
       listGood: null,
       listFollow: null,
@@ -228,6 +243,7 @@ export default {
       }).then(response => {
         this.listFollow = response.data.data.list
         if (this.listFollow) {
+          // 更新优先级
           this.listGood.forEach(v => {
             v.priority = 0
             v.show = true
@@ -238,7 +254,13 @@ export default {
               }
             }
           })
+
+          // 重新排序
+          this.listGood.sort((a, b) => {
+            return b.priority - a.priority
+          })
         }
+        this.isUpdate = !this.isUpdate
         this.getGoodReport()
       })
     },
