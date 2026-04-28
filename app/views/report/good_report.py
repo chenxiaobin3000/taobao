@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.const.good_follow import GoodFollowStatus
+from app.models.const.good_status import GoodStatus
+from app.models.const.good_type import GoodType
 from app.models.const.order_status import OrderStatus
 from app.models.system.good import Good
 from app.models.middle.order_summary import OrderSummary
@@ -33,7 +35,8 @@ def getList(request):
             goods = Good.objects.getList(shop_id, 1, 1000)
             if goods:
                 for good in goods:
-                    datas.append(init_data(good['good_id'], good['short_name']))
+                    if good['good_status'] == GoodStatus.SALE and good['good_type'] == GoodType.NORMAL:
+                        datas.append(init_data(good['good_id'], good['short_name']))
 
         case GoodFollowStatus.HAS_FOLLOW:
             temps = GoodFollow.objects.getList(shop_id, 1, 1000)
@@ -42,7 +45,8 @@ def getList(request):
                 goods = Good.objects.getListInIds(shop_id, ids)
                 if goods:
                     for good in goods:
-                        datas.append(init_data(good['good_id'], good['short_name']))
+                        if good['good_status'] == GoodStatus.SALE and good['good_type'] == GoodType.NORMAL:
+                            datas.append(init_data(good['good_id'], good['short_name']))
 
         case GoodFollowStatus.NOT_FOLLOW:
             temps = GoodFollow.objects.getList(shop_id, 1, 1000)
@@ -51,7 +55,8 @@ def getList(request):
                 goods = Good.objects.getListNotInIds(shop_id, ids)
                 if goods:
                     for good in goods:
-                        datas.append(init_data(good['good_id'], good['short_name']))
+                        if good['good_status'] == GoodStatus.SALE and good['good_type'] == GoodType.NORMAL:
+                            datas.append(init_data(good['good_id'], good['short_name']))
 
         case _:
             response['code'] = -1

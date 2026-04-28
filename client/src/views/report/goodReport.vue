@@ -45,7 +45,7 @@
             </template>
           </el-table-column>
           <el-table-column align="center" label="利润" width="80">
-            <template slot-scope="scope"><div :style="{ color: scope.row.expect < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
+            <template slot-scope="scope"><div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
             </template>
           </el-table-column>
           <el-table-column align="center" label="花费" width="80">

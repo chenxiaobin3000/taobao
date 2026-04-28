@@ -1,5 +1,5 @@
 # 商品状态
-class GoodType:
+class GoodStatus:
     def __setattr__(self, name, value):
         raise AttributeError("Cannot modify constant attribute.")
  

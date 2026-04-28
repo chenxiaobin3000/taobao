@@ -185,7 +185,7 @@ export default {
           o[i].pi = ext[2]
         } else {
           // 忽略未付款或订单关闭
-          if (o[i].st === OrderStatus.CLOSE || o[i].st === OrderStatus.UNPAID) {
+          if (o[i].st === OrderStatus.CLOSE || o[i].st === OrderStatus.UNPAID || o[i].st === OrderStatus.PAID) {
             continue
           }
           // 金额小于6认定为刷单，忽略备注

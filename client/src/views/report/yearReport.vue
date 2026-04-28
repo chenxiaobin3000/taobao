@@ -101,7 +101,7 @@
           {{ scope.row.income }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="推广" width="70">
+      <el-table-column align="center" label="推广" width="80">
         <template slot-scope="scope">
           {{ scope.row.promotion }}
         </template>
@@ -141,7 +141,7 @@
           {{ scope.row.pending_refund_procure }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已完结" width="70">
+      <el-table-column align="center" label="已完结" width="80">
         <template slot-scope="scope">
           {{ scope.row.settled }}
         </template>
@@ -161,12 +161,12 @@
           {{ scope.row.settled_refund_procure }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已关闭" width="70">
+      <el-table-column align="center" label="已关闭" width="80">
         <template slot-scope="scope">
           {{ scope.row.close }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="关闭退款" width="70">
+      <el-table-column align="center" label="关闭退款" width="80">
         <template slot-scope="scope">
           {{ scope.row.close_refund }}
         </template>
