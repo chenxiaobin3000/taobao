@@ -464,7 +464,8 @@ export const OrderStatus = {
   SHIPPED: 3, // 已发货：卖家已发货，等待买家确认
   PAID: 4, // 待发货：买家已付款,等待卖家发货
   UNPAID: 5, // 未付款：等待买家付款
-  OTHER: 6, // 异常
+  UNCREATED: 6, // 未创建支付宝交易
+  OTHER: 7, // 异常
 
   text2num(text) {
     if (text === '交易成功') {
@@ -477,6 +478,8 @@ export const OrderStatus = {
       return this.PAID
     } else if (text === '等待买家付款') {
       return this.UNPAID
+    } else if (text === '未创建支付宝交易') {
+      return this.UNCREATED
     } else { // 异常
       return this.OTHER
     }
@@ -493,6 +496,8 @@ export const OrderStatus = {
         return '买家已付款，等待卖家发货'
       case this.UNPAID:
         return '等待买家付款'
+      case this.UNCREATED:
+        return '未创建支付宝交易'
     }
     return '异常'
   },
@@ -509,6 +514,8 @@ export const OrderStatus = {
       id: this.PAID, name: '待发货'
     }, {
       id: this.UNPAID, name: '待付款'
+    }, {
+      id: this.UNCREATED, name: '未创建支付宝交易'
     }]
   }
 }
