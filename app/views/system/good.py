@@ -23,9 +23,9 @@ def addList(request):
     for good in goods:
         find_object = Good.objects.getById(shop_id, good['i'])
         if find_object:
-            Good.objects.set(find_object['id'], good['n'], good['sn'], good['t'], good['s'], good['o'], good['ot'])
+            Good.objects.set(find_object['id'], good['n'], good['sn'], good['t'], good['s'], good['o'], good['ot'], good['st'], good['stt'])
         else:
-            Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'], good['o'], good['ot'])
+            Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'], good['o'], good['ot'], good['st'], good['stt'])
 
         # 处理别名
         for alias in good['as']:
@@ -71,9 +71,11 @@ def set(request):
     short_name = post.get('sname')
     good_type = int(post.get('type'))
     good_status = int(post.get('status'))
-    origin = int(post.get('origin'))
+    origin = post.get('origin')
     origin_type = int(post.get('origin_type'))
-    Good.objects.set(pk, name, short_name, good_type, good_status, origin, origin_type)
+    stock = post.get('stock')
+    stock_type = int(post.get('stock_type'))
+    Good.objects.set(pk, name, short_name, good_type, good_status, origin, origin_type, stock, stock_type)
     response = {
         'code': 0,
         'msg': 'success'

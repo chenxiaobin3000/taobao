@@ -14,8 +14,10 @@ def add(request):
     name = post.get('name')
     origin = post.get('origin')
     origin_type = int(post.get('origin_type'))
+    stock = post.get('stock')
+    stock_type = int(post.get('stock_type'))
     good_note = post.get('note')
-    GoodPrepare.objects.add(shop_id, name, origin, origin_type, good_note)
+    GoodPrepare.objects.add(shop_id, name, origin, origin_type, stock, stock_type, good_note)
     response = {
         'code': 0,
         'msg': 'success'

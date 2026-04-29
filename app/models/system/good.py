@@ -4,10 +4,10 @@ from django.forms.models import model_to_dict
 
 # 商品表
 class GoodManager(models.Manager):
-    def add(self, shop_id, good_id, name, short_name, good_type, good_status, origin, origin_type):
-        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name, good_type=good_type, good_status=good_status, origin=origin, origin_type=origin_type)
+    def add(self, shop_id, good_id, name, short_name, good_type, good_status, origin, origin_type, stock, stock_type):
+        return self.create(shop_id=shop_id, good_id=good_id, name=name, short_name=short_name, good_type=good_type, good_status=good_status, origin=origin, origin_type=origin_type, stock=stock, stock_type=stock_type)
 
-    def set(self, pk, name, short_name, good_type, good_status, origin, origin_type):
+    def set(self, pk, name, short_name, good_type, good_status, origin, origin_type, stock, stock_type):
         good = self.get(pk=pk)
         good.name = name
         good.short_name = short_name
@@ -15,6 +15,8 @@ class GoodManager(models.Manager):
         good.good_status = good_status
         good.origin = origin
         good.origin_type = origin_type
+        good.stock = stock
+        good.stock_type = stock_type
         return good.save()
 
     def setFakeDate(self, pk, fake_date):
@@ -61,12 +63,12 @@ class GoodManager(models.Manager):
 
     def encoder(self, good):
         if good:
-            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'fake_date', 'promotion_date', 'ctime'])
+            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'stock', 'stock_type', 'fake_date', 'promotion_date', 'ctime'])
         return None
 
     def encoderList(self, goods):
         if goods:
-            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'fake_date', 'promotion_date', 'ctime']) for good in goods]
+            return [model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name', 'short_name', 'good_type', 'good_status', 'origin', 'origin_type', 'stock', 'stock_type', 'fake_date', 'promotion_date', 'ctime']) for good in goods]
         return None
 
 class Good(models.Model):
@@ -79,6 +81,8 @@ class Good(models.Model):
     good_status = models.IntegerField(db_index = True) # 商品状态
     origin = models.CharField(max_length = 12, db_index = True) # 外部id
     origin_type = models.IntegerField() # 外部id类型
+    stock = models.CharField(max_length = 12, db_index = True) # 进货id
+    stock_type = models.IntegerField() # 进货id类型
     fake_date = models.DateField(null=True, blank=True) # 首次刷单日期
     promotion_date = models.DateField(null=True, blank=True) # 首次刷单日期
     ctime = models.DateTimeField(default = timezone.now)

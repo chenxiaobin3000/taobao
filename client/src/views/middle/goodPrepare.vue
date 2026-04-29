@@ -17,12 +17,22 @@
       </el-table-column>
       <el-table-column align="center" label="外部编码" width="120">
         <template slot-scope="scope">
-          <a :href="handleJump(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
+          <a :href="handleJumpOrigin(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
         </template>
       </el-table-column>
       <el-table-column align="center" label="外部类型" width="70">
         <template slot-scope="scope">
-          {{ num2type(scope.row.origin_type) }}
+          {{ num2OriginType(scope.row.origin_type) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="进货编码" width="120">
+        <template slot-scope="scope">
+          <a :href="handleJumpStock(scope.row.stock, scope.row.stock_type)" target="_blank">{{ scope.row.stock }}</a>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="进货类型" width="70">
+        <template slot-scope="scope">
+          {{ num2StockType(scope.row.stock_type) }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="创建时间" width="160">
@@ -60,7 +70,15 @@
         </el-form-item>
         <el-form-item label="外部类型">
           <el-select v-model="temp.origin_type" class="filter-item" placeholder="请选择类型">
-            <el-option v-for="item in typeList" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option v-for="item in originList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="进货编码">
+          <el-input v-model="temp.stock" />
+        </el-form-item>
+        <el-form-item label="进货类型">
+          <el-select v-model="temp.stock_type" class="filter-item" placeholder="请选择类型">
+            <el-option v-for="item in stockList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
@@ -78,7 +96,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { GoodOriginType } from '@/utils/const'
+import { GoodOriginType, GoodStockType } from '@/utils/const'
 import { getGoodPrepareList, addGoodPrepare, delGoodPrepare, flushGoodPrepare } from '@/api/middle/goodPrepare'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -91,7 +109,8 @@ export default {
       list: null,
       total: 0,
       loading: false,
-      typeList: [], // 商品类型列表
+      originList: [], // 商品类型列表
+      stockList: [], // 商品类型列表
       shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
@@ -124,7 +143,8 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.typeList = GoodOriginType.getList()
+    this.originList = GoodOriginType.getList()
+    this.stockList = GoodStockType.getList()
     this.resetTemp()
     this.getOwnShopList()
   },
@@ -135,6 +155,8 @@ export default {
         name: '',
         origin: '',
         origin_type: 1,
+        stock: '',
+        stock_type: 1,
         good_note: ''
       }
     },
@@ -163,11 +185,17 @@ export default {
         this.getGoodPrepareList()
       })
     },
-    num2type(num) {
+    num2OriginType(num) {
       return GoodOriginType.num2text(num)
     },
-    handleJump(id, type) {
+    num2StockType(num) {
+      return GoodStockType.num2text(num)
+    },
+    handleJumpOrigin(id, type) {
       return GoodOriginType.getUrl(id, type)
+    },
+    handleJumpStock(id, type) {
+      return GoodStockType.getUrl(id, type)
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
@@ -183,6 +211,8 @@ export default {
         name: this.temp.name,
         origin: this.temp.origin,
         origin_type: this.temp.origin_type,
+        stock: this.temp.stock,
+        stock_type: this.temp.stock_type,
         note: this.temp.good_note
       }).then(() => {
         this.$message({ type: 'success', message: '新增成功!' })

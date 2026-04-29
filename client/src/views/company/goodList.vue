@@ -22,7 +22,12 @@
       </el-table-column>
       <el-table-column align="center" label="外部编码" width="120">
         <template slot-scope="scope">
-          <a :href="handleJump(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
+          <a :href="handleJumpOrigin(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="进货编码" width="120">
+        <template slot-scope="scope">
+          <a :href="handleJumpStock(scope.row.stock, scope.row.stock_type)" target="_blank">{{ scope.row.stock }}</a>
         </template>
       </el-table-column>
       <el-table-column align="center" label="商品类型" width="70">
@@ -72,6 +77,9 @@
         <el-form-item label="外部编码">
           <el-input v-model="temp.origin" />
         </el-form-item>
+        <el-form-item label="进货编码">
+          <el-input v-model="temp.stock" />
+        </el-form-item>
         <el-form-item label="商品类型">
           <el-select v-model="temp.good_type" class="filter-item" placeholder="请选择类型">
             <el-option v-for="item in typeList" :key="item.id" :label="item.name" :value="item.id" />
@@ -114,7 +122,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { GoodOriginType, GoodStatus, GoodType } from '@/utils/const'
+import { GoodOriginType, GoodStockType, GoodStatus, GoodType } from '@/utils/const'
 import { getGoodList, addGoodList, delGood, setGood, flushGood } from '@/api/system/good'
 import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/goodAlias'
 import { getOwnShopList } from '@/api/system/shop'
@@ -213,8 +221,11 @@ export default {
     num2type(num) {
       return GoodType.num2text(num)
     },
-    handleJump(id, type) {
+    handleJumpOrigin(id, type) {
       return GoodOriginType.getUrl(id, type)
+    },
+    handleJumpStock(id, type) {
+      return GoodStockType.getUrl(id, type)
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
@@ -230,18 +241,21 @@ export default {
       const status = header[3]
       const origin = header[4]
       const origin_type = header[5]
-      const name = header[6]
-      const alias1 = header[7]
-      const alias2 = header[8]
-      const alias3 = header[9]
-      const alias4 = header[10]
-      const alias5 = header[11]
+      const stock = header[6]
+      const stock_type = header[7]
+      const name = header[8]
+      const alias1 = header[9]
+      const alias2 = header[10]
+      const alias3 = header[11]
+      const alias4 = header[12]
+      const alias5 = header[13]
       const g = []
       let stop = false
       results.forEach(v => {
         const type_num = GoodType.text2num(v[type])
         const status_num = GoodStatus.text2num(v[status])
         const origin_num = GoodOriginType.text2num(v[origin_type])
+        const stock_num = GoodStockType.text2num(v[stock_type])
         if (type_num === GoodType.OTHER) {
           console.log('商品类型异常:' + v[id])
           stop = true
@@ -254,12 +268,18 @@ export default {
           console.log('外部编号异常:' + v[id])
           stop = true
         }
+        if (stock_num === GoodStockType.OTHER) {
+          console.log('进货编号异常:' + v[id])
+          stop = true
+        }
         g.push({
           i: v[id],
           n: v[name],
           sn: v[sname],
           o: v[origin],
           ot: origin_num,
+          st: v[stock],
+          stt: stock_num,
           t: type_num,
           s: status_num,
           as: [v[alias1], v[alias2], v[alias3], v[alias4], v[alias5]]
@@ -313,7 +333,10 @@ export default {
         sname: this.temp.short_name,
         type: this.temp.good_type,
         status: this.temp.good_status,
-        origin: this.temp.origin
+        origin: this.temp.origin,
+        origin_type: GoodOriginType.TAO_BAO,
+        stock: this.temp.stock,
+        stock_type: GoodStockType.ALIBABA
       }).then(() => {
         this.$message({ type: 'success', message: '修改成功!' })
         this.getGoodList()

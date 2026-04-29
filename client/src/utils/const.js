@@ -408,10 +408,70 @@ export const GoodOriginType = {
   },
   getUrl(id, type) {
     switch (type) {
-      case GoodOriginType.TAO_BAO:
+      case this.TAO_BAO:
         return 'https://item.taobao.com/item.htm?id=' + id
-      case GoodOriginType.TIAN_MAO:
+      case this.TIAN_MAO:
         return 'https://detail.tmall.com/item.htm?id=' + id
+    }
+    return ''
+  }
+}
+
+// 商品进货类型
+export const GoodStockType = {
+  ALIBABA: 1, // 1688
+  TAO_BAO: 2, // 淘宝
+  PIN_DUO_DUO: 3, // 拼多多
+  DOU_YIN: 4, // 抖音
+  OTHER: 5, // 异常
+
+  text2num(text) {
+    if (text === '1688') {
+      return this.ALIBABA
+    } else if (text === '淘宝') {
+      return this.TAO_BAO
+    } else if (text === '拼多多') {
+      return this.PIN_DUO_DUO
+    } else if (text === '抖音') {
+      return this.DOU_YIN
+    } else { // 异常
+      return this.OTHER
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.ALIBABA:
+        return '1688'
+      case this.TAO_BAO:
+        return '淘宝'
+      case this.PIN_DUO_DUO:
+        return '拼多多'
+      case this.DOU_YIN:
+        return '抖音'
+    }
+    return '异常'
+  },
+  getList() {
+    return [{
+      id: this.ALIBABA, name: '1688'
+    }, {
+      id: this.TAO_BAO, name: '淘宝'
+    }, {
+      id: this.PIN_DUO_DUO, name: '拼多多'
+    }, {
+      id: this.DOU_YIN, name: '抖音'
+    }]
+  },
+  getUrl(id, type) {
+    switch (type) {
+      case this.ALIBABA:
+        return 'https://detail.1688.com/offer/' + id + '.html'
+      case this.TAO_BAO:
+        return 'tabao:' + id
+      case this.PIN_DUO_DUO:
+        return 'pinduoduo:' + id
+      case this.DOU_YIN:
+        return 'douyin:' + id
     }
     return ''
   }
