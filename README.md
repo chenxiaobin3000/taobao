@@ -13,7 +13,7 @@
 
 ### 后端
 
-- Python 3.x
+- Python 3.10+
 - Django 5.2.8
 - django-cors-headers
 - SQLite
@@ -150,6 +150,26 @@ taobao/
 
 部分报表查询使用 `app/models/report/native_*.py` 中的原生 SQL，主要面向汇总表进行统计。
 
+## 快速启动（首次运行）
+
+如果你是第一次在本机运行，推荐按以下顺序：
+
+1. 启动后端虚拟环境并安装最小依赖（`django`、`django-cors-headers`）。
+2. 执行数据库迁移：`python manage.py makemigrations app && python manage.py migrate`。
+3. 执行初始化：`python manage.py initialize`（会写入默认基础数据）。
+4. 启动后端：`python manage.py runserver`。
+5. 启动前端：`cd client && npm install && npm run dev`。
+
+Windows 下也可使用脚本组合：
+
+```bat
+init.bat
+server.bat
+client\server.bat
+```
+
+> `server.bat` 会依次执行备份、清理、迁移并启动后端，适合本地日常开发。
+
 ## 本地开发
 
 ### 1. 后端环境
@@ -167,7 +187,7 @@ python -m venv .venv
 pip install django django-cors-headers
 ```
 
-项目当前没有提交 `requirements.txt`，如果后续新增依赖，建议补充依赖清单。
+项目当前没有提交 Python 依赖锁定文件（如 `requirements.txt`），建议后续补齐，方便团队复现环境。
 
 ### 2. 数据库迁移
 
@@ -233,11 +253,13 @@ npm run dev
 http://localhost:9527/
 ```
 
-开发环境下，`client/vue.config.js` 会把 `/api` 代理到：
+开发环境下，`client/vue.config.js` 会把 `/api` 代理到后端：
 
 ```text
 http://localhost:8000/api
 ```
+
+同时通过 `pathRewrite: { '^/api': '/' }` 保持最终请求仍落到 Django 的 `api/...` 路由上（例如 `/api/account/login`）。
 
 ## 构建与部署
 
@@ -274,6 +296,13 @@ Django 根路由 `server/urls.py` 会返回 `app/templates/index.html`，API 仍
 | `clean.bat` | 清理 Python 缓存和迁移缓存 |
 | `client/server.bat` | 启动前端开发服务 |
 | `client/deploy.bat` | 部署前端构建产物到 Django 静态目录 |
+
+## 常见开发场景
+
+- 仅刷新订单汇总：调用 `POST /api/order_summary/flush`（后端实现位于 `app/views/middle/order_summary.py`）。
+- 修改报表查询：优先查看 `app/views/report/` 与 `app/models/report/`（部分使用原生 SQL）。
+- 新增接口：在对应 `app/views/*` 编写视图后，注册到 `app/url/*.py`，路由统一使用 `api/` 前缀。
+- 排查前后端联调问题：先确认 Django `8000` 与 Vue `9527` 均已启动，再检查 `client/vue.config.js` 代理配置。
 
 ## 接口约定
 
