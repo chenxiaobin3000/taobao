@@ -8,8 +8,8 @@ Taobao Admin is a Django + Vue 2 management system for e-commerce operations and
 
 Primary stack:
 
-- Backend: Python 3.10+, Django 5.2.8, django-cors-headers, SQLite
-- Frontend: Vue 2.6, Vue Router 3, Vuex 3, Element UI 2, Axios, ECharts, xlsx
+- Backend: Python 3.10+, Django 5.2.8, django-cors-headers (4.x), SQLite
+- Frontend: Vue 2.6.10, Vue Router 3.0.2, Vuex 3.1.0, Element UI 2.13.2, Axios 0.18.1, ECharts 4.2.1, xlsx 0.14.1
 - Database: root-level `cxkw.db`
 - Backend dependencies: root-level `requirements.txt`
 - Frontend dependencies: `client/package.json`
@@ -75,7 +75,10 @@ Most backend views:
 }
 ```
 
-Frontend requests go through `client/src/utils/request.js`. In development, `client/vue.config.js` proxies `/api` to `http://localhost:8000/api`.
+Frontend requests go through `client/src/utils/request.js`. In development, `client/vue.config.js` proxies:
+
+- `/api` -> `http://localhost:8000/api` (with `pathRewrite: { '^/api': '/' }`)
+- `/upload` -> `http://localhost:8000/upload`
 
 ## Business Domains
 
@@ -229,6 +232,12 @@ Install backend dependencies:
 ```bash
 pip install -r requirements.txt
 ```
+
+Current `requirements.txt` includes:
+
+- `Django==5.2.8`
+- `django-cors-headers>=4.0,<5.0`
+- `tzdata>=2024.1; sys_platform == "win32"`
 
 Run backend:
 
