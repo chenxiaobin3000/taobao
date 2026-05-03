@@ -184,10 +184,10 @@ python -m venv .venv
 安装依赖：
 
 ```bash
-pip install django django-cors-headers
+pip install -r requirements.txt
 ```
 
-项目当前没有提交 Python 依赖锁定文件（如 `requirements.txt`），建议后续补齐，方便团队复现环境。
+后端 Python 依赖由根目录 `requirements.txt` 管理；前端依赖由 `client/package.json` 管理。
 
 ### 2. 数据库迁移
 
@@ -368,7 +368,7 @@ app/models/const/default_password.py
 
 ## 后续维护建议
 
-- 增加 `requirements.txt` 或 `pyproject.toml` 固化后端依赖。
+- 持续维护 `requirements.txt`，新增后端依赖时及时写入并说明用途。
 - 增加 `.env.example`，把密钥、数据库路径、前端 API 地址等配置外置。
 - 为导入、合并、汇总和报表核心流程补充测试。
 - 梳理并修复历史乱码，统一项目文件编码。
