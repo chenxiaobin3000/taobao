@@ -419,14 +419,14 @@ export const GoodOriginType = {
 
 // 商品进货类型
 export const GoodStockType = {
-  ALIBABA: 1, // 1688
+  ALIBABA: 1, // 阿里巴巴
   TAO_BAO: 2, // 淘宝
   PIN_DUO_DUO: 3, // 拼多多
   DOU_YIN: 4, // 抖音
   OTHER: 5, // 异常
 
   text2num(text) {
-    if (text === '1688') {
+    if (text === '阿里巴巴') {
       return this.ALIBABA
     } else if (text === '淘宝') {
       return this.TAO_BAO
@@ -441,7 +441,7 @@ export const GoodStockType = {
   num2text(num) {
     switch (num) {
       case this.ALIBABA:
-        return '1688'
+        return '阿里巴巴'
       case this.TAO_BAO:
         return '淘宝'
       case this.PIN_DUO_DUO:
@@ -453,7 +453,7 @@ export const GoodStockType = {
   },
   getList() {
     return [{
-      id: this.ALIBABA, name: '1688'
+      id: this.ALIBABA, name: '阿里巴巴'
     }, {
       id: this.TAO_BAO, name: '淘宝'
     }, {
