@@ -1,375 +1,69 @@
 # CLAUDE.md
 
-This file gives Claude Code project-specific context and guardrails for working in this repository.
-
-## Project Summary
-
-Taobao Admin is a Django + Vue 2 management system for e-commerce operations and finance data. It manages platform/shop data, imports raw order-related spreadsheets, merges raw records into archived business tables, refreshes summary tables, and displays reports.
-
-Primary stack:
-
-- Backend: Python 3.10+, Django 5.2.8, django-cors-headers (4.x), SQLite
-- Frontend: Vue 2.6.10, Vue Router 3.0.2, Vuex 3.1.0, Element UI 2.13.2, Axios 0.18.1, ECharts 4.2.1, xlsx 0.14.1
-- Database: root-level `cxkw.db`
-- Backend dependencies: root-level `requirements.txt`
-- Frontend dependencies: `client/package.json`
-
-## Repository Layout
-
-```text
-.
-├── app/                    # Django business app
-│   ├── management/commands/ # Custom management commands, including initialize
-│   ├── models/              # Django models and native SQL query helpers
-│   │   ├── const/           # Business constants
-│   │   ├── middle/          # Summary/helper models
-│   │   ├── original/        # Raw imported data models
-│   │   ├── report/          # Report query models and native SQL helpers
-│   │   ├── system/          # Company/shop/user/role/permission models
-│   │   └── trunk/           # Archived/core business models
-│   ├── templates/           # Django template directory for built frontend index.html
-│   ├── url/                 # URL groups by business domain
-│   └── views/               # API views
-├── client/                  # Vue CLI frontend
-│   ├── public/
-│   └── src/
-│       ├── api/             # Frontend API wrappers
-│       ├── components/
-│       ├── layout/
-│       ├── router/          # Routes and role-gated menus
-│       ├── store/
-│       └── views/
-├── docs/                    # Project documents
-├── server/                  # Django project settings/urls/asgi/wsgi
-├── static/                  # Django static assets; built frontend static files go here
-├── backup/                  # SQLite backup output directory
-├── cxkw.db                  # SQLite database
-├── manage.py
-└── requirements.txt
-```
-
-## Core Architecture
-
-Backend routing starts at `server/urls.py`, which concatenates URL lists from:
-
-- `app/url/system.py`
-- `app/url/original.py`
-- `app/url/trunk.py`
-- `app/url/middle.py`
-- `app/url/report.py`
-
-The root path returns `app/templates/index.html` through `TemplateView`, so production-style deployment expects the Vue build output to be copied into Django static/template directories.
-
-Most backend views:
-
-- Use function-based Django views
-- Use `@require_POST`
-- Return `JsonResponse`
-- Use response shape similar to:
-
-```json
-{
-  "code": 0,
-  "msg": "success",
-  "data": {}
-}
-```
-
-Frontend requests go through `client/src/utils/request.js`. In development, `client/vue.config.js` proxies:
-
-- `/api` -> `http://localhost:8000/api` (with `pathRewrite: { '^/api': '/' }`)
-- `/upload` -> `http://localhost:8000/upload`
-
-## Business Domains
-
-### System
-
-Backend:
-
-- `app/views/account.py`
-- `app/views/system/`
-- `app/models/account.py`
-- `app/models/system/`
-
-Frontend:
-
-- `client/src/views/company/`
-- `client/src/views/system/`
-- `client/src/api/account.js`
-- `client/src/api/system/`
-
-Responsibilities:
-
-- Account login/logout/register/password reset
-- Company, platform, shop, product, product alias management
-- User, role, permission management
-- User-shop relationships
-
-### Original Data
-
-Backend:
-
-- `app/views/original/`
-- `app/models/original/`
-
-Frontend:
-
-- `client/src/views/original/`
-- `client/src/api/original/`
-
-Responsibilities:
-
-- Raw order data
-- Raw fake-order data
-- Raw promotion and promotion-detail data
-- Raw deduction data
-- Raw polymerize data
-- Raw purchase data
-- Raw refund/refund-gift data
-- Raw transfer/small-payment data
-
-These pages often support Excel import, list queries, single delete, and delete-all flows.
-
-### Trunk/Archived Data
-
-Backend:
-
-- `app/views/trunk/`
-- `app/models/trunk/`
-
-Frontend:
-
-- `client/src/views/trunk/`
-- `client/src/api/trunk/`
-
-Responsibilities:
-
-- Merge raw data into archived/core records
-- Query archived records
-- Delete archived records
-
-The common endpoint pattern is:
-
-```text
-POST /api/<domain>/merge
-POST /api/<domain>/getList
-POST /api/<domain>/del
-```
-
-### Middle/Summary Tools
-
-Backend:
-
-- `app/views/middle/`
-- `app/models/middle/`
-
-Frontend:
-
-- `client/src/views/middle/`
-- `client/src/api/middle/`
-
-Responsibilities:
-
-- Order summary refresh/query
-- Deduction summary refresh/query
-- Fake summary refresh/edit/batch/complete
-- Good prepare management
-- Miscellaneous management
-- Receipt-related APIs exist in backend, but are not obviously exposed in frontend menus
-
-### Reports
-
-Backend:
-
-- `app/views/report/`
-- `app/models/report/`
-- `app/models/report/native_*.py`
-
-Frontend:
-
-- `client/src/views/report/`
-- `client/src/api/report/`
-
-Reports:
-
-- Board report
-- Year report
-- Day report
-- Good report and good follow
-- Promotion report
-- Cost report
-- Order report
-- Omission report
-- Fake report endpoint exists, but there is no separate permission-tree menu item for it
-
-Some report queries use raw SQL through `django.db.connection`.
-
-## Permissions And Menus
-
-Frontend permissions are role-code based. The reference list is `client/src/utils/role-data.js`; routes live under `client/src/router/modules/`.
-
-Top-level domains:
-
-- `1000`: System management
-- `2000`: Company data
-- `3000`: Original data
-- `4000`: Archived data
-- `5000`: Reports
-- `6000`: Middle/helper tools
-
-When adding a new frontend page, update all relevant places:
-
-- `client/src/router/modules/*.js`
-- `client/src/utils/role-data.js`
-- `client/src/api/...`
-- Matching backend `app/url/...` and `app/views/...`
-- Any model/table changes in `app/models/...`
-
-## Common Commands
-
-Install backend dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Current `requirements.txt` includes:
-
-- `Django==5.2.8`
-- `django-cors-headers>=4.0,<5.0`
-- `tzdata>=2024.1; sys_platform == "win32"`
-
-Run backend:
-
-```bash
-python manage.py runserver
-```
-
-Create/apply migrations:
-
-```bash
-python manage.py makemigrations app
-python manage.py migrate
-```
-
-Initialize seed data:
-
-```bash
-python manage.py initialize
-```
-
-Run frontend:
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-Build frontend:
-
-```bash
-cd client
-npm run build
-```
-
-Deploy built frontend into Django:
-
-```bat
-client\deploy.bat
-```
-
-## Batch Script Warnings
-
-Be careful with existing `.bat` scripts.
-
-- `server.bat` runs `backup.bat`, `clean.bat`, migrations, then starts Django.
-- `backup.bat` copies `cxkw.db` into `backup/`.
-- `clean.bat` deletes Python cache folders and also deletes `app\migrations\__init__.py`. Do not run it casually.
-- `client\deploy.bat` deletes old frontend assets under `static/` and replaces `app/templates/index.html`.
-
-Prefer explicit Python/npm commands while developing unless the user asks to run a batch script.
-
-## Database Notes
-
-- SQLite database file: `cxkw.db`
-- Django database config: `server/settings.py`
-- SQLite timeout is configured as `500`.
-- `USE_TZ = False`, `TIME_ZONE = 'Asia/Shanghai'`.
-- Database tables use custom `db_table` names such as `t_account` and many `t_*` business tables.
-- Migrations exist under `app/migrations/`.
-
-When changing models:
-
-- Inspect existing `db_table` names before renaming anything.
-- Avoid destructive schema changes unless explicitly requested.
-- Generate migrations with `python manage.py makemigrations app`.
-- Do not delete or regenerate the SQLite database without explicit approval.
-
-## Coding Conventions
-
-Backend patterns:
-
-- Use function-based views consistent with existing code.
-- Use `@require_POST` for API endpoints unless there is a clear reason not to.
-- Use `transaction.atomic` where existing similar views do.
-- Return `JsonResponse(..., encoder=MyJSONEncoder)` for business responses.
-- Keep response shape compatible with frontend interceptors: `code`, `msg`, `data`.
-- Preserve manager-style model methods where existing models use custom `objects` managers.
-
-Frontend patterns:
-
-- API wrappers live in `client/src/api/<domain>/`.
-- Views live in `client/src/views/<domain>/`.
-- Most list pages use `Pagination` and Vuex `mapState`.
-- Login/password flows use `js-md5`.
-- Auth state and cached values are handled in `client/src/utils/cache.js`.
-- Request errors are handled centrally in `client/src/utils/request.js`.
-
-Style and encoding:
-
-- Prefer UTF-8 for new or rewritten files.
-- Some older files may contain garbled Chinese comments/text. Do not spread the corruption; write new Chinese text as UTF-8.
-- Keep changes narrow and consistent with surrounding code.
-
-## Security And Production Caveats
-
-Current settings are development-oriented:
-
-- `DEBUG = True`
-- `ALLOWED_HOSTS = []`
-- `SECRET_KEY` is committed in source
-- Login uses MD5 on the frontend
-- Backend token/session validation appears incomplete; frontend stores `token`, but login mainly returns `id`
-
-Do not present the current setup as production-ready. If productionizing, externalize secrets, configure hosts, close debug mode, and implement stronger backend authentication/authorization.
-
-## Testing And Verification
-
-There is no obvious backend test suite in the current tree.
-
-Useful checks:
-
-```bash
-python -m py_compile manage.py server\settings.py server\urls.py
-python manage.py check
-```
-
-Frontend checks depend on installed npm dependencies:
-
-```bash
-cd client
-npm run build
-```
-
-If dependencies are missing or network access is unavailable, explain that verification could not be completed instead of inventing results.
-
-## Working Safely In This Repo
-
-- Do not overwrite user data in `cxkw.db`.
-- Do not delete backups.
-- Do not run destructive cleanup/deploy scripts unless requested.
-- Do not change generated frontend build assets in `static/` unless doing a frontend deployment.
-- Do not assume garbled comments are intentional business wording; verify against readable route names, permission labels, frontend constants, and UI files.
-- If changing a business flow, inspect the matching backend view, model manager, frontend API wrapper, and Vue page together.
-- If adding a backend endpoint, register it in the appropriate `app/url/*.py` file and add/update the matching frontend API wrapper if needed.
+本项目是 **Taobao Admin**，一个面向电商运营/财务数据处理的后台管理系统。
+
+## 项目定位
+
+面向电商运营和财务数据处理的后台管理系统，围绕淘宝等平台的店铺运营数据，提供从 **原始数据导入 → 归档合并 → 汇总计算 → 报表展示** 的完整数据处理流水线。
+
+## 技术栈
+
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| 后端框架 | Django | 5.2.8 |
+| 前端框架 | Vue 2 | 2.6.10 |
+| 路由 | Vue Router | 3.0.2 |
+| 状态管理 | Vuex | 3.1.0 |
+| UI 组件库 | Element UI | 2.13.2 |
+| HTTP 客户端 | Axios | 0.18.1 |
+| 图表 | ECharts | 4.2.1 |
+| Excel 处理 | xlsx | 0.14.1 |
+| 数据库 | SQLite | cxkw.db |
+| 跨域 | django-cors-headers | 4.x |
+
+## 架构特点
+
+- **四层数据架构**：原始数据层 → 归档数据层 → 汇总数据层 → 报表展示层
+- **前后端分离开发**：Vue CLI (9527端口) 代理 Django (8000端口)；生产构建产物由 Django 统一托管
+- **函数式视图**：全部使用 `@require_POST` + `JsonResponse`，返回统一 JSON 格式 `{code, msg, data}`
+- **路由按模块拆分**：`app/url/` 下按业务域分文件（system, original, trunk, middle, report）
+- **Windows 脚本完善**：`init.bat`、`server.bat`、`backup.bat`、`clean.bat` 等全套开发脚本
+
+## 业务模块
+
+### 1. 系统与权限（system）
+账号登录/注册/密码管理、公司/店铺/商品/商品别名管理、用户/角色/权限管理、用户-店铺关联。
+
+### 2. 原始数据导入（original）
+10 种数据类型：订单、刷单、推广、推广明细、扣费、聚合、采购、退货、退货过滤、小额打款。每个提供 addList(批量导入)、getList(分页查询)、del(单条删除)、delAll(清空) 四个接口。
+
+### 3. 归档数据（trunk）
+通过 merge 操作将原始数据合并到归档库，覆盖上述各数据类型。
+
+### 4. 辅助汇总（middle）
+对归档数据进行聚合计算，包括：订单汇总、扣款汇总、刷单汇总、日汇总、预备商品、杂项、发票管理、遗漏汇总等。
+
+### 5. 统计报表（report）
+基于 ECharts 的数据可视化，包括：业绩大屏、日报汇总、年报汇总、商品汇总、推广汇总、成本汇总、订单汇总、刷单汇总、遗漏汇总、商品跟踪。部分报表使用原生 SQL 查询。
+
+## 安全风险（需关注）
+
+| 项目 | 风险等级 | 说明 |
+|------|---------|------|
+| 用户认证 | ⚠️ 高 | 无 Token/JWT，直接比密码 MD5 |
+| 密码存储 | ⚠️ 高 | MD5 存储（非加盐哈希） |
+| Session 管理 | ⚠️ 高 | 基本是桩代码，未实现 |
+| SECRET_KEY | ⚠️ 中 | 硬编码在源码中 |
+| DEBUG | ⚠️ 中 | 设置为 True |
+| ALLOWED_HOSTS | ⚠️ 中 | 空列表 [] |
+| SQL 注入 | ⚠️ 需检查 | 部分使用原生 SQL |
+| CSRF 保护 | ⚠️ 需确认 | 通过 django-cors-headers 可能绕过 |
+
+## 其他注意事项
+
+1. **数据库**：SQLite 适合小规模，数据量增长后建议迁移至 MySQL/PostgreSQL
+2. **前端依赖**：Vue CLI 4、Vue 2.6、Element UI 2.13.2，部分依赖较老，可能在新版 Node.js/npm 下构建失败
+3. **测试**：缺乏自动化测试（无单元测试或集成测试文件）
+4. **编码**：部分中文注释存在编码异常
+5. **密码**：默认密码常量和默认规则在 `app/models/const/default_password.py` 中定义
+6. **开发服务器**：前端 `http://localhost:9527/`，后端 `http://localhost:8000/`
