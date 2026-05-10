@@ -110,7 +110,7 @@ def getList(request):
 def getOwnList(request):
     post = json.loads(request.body)
     company_id = int(post.get('id'))
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     shops = Shop.objects.getList(company_id, 1, 1000)
     userShops = UserShop.objects.getList(user_id, 1, 1000)
     datas = []

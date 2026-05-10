@@ -11,7 +11,7 @@ from app.models.original.user_transfer import UserTransfer
 def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     transfers = UserTransfer.objects.getAll(user_id, shop_id)
 
     if transfers:

@@ -5,15 +5,29 @@ from django.utils import timezone
 # 会话表
 class SessionManager(models.Manager):
     def add(self, account, token):
-        return self.create(account=account, token=token)
+        self.filter(token=token).exclude(account=account).delete()
+        session, _ = self.update_or_create(
+            account=account,
+            defaults={
+                'token': token,
+                'ctime': timezone.now()
+            }
+        )
+        return session
 
     # 删除指定天数之前的数据
     def delete(self, day):
         ago = timezone.now() - timedelta(days=day)
         return self.filter(ctime__lt=ago).delete()
 
-    def check(self, token):
+    def getByToken(self, token):
         return self.filter(token=token).first()
+
+    def deleteByToken(self, token):
+        return self.filter(token=token).delete()
+
+    def deleteByAccount(self, account):
+        return self.filter(account=account).delete()
 
 class Session(models.Model):
     objects = SessionManager()

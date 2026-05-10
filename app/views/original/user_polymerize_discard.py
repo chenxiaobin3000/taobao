@@ -22,7 +22,7 @@ def delete(request):
 def deleteAll(request):
     post = json.loads(request.body)
     id = int(post.get('id'))
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     UserPolymerizeDiscard.objects.deleteAll(user_id, id)
     response = {
         'code': 0,
@@ -35,7 +35,7 @@ def deleteAll(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = UserPolymerizeDiscard.objects.total(user_id, shop_id)

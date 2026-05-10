@@ -10,7 +10,7 @@ from app.models.middle.receipt_from import ReceiptFrom
 def add(request):
     post = json.loads(request.body)
     create_date = post.get('cdate')
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     project_id = int(post.get('name'))
     project_num = int(post.get('num'))
     receipt_note = post.get('note')

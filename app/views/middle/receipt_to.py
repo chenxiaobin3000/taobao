@@ -11,7 +11,7 @@ def add(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     create_date = post.get('cdate')
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     receipt_id = post.get('rid')
     receipt_name = post.get('name')
     project_id = int(post.get('pid'))

@@ -80,8 +80,14 @@ def get(request):
 @transaction.atomic
 def getInfo(request):
     post = json.loads(request.body)
-    pk = int(post.get('id'))
+    pk = request.user_id
     user = User.objects.find(pk)
+    if not user:
+        response = {
+            'code': -3,
+            'msg': 'login expired'
+        }
+        return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 公司信息
     company = Company.objects.find(user['company_id'])

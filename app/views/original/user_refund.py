@@ -13,7 +13,7 @@ from app.models.system.good import Good
 def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     refunds = post.get('r')
 
     # 获取赠品列表
@@ -79,7 +79,7 @@ def delete(request):
 def deleteAll(request):
     post = json.loads(request.body)
     id = int(post.get('id'))
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     UserRefund.objects.deleteAll(user_id, id)
     response = {
         'code': 0,
@@ -92,7 +92,7 @@ def deleteAll(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    user_id = int(post.get('uid'))
+    user_id = request.user_id
     page = int(post.get('page'))
     num = int(post.get('num'))
     total = UserRefund.objects.total(user_id, shop_id)
