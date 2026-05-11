@@ -13,6 +13,7 @@ from app.models.trunk.deduction import Deduction
 from app.models.trunk.polymerize import Polymerize
 from app.models.trunk.order import Order
 from app.models.trunk.fake import Fake
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -21,18 +22,13 @@ def flush(request):
     shop_id = int(post.get('id'))
     now_date = timezone.now()
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 计算开始日期至今的数据
     duration = now_date - start_date
     days = duration.days
     if days < 1:
-        response['code'] = -1
-        response['msg'] = '开始日期要早于当前时间'
-        return JsonResponse(response, encoder=MyJSONEncoder)
+        return JsonResponse(failed('开始日期要早于当前时间'), encoder=MyJSONEncoder)
 
     # 获取所有扣费和聚合数据
     deductions = Deduction.objects.getAll(shop_id, start_date)
@@ -106,12 +102,8 @@ def getList(request):
     num = int(post.get('num'))
     total = DeductionSummary.objects.total(shop_id)
     datas = DeductionSummary.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

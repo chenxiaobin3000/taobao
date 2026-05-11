@@ -9,6 +9,7 @@ from app.models.original.user_order import UserOrder
 from app.models.original.user_fake import UserFake
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -17,10 +18,7 @@ def addList(request):
     shop_id = int(post.get('id'))
     user_id = request.user_id
     orders = post.get('o')
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 批量添加
     for order in orders:
@@ -70,9 +68,7 @@ def addList(request):
                         # 在别名表命中，返回商品表查询
                         good = Good.objects.getById(shop_id, good['good_id'])
                     if not good:
-                        response['code'] = -1
-                        response['msg'] = '没有查询到商品:' + order_id + ',' + product
-                        return JsonResponse(response, encoder=MyJSONEncoder)
+                        return JsonResponse(failed('没有查询到商品:' + order_id + ',' + product), encoder=MyJSONEncoder)
                 if good['good_type'] != GoodType.GIFT:
                     good_ids = good_ids + good['good_id'] + '|'
                 if good['good_type'] == GoodType.SUPPLEMENT:
@@ -91,10 +87,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserOrder.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -104,10 +97,7 @@ def deleteAll(request):
     id = int(post.get('id'))
     user_id = request.user_id
     UserOrder.objects.deleteAll(user_id, id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -131,12 +121,8 @@ def getList(request):
                 if find_object:
                     data['good_names'] = data['good_names'] + find_object['short_name'] + ','
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': orders
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

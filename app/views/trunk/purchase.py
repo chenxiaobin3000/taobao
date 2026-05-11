@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.purchase import Purchase
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -25,10 +26,7 @@ def merge(request):
         purchase_note = purchase['note']
         Purchase.objects.add(shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -38,10 +36,7 @@ def set(request):
     pk = int(post.get('id'))
     order_status = int(post.get('status'))
     Purchase.objects.set(pk, order_status)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -50,10 +45,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     data = Purchase.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -65,12 +57,8 @@ def getList(request):
     num = int(post.get('num'))
     total = Purchase.objects.total(shop_id)
     datas = Purchase.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

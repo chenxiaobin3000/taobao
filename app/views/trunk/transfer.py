@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.trunk.transfer import Transfer
 from app.models.original.user_transfer import UserTransfer
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -25,10 +26,7 @@ def merge(request):
         # 清空临时数据
         UserTransfer.objects.deleteAll(user_id, shop_id)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -37,10 +35,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     Transfer.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -52,12 +47,8 @@ def getList(request):
     num = int(post.get('num'))
     total = Transfer.objects.total(shop_id)
     datas = Transfer.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -12,6 +12,7 @@ from app.models.system.market import Market
 from app.models.system.shop import Shop
 from app.models.system.user_shop import UserShop
 from app.models.system.permission import Permission
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -22,16 +23,11 @@ def add(request):
     phone = post.get('phone')
     company_id = int(post.get('cid'))
     role_id = int(post.get('rid'))
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     user = User.objects.add(name, phone, company_id, role_id)
     if not user:
-        response['code'] = -1
-        response['msg'] = '创建用户失败'
-        return JsonResponse(response, encoder=MyJSONEncoder)
+        return JsonResponse(failed('创建用户失败'), encoder=MyJSONEncoder)
 
     Account.objects.add(account, DefaultPassword.VALUE, user.id)
     return JsonResponse(response, encoder=MyJSONEncoder)
@@ -45,10 +41,7 @@ def set(request):
     phone = post.get('phone')
     role_id = int(post.get('rid'))
     User.objects.set(pk, name, phone, role_id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -57,10 +50,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     User.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -69,11 +59,7 @@ def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     user = User.objects.find(pk)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': user
-    }
+    response = success(user)
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -83,10 +69,7 @@ def getInfo(request):
     pk = request.user_id
     user = User.objects.find(pk)
     if not user:
-        response = {
-            'code': -3,
-            'msg': 'login expired'
-        }
+        response = failed('login expired', -3)
         return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 公司信息
@@ -112,17 +95,13 @@ def getInfo(request):
     permissions = Permission.objects.getList(user['role_id'], 1, 1000)
     permissions = [data['permission'] for data in permissions]
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'user': user,
             'company': company,
             'market': dataCM,
             'shop': dataShop,
             'perms': permissions
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -131,11 +110,7 @@ def getByPhone(request):
     post = json.loads(request.body)
     phone = post.get('phone')
     user = User.objects.getByPhone(phone)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': user
-    }
+    response = success(user)
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -147,18 +122,13 @@ def getList(request):
     num = int(post.get('num'))
     total = User.objects.total(company_id)
     users = User.objects.getList(company_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {}
-    }
+    response = success({})
 
     # 获取账号、店铺信息
     for user in users:
         account = Account.objects.getByUserId(user['id'])
         if not account:
-            response['code'] = -1
-            response['msg'] = '账号不存在'
+            return JsonResponse(failed('账号不存在'), encoder=MyJSONEncoder)
         user['account'] = account['account']
         user['shops'] = []
         userShops = UserShop.objects.getList(user['id'], 1, 1000)

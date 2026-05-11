@@ -14,6 +14,7 @@ from app.models.system.good import Good
 from app.models.middle.order_summary import OrderSummary
 from app.models.report.good_follow import GoodFollow
 from app.models.report.native_promotion_detail import NativePromotionDetail
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -23,10 +24,7 @@ def getList(request):
     follow = int(post.get('follow'))
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
     end_date = datetime.strptime(post.get('edate'), "%Y-%m-%d")
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 生成商品列表
     datas = []
@@ -59,9 +57,7 @@ def getList(request):
                             datas.append(init_data(good['good_id'], good['short_name']))
 
         case _:
-            response['code'] = -1
-            response['msg'] = '关注类型异常'
-            return JsonResponse(response, encoder=MyJSONEncoder)
+            return JsonResponse(failed('关注类型异常'), encoder=MyJSONEncoder)
 
     # 获取订单数据
     orders= OrderSummary.objects.getListByDate(shop_id, start_date, end_date)

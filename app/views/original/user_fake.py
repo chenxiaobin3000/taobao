@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.original.user_fake import UserFake
 from app.models.system.good import Good
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -12,10 +13,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserFake.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -25,10 +23,7 @@ def deleteAll(request):
     id = int(post.get('id'))
     user_id = request.user_id
     UserFake.objects.deleteAll(user_id, id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -52,12 +47,8 @@ def getList(request):
                 if find_object:
                     data['good_names'] = data['good_names'] + find_object['short_name'] + ','
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': orders
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -8,6 +8,7 @@ from app.models.system.user import User
 from app.models.system.user_shop import UserShop
 from app.models.system.market import Market
 from app.models.system.good import Good
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -18,10 +19,7 @@ def add(request):
     name = post.get('name')
     deposit = int(post.get('deposit'))
     Shop.objects.add(company_id, market_id, name, deposit)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -32,10 +30,7 @@ def set(request):
     name = post.get('name')
     deposit = int(post.get('deposit'))
     Shop.objects.set(pk, name, deposit)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -43,24 +38,17 @@ def set(request):
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 存在商品不能删除
     good = Good.objects.getList(pk, 1, 1)
     if good:
-        response['code'] = -1
-        response['msg'] = '存在商品，不能删除'
-        return JsonResponse(response, encoder=MyJSONEncoder)
+        return JsonResponse(failed('存在商品，不能删除'), encoder=MyJSONEncoder)
 
     # 存在管理员不能删除
     shop = UserShop.objects.getListByShop(pk)
     if shop:
-        response['code'] = -1
-        response['msg'] = '存在管理员，不能删除'
-        return JsonResponse(response, encoder=MyJSONEncoder)
+        return JsonResponse(failed('存在管理员，不能删除'), encoder=MyJSONEncoder)
 
     Shop.objects.delete(pk)
     return JsonResponse(response, encoder=MyJSONEncoder)
@@ -95,14 +83,10 @@ def getList(request):
                     break
         data['users'] = userShops
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': shops
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -123,9 +107,5 @@ def getOwnList(request):
                     datas.append(data)
                     break
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': datas
-    }
+    response = success(datas)
     return JsonResponse(response, encoder=MyJSONEncoder)

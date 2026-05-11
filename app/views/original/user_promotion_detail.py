@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.original.user_promotion_detail import UserPromotionDetail
 from app.models.system.good import Good
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -13,10 +14,7 @@ def addList(request):
     shop_id = int(post.get('id'))
     user_id = request.user_id
     polymerizes = post.get('p')
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 批量添加
     for polymerize in polymerizes:
@@ -48,10 +46,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserPromotionDetail.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -61,10 +56,7 @@ def deleteAll(request):
     id = int(post.get('id'))
     user_id = request.user_id
     UserPromotionDetail.objects.deleteAll(user_id, id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -87,12 +79,8 @@ def getList(request):
             else:
                 data['good_name'] = data['good_id']
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': promotions
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

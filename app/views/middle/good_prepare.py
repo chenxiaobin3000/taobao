@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.good_prepare import GoodPrepare
 from app.models.system.good import Good
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -18,10 +19,7 @@ def add(request):
     stock_type = int(post.get('stock_type'))
     good_note = post.get('note')
     GoodPrepare.objects.add(shop_id, name, origin, origin_type, stock, stock_type, good_note)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -37,10 +35,7 @@ def flush(request):
                 temp = Good.objects.getByOrigin(shop_id, good['origin'])
                 if temp:
                     GoodPrepare.objects.setJoinDate(good['id'], temp['ctime'])
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -49,10 +44,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     GoodPrepare.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -64,12 +56,8 @@ def getList(request):
     num = int(post.get('num'))
     total = GoodPrepare.objects.total(shop_id)
     datas = GoodPrepare.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

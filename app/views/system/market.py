@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.market import Market
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -11,10 +12,7 @@ def add(request):
     post = json.loads(request.body)
     name = post.get('name')
     Market.objects.add(name)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -24,10 +22,7 @@ def set(request):
     pk = int(post.get('id'))
     name = post.get('name')
     Market.objects.set(pk, name)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -36,10 +31,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     Market.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -48,11 +40,7 @@ def get(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     market = Market.objects.find(pk)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': market
-    }
+    response = success(market)
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -63,12 +51,8 @@ def getList(request):
     num = int(post.get('num'))
     total = Market.objects.total()
     markets = Market.objects.getList(page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': markets
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

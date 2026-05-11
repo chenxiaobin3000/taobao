@@ -9,24 +9,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.account import Account
 from app.models.const.default_password import DefaultPassword
 from app.models.session import Session
-
-
-def success(data=None):
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
-    if data is not None:
-        response['data'] = data
-    return response
-
-
-def failed(msg, code=-1):
-    return {
-        'code': code,
-        'msg': msg,
-        'data': {}
-    }
+from app.views.common import failed, success
 
 
 @require_POST

@@ -6,6 +6,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.system.user_shop import UserShop
 from app.models.system.shop import Shop
 from app.models.system.user import User
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -14,10 +15,7 @@ def add(request):
     user_id = int(post.get('uid'))
     shop_id = int(post.get('sid'))
     UserShop.objects.add(user_id, shop_id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -27,10 +25,7 @@ def delete(request):
     user_id = int(post.get('uid'))
     shop_id = int(post.get('sid'))
     UserShop.objects.delete(user_id, shop_id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -42,14 +37,10 @@ def getList(request):
     num = int(post.get('num'))
     total = UserShop.objects.total(user_id)
     userShops = UserShop.objects.getList(user_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': userShops
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -71,9 +62,5 @@ def getListByShop(request):
             if user['id'] == userShop['user_id']:
                 userShop['name'] = user['name']
                 break
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': userShops
-    }
+    response = success(userShops)
     return JsonResponse(response, encoder=MyJSONEncoder)

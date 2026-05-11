@@ -8,6 +8,7 @@ from app.models.const.order_status import OrderStatus
 from app.models.middle.day_summary import DaySummary
 from app.models.middle.fake_summary import FakeSummary
 from app.models.trunk.promotion import Promotion
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -16,18 +17,13 @@ def getList(request):
     shop_id = int(post.get('id'))
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
     end_date = datetime.strptime(post.get('edate'), "%Y-%m-%d")
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 计算开始日期至今的数据
     duration = end_date - start_date
     days = duration.days
     if days < 1:
-        response['code'] = -1
-        response['msg'] = '开始日期要早于结束时间'
-        return JsonResponse(response, encoder=MyJSONEncoder)
+        return JsonResponse(failed('开始日期要早于结束时间'), encoder=MyJSONEncoder)
 
     # 按天生成数据
     pending = 0 # 未完结

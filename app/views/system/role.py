@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.role import Role
 from app.models.system.permission import Permission
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -19,10 +20,7 @@ def add(request):
     for p in permissions:
         Permission.objects.add(role['id'], p)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -39,10 +37,7 @@ def set(request):
     for p in permissions:
         Permission.objects.add(pk, p)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -51,10 +46,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     Role.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -68,11 +60,7 @@ def get(request):
     permissions = Permission.objects.getList(role['id'], 1, 1000)
     role['p'] = [tmp['permission'] for tmp in permissions]
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': role
-    }
+    response = success(role)
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -90,12 +78,8 @@ def getList(request):
         permissions = Permission.objects.getList(role['id'], 1, 1000)
         role['p'] = [data['permission'] for data in permissions]
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': roles
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

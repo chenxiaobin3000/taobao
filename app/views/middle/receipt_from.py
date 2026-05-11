@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.receipt_from import ReceiptFrom
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -15,10 +16,7 @@ def add(request):
     project_num = int(post.get('num'))
     receipt_note = post.get('note')
     ReceiptFrom.objects.add(create_date, user_id, project_id, project_num, receipt_note)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -27,10 +25,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     ReceiptFrom.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -42,12 +37,8 @@ def getList(request):
     num = int(post.get('num'))
     total = ReceiptFrom.objects.total(shop_id)
     datas = ReceiptFrom.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

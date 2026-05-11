@@ -8,6 +8,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.middle.fake_summary import FakeSummary
 from app.models.trunk.fake import Fake
 from app.models.system.good import Good
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -15,18 +16,13 @@ def flush(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 计算开始日期至今的数据
     duration = timezone.now() - start_date
     days = duration.days
     if days < 1:
-        response['code'] = -1
-        response['msg'] = '开始日期要早于当前时间'
-        return JsonResponse(response, encoder=MyJSONEncoder)
+        return JsonResponse(failed('开始日期要早于当前时间'), encoder=MyJSONEncoder)
 
     # 按天生成数据
     for i in range(0, days):
@@ -72,10 +68,7 @@ def set(request):
     freight = int(post.get('freight'))
     fake_note = post.get('note')
     FakeSummary.objects.set(pk, fake_amount, fake_num, commission, freight, fake_note)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -85,10 +78,7 @@ def setComplete(request):
     pk = int(post.get('id'))
     is_complete = int(post.get('c'))
     FakeSummary.objects.setComplete(pk, is_complete)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -97,18 +87,13 @@ def batch(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 计算开始日期至今的数据
     duration = timezone.now() - start_date
     days = duration.days
     if days < 1:
-        response['code'] = -1
-        response['msg'] = '开始日期要早于当前时间'
-        return JsonResponse(response, encoder=MyJSONEncoder)
+        return JsonResponse(failed('开始日期要早于当前时间'), encoder=MyJSONEncoder)
 
     # 按天生成数据
     for i in range(0, days):
@@ -128,12 +113,8 @@ def getList(request):
     num = int(post.get('num'))
     total = FakeSummary.objects.total(shop_id)
     datas = FakeSummary.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

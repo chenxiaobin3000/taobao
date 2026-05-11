@@ -6,6 +6,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.const.deduction_type import DeductionType
 from app.models.original.user_polymerize import UserPolymerize
 from app.models.original.user_polymerize_discard import UserPolymerizeDiscard
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -14,10 +15,7 @@ def addList(request):
     shop_id = int(post.get('id'))
     user_id = request.user_id
     polymerizes = post.get('p')
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 批量添加
     for polymerize in polymerizes:
@@ -30,9 +28,7 @@ def addList(request):
 
         # 未知数据类型返回失败
         if DeductionType.OTHER == amount_type:
-            response['code'] = -1
-            response['msg'] = '异常数据'
-            return JsonResponse(response, encoder=MyJSONEncoder)
+            return JsonResponse(failed('异常数据'), encoder=MyJSONEncoder)
         
         # 不处理的数据放废弃表
         if DeductionType.TUI_KUAN == amount_type or DeductionType.ZHUAN_ZHANG == amount_type:
@@ -52,10 +48,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserPolymerize.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -65,10 +58,7 @@ def deleteAll(request):
     id = int(post.get('id'))
     user_id = request.user_id
     UserPolymerize.objects.deleteAll(user_id, id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -81,12 +71,8 @@ def getList(request):
     num = int(post.get('num'))
     total = UserPolymerize.objects.total(user_id, shop_id)
     polymerizes = UserPolymerize.objects.getList(user_id, shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': polymerizes
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

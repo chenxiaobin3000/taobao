@@ -7,6 +7,7 @@ from app.models.const.good_type import GoodType
 from app.models.original.user_refund import UserRefund
 from app.models.original.user_refund_gift import UserRefundGift
 from app.models.system.good import Good
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -56,10 +57,7 @@ def addList(request):
         else:
             UserRefund.objects.add(user_id, shop_id, refund_id, order_id, product_id, actual_pay, refund_pay, refund_platform, refund_type, refund_status, pay_time, apply_time, timeout_time, complete_time)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -68,10 +66,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserRefund.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -81,10 +76,7 @@ def deleteAll(request):
     id = int(post.get('id'))
     user_id = request.user_id
     UserRefund.objects.deleteAll(user_id, id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -105,12 +97,8 @@ def getList(request):
             if find_object:
                 refund['product_name'] = find_object['short_name']
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': refunds
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

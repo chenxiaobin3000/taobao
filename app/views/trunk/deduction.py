@@ -6,6 +6,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.trunk.deduction import Deduction
 from app.models.original.user_deduction import UserDeduction
 from app.models.original.user_deduction_discard import UserDeductionDiscard
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -29,10 +30,7 @@ def merge(request):
         UserDeduction.objects.deleteAll(user_id, shop_id)
         UserDeductionDiscard.objects.deleteAll(user_id, shop_id)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -41,10 +39,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     Deduction.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -56,12 +51,8 @@ def getList(request):
     num = int(post.get('num'))
     total = Deduction.objects.total(shop_id)
     datas = Deduction.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

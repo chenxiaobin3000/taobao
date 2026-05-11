@@ -9,16 +9,14 @@ from app.models.const.order_status import OrderStatus
 from app.models.report.native_order import NativeOrder
 from app.models.report.native_fake import NativeFake
 from app.models.report.native_promotion import NativePromotion
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     pending = 0 # 未完结
     pending_refund = 0 # 未完结退款
@@ -59,9 +57,7 @@ def getList(request):
         if key_month in datas:
             datas[key_month]['pending'] = paid['payment']
         else:
-            response['code'] = -1
-            response['msg'] = '数据异常，请联系管理员'
-            return JsonResponse(response, encoder=MyJSONEncoder)
+            return JsonResponse(failed('数据异常，请联系管理员'), encoder=MyJSONEncoder)
 
     # 已发货
     shippeds = NativeOrder().groupByMonth(shop_id, OrderStatus.SHIPPED)
@@ -74,9 +70,7 @@ def getList(request):
             datas[key_month]['pending_procure'] += shipped['procure']
             datas[key_month]['pending_refund_procure'] += shipped['refund_procure']
         else:
-            response['code'] = -1
-            response['msg'] = '数据异常，请联系管理员'
-            return JsonResponse(response, encoder=MyJSONEncoder)
+            return JsonResponse(failed('数据异常，请联系管理员'), encoder=MyJSONEncoder)
 
     # 已结算
     successes = NativeOrder().groupByMonth(shop_id, OrderStatus.SUCCESS)
@@ -92,9 +86,7 @@ def getList(request):
             datas[key_month]['deduction'] += success['deduction']
             datas[key_month]['fake_deduction'] += success['fake']
         else:
-            response['code'] = -1
-            response['msg'] = '数据异常，请联系管理员'
-            return JsonResponse(response, encoder=MyJSONEncoder)
+            return JsonResponse(failed('数据异常，请联系管理员'), encoder=MyJSONEncoder)
 
     # 已关闭
     closes = NativeOrder().groupByMonth(shop_id, OrderStatus.CLOSE)
@@ -110,9 +102,7 @@ def getList(request):
             datas[key_month]['deduction'] += close_data['deduction']
             datas[key_month]['fake_deduction'] += close_data['fake']
         else:
-            response['code'] = -1
-            response['msg'] = '数据异常，请联系管理员'
-            return JsonResponse(response, encoder=MyJSONEncoder)
+            return JsonResponse(failed('数据异常，请联系管理员'), encoder=MyJSONEncoder)
 
     # 推广
     promotions = NativePromotion().groupByMonth(shop_id)

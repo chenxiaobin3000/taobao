@@ -6,6 +6,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.trunk.promotion_detail import PromotionDetail
 from app.models.original.user_promotion_detail import UserPromotionDetail
 from app.models.system.good import Good
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -27,10 +28,7 @@ def merge(request):
         # 清空临时数据
         UserPromotionDetail.objects.deleteAll(user_id, shop_id)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -39,10 +37,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     PromotionDetail.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -64,12 +59,8 @@ def getList(request):
             else:
                 data['good_name'] = data['good_id']
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

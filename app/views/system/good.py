@@ -7,6 +7,7 @@ from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
 from app.models.trunk.fake import Fake
 from app.models.trunk.promotion_detail import PromotionDetail
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -14,10 +15,7 @@ def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     goods = post.get('g')
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
 
     # 批量添加
     for good in goods:
@@ -56,10 +54,7 @@ def flush(request):
                 if promotion:
                     Good.objects.setPromotionDate(good['id'], promotion['promotion_date'])
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -76,10 +71,7 @@ def set(request):
     stock = post.get('stock')
     stock_type = int(post.get('stock_type'))
     Good.objects.set(pk, name, short_name, good_type, good_status, origin, origin_type, stock, stock_type)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -88,10 +80,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     Good.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -103,12 +92,8 @@ def getList(request):
     num = int(post.get('num'))
     total = Good.objects.total(shop_id)
     datas = Good.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

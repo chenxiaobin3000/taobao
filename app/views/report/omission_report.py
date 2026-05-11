@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.omission import Omission
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -14,13 +15,9 @@ def getList(request):
     num = int(post.get('num'))
     total = Omission.objects.total(shop_id)
     datas = Omission.objects.getList(shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total['id__count'],
             'amount': total['amount__sum'],
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

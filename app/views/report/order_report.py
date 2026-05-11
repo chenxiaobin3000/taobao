@@ -6,6 +6,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
 from app.models.report.native_order import NativeOrder
 from app.models.system.good import Good
+from app.views.common import success
 
 # 刷新订单中间表
 @require_POST
@@ -41,10 +42,7 @@ def getList(request):
             if len(data['good_names']) > 3:
                 data['good_names'] = data['good_names'][:-3]
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total['total'],
             'payment': total['payment'],
             'refund_customer': total['refund_customer'],
@@ -54,6 +52,5 @@ def getList(request):
             'transfer': total['transfer'],
             'deduction': total['deduction'],
             'list': datas
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.company import Company
 from app.models.system.user import User
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -13,10 +14,7 @@ def add(request):
     name = post.get('name')
     user_id = int(post.get('uid'))
     Company.objects.add(name, user_id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -27,10 +25,7 @@ def set(request):
     name = post.get('name')
     user_id = int(post.get('uid'))
     Company.objects.set(pk, name, user_id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -39,10 +34,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     Company.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -59,12 +51,8 @@ def getList(request):
         user = User.objects.find(company['user_id'])
         company['user'] = user['name']
 
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': companys
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)

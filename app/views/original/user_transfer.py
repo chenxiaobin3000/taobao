@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.original.user_transfer import UserTransfer
+from app.views.common import success
 
 @require_POST
 @transaction.atomic
@@ -25,10 +26,7 @@ def addList(request):
             continue
         UserTransfer.objects.add(user_id, shop_id, user_name, payee_name, order_id, amount, create_time, transfer_note)
 
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -37,10 +35,7 @@ def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))
     UserTransfer.objects.delete(pk)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -50,10 +45,7 @@ def deleteAll(request):
     id = int(post.get('id'))
     user_id = request.user_id
     UserTransfer.objects.deleteAll(user_id, id)
-    response = {
-        'code': 0,
-        'msg': 'success'
-    }
+    response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
 @require_POST
@@ -66,12 +58,8 @@ def getList(request):
     num = int(post.get('num'))
     total = UserTransfer.objects.total(user_id, shop_id)
     transfers = UserTransfer.objects.getList(user_id, shop_id, page, num)
-    response = {
-        'code': 0,
-        'msg': 'success',
-        'data': {
+    response = success({
             'total': total,
             'list': transfers
-        }
-    }
+        })
     return JsonResponse(response, encoder=MyJSONEncoder)
