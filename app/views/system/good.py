@@ -90,8 +90,9 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Good.objects.total(shop_id)
-    datas = Good.objects.getList(shop_id, page, num)
+    search = post.get('search')
+    total = Good.objects.total(shop_id, search)
+    datas = Good.objects.getList(shop_id, page, num, search)
     response = success({
             'total': total,
             'list': datas

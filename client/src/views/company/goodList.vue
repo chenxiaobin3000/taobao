@@ -159,6 +159,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
+      this.listQuery.page = 1
       this.getGoodList()
     }
   },
@@ -229,6 +230,7 @@ export default {
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+      this.listQuery.page = 1
       this.getGoodList()
     },
     handleExcel() {

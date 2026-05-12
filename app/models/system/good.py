@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from django.forms.models import model_to_dict
 
@@ -47,13 +48,27 @@ class GoodManager(models.Manager):
     def getByType(self, shop_id, good_type):
         return self.encoderList(self.filter(shop_id=shop_id, good_type=good_type))
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def filterBySearch(self, shop_id, search):
+        queryset = self.filter(shop_id=shop_id)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                queryset = queryset.filter(
+                    Q(short_name__icontains=keyword) |
+                    Q(name__icontains=keyword) |
+                    Q(good_id=keyword) |
+                    Q(origin=keyword) |
+                    Q(stock=keyword)
+                )
+        return queryset
 
-    def getList(self, shop_id, page, num):
+    def total(self, shop_id, search=None):
+        return self.filterBySearch(shop_id, search).count()
+
+    def getList(self, shop_id, page, num, search=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-ctime')[left:right])
+        return self.encoderList(self.filterBySearch(shop_id, search).order_by('-ctime')[left:right])
 
     def getListInIds(self, shop_id, ids):
         return self.encoderList(self.filter(shop_id=shop_id, good_id__in=ids).order_by('-ctime'))
