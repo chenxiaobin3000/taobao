@@ -4,12 +4,6 @@ export const NoneTime = '2000-01-01 00:00:00'
 // 默认空订单
 export const DefaultOrder = '0000000000000000000'
 
-// 批次导入数量
-export const ImportCount = 500
-
-// 导入间隔时间
-export const ImportSpan = 2000
-
 // 公司状态
 export const CompanyStatus = {
   NORMAL: 1, // 正常

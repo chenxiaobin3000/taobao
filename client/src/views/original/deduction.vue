@@ -60,8 +60,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { DefaultOrder, ImportCount, ImportSpan, DeductionType, FinanceType } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
+import { DefaultOrder, DeductionType, FinanceType } from '@/utils/const'
 import { getUserDeductionList, addUserDeductionList, delUserDeduction, delAllUserDeduction } from '@/api/original/deduction'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -331,36 +330,15 @@ export default {
           return
         }
       }
-      let length = d.length
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addUserDeductionList({
-            id: this.listQuery.id,
-            uid: this.userdata.user.id,
-            d: d.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getUserDeductionList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addUserDeductionList({
-          id: this.listQuery.id,
-          uid: this.userdata.user.id,
-          d: d
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getUserDeductionList()
-          this.dialogVisible = false
-        })
-      }
+      addUserDeductionList({
+        id: this.listQuery.id,
+        uid: this.userdata.user.id,
+        d: d
+      }).then(() => {
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getUserDeductionList()
+        this.dialogVisible = false
+      })
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

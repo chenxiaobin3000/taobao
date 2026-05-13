@@ -50,8 +50,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan, PromotionType } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
+import { PromotionType } from '@/utils/const'
 import { getUserPromotionList, addUserPromotionList, delUserPromotion, delAllUserPromotion } from '@/api/original/promotion'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -151,7 +150,7 @@ export default {
           })
         }
       })
-      let length = p.length
+      const length = p.length
       // 预校验数据
       for (let i = 0; i < length; ++i) {
         if (p[i].t === PromotionType.OTHER) {
@@ -160,35 +159,15 @@ export default {
           return
         }
       }
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addUserPromotionList({
-            id: this.listQuery.id,
-            uid: this.userdata.user.id,
-            p: p.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getUserPromotionList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addUserPromotionList({
-          id: this.listQuery.id,
-          uid: this.userdata.user.id,
-          p: p
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getUserPromotionList()
-          this.dialogVisible = false
-        })
-      }
+      addUserPromotionList({
+        id: this.listQuery.id,
+        uid: this.userdata.user.id,
+        p: p
+      }).then(() => {
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getUserPromotionList()
+        this.dialogVisible = false
+      })
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

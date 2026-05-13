@@ -81,8 +81,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { NoneTime, ImportCount, ImportSpan, RefundStatus, RefundType } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
+import { NoneTime, RefundStatus, RefundType } from '@/utils/const'
 import { getUserRefundList, addUserRefundList, delUserRefund, delAllUserRefund } from '@/api/original/refund'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -200,7 +199,7 @@ export default {
           ct: v[complete_time] === '' ? NoneTime : v[complete_time]
         })
       })
-      let length = r.length
+      const length = r.length
       // 预校验数据
       for (let i = 0; i < length; ++i) {
         if (r[i].rt === RefundType.OTHER || r[i].rs === RefundStatus.OTHER) {
@@ -209,35 +208,15 @@ export default {
           return
         }
       }
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addUserRefundList({
-            id: this.listQuery.id,
-            uid: this.userdata.user.id,
-            r: r.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getUserRefundList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addUserRefundList({
-          id: this.listQuery.id,
-          uid: this.userdata.user.id,
-          r: r
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getUserRefundList()
-          this.dialogVisible = false
-        })
-      }
+      addUserRefundList({
+        id: this.listQuery.id,
+        uid: this.userdata.user.id,
+        r: r
+      }).then(() => {
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getUserRefundList()
+        this.dialogVisible = false
+      })
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

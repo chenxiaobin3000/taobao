@@ -60,8 +60,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan, DeductionType, FinanceType } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
+import { DeductionType, FinanceType } from '@/utils/const'
 import { getUserPolymerizeList, addUserPolymerizeList, delUserPolymerize, delAllUserPolymerize } from '@/api/original/polymerize'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -186,36 +185,15 @@ export default {
           return
         }
       }
-      let length = p.length
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addUserPolymerizeList({
-            id: this.listQuery.id,
-            uid: this.userdata.user.id,
-            p: p.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getUserPolymerizeList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addUserPolymerizeList({
-          id: this.listQuery.id,
-          uid: this.userdata.user.id,
-          p: p
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getUserPolymerizeList()
-          this.dialogVisible = false
-        })
-      }
+      addUserPolymerizeList({
+        id: this.listQuery.id,
+        uid: this.userdata.user.id,
+        p: p
+      }).then(() => {
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getUserPolymerizeList()
+        this.dialogVisible = false
+      })
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {

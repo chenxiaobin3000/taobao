@@ -65,8 +65,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { ImportCount, ImportSpan, OrderStatus } from '@/utils/const'
-import { sleep } from '@/utils/sleep'
+import { OrderStatus } from '@/utils/const'
 import { getUserOrderList, addUserOrderList, delUserOrder, delAllUserOrder } from '@/api/original/order'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -171,7 +170,7 @@ export default {
         })
       })
       // 提取采购价
-      let length = o.length
+      const length = o.length
       for (let i = 0; i < length; ++i) {
         // 异常状态
         if (o[i].st === OrderStatus.OTHER) {
@@ -196,35 +195,15 @@ export default {
           }
         }
       }
-      if (length > ImportCount) {
-        length = parseInt(length / ImportCount)
-        for (let i = 0; i <= length; ++i) {
-          addUserOrderList({
-            id: this.listQuery.id,
-            uid: this.userdata.user.id,
-            o: o.slice(i * ImportCount, (i + 1) * ImportCount)
-          }).then(() => {
-            if (i === length) {
-              this.$message({ type: 'success', message: '导入成功!' })
-              this.getUserOrderList()
-              this.dialogVisible = false
-            } else {
-              this.$message({ type: 'success', message: '正在导入!' })
-            }
-          })
-          await sleep(ImportSpan)
-        }
-      } else {
-        addUserOrderList({
-          id: this.listQuery.id,
-          uid: this.userdata.user.id,
-          o: o
-        }).then(() => {
-          this.$message({ type: 'success', message: '导入成功!' })
-          this.getUserOrderList()
-          this.dialogVisible = false
-        })
-      }
+      addUserOrderList({
+        id: this.listQuery.id,
+        uid: this.userdata.user.id,
+        o: o
+      }).then(() => {
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getUserOrderList()
+        this.dialogVisible = false
+      })
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
