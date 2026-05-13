@@ -48,7 +48,7 @@ class GoodManager(models.Manager):
     def getByType(self, shop_id, good_type):
         return self.encoderList(self.filter(shop_id=shop_id, good_type=good_type))
 
-    def filterBySearch(self, shop_id, search):
+    def filterBySearch(self, shop_id, search, good_type=None, good_status=None):
         queryset = self.filter(shop_id=shop_id)
         if search:
             keyword = str(search).strip()
@@ -60,15 +60,19 @@ class GoodManager(models.Manager):
                     Q(origin=keyword) |
                     Q(stock=keyword)
                 )
+        if good_type:
+            queryset = queryset.filter(good_type=good_type)
+        if good_status:
+            queryset = queryset.filter(good_status=good_status)
         return queryset
 
-    def total(self, shop_id, search=None):
-        return self.filterBySearch(shop_id, search).count()
+    def total(self, shop_id, search=None, good_type=None, good_status=None):
+        return self.filterBySearch(shop_id, search, good_type, good_status).count()
 
-    def getList(self, shop_id, page, num, search=None):
+    def getList(self, shop_id, page, num, search=None, good_type=None, good_status=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filterBySearch(shop_id, search).order_by('-ctime')[left:right])
+        return self.encoderList(self.filterBySearch(shop_id, search, good_type, good_status).order_by('-ctime')[left:right])
 
     def getListInIds(self, shop_id, ids):
         return self.encoderList(self.filter(shop_id=shop_id, good_id__in=ids).order_by('-ctime'))

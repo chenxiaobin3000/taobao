@@ -5,6 +5,12 @@
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
+        <el-select v-model="listQuery.type" class="filter-item" placeholder="商品类型" style="width:120px;margin-left:10px;" @change="handleFilterChange">
+          <el-option v-for="item in typeFilterList" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
+        <el-select v-model="listQuery.status" class="filter-item" placeholder="在售状态" style="width:120px;margin-left:10px;" @change="handleFilterChange">
+          <el-option v-for="item in statusFilterList" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
         <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
         <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleFlush()">刷新</el-button>
       </el-form-item>
@@ -137,14 +143,18 @@ export default {
       total: 0,
       loading: false,
       typeList: [], // 商品类型列表
+      typeFilterList: [], // 商品类型筛选列表
       statusList: [], // 商品状态列表
+      statusFilterList: [], // 商品状态筛选列表
       shopList: [], // 本公司所有店铺列表
       goodAliasList: [], // 商品所有别名列表
       listQuery: {
         id: 0,
         page: 1,
         num: 10,
-        search: null
+        search: null,
+        type: 0,
+        status: 0
       },
       temp: {},
       dialogVisible: false,
@@ -174,7 +184,9 @@ export default {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
     this.typeList = GoodType.getList()
+    this.typeFilterList = [{ id: 0, name: '全部类型' }].concat(this.typeList)
     this.statusList = GoodStatus.getList()
+    this.statusFilterList = [{ id: 0, name: '全部状态' }].concat(this.statusList)
     this.resetTemp()
     this.getOwnShopList()
   },
@@ -230,6 +242,10 @@ export default {
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+      this.listQuery.page = 1
+      this.getGoodList()
+    },
+    handleFilterChange() {
       this.listQuery.page = 1
       this.getGoodList()
     },
