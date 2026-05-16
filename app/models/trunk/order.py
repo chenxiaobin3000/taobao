@@ -21,13 +21,25 @@ class OrderManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def filterByDate(self, shop_id, start_date=None, end_date=None, search=None):
+        queryset = self.filter(shop_id=shop_id)
+        if start_date:
+            queryset = queryset.filter(create_time__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(create_time__lt=end_date)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                queryset = queryset.filter(order_id=keyword)
+        return queryset
 
-    def getList(self, shop_id, page, num):
+    def total(self, shop_id, start_date=None, end_date=None, search=None):
+        return self.filterByDate(shop_id, start_date, end_date, search).count()
+
+    def getList(self, shop_id, page, num, start_date=None, end_date=None, search=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
+        return self.encoderList(self.filterByDate(shop_id, start_date, end_date, search).order_by('-create_time')[left:right])
 
     def getListByDate(self, shop_id, start_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date).order_by('-create_time'))

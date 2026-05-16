@@ -2,22 +2,33 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="6">
+        <el-col :span="4">
           <el-form-item label="店铺:" prop="shopName">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
               <el-option v-for="item in shopList" :key="'S' + item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="4">
           <el-form-item label="来源:" prop="fromName">
-            <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择店铺" @change="handleChangeUser">
+            <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择来源" @change="handleChangeUser">
               <el-option v-for="item in userList" :key="'U' + item.user_id" :label="item.name" :value="item.user_id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="5">
+          <el-form-item label="开始日期:" prop="startDate" label-width="80px">
+            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="5">
+          <el-form-item label="结束日期:" prop="endDate" label-width="80px">
+            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
           <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -64,7 +75,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getOrderList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="handlePage" />
   </div>
 </template>
 
@@ -93,7 +104,9 @@ export default {
         uid: 0,
         page: 1,
         num: 10,
-        search: null
+        search: null,
+        sdate: 0,
+        edate: 0
       }
     }
   },
@@ -105,7 +118,8 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
-      this.getOrderList()
+      this.listQuery.page = 1
+      this.handleSelect()
     }
   },
   mounted: function() {
@@ -118,6 +132,11 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
+    this.listQuery.sdate = new Date()
+    this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
+    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 31
+    this.listQuery.sdate.setTime(seconds)
+    this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
     this.getOwnShopList()
   },
   methods: {
@@ -174,9 +193,18 @@ export default {
     handleChangeShop() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.listQuery.uid = 0
-      this.getOrderList()
+      this.listQuery.page = 1
+      this.getUserListByShop()
     },
     handleChangeUser() {
+      this.listQuery.page = 1
+      this.handleSelect()
+    },
+    handleSelect() {
+      this.listQuery.page = 1
+      this.handlePage()
+    },
+    handlePage() {
       if (this.listQuery.uid === 0) {
         this.getOrderList()
       } else {

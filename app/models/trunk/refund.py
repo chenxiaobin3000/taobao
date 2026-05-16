@@ -27,13 +27,25 @@ class RefundManager(models.Manager):
     def getByIdAndTime(self, shop_id, order_id, refund_id, product_id, apply_time):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id, refund_id=refund_id, product_id=product_id, apply_time=apply_time).first())
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def filterByDate(self, shop_id, start_date=None, end_date=None, search=None):
+        queryset = self.filter(shop_id=shop_id)
+        if start_date:
+            queryset = queryset.filter(apply_time__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(apply_time__lt=end_date)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                queryset = queryset.filter(order_id=keyword)
+        return queryset
 
-    def getList(self, shop_id, page, num):
+    def total(self, shop_id, start_date=None, end_date=None, search=None):
+        return self.filterByDate(shop_id, start_date, end_date, search).count()
+
+    def getList(self, shop_id, page, num, start_date=None, end_date=None, search=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-apply_time')[left:right])
+        return self.encoderList(self.filterByDate(shop_id, start_date, end_date, search).order_by('-apply_time')[left:right])
 
     def encoder(self, refund):
         if refund:
