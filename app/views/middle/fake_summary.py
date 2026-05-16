@@ -111,8 +111,9 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = FakeSummary.objects.total(shop_id)
-    datas = FakeSummary.objects.getList(shop_id, page, num)
+    search = post.get('search')
+    total = FakeSummary.objects.total(shop_id, search)
+    datas = FakeSummary.objects.getList(shop_id, page, num, search)
     response = success({
             'total': total,
             'list': datas

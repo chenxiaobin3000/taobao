@@ -29,13 +29,21 @@ class OrderSummaryManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def filterBySearch(self, shop_id, search=None):
+        queryset = self.filter(shop_id=shop_id)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                queryset = queryset.filter(order_id=keyword)
+        return queryset
 
-    def getList(self, shop_id, page, num):
+    def total(self, shop_id, search=None):
+        return self.filterBySearch(shop_id, search).count()
+
+    def getList(self, shop_id, page, num, search=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
+        return self.encoderList(self.filterBySearch(shop_id, search).order_by('-create_time')[left:right])
 
     def getAll(self, shop_id, order_status, start_date, end_date):
         return NativeOrder().groupByDate(shop_id, order_status, start_date, end_date)

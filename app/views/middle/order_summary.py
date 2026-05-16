@@ -117,8 +117,9 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = OrderSummary.objects.total(shop_id)
-    datas = OrderSummary.objects.getList(shop_id, page, num)
+    search = post.get('search')
+    total = OrderSummary.objects.total(shop_id, search)
+    datas = OrderSummary.objects.getList(shop_id, page, num, search)
 
     # 解析商品名称
     if datas:

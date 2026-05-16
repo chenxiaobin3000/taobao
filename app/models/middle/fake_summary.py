@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.forms.models import model_to_dict
+from app.models.trunk.fake import Fake
 
 # 刷单汇总表
 class FakeSummaryManager(models.Manager):
@@ -42,13 +43,22 @@ class FakeSummaryManager(models.Manager):
     def getByDate(self, shop_id, date):
         return self.encoder(self.filter(shop_id=shop_id, create_date=date).first())
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def filterBySearch(self, shop_id, search=None):
+        queryset = self.filter(shop_id=shop_id)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                create_dates = Fake.objects.filter(shop_id=shop_id, order_id=keyword).values_list('create_time__date', flat=True)
+                queryset = queryset.filter(create_date__in=create_dates)
+        return queryset
 
-    def getList(self, shop_id, page, num):
+    def total(self, shop_id, search=None):
+        return self.filterBySearch(shop_id, search).count()
+
+    def getList(self, shop_id, page, num, search=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_date')[left:right])
+        return self.encoderList(self.filterBySearch(shop_id, search).order_by('-create_date')[left:right])
 
     def encoder(self, fake):
         if fake:

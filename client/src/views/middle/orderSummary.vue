@@ -119,7 +119,9 @@ export default {
   },
   watch: {
     search(newVal, oldVal) {
-      this.$message({ type: 'error', message: '不支持搜索!' })
+      this.listQuery.search = newVal
+      this.listQuery.page = 1
+      this.getOrderSummaryList()
     }
   },
   mounted: function() {
@@ -166,6 +168,7 @@ export default {
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+      this.listQuery.page = 1
       this.getOrderSummaryList()
     },
     handleFlush() {
