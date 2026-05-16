@@ -63,16 +63,16 @@ def getList(request):
             data['pending_refund_procure'] += shipped['refund_procure']
 
         # 已结算
-        success = DaySummary.objects.getByDate(shop_id, start, OrderStatus.SUCCESS)
-        if success:
-            data['settled'] += success['payment']
-            data['settled_refund'] += success['refund_customer']
-            data['settled_refund'] += success['refund_platform']
-            data['settled_procure'] += success['procure']
-            data['settled_refund_procure'] += success['refund_procure']
-            data['transfer'] += success['transfer']
-            data['deduction'] += success['deduction']
-            data['fake_deduction'] += success['fake']
+        success_data = DaySummary.objects.getByDate(shop_id, start, OrderStatus.SUCCESS)
+        if success_data:
+            data['settled'] += success_data['payment']
+            data['settled_refund'] += success_data['refund_customer']
+            data['settled_refund'] += success_data['refund_platform']
+            data['settled_procure'] += success_data['procure']
+            data['settled_refund_procure'] += success_data['refund_procure']
+            data['transfer'] += success_data['transfer']
+            data['deduction'] += success_data['deduction']
+            data['fake_deduction'] += success_data['fake']
 
         # 已关闭
         close_data = DaySummary.objects.getByDate(shop_id, start, OrderStatus.CLOSE)

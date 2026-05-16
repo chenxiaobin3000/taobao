@@ -77,17 +77,17 @@ def getList(request):
 
         # 已结算
         successes = NativeOrder().groupByMonth(shop_id, OrderStatus.SUCCESS)
-        for success in successes:
-            key_month = success['create_month']
+        for success_data in successes:
+            key_month = success_data['create_month']
             if key_month in datas:
-                datas[key_month]['settled'] += success['payment']
-                datas[key_month]['settled_refund'] += success['refund_customer']
-                datas[key_month]['settled_refund'] += success['refund_platform']
-                datas[key_month]['settled_procure'] += success['procure']
-                datas[key_month]['settled_refund_procure'] += success['refund_procure']
-                datas[key_month]['transfer'] += success['transfer']
-                datas[key_month]['deduction'] += success['deduction']
-                datas[key_month]['fake_deduction'] += success['fake']
+                datas[key_month]['settled'] += success_data['payment']
+                datas[key_month]['settled_refund'] += success_data['refund_customer']
+                datas[key_month]['settled_refund'] += success_data['refund_platform']
+                datas[key_month]['settled_procure'] += success_data['procure']
+                datas[key_month]['settled_refund_procure'] += success_data['refund_procure']
+                datas[key_month]['transfer'] += success_data['transfer']
+                datas[key_month]['deduction'] += success_data['deduction']
+                datas[key_month]['fake_deduction'] += success_data['fake']
             else:
                 return JsonResponse(failed('数据异常，请联系管理员'), encoder=MyJSONEncoder)
 
