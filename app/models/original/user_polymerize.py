@@ -16,13 +16,25 @@ class UserPolymerizeManager(models.Manager):
     def getByCTime(self, user_id, shop_id, order_id, amount_type, create_time):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first())
 
-    def total(self, user_id, shop_id):
-        return self.filter(user_id=user_id, shop_id=shop_id).count()
+    def filterByDate(self, user_id, shop_id, start_date=None, end_date=None, search=None):
+        queryset = self.filter(user_id=user_id, shop_id=shop_id)
+        if start_date:
+            queryset = queryset.filter(create_time__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(create_time__lt=end_date)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                queryset = queryset.filter(order_id=keyword)
+        return queryset
 
-    def getList(self, user_id, shop_id, page, num):
+    def total(self, user_id, shop_id, start_date=None, end_date=None, search=None):
+        return self.filterByDate(user_id, shop_id, start_date, end_date, search).count()
+
+    def getList(self, user_id, shop_id, page, num, start_date=None, end_date=None, search=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time')[left:right])
+        return self.encoderList(self.filterByDate(user_id, shop_id, start_date, end_date, search).order_by('-create_time')[left:right])
 
     def getAll(self, user_id, shop_id):
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time'))

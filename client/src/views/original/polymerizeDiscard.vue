@@ -1,12 +1,29 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="danger" size="mini" style="float:right;width:60px" @click="handleDeleteAll()">清空</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="6">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="开始日期:" prop="startDate" label-width="80px">
+            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="结束日期:" prop="endDate" label-width="80px">
+            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-button type="danger" size="mini" style="float:right;width:60px" @click="handleDeleteAll()">清空</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect()">查询</el-button>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="订单编号" width="160">
@@ -72,7 +89,9 @@ export default {
         uid: 0,
         page: 1,
         num: 10,
-        search: null
+        search: null,
+        sdate: 0,
+        edate: 0
       }
     }
   },
@@ -84,6 +103,7 @@ export default {
   watch: {
     search(newVal, oldVal) {
       this.listQuery.search = newVal
+      this.listQuery.page = 1
       this.getUserPolymerizeDiscardList()
     }
   },
@@ -98,6 +118,11 @@ export default {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
     this.listQuery.uid = this.userdata.user.id
+    this.listQuery.sdate = new Date()
+    this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
+    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 31
+    this.listQuery.sdate.setTime(seconds)
+    this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
     this.getOwnShopList()
   },
   methods: {
@@ -134,6 +159,11 @@ export default {
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+      this.listQuery.page = 1
+      this.getUserPolymerizeDiscardList()
+    },
+    handleSelect() {
+      this.listQuery.page = 1
       this.getUserPolymerizeDiscardList()
     },
     handleDelete(row) {

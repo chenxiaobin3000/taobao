@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -34,8 +35,15 @@ def getList(request):
     user_id = request.user_id
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = UserFake.objects.total(user_id, shop_id)
-    orders = UserFake.objects.getList(user_id, shop_id, page, num)
+    search = post.get('search')
+    start_date = post.get('sdate')
+    end_date = post.get('edate')
+    if start_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+    total = UserFake.objects.total(user_id, shop_id, start_date, end_date, search)
+    orders = UserFake.objects.getList(user_id, shop_id, page, num, start_date, end_date, search)
 
     # 商品id转换商品名称
     if orders:
