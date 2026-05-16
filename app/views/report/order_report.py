@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -17,14 +18,21 @@ def getList(request):
     status = int(post.get('status'))
     page = int(post.get('page'))
     num = int(post.get('num'))
+    search = post.get('search')
+    start_date = post.get('sdate')
+    end_date = post.get('edate')
+    if start_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
     total = []
     datas = None
     if status == OrderStatus.OTHER:
-        total = NativeOrder().total(shop_id)
-        datas = NativeOrder().getList(shop_id, page, num)
+        total = NativeOrder().total(shop_id, start_date, end_date, search)
+        datas = NativeOrder().getList(shop_id, page, num, start_date, end_date, search)
     else:
-        total = NativeOrder().totalByStatus(shop_id, status)
-        datas = NativeOrder().getListByStatus(shop_id, status, page, num)
+        total = NativeOrder().totalByStatus(shop_id, status, start_date, end_date, search)
+        datas = NativeOrder().getListByStatus(shop_id, status, page, num, start_date, end_date, search)
 
     # 解析商品名称
     if datas:

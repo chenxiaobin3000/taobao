@@ -3,10 +3,26 @@ from app.models.model import Model
 
 # 订单表
 class NativeOrder(Model):
-    def total(self, shop_id):
+    def _append_filters(self, where, params, start_date=None, end_date=None, search=None):
+        if start_date:
+            where.append("create_time >= %s")
+            params.append(start_date)
+        if end_date:
+            where.append("create_time < %s")
+            params.append(end_date)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                where.append("order_id = %s")
+                params.append(keyword)
+
+    def total(self, shop_id, start_date=None, end_date=None, search=None):
+        where = ["shop_id = %s"]
+        params = [shop_id]
+        self._append_filters(where, params, start_date, end_date, search)
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT
                     COUNT(id) as total,
                     SUM(payment) as payment,
@@ -18,13 +34,16 @@ class NativeOrder(Model):
                     SUM(deduction) as deduction
                 FROM t_order_summary
                 WHERE
-                    shop_id = %s""", [shop_id])
+                    {' AND '.join(where)}""", params)
             return self.dictfetchall(cursor)[0]
 
-    def totalByStatus(self, shop_id, status):
+    def totalByStatus(self, shop_id, status, start_date=None, end_date=None, search=None):
+        where = ["shop_id = %s", "order_status = %s"]
+        params = [shop_id, status]
+        self._append_filters(where, params, start_date, end_date, search)
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT
                     COUNT(id) as total,
                     SUM(payment) as payment,
@@ -36,37 +55,43 @@ class NativeOrder(Model):
                     SUM(deduction) as deduction
                 FROM t_order_summary
                 WHERE
-                    shop_id = %s
-                    and order_status = %s""", [shop_id, status])
+                    {' AND '.join(where)}""", params)
             return self.dictfetchall(cursor)[0]
 
-    def getList(self, shop_id, page, num):
+    def getList(self, shop_id, page, num, start_date=None, end_date=None, search=None):
         left = (page - 1) * num
+        where = ["shop_id = %s"]
+        params = [shop_id]
+        self._append_filters(where, params, start_date, end_date, search)
+        params.extend([num, left])
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT *
                 FROM t_order_summary
                 WHERE
-                    shop_id = %s
+                    {' AND '.join(where)}
                 ORDER BY create_time DESC
                 LIMIT %s
-                OFFSET %s""", [shop_id, num, left])
+                OFFSET %s""", params)
             return self.dictfetchall(cursor)
 
-    def getListByStatus(self, shop_id, status, page, num):
+    def getListByStatus(self, shop_id, status, page, num, start_date=None, end_date=None, search=None):
         left = (page - 1) * num
+        where = ["shop_id = %s", "order_status = %s"]
+        params = [shop_id, status]
+        self._append_filters(where, params, start_date, end_date, search)
+        params.extend([num, left])
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT *
                 FROM t_order_summary
                 WHERE
-                    shop_id = %s
-                    AND order_status = %s
+                    {' AND '.join(where)}
                 ORDER BY create_time DESC
                 LIMIT %s
-                OFFSET %s""", [shop_id, status, num, left])
+                OFFSET %s""", params)
             return self.dictfetchall(cursor)
 
     def groupByDate(self, shop_id, order_status, start_date, end_date):

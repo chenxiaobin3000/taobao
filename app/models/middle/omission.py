@@ -13,13 +13,21 @@ class OmissionManager(models.Manager):
     def deleteByDate(self, shop_id, create_time):
         return self.filter(shop_id=shop_id, create_time__gte=create_time).delete()
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).aggregate(models.Sum('amount'), models.Count('id'))
+    def filterByDate(self, shop_id, start_date=None, end_date=None):
+        queryset = self.filter(shop_id=shop_id)
+        if start_date:
+            queryset = queryset.filter(create_time__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(create_time__lt=end_date)
+        return queryset
 
-    def getList(self, shop_id, page, num):
+    def total(self, shop_id, start_date=None, end_date=None):
+        return self.filterByDate(shop_id, start_date, end_date).aggregate(models.Sum('amount'), models.Count('id'))
+
+    def getList(self, shop_id, page, num, start_date=None, end_date=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
+        return self.encoderList(self.filterByDate(shop_id, start_date, end_date).order_by('-create_time')[left:right])
 
     def encoder(self, deduction):
         if deduction:

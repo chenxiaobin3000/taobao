@@ -2,18 +2,31 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-form-item label="店铺:" prop="shopName">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="5">
+          <el-form-item label="开始日期:" prop="startDate" label-width="80px">
+            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="5">
+          <el-form-item label="结束日期:" prop="endDate" label-width="80px">
+            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="3">
           <div>总计: {{ amount ? amount : 0 }} 元</div>
         </el-col>
-        <el-col :span="14">
+        <el-col :span="3">
           <div>本页面: {{ single ? single : 0 }} 元</div>
+        </el-col>
+        <el-col :span="3">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -66,7 +79,9 @@ export default {
         id: 0,
         page: 1,
         num: 10,
-        search: null
+        search: null,
+        sdate: 0,
+        edate: 0
       }
     }
   },
@@ -90,6 +105,11 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
+    this.listQuery.sdate = new Date()
+    this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
+    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 31
+    this.listQuery.sdate.setTime(seconds)
+    this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
     this.getOwnShopList()
   },
   methods: {
@@ -102,10 +122,12 @@ export default {
         this.amount = parseFloat(response.data.data.amount)
         this.list = response.data.data.list
         this.single = 0
-        this.list.forEach(v => {
-          v.amount = parseFloat(v.amount)
-          this.single += v.amount
-        })
+        if (this.list) {
+          this.list.forEach(v => {
+            v.amount = parseFloat(v.amount)
+            this.single += v.amount
+          })
+        }
         this.single = this.single.toFixed(2)
         this.loading = false
       }).catch(error => {
@@ -127,6 +149,11 @@ export default {
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+      this.listQuery.page = 1
+      this.getOmissionReport()
+    },
+    handleSelect() {
+      this.listQuery.page = 1
       this.getOmissionReport()
     }
   }
