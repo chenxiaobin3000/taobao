@@ -2,7 +2,7 @@
 *.pyc
 app/migrations/*
 app/templates/index.html
-.claw/*
+.claude/*
 .venv/*
 venv/*
 backup/*
