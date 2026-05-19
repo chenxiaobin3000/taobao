@@ -29,6 +29,8 @@ export const MyRoleData = [{
     id: 6004, label: '扣款管理'
   }, {
     id: 6005, label: '预备商品'
+  }, {
+    id: 6006, label: '发票管理'
   }]
 }, {
   id: 4000, label: '存档数据',

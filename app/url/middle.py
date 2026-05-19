@@ -36,6 +36,7 @@ url_middle = [
 
     # 发票项
     path('api/receipt_item/add', receipt_item.add),
+    path('api/receipt_item/set', receipt_item.set),
     path('api/receipt_item/del', receipt_item.delete),
     path('api/receipt_item/getList', receipt_item.getList),
 

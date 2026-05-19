@@ -7,16 +7,22 @@ class ReceiptItemManager(models.Manager):
     def add(self, project_name, project_note):
         return self.create(project_name=project_name, project_note=project_note)
 
+    def set(self, pk, project_name, project_note):
+        item = self.get(pk=pk)
+        item.project_name = project_name
+        item.project_note = project_note
+        return item.save()
+
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def total(self):
+        return self.count()
 
-    def getList(self, shop_id, page, num):
+    def getList(self, page, num):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-ctime')[left:right])
+        return self.encoderList(self.order_by('-ctime')[left:right])
 
     def encoderList(self, items):
         if items:

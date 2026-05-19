@@ -1,13 +1,20 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="6">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="18">
+          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
+        </el-col>
+      </el-row>
     </el-form>
+
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="项目名称">
         <template slot-scope="scope">
