@@ -24,6 +24,21 @@ def add(request):
 
 @require_POST
 @transaction.atomic
+def set(request):
+    post = json.loads(request.body)
+    pk = int(post.get('id'))
+    create_date = post.get('cdate')
+    receipt_id = post.get('rid')
+    receipt_name = post.get('name')
+    project_id = int(post.get('pid'))
+    project_num = int(post.get('num'))
+    receipt_note = post.get('note')
+    ReceiptTo.objects.set(pk, create_date, receipt_id, receipt_name, project_id, project_num, receipt_note)
+    response = success()
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
 def delete(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))

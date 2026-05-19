@@ -10,12 +10,26 @@ from app.views.common import success
 @transaction.atomic
 def add(request):
     post = json.loads(request.body)
+    shop_id = int(post.get('id'))
     create_date = post.get('cdate')
     user_id = request.user_id
     project_id = int(post.get('name'))
     project_num = int(post.get('num'))
     receipt_note = post.get('note')
-    ReceiptFrom.objects.add(create_date, user_id, project_id, project_num, receipt_note)
+    ReceiptFrom.objects.add(shop_id, create_date, user_id, project_id, project_num, receipt_note)
+    response = success()
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
+def set(request):
+    post = json.loads(request.body)
+    pk = int(post.get('id'))
+    create_date = post.get('cdate')
+    project_id = int(post.get('name'))
+    project_num = int(post.get('num'))
+    receipt_note = post.get('note')
+    ReceiptFrom.objects.set(pk, create_date, project_id, project_num, receipt_note)
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 

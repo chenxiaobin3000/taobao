@@ -26,5 +26,11 @@ export default {
   }, {
     path: 'receiptItem', component: () => import('@/views/middle/receiptItem'),
     name: 'middle_receiptItem', meta: { title: '发票管理', roles: [6006] }
+  }, {
+    path: 'receiptFrom', component: () => import('@/views/middle/receiptFrom'),
+    name: 'middle_receiptFrom', meta: { title: '进项管理', roles: [6007] }
+  }, {
+    path: 'receiptTo', component: () => import('@/views/middle/receiptTo'),
+    name: 'middle_receiptTo', meta: { title: '出项管理', roles: [6008] }
   }]
 }

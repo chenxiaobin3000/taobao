@@ -4,8 +4,17 @@ from django.forms.models import model_to_dict
 
 # 进项表
 class ReceiptFromManager(models.Manager):
-    def add(self, create_date, user_id, project_id, project_num, receipt_note):
-        return self.create(create_date=create_date, user_id=user_id, project_id=project_id, project_num=project_num, receipt_note=receipt_note)
+    def add(self, shop_id, create_date, user_id, project_id, project_num, receipt_note):
+        return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, project_id=project_id, project_num=project_num, receipt_note=receipt_note)
+
+    def set(self, pk, create_date, project_id, project_num, receipt_note):
+        receipt = self.get(pk=pk)
+        receipt.create_date = create_date
+        receipt.project_id = project_id
+        receipt.project_num = project_num
+        receipt.receipt_note = receipt_note
+        receipt.save()
+        return receipt
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -20,11 +29,12 @@ class ReceiptFromManager(models.Manager):
 
     def encoderList(self, receipts):
         if receipts:
-            return [model_to_dict(receipt, fields=['id', 'create_date', 'user_id', 'project_id', 'project_num', 'receipt_note']) for receipt in receipts]
+            return [model_to_dict(receipt, fields=['id', 'shop_id', 'create_date', 'user_id', 'project_id', 'project_num', 'receipt_note']) for receipt in receipts]
         return None
 
 class ReceiptFrom(models.Model):
     objects = ReceiptFromManager()
+    shop_id = models.IntegerField(db_index = True) # 店铺id
     create_date = models.DateField(db_index=True) # 创建日期
     user_id = models.IntegerField(db_index=True) # 填报人
     project_id = models.IntegerField(db_index=True) # 项目

@@ -7,6 +7,17 @@ class ReceiptToManager(models.Manager):
     def add(self, shop_id, create_date, user_id, receipt_id, receipt_name, project_id, project_num, receipt_note):
         return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, receipt_id=receipt_id, receipt_name=receipt_name, project_id=project_id, project_num=project_num, receipt_note=receipt_note)
 
+    def set(self, pk, create_date, receipt_id, receipt_name, project_id, project_num, receipt_note):
+        receipt = self.get(pk=pk)
+        receipt.create_date = create_date
+        receipt.receipt_id = receipt_id
+        receipt.receipt_name = receipt_name
+        receipt.project_id = project_id
+        receipt.project_num = project_num
+        receipt.receipt_note = receipt_note
+        receipt.save()
+        return receipt
+
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
