@@ -228,16 +228,6 @@ export default {
         background-color: #42b983;
         color: #fff;
         border-color: #42b983;
-        &::before {
-          content: '';
-          background: #fff;
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          position: relative;
-          margin-right: 2px;
-        }
       }
     }
   }
