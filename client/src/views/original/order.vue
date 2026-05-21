@@ -201,12 +201,12 @@ export default {
       })
       // 提取采购价
       const length = o.length
+      const errors = []
       for (let i = 0; i < length; ++i) {
         // 异常状态
         if (o[i].st === OrderStatus.OTHER) {
-          this.$message({ type: 'error', message: '订单状态异常!' })
-          console.log(o[i])
-          return
+          errors.push(this.formatImportError(i, '订单状态异常', o[i]))
+          continue
         }
         const ext = this.extract(o[i].no, o[i].id)
         if (ext[0]) {
@@ -219,11 +219,14 @@ export default {
           }
           // 金额小于6认定为刷单，忽略备注
           if (parseFloat(o[i].pa) > 6) {
-            this.$message({ type: 'error', message: '订单备注解析异常!' })
-            console.log(o[i])
-            return
+            errors.push(this.formatImportError(i, '订单备注解析异常', o[i]))
           }
         }
+      }
+      if (errors.length > 0) {
+        this.downloadImportErrors(errors)
+        this.$message({ type: 'error', message: '订单备注解析异常!' })
+        return
       }
       addUserOrderList({
         id: this.listQuery.id,
@@ -234,6 +237,30 @@ export default {
         this.getUserOrderList()
         this.dialogVisible = false
       })
+    },
+    formatImportError(index, reason, order) {
+      return [
+        `行号: ${index + 2}`,
+        `原因: ${reason}`,
+        `订单编号: ${order.id}`,
+        `订单状态: ${order.st}`,
+        `付款金额: ${order.pa}`,
+        `创建时间: ${order.ct}`,
+        `商品名称: ${order.na}`,
+        `备注: ${order.no}`
+      ].join('\r\n')
+    },
+    downloadImportErrors(errors) {
+      const content = errors.join('\r\n\r\n')
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'order_import_errors.txt'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
