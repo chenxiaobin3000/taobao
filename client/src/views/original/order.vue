@@ -74,6 +74,10 @@
     <el-dialog title="导入Excel" :visible.sync="dialogVisible">
       <pre style="text-align:center;font-size:13px;">订单编号1  |  状态3  |  创建时间4  |  名称5  |  备注6  |  金额7</pre>
       <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
+      <div v-if="uploading || uploadProgress > 0" style="padding: 20px 5% 0 5%;">
+        <el-progress :percentage="uploadProgress" />
+        <div style="text-align:center;margin-top:8px;font-size:13px;">{{ uploadProgressText }}</div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -105,7 +109,10 @@ export default {
         sdate: 0,
         edate: 0
       },
-      dialogVisible: false
+      dialogVisible: false,
+      uploading: false,
+      uploadProgress: 0,
+      uploadProgressText: ''
     }
   },
   computed: {
@@ -177,6 +184,9 @@ export default {
       this.getUserOrderList()
     },
     handleExcel() {
+      this.uploading = false
+      this.uploadProgress = 0
+      this.uploadProgressText = ''
       this.dialogVisible = true
     },
     async handleSuccess({ results, header }) {
@@ -225,18 +235,37 @@ export default {
       }
       if (errors.length > 0) {
         this.downloadImportErrors(errors)
-        this.$message({ type: 'error', message: '订单备注解析异常!' })
+        this.$message({ type: 'error', message: '数据异常，请查看下载的异常信息文件!' })
         return
       }
-      addUserOrderList({
-        id: this.listQuery.id,
-        uid: this.userdata.user.id,
-        o: o
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getUserOrderList()
-        this.dialogVisible = false
-      })
+      await this.uploadOrderChunks(o)
+      this.$message({ type: 'success', message: '导入成功!' })
+      this.getUserOrderList()
+      this.dialogVisible = false
+    },
+    async uploadOrderChunks(orders) {
+      const chunkSize = 1000
+      const total = orders.length
+      this.uploading = true
+      this.uploadProgress = 0
+      this.uploadProgressText = `正在导入 0/${total}`
+      try {
+        for (let i = 0; i < total; i += chunkSize) {
+          const chunk = orders.slice(i, i + chunkSize)
+          await addUserOrderList({
+            id: this.listQuery.id,
+            uid: this.userdata.user.id,
+            o: chunk
+          })
+          const finished = Math.min(i + chunk.length, total)
+          this.uploadProgress = Math.floor((finished / total) * 100)
+          this.uploadProgressText = `正在导入 ${finished}/${total}`
+        }
+        this.uploadProgress = 100
+        this.uploadProgressText = `导入完成 ${total}/${total}`
+      } finally {
+        this.uploading = false
+      }
     },
     formatImportError(index, reason, order) {
       return [
