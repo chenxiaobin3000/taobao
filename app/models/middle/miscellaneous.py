@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 from django.utils import timezone
 from django.forms.models import model_to_dict
 
@@ -9,6 +10,14 @@ class MiscellaneousManager(models.Manager):
 
     def addList(self, miscs):
         return self.bulk_create(miscs)
+
+    def exists(self, shop_id, create_date, project_name, amount):
+        return self.filter(
+            shop_id=shop_id,
+            create_date=create_date,
+            project_name=project_name,
+            amount=Decimal(str(amount))
+        ).exists()
 
     def set(self, pk, create_date, user_id, project_name, amount, misc_note):
         misc = self.get(pk=pk)

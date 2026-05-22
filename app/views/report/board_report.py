@@ -8,6 +8,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
 from app.models.report.native_order import NativeOrder
 from app.models.report.native_fake import NativeFake
+from app.models.report.native_miscellaneous import NativeMiscellaneous
 from app.models.report.native_promotion import NativePromotion
 from app.views.common import failed, success
 
@@ -35,6 +36,7 @@ def getList(request):
     promotion = 0 # 推广
     fake = 0 # 刷单成本
     fake_deduction = 0 # 刷单扣款
+    misc = 0 # 杂项
 
     now_date = timezone.now()
     datas_list = {}
@@ -45,7 +47,7 @@ def getList(request):
         start_date = datetime(year, month, 1)
         datas = {}
         while start_date < now_date:
-            datas[start_date.strftime('%Y-%m')] = { 'pending': 0, 'pending_refund': 0, 'pending_procure': 0, 'pending_refund_procure': 0, 'settled': 0, 'settled_refund': 0, 'settled_procure': 0, 'settled_refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0 }
+            datas[start_date.strftime('%Y-%m')] = { 'pending': 0, 'pending_refund': 0, 'pending_procure': 0, 'pending_refund_procure': 0, 'settled': 0, 'settled_refund': 0, 'settled_procure': 0, 'settled_refund_procure': 0, 'close': 0, 'close_refund': 0, 'close_procure': 0, 'close_refund_procure': 0, 'transfer': 0, 'deduction': 0, 'promotion': 0, 'fake': 0, 'fake_deduction': 0, 'misc': 0 }
             month = month + 1
             if month > 12:
                 month = 1
@@ -121,6 +123,13 @@ def getList(request):
             if key_month in datas:
                 datas[key_month]['fake'] = temp['commission'] + temp['freight']
 
+        # 杂项
+        miscs = NativeMiscellaneous().groupByMonth(shop_id)
+        for temp in miscs:
+            key_month = temp['create_month']
+            if key_month in datas:
+                datas[key_month]['misc'] = temp['amount']
+
         # 统计
         values = datas.values()
         for value in values:
@@ -141,6 +150,7 @@ def getList(request):
             value['promotion'] = round(value['promotion'], 1)
             value['fake'] = round(value['fake'], 1)
             value['fake_deduction'] = round(value['fake_deduction'], 1)
+            value['misc'] = round(value['misc'], 1)
 
             pending += value['pending']
             pending_refund += value['pending_refund']
@@ -159,6 +169,7 @@ def getList(request):
             promotion += value['promotion']
             fake += value['fake']
             fake_deduction += value['fake_deduction']
+            misc += value['misc']
 
     # 重新排序
     year = 2025
@@ -194,6 +205,7 @@ def getList(request):
         'promotion': round(promotion, 1),
         'fake': round(fake, 1),
         'fake_deduction': round(fake_deduction, 1),
+        'misc': round(misc, 1),
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
