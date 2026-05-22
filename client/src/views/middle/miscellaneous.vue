@@ -217,8 +217,13 @@ export default {
       const note = header[4]
       const createDate = header[0]
       const miscs = []
-      results.forEach(v => {
+      for (let i = 0; i < results.length; ++i) {
+        const v = results[i]
         const uid = this.userName2Id(v[userName])
+        if (uid === -1) {
+          this.$message({ type: 'error', message: `第${i + 1}行，负责人不存在` })
+          return
+        }
         miscs.push({
           name: v[projectName],
           amount: v[amount],
@@ -226,7 +231,7 @@ export default {
           note: v[note] || '',
           cdate: excelDateToText(v[createDate], 'yyyy-MM-dd')
         })
-      })
+      }
       this.uploading = true
       this.uploadProgressText = `Uploading 0/${miscs.length}`
       addMiscList({
@@ -244,15 +249,12 @@ export default {
       })
     },
     userName2Id(name) {
-      if (!name) {
-        return this.userdata.user.id
-      }
       for (let i = 0; i < this.userList.length; ++i) {
         if (this.userList[i].name === name) {
           return this.userList[i].id
         }
       }
-      return 0
+      return -1
     },
     handleCreate() {
       this.resetTemp()

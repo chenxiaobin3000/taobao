@@ -186,6 +186,11 @@
           {{ scope.row.transfer }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="杂项" width="70">
+        <template slot-scope="scope">
+          {{ scope.row.misc }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="备注">
         <div><br></div>
       </el-table-column>
@@ -225,6 +230,7 @@ export default {
       promotion: 0, // 推广
       fake: 0, // 刷单
       fake_deduction: 0, // 刷单扣款
+      misc: 0, // 杂项
       loading: false,
       shopList: [], // 本公司所有店铺列表
       listQuery: {
@@ -277,12 +283,13 @@ export default {
         this.promotion = response.data.data.promotion
         this.fake = response.data.data.fake
         this.fake_deduction = response.data.data.fake_deduction
+        this.misc = response.data.data.misc
         // 成交
         this.amount = parseFloat(this.pending) + parseFloat(this.settled) + parseFloat(this.close)
         // 毛利
         this.income = parseFloat(this.pending) - parseFloat(this.pending_procure) + parseFloat(this.settled) - parseFloat(this.settled_procure)
         // 利润
-        this.profit = parseFloat(this.settled) - parseFloat(this.settled_refund) - parseFloat(this.settled_procure) + parseFloat(this.settled_refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
+        this.profit = parseFloat(this.settled) - parseFloat(this.settled_refund) - parseFloat(this.settled_procure) + parseFloat(this.settled_refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction) - parseFloat(this.misc)
         // 预估
         this.expect = parseFloat(this.pending) - parseFloat(this.pending_refund) - parseFloat(this.pending_procure) + parseFloat(this.pending_refund_procure) + this.profit
         this.amount = this.amount.toFixed(1)
@@ -295,7 +302,7 @@ export default {
         Object.entries(data).forEach(([k, v]) => {
           v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
           v.income = parseFloat(v.pending) - parseFloat(v.pending_refund) + parseFloat(v.settled) - parseFloat(v.settled_procure)
-          v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
+          v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction) - parseFloat(v.misc)
           v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
           v.amount = v.amount.toFixed(1)
           v.income = v.income.toFixed(1)
@@ -325,6 +332,7 @@ export default {
           let promotion = 0
           let fake = 0
           let fake_deduction = 0
+          let misc = 0
           for (let m = 0; m < 12; ++m) {
             if (y === currentYear && m > currentMonth) {
               break
@@ -356,12 +364,13 @@ export default {
             promotion += temp.promotion
             fake += temp.fake
             fake_deduction += temp.fake_deduction
+            misc += temp.misc
             this.list.unshift(temp)
           }
           // 插入年数据
           const amount = pending + settled + close
           const income = pending + settled
-          const profit = settled - settled_refund - settled_procure + settled_refund_procure - promotion - transfer - deduction - fake - fake_deduction
+          const profit = settled - settled_refund - settled_procure + settled_refund_procure - promotion - transfer - deduction - fake - fake_deduction - misc
           const expect = pending - pending_refund - pending_procure + pending_refund_procure + profit
           this.list.unshift({
             create_date: y + '年',
@@ -386,6 +395,7 @@ export default {
             promotion: promotion.toFixed(1),
             fake: fake.toFixed(1),
             fake_deduction: fake_deduction.toFixed(1),
+            misc: misc.toFixed(1),
             is_show: 1
           })
         }
