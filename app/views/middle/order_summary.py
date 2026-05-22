@@ -71,6 +71,8 @@ def flush(request):
             if deduction:
                 data['deduction'] = deduction['amount']
                 data['deduction_detail'] = deduction['deduction_detail']
+            else:
+                deduction = { 'amount': 0 }
 
             # 采购退款
             refund_procure = 0
