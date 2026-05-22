@@ -1,17 +1,13 @@
 <template>
   <div class="app-container">
+    <div class="excel-import-row">
+      <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
+      <div v-if="uploading || uploadProgress > 0" class="excel-import-progress">
+        <el-progress :percentage="uploadProgress" />
+        <span>{{ uploadProgressText }}</span>
+      </div>
+    </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-row>
-        <el-col :span="24">
-          <div class="excel-import-row">
-            <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
-            <div v-if="uploading || uploadProgress > 0" class="excel-import-progress">
-              <el-progress :percentage="uploadProgress" />
-              <span>{{ uploadProgressText }}</span>
-            </div>
-          </div>
-        </el-col>
-      </el-row>
       <el-row>
         <el-col :span="6">
           <el-form-item label="店铺:" prop="shopName">

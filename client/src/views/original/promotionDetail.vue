@@ -1,11 +1,17 @@
 <template>
   <div class="app-container">
+    <div class="excel-import-row">
+      <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
+      <div v-if="uploading || uploadProgress > 0" class="excel-import-progress">
+        <el-progress :percentage="uploadProgress" />
+        <span>{{ uploadProgressText }}</span>
+      </div>
+    </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-form-item label="店铺:" prop="shopName">
         <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
           <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
         <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
       </el-form-item>
     </el-form>
@@ -89,12 +95,6 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getUserPromotionDetailList" />
 
-    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">日期1  |  编号2  |  展现量5  |  点击量6  |  消耗7</pre>
-      <pre style="text-align:center;font-size:13px;">点击率8  |  平均消耗9  |  千次消耗10  |  金额19  |  订单20</pre>
-      <pre style="text-align:center;font-size:13px;">投产比24  |  成交成本26  |  购物车27  |  收藏31</pre>
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
-    </el-dialog>
   </div>
 </template>
 
@@ -114,6 +114,9 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      uploading: false,
+      uploadProgress: 0,
+      uploadProgressText: '',
       shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
@@ -179,10 +182,11 @@ export default {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getUserPromotionDetailList()
     },
-    handleExcel() {
-      this.dialogVisible = true
-    },
+
     async handleSuccess({ results, header }) {
+      this.uploading = false
+      this.uploadProgress = 0
+      this.uploadProgressText = ''
       const promotion_date = header[0]
       const good_id = header[1]
       const show_num = header[4]
@@ -216,15 +220,33 @@ export default {
           roi: v[roi] ? v[roi] : 0
         })
       })
-      addUserPromotionDetailList({
-        id: this.listQuery.id,
-        uid: this.userdata.user.id,
-        p: p
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getUserPromotionDetailList()
-        this.dialogVisible = false
-      })
+      await this.uploadExcelChunks(p)
+      this.$message({ type: 'success', message: 'Imported successfully!' })
+      this.getUserPromotionDetailList()
+    },
+    async uploadExcelChunks(records) {
+      const chunkSize = 1000
+      const total = records.length
+      this.uploading = true
+      this.uploadProgress = 0
+      this.uploadProgressText = `Uploading 0/${total}`
+      try {
+        for (let i = 0; i < total; i += chunkSize) {
+          const chunk = records.slice(i, i + chunkSize)
+          await addUserPromotionDetailList({
+            id: this.listQuery.id,
+            uid: this.userdata.user.id,
+            p: chunk
+          })
+          const finished = Math.min(i + chunk.length, total)
+          this.uploadProgress = Math.floor((finished / total) * 100)
+          this.uploadProgressText = `Uploading ${finished}/${total}`
+        }
+        this.uploadProgress = 100
+        this.uploadProgressText = `Imported ${total}/${total}`
+      } finally {
+        this.uploading = false
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
@@ -258,3 +280,47 @@ export default {
   }
 }
 </script>
+<style scoped>
+.excel-import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  padding: 6px 1%;
+  margin-bottom: 8px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.excel-import-row > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.excel-import-row ::v-deep .drop {
+  margin: 0;
+  font-size: 13px;
+  border-width: 1px;
+}
+
+.excel-import-row ::v-deep .drop .el-button {
+  margin-left: 10px;
+}
+
+.excel-import-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 240px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.excel-import-progress ::v-deep .el-progress {
+  flex: 1 1 auto;
+}
+</style>

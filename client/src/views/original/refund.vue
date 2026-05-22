@@ -1,5 +1,12 @@
 <template>
   <div class="app-container">
+    <div class="excel-import-row">
+      <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
+      <div v-if="uploading || uploadProgress > 0" class="excel-import-progress">
+        <el-progress :percentage="uploadProgress" />
+        <span>{{ uploadProgressText }}</span>
+      </div>
+    </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
         <el-col :span="6">
@@ -20,7 +27,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
           <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
           <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect()">查询</el-button>
         </el-col>
@@ -86,11 +92,6 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getUserRefundList" />
 
-    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">订单号1  |  退货编号2  |  付款时间3  |  完结时间4  |  付款金额5  |  退款金额6</pre>
-      <pre style="text-align:center;font-size:13px;">申请时间9  |  超时时间10  |  状态11  |  类型12  |  商品编码13  |  退给平台15</pre>
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
-    </el-dialog>
   </div>
 </template>
 
@@ -111,6 +112,9 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      uploading: false,
+      uploadProgress: 0,
+      uploadProgressText: '',
       shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0,
@@ -196,10 +200,11 @@ export default {
       this.listQuery.page = 1
       this.getUserRefundList()
     },
-    handleExcel() {
-      this.dialogVisible = true
-    },
+
     async handleSuccess({ results, header }) {
+      this.uploading = false
+      this.uploadProgress = 0
+      this.uploadProgressText = ''
       const refund_id = header[1]
       const order_id = header[0]
       const product_id = header[12]
@@ -238,15 +243,33 @@ export default {
           return
         }
       }
-      addUserRefundList({
-        id: this.listQuery.id,
-        uid: this.userdata.user.id,
-        r: r
-      }).then(() => {
-        this.$message({ type: 'success', message: '导入成功!' })
-        this.getUserRefundList()
-        this.dialogVisible = false
-      })
+      await this.uploadExcelChunks(r)
+      this.$message({ type: 'success', message: 'Imported successfully!' })
+      this.getUserRefundList()
+    },
+    async uploadExcelChunks(records) {
+      const chunkSize = 1000
+      const total = records.length
+      this.uploading = true
+      this.uploadProgress = 0
+      this.uploadProgressText = `Uploading 0/${total}`
+      try {
+        for (let i = 0; i < total; i += chunkSize) {
+          const chunk = records.slice(i, i + chunkSize)
+          await addUserRefundList({
+            id: this.listQuery.id,
+            uid: this.userdata.user.id,
+            r: chunk
+          })
+          const finished = Math.min(i + chunk.length, total)
+          this.uploadProgress = Math.floor((finished / total) * 100)
+          this.uploadProgressText = `Uploading ${finished}/${total}`
+        }
+        this.uploadProgress = 100
+        this.uploadProgressText = `Imported ${total}/${total}`
+      } finally {
+        this.uploading = false
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
@@ -280,3 +303,47 @@ export default {
   }
 }
 </script>
+<style scoped>
+.excel-import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  padding: 6px 1%;
+  margin-bottom: 8px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.excel-import-row > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.excel-import-row ::v-deep .drop {
+  margin: 0;
+  font-size: 13px;
+  border-width: 1px;
+}
+
+.excel-import-row ::v-deep .drop .el-button {
+  margin-left: 10px;
+}
+
+.excel-import-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 240px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.excel-import-progress ::v-deep .el-progress {
+  flex: 1 1 auto;
+}
+</style>

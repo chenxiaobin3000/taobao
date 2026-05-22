@@ -1,21 +1,39 @@
-<template>
+﻿<template>
   <div class="app-container">
+    <div class="excel-import-row">
+      <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
+    </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:" prop="shopName">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-select v-model="listQuery.type" class="filter-item" placeholder="商品类型" style="width:120px;margin-left:10px;" @change="handleFilterChange">
-          <el-option v-for="item in typeFilterList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-select v-model="listQuery.status" class="filter-item" placeholder="在售状态" style="width:120px;margin-left:10px;" @change="handleFilterChange">
-          <el-option v-for="item in statusFilterList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
-        <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleFlush()">刷新</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="6">
+          <el-form-item label="店铺:" prop="shopName">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="类型:" prop="typeName">
+            <el-select v-model="listQuery.type" class="filter-item" placeholder="请选择类型" @change="handleFilterChange">
+              <el-option v-for="item in typeFilterList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="状态:" prop="statusName">
+            <el-select v-model="listQuery.status" class="filter-item" placeholder="请选择状态" @change="handleFilterChange">
+              <el-option v-for="item in statusFilterList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;"
+            @click="handleFlush()">刷新</el-button>
+        </el-col>
+      </el-row>
     </el-form>
-    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit
+      highlight-current-row>
       <el-table-column align="center" label="商品名称" width="100">
         <template slot-scope="scope">
           {{ scope.row.short_name }}
@@ -28,7 +46,8 @@
       </el-table-column>
       <el-table-column align="center" label="外部编码" width="120">
         <template slot-scope="scope">
-          <a :href="handleJumpOrigin(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
+          <a :href="handleJumpOrigin(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin
+          }}</a>
         </template>
       </el-table-column>
       <el-table-column align="center" label="进货编码" width="120">
@@ -69,7 +88,8 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getGoodList" />
+    <pagination v-show="total > 0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num"
+      @pagination="getGoodList" />
 
     <!-- 商品信息编辑 -->
     <el-dialog title="修改商品信息" :visible.sync="dialogVisible">
@@ -101,25 +121,21 @@
         </el-form-item>
         <el-form-item label="添加别名">
           <el-input v-model="temp.alias" style="width:80%" />
-          <el-button type="primary" size="mini" style="float:right;width:18%" @click="addGoodAlias(temp.good_id)">新增</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:18%"
+            @click="addGoodAlias(temp.good_id)">新增</el-button>
         </el-form-item>
         <el-form-item v-for="item in goodAliasList" :key="item.id" label="别名">
           <div>
             {{ item.name }}
-            <el-button type="danger" size="mini" style="float:right" @click="delGoodAlias(item.id, temp.good_id)">删除</el-button>
+            <el-button type="danger" size="mini" style="float:right"
+              @click="delGoodAlias(item.id, temp.good_id)">删除</el-button>
           </div>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="updateData()">确定</el-button>
+        <el-button type="danger" @click="dialogVisible = false">鍙栨秷</el-button>
+        <el-button type="primary" @click="updateData()">纭畾</el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog title="导入Excel" :visible.sync="dialogExcelVisible">
-      <pre style="text-align:center;font-size:13px;">商品名称1  |  商品编号2  |  类型3(商品,赠品,补差价)  |  状态4(在售,下架,删除)</pre>
-      <pre style="text-align:center;font-size:13px;">外部编号5  |  外部类型6(淘宝,天猫)  |  完整名称7  |  别名8(最多5个)</pre>
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
     </el-dialog>
   </div>
 </template>
@@ -157,8 +173,7 @@ export default {
         status: 0
       },
       temp: {},
-      dialogVisible: false,
-      dialogExcelVisible: false
+      dialogVisible: false
     }
   },
   computed: {
@@ -173,7 +188,7 @@ export default {
       this.getGoodList()
     }
   },
-  mounted: function() {
+  mounted: function () {
     setTimeout(() => {
       if (this.$refs.table) {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 78
@@ -249,9 +264,6 @@ export default {
       this.listQuery.page = 1
       this.getGoodList()
     },
-    handleExcel() {
-      this.dialogExcelVisible = true
-    },
     handleSuccess({ results, header }) {
       const sname = header[0]
       const id = header[1]
@@ -279,7 +291,7 @@ export default {
           stop = true
         }
         if (status_num === GoodStatus.OTHER) {
-          console.log('商品状态异常:' + v[id])
+          console.log('商品状态异常?' + v[id])
           stop = true
         }
         if (origin_num === GoodOriginType.OTHER) {
@@ -323,7 +335,6 @@ export default {
       }).then(() => {
         this.$message({ type: 'success', message: '导入成功!' })
         this.getGoodList()
-        this.dialogExcelVisible = false
       })
     },
     handleFlush() {
@@ -411,3 +422,42 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.excel-import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 6px 1%;
+  margin-bottom: 8px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.excel-import-row>div:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.excel-import-row ::v-deep .drop {
+  margin: 0;
+  font-size: 13px;
+  border-width: 1px;
+}
+
+.excel-import-row ::v-deep .drop .el-button {
+  margin-left: 10px;
+}
+
+.excel-import-tip {
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 20px;
+  color: #606266;
+  white-space: nowrap;
+}
+</style>
