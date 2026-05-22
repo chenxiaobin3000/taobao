@@ -153,7 +153,10 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.start_date = new Date().toLocaleDateString().replace(/\//g, '-')
+    this.start_date = new Date()
+    const seconds = this.start_date.getTime() - 1000 * 60 * 60 * 24 * 180
+    this.start_date.setTime(seconds)
+    this.start_date = this.start_date.toLocaleDateString().replace(/\//g, '-')
     this.resetTemp()
     this.getOwnShopList()
   },

@@ -79,6 +79,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
+import { excelDateToText } from '@/utils/excel'
 import { getUserTransferList, addUserTransferList, delUserTransfer, delAllUserTransfer } from '@/api/original/transfer'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -190,7 +191,7 @@ export default {
           p: v[payee_name],
           o: v[order_id],
           a: v[amount],
-          c: v[create_time],
+          c: excelDateToText(v[create_time]),
           tn: v[transfer_note]
         })
       })

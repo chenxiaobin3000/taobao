@@ -204,7 +204,7 @@ export default {
             f: ftype,
             a: v[amount],
             t: DeductionType.text2num(v[polymerize_note]),
-            c: excelDateToText(v[create_time], 'yyyy-MM-dd'),
+            c: v[create_time],
             n: v[polymerize_note]
           })
         }

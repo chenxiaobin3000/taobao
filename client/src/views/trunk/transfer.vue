@@ -128,7 +128,7 @@ export default {
     this.listQuery.id = this.$store.getters.shop
     this.listQuery.sdate = new Date()
     this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
-    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 31
+    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 180
     this.listQuery.sdate.setTime(seconds)
     this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
     this.getOwnShopList()

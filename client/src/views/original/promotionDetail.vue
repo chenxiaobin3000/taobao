@@ -102,6 +102,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
+import { excelDateToText } from '@/utils/excel'
 import { getUserPromotionDetailList, addUserPromotionDetailList, delUserPromotionDetail, delAllUserPromotionDetail } from '@/api/original/promotionDetail'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -204,7 +205,7 @@ export default {
       const p = []
       results.forEach(v => {
         p.push({
-          pd: v[promotion_date],
+          pd: excelDateToText(v[promotion_date], 'yyyy-MM-dd'),
           id: v[good_id],
           sn: v[show_num] ? v[show_num] : 0,
           cn: v[click_num] ? v[click_num] : 0,
