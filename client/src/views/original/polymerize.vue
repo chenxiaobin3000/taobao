@@ -179,7 +179,6 @@ export default {
       this.listQuery.page = 1
       this.getUserPolymerizeList()
     },
-
     async handleSuccess({ results, header }) {
       this.uploading = false
       this.uploadProgress = 0
@@ -205,7 +204,7 @@ export default {
             f: ftype,
             a: v[amount],
             t: DeductionType.text2num(v[polymerize_note]),
-            c: v[create_time],
+            c: excelDateToText(v[create_time], 'yyyy-MM-dd'),
             n: v[polymerize_note]
           })
         }
@@ -222,7 +221,7 @@ export default {
         }
       }
       await this.uploadExcelChunks(p)
-      this.$message({ type: 'success', message: 'Imported successfully!' })
+      this.$message({ type: 'success', message: '导入成功!' })
       this.getUserPolymerizeList()
     },
     async uploadExcelChunks(records) {
