@@ -27,13 +27,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;"
-            @click="handleFlush()">刷新</el-button>
+          <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleFlush()">刷新</el-button>
         </el-col>
       </el-row>
     </el-form>
-    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit
-      highlight-current-row>
+    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="商品名称" width="100">
         <template slot-scope="scope">
           {{ scope.row.short_name }}
@@ -46,8 +44,7 @@
       </el-table-column>
       <el-table-column align="center" label="外部编码" width="120">
         <template slot-scope="scope">
-          <a :href="handleJumpOrigin(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin
-          }}</a>
+          <a :href="handleJumpOrigin(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.origin }}</a>
         </template>
       </el-table-column>
       <el-table-column align="center" label="进货编码" width="120">
@@ -88,8 +85,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total > 0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num"
-      @pagination="getGoodList" />
+    <pagination v-show="total > 0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getGoodList" />
 
     <!-- 商品信息编辑 -->
     <el-dialog title="修改商品信息" :visible.sync="dialogVisible">
@@ -121,14 +117,12 @@
         </el-form-item>
         <el-form-item label="添加别名">
           <el-input v-model="temp.alias" style="width:80%" />
-          <el-button type="primary" size="mini" style="float:right;width:18%"
-            @click="addGoodAlias(temp.good_id)">新增</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:18%" @click="addGoodAlias(temp.good_id)">新增</el-button>
         </el-form-item>
         <el-form-item v-for="item in goodAliasList" :key="item.id" label="别名">
           <div>
             {{ item.name }}
-            <el-button type="danger" size="mini" style="float:right"
-              @click="delGoodAlias(item.id, temp.good_id)">删除</el-button>
+            <el-button type="danger" size="mini" style="float:right" @click="delGoodAlias(item.id, temp.good_id)">删除</el-button>
           </div>
         </el-form-item>
       </el-form>
@@ -188,7 +182,7 @@ export default {
       this.getGoodList()
     }
   },
-  mounted: function () {
+  mounted: function() {
     setTimeout(() => {
       if (this.$refs.table) {
         this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 78
