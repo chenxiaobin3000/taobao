@@ -367,7 +367,7 @@ export default {
         }
       }
       await this.uploadExcelChunks(d)
-      this.$message({ type: 'success', message: 'Imported successfully!' })
+      this.$message({ type: 'success', message: '导入成功!' })
       this.getUserDeductionList()
     },
     async uploadExcelChunks(records) {

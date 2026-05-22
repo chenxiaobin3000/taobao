@@ -53,6 +53,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { PromotionType } from '@/utils/const'
+import { excelDateToText } from '@/utils/excel'
 import { getUserPromotionList, addUserPromotionList, delUserPromotion, delAllUserPromotion } from '@/api/original/promotion'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -149,7 +150,7 @@ export default {
       results.forEach(v => {
         if (v[output] === '支出') {
           p.push({
-            d: v[create_date],
+            d: excelDateToText(v[create_date], 'yyyy-MM-dd'),
             p: v[payment],
             t: PromotionType.text2num(v[promotion_note]),
             n: v[promotion_note]
@@ -166,7 +167,7 @@ export default {
         }
       }
       await this.uploadExcelChunks(p)
-      this.$message({ type: 'success', message: 'Imported successfully!' })
+      this.$message({ type: 'success', message: '导入成功!' })
       this.getUserPromotionList()
     },
     async uploadExcelChunks(records) {
