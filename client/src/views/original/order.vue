@@ -2,6 +2,17 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
+        <el-col :span="24">
+          <div class="excel-import-row">
+            <upload-excel-component :on-success="handleSuccess" width="360px" line-height="32px" height="36px" />
+            <div v-if="uploading || uploadProgress > 0" class="excel-import-progress">
+              <el-progress :percentage="uploadProgress" />
+              <span>{{ uploadProgressText }}</span>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="6">
           <el-form-item label="店铺:" prop="shopName">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
@@ -20,7 +31,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleExcel()">导入</el-button>
           <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
           <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect()">查询</el-button>
         </el-col>
@@ -71,14 +81,6 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getUserOrderList" />
 
-    <el-dialog title="导入Excel" :visible.sync="dialogVisible">
-      <pre style="text-align:center;font-size:13px;">订单编号1  |  状态3  |  创建时间4  |  名称5  |  备注6  |  金额7</pre>
-      <upload-excel-component :on-success="handleSuccess" width="90%" line-height="300px" height="300px" />
-      <div v-if="uploading || uploadProgress > 0" style="padding: 20px 5% 0 5%;">
-        <el-progress :percentage="uploadProgress" />
-        <div style="text-align:center;margin-top:8px;font-size:13px;">{{ uploadProgressText }}</div>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -109,7 +111,6 @@ export default {
         sdate: 0,
         edate: 0
       },
-      dialogVisible: false,
       uploading: false,
       uploadProgress: 0,
       uploadProgressText: ''
@@ -183,13 +184,10 @@ export default {
       this.listQuery.page = 1
       this.getUserOrderList()
     },
-    handleExcel() {
+    async handleSuccess({ results, header }) {
       this.uploading = false
       this.uploadProgress = 0
       this.uploadProgressText = ''
-      this.dialogVisible = true
-    },
-    async handleSuccess({ results, header }) {
       const order_id = header[0]
       const payment = header[6]
       const order_status = header[2]
@@ -241,7 +239,6 @@ export default {
       await this.uploadOrderChunks(o)
       this.$message({ type: 'success', message: '导入成功!' })
       this.getUserOrderList()
-      this.dialogVisible = false
     },
     async uploadOrderChunks(orders) {
       const chunkSize = 1000
@@ -370,3 +367,50 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.excel-import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  padding: 6px 1%;
+  margin-bottom: 8px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.excel-import-row ::v-deep .drop {
+  margin: 0;
+  font-size: 13px;
+  border-width: 1px;
+}
+
+.excel-import-row ::v-deep .drop .el-button {
+  margin-left: 10px;
+}
+
+.excel-import-tip {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: #606266;
+  white-space: nowrap;
+}
+
+.excel-import-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 240px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.excel-import-progress ::v-deep .el-progress {
+  flex: 1 1 auto;
+}
+</style>
