@@ -7,6 +7,9 @@ class MiscellaneousManager(models.Manager):
     def add(self, shop_id, create_date, user_id, project_name, amount, misc_note):
         return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, project_name=project_name, amount=amount, misc_note=misc_note)
 
+    def addList(self, miscs):
+        return self.bulk_create(miscs)
+
     def set(self, pk, create_date, user_id, project_name, amount, misc_note):
         misc = self.get(pk=pk)
         misc.create_date = create_date

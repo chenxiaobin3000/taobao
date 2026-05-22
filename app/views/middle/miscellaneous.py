@@ -22,6 +22,26 @@ def add(request):
 
 @require_POST
 @transaction.atomic
+def addList(request):
+    post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    datas = post.get('m')
+    miscs = []
+    for data in datas:
+        miscs.append(Miscellaneous(
+            shop_id=shop_id,
+            create_date=data.get('cdate'),
+            user_id=int(data.get('uid')),
+            project_name=data.get('name'),
+            amount=data.get('amount'),
+            misc_note=data.get('note')
+        ))
+    Miscellaneous.objects.addList(miscs)
+    response = success()
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
 def set(request):
     post = json.loads(request.body)
     pk = int(post.get('id'))

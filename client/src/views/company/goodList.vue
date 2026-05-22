@@ -446,12 +446,4 @@ export default {
 .excel-import-row ::v-deep .drop .el-button {
   margin-left: 10px;
 }
-
-.excel-import-tip {
-  flex: 0 0 auto;
-  font-size: 13px;
-  line-height: 20px;
-  color: #606266;
-  white-space: nowrap;
-}
 </style>

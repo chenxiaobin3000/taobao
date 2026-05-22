@@ -21,6 +21,7 @@ url_middle = [
 
     # 杂项
     path('api/misc/add', miscellaneous.add),
+    path('api/misc/addList', miscellaneous.addList),
     path('api/misc/set', miscellaneous.set),
     path('api/misc/del', miscellaneous.delete),
     path('api/misc/getList', miscellaneous.getList),

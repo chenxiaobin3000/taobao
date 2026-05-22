@@ -1,5 +1,12 @@
 <template>
   <div class="app-container">
+    <div class="excel-import-row">
+      <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
+      <div v-if="uploading || uploadProgress > 0" class="excel-import-progress">
+        <el-progress :percentage="uploadProgress" />
+        <span>{{ uploadProgressText }}</span>
+      </div>
+    </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
         <el-col :span="6">
@@ -83,12 +90,14 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
+import UploadExcelComponent from '@/components/UploadExcel'
+import { excelDateToText } from '@/utils/excel'
 import { getOwnShopList } from '@/api/system/shop'
 import { getUserList } from '@/api/system/user'
-import { getMiscList, addMisc, setMisc, delMisc } from '@/api/middle/miscellaneous'
+import { getMiscList, addMisc, addMiscList, setMisc, delMisc } from '@/api/middle/miscellaneous'
 
 export default {
-  components: { Pagination },
+  components: { Pagination, UploadExcelComponent },
   data() {
     return {
       userdata: {},
@@ -96,6 +105,9 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      uploading: false,
+      uploadProgress: 0,
+      uploadProgressText: '',
       shopList: null, // 本公司所有店铺列表
       userList: null, // 本公司所有用户列表
       listQuery: {
@@ -195,6 +207,53 @@ export default {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getMiscList()
     },
+    handleSuccess({ results, header }) {
+      this.uploading = false
+      this.uploadProgress = 0
+      this.uploadProgressText = ''
+      const projectName = header[2]
+      const amount = header[3]
+      const userName = header[1]
+      const note = header[4]
+      const createDate = header[0]
+      const miscs = []
+      results.forEach(v => {
+        const uid = this.userName2Id(v[userName])
+        miscs.push({
+          name: v[projectName],
+          amount: v[amount],
+          uid: uid,
+          note: v[note] || '',
+          cdate: excelDateToText(v[createDate], 'yyyy-MM-dd')
+        })
+      })
+      this.uploading = true
+      this.uploadProgressText = `Uploading 0/${miscs.length}`
+      addMiscList({
+        id: this.listQuery.id,
+        m: miscs
+      }).then(() => {
+        this.uploadProgress = 100
+        this.uploadProgressText = `Imported ${miscs.length}/${miscs.length}`
+        this.uploading = false
+        this.$message({ type: 'success', message: '导入成功!' })
+        this.getMiscList()
+      }).catch(error => {
+        this.uploading = false
+        Promise.reject(error)
+      })
+    },
+    userName2Id(name) {
+      if (!name) {
+        return this.userdata.user.id
+      }
+      for (let i = 0; i < this.userList.length; ++i) {
+        if (this.userList[i].name === name) {
+          return this.userList[i].id
+        }
+      }
+      return 0
+    },
     handleCreate() {
       this.resetTemp()
       this.temp.user_id = this.userList[0].id
@@ -251,3 +310,48 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.excel-import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  padding: 6px 1%;
+  margin-bottom: 8px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.excel-import-row > div:first-of-type {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.excel-import-row ::v-deep .drop {
+  margin: 0;
+  font-size: 13px;
+  border-width: 1px;
+}
+
+.excel-import-row ::v-deep .drop .el-button {
+  margin-left: 10px;
+}
+
+.excel-import-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 240px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.excel-import-progress ::v-deep .el-progress {
+  flex: 1 1 auto;
+}
+</style>

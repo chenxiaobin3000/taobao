@@ -9,6 +9,14 @@ export function addMisc(data) {
   })
 }
 
+export function addMiscList(data) {
+  return request({
+    url: `${path}/addList`,
+    method: 'post',
+    data
+  })
+}
+
 export function setMisc(data) {
   return request({
     url: `${path}/set`,
