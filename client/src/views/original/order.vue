@@ -4,7 +4,7 @@
       <el-row>
         <el-col :span="24">
           <div class="excel-import-row">
-            <upload-excel-component :on-success="handleSuccess" width="360px" line-height="32px" height="36px" />
+            <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
             <div v-if="uploading || uploadProgress > 0" class="excel-import-progress">
               <el-progress :percentage="uploadProgress" />
               <span>{{ uploadProgressText }}</span>
@@ -387,6 +387,11 @@ export default {
   margin: 0;
   font-size: 13px;
   border-width: 1px;
+}
+
+.excel-import-row > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .excel-import-row ::v-deep .drop .el-button {
