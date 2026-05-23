@@ -610,7 +610,7 @@ export const PromotionType = {
   }
 }
 
-// # 退货状态
+// 退货状态
 export const RefundStatus = {
   SUCCESS: 1, // 退款成功
   CLOSE: 2, // 退款关闭

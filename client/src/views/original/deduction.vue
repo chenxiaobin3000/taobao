@@ -187,8 +187,8 @@ export default {
       const create_time = header[0]
       const finance_type = header[4]
       const amount = header[6]
-      const good_name = header[14]
-      const deduction_note = header[15]
+      const good_name = header[11]
+      const deduction_note = header[12]
       const d = []
       let stop = false
       results.forEach(v => {
