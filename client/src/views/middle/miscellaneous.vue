@@ -233,13 +233,13 @@ export default {
         })
       }
       this.uploading = true
-      this.uploadProgressText = `Uploading 0/${miscs.length}`
+      this.uploadProgressText = `上传中: 0/${miscs.length}`
       addMiscList({
         id: this.listQuery.id,
         m: miscs
       }).then(() => {
         this.uploadProgress = 100
-        this.uploadProgressText = `Imported ${miscs.length}/${miscs.length}`
+        this.uploadProgressText = `已导入: ${miscs.length}/${miscs.length}`
         this.uploading = false
         this.$message({ type: 'success', message: '导入成功!' })
         this.getMiscList()

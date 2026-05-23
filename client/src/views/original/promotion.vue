@@ -175,7 +175,7 @@ export default {
       const total = records.length
       this.uploading = true
       this.uploadProgress = 0
-      this.uploadProgressText = `Uploading 0/${total}`
+      this.uploadProgressText = `上传中: 0/${total}`
       try {
         for (let i = 0; i < total; i += chunkSize) {
           const chunk = records.slice(i, i + chunkSize)
@@ -186,10 +186,10 @@ export default {
           })
           const finished = Math.min(i + chunk.length, total)
           this.uploadProgress = Math.floor((finished / total) * 100)
-          this.uploadProgressText = `Uploading ${finished}/${total}`
+          this.uploadProgressText = `上传中: ${finished}/${total}`
         }
         this.uploadProgress = 100
-        this.uploadProgressText = `Imported ${total}/${total}`
+        this.uploadProgressText = `已导入: ${total}/${total}`
       } finally {
         this.uploading = false
       }
