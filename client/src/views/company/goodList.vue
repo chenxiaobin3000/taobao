@@ -5,28 +5,35 @@
     </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-form-item label="店铺:" prop="shopName">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-form-item label="类型:" prop="typeName">
             <el-select v-model="listQuery.type" class="filter-item" placeholder="请选择类型" @change="handleFilterChange">
               <el-option v-for="item in typeFilterList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-form-item label="状态:" prop="statusName">
             <el-select v-model="listQuery.status" class="filter-item" placeholder="请选择状态" @change="handleFilterChange">
               <el-option v-for="item in statusFilterList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
+          <el-form-item label="关注:" prop="followName">
+            <el-select v-model="listQuery.follow" class="filter-item" placeholder="请选择关注" @change="handleFilterChange">
+              <el-option v-for="item in followFilterList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="4">
           <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleFlush()">刷新</el-button>
         </el-col>
       </el-row>
@@ -40,6 +47,12 @@
       <el-table-column align="center" label="商品编码" width="120">
         <template slot-scope="scope">
           {{ scope.row.good_id }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="优先级" width="70">
+        <template slot-scope="{row}">
+          <a v-if="row.show" @click="handleEditPriority(row)">{{ row.priority }}</a>
+          <el-input v-else v-model="followTemp.priority" @keyup.enter.native="handleSetPriority" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="外部编码" width="120">
@@ -138,9 +151,10 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { GoodOriginType, GoodStockType, GoodStatus, GoodType } from '@/utils/const'
+import { GoodFollowStatus, GoodOriginType, GoodStockType, GoodStatus, GoodType } from '@/utils/const'
 import { getGoodList, addGoodList, delGood, setGood, flushGood } from '@/api/system/good'
 import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/goodAlias'
+import { getGoodFollowList, addGoodFollow, setGoodFollow, delGoodFollow } from '@/api/report/goodFollow'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {
@@ -156,17 +170,21 @@ export default {
       typeFilterList: [], // 商品类型筛选列表
       statusList: [], // 商品状态列表
       statusFilterList: [], // 商品状态筛选列表
+      followFilterList: [], // 关注筛选列表
       shopList: [], // 本公司所有店铺列表
       goodAliasList: [], // 商品所有别名列表
+      listFollow: [], // 商品优先级列表
       listQuery: {
         id: 0,
         page: 1,
         num: 10,
         search: null,
         type: 0,
-        status: 0
+        status: 0,
+        follow: 0
       },
       temp: {},
+      followTemp: {},
       dialogVisible: false
     }
   },
@@ -196,6 +214,7 @@ export default {
     this.typeFilterList = [{ id: 0, name: '全部类型' }].concat(this.typeList)
     this.statusList = GoodStatus.getList()
     this.statusFilterList = [{ id: 0, name: '全部状态' }].concat(this.statusList)
+    this.followList = GoodFollowStatus.getList()
     this.resetTemp()
     this.getOwnShopList()
   },
@@ -211,6 +230,11 @@ export default {
         good_status: GoodStatus.SALE,
         alias: ''
       }
+      this.followTemp = {
+        id: 0,
+        good_id: '',
+        priority: 0
+      }
     },
     getGoodList() {
       this.loading = true
@@ -218,7 +242,36 @@ export default {
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
-        this.list = response.data.data.list
+        this.list = (response.data.data.list || []).map(v => Object.assign({
+          priority: 0,
+          show: true,
+          follow_id: 0
+        }, v))
+        this.getGoodFollowList()
+      }).catch(error => {
+        this.loading = false
+        Promise.reject(error)
+      })
+    },
+    getGoodFollowList() {
+      getGoodFollowList({
+        id: this.listQuery.id,
+        page: 1,
+        num: 1000
+      }).then(response => {
+        this.listFollow = response.data.data.list || []
+        this.list.forEach(v => {
+          v.priority = 0
+          v.show = true
+          v.follow_id = 0
+          for (let i = 0; i < this.listFollow.length; ++i) {
+            if (v.good_id === this.listFollow[i].good_id) {
+              v.priority = this.listFollow[i].priority
+              v.follow_id = this.listFollow[i].id
+              break
+            }
+          }
+        })
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -261,18 +314,19 @@ export default {
     handleSuccess({ results, header }) {
       const sname = header[0]
       const id = header[1]
-      const type = header[2]
-      const status = header[3]
-      const origin = header[4]
-      const origin_type = header[5]
-      const stock = header[6]
-      const stock_type = header[7]
-      const name = header[8]
-      const alias1 = header[9]
-      const alias2 = header[10]
-      const alias3 = header[11]
-      const alias4 = header[12]
-      const alias5 = header[13]
+      const priority = header[2]
+      const type = header[3]
+      const status = header[4]
+      const origin = header[5]
+      const origin_type = header[6]
+      const stock = header[7]
+      const stock_type = header[8]
+      const name = header[9]
+      const alias1 = header[10]
+      const alias2 = header[11]
+      const alias3 = header[12]
+      const alias4 = header[13]
+      const alias5 = header[14]
       const g = []
       let stop = false
       results.forEach(v => {
@@ -280,6 +334,11 @@ export default {
         const status_num = GoodStatus.text2num(v[status])
         const origin_num = GoodOriginType.text2num(v[origin_type])
         const stock_num = GoodStockType.text2num(v[stock_type])
+        const priority_num = parseInt(v[priority] || 0)
+        if (isNaN(priority_num) || priority_num < 0 || priority_num > 10) {
+          console.log('优先级异常:' + v[id])
+          stop = true
+        }
         if (type_num === GoodType.OTHER) {
           console.log('商品类型异常:' + v[id])
           stop = true
@@ -306,6 +365,7 @@ export default {
           stt: stock_num,
           t: type_num,
           s: status_num,
+          p: priority_num,
           as: [v[alias1], v[alias2], v[alias3], v[alias4], v[alias5]]
         })
       })
@@ -348,6 +408,53 @@ export default {
         this.goodAliasList = response.data.data
         this.dialogVisible = true
       })
+    },
+    handleEditPriority(row) {
+      this.list.forEach(v => {
+        v.show = true
+      })
+      row.show = false
+      this.followTemp = {
+        id: row.follow_id || 0,
+        good_id: row.good_id,
+        priority: row.priority
+      }
+    },
+    handleSetPriority() {
+      const priority = parseInt(this.followTemp.priority)
+      if (isNaN(priority) || priority < 0 || priority > 10) {
+        this.$message({ type: 'error', message: '优先级必须在[0-10]之间!' })
+        return
+      }
+      if (this.followTemp.id === 0) {
+        if (priority === 0) {
+          this.getGoodFollowList()
+          return
+        }
+        addGoodFollow({
+          id: this.listQuery.id,
+          good_id: this.followTemp.good_id,
+          priority: priority
+        }).then(() => {
+          this.$message({ type: 'success', message: '修改成功!' })
+          this.getGoodFollowList()
+        })
+      } else if (priority === 0) {
+        delGoodFollow({
+          id: this.followTemp.id
+        }).then(() => {
+          this.$message({ type: 'success', message: '修改成功!' })
+          this.getGoodFollowList()
+        })
+      } else {
+        setGoodFollow({
+          id: this.followTemp.id,
+          priority: priority
+        }).then(() => {
+          this.$message({ type: 'success', message: '修改成功!' })
+          this.getGoodFollowList()
+        })
+      }
     },
     updateData() {
       setGood({

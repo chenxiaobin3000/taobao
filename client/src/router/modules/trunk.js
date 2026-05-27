@@ -32,5 +32,8 @@ export default {
   }, {
     path: 'transfer', component: () => import('@/views/trunk/transfer'),
     name: 'trunk_transfer', meta: { title: '小额打款', roles: [4010] }
+  }, {
+    path: 'purchase', component: () => import('@/views/trunk/purchase'),
+    name: 'trunk_purchase', meta: { title: '采购管理', roles: [4011] }
   }]
 }

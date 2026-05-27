@@ -5,6 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
+from app.models.report.good_follow import GoodFollow
 from app.models.trunk.fake import Fake
 from app.models.trunk.promotion_detail import PromotionDetail
 from app.views.common import success
@@ -24,6 +25,17 @@ def addList(request):
             Good.objects.set(find_object['id'], good['n'], good['sn'], good['t'], good['s'], good['o'], good['ot'], good['st'], good['stt'])
         else:
             Good.objects.add(shop_id, good['i'], good['n'], good['sn'], good['t'], good['s'], good['o'], good['ot'], good['st'], good['stt'])
+
+        # 处理优先级
+        priority = int(good.get('p'))
+        follow = GoodFollow.objects.filter(shop_id=shop_id, good_id=good['i']).first()
+        if priority > 0:
+            if follow:
+                GoodFollow.objects.set(follow.id, priority)
+            else:
+                GoodFollow.objects.add(shop_id, good['i'], priority)
+        elif follow:
+            GoodFollow.objects.delete(follow.id)
 
         # 处理别名
         for alias in good['as']:
@@ -91,10 +103,12 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     search = post.get('search')
-    good_type = int(post.get('type') or 0)
-    good_status = int(post.get('status') or 0)
-    total = Good.objects.total(shop_id, search, good_type, good_status)
-    datas = Good.objects.getList(shop_id, page, num, search, good_type, good_status)
+    good_type = int(post.get('type'))
+    good_status = int(post.get('status'))
+    follow = int(post.get('follow'))
+    follow_ids = list(GoodFollow.objects.filter(shop_id=shop_id).values_list('good_id', flat=True))
+    total = Good.objects.total(shop_id, search, good_type, good_status, follow, follow_ids)
+    datas = Good.objects.getList(shop_id, page, num, search, good_type, good_status, follow, follow_ids)
     response = success({
             'total': total,
             'list': datas

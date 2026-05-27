@@ -15,13 +15,33 @@ class PurchaseManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def getById(self, shop_id, purchase_id):
+        return self.encoder(self.filter(shop_id=shop_id, purchase_id=purchase_id).first())
 
-    def getList(self, shop_id, page, num):
+    def filterByDate(self, shop_id, start_date=None, end_date=None, search=None):
+        queryset = self.filter(shop_id=shop_id)
+        if start_date:
+            queryset = queryset.filter(create_time__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(create_time__lt=end_date)
+        if search:
+            keyword = str(search).strip()
+            if keyword:
+                queryset = queryset.filter(models.Q(purchase_id=keyword) | models.Q(order_id=keyword))
+        return queryset
+
+    def total(self, shop_id, start_date=None, end_date=None, search=None):
+        return self.filterByDate(shop_id, start_date, end_date, search).count()
+
+    def getList(self, shop_id, page, num, start_date=None, end_date=None, search=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_time')[left:right])
+        return self.encoderList(self.filterByDate(shop_id, start_date, end_date, search).order_by('-create_time')[left:right])
+
+    def encoder(self, purchase):
+        if purchase:
+            return model_to_dict(purchase, fields=['id', 'shop_id', 'purchase_id', 'order_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note'])
+        return None
 
     def encoderList(self, purchases):
         if purchases:

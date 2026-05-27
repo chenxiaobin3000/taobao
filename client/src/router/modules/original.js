@@ -41,5 +41,8 @@ export default {
   }, {
     path: 'transfer', component: () => import('@/views/original/transfer'),
     name: 'original_transfer', meta: { title: '小额打款', roles: [3011] }
+  }, {
+    path: 'purchase', component: () => import('@/views/original/purchase'),
+    name: 'original_purchase', meta: { title: '采购管理', roles: [3012] }
   }]
 }

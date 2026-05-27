@@ -41,6 +41,8 @@ export const MyRoleData = [{
   children: [{
     id: 4001, label: '订单管理'
   }, {
+    id: 4011, label: '采购管理'
+  }, {
     id: 4002, label: '刷单管理'
   }, {
     id: 4003, label: '推广管理'
@@ -59,6 +61,8 @@ export const MyRoleData = [{
   id: 3000, label: '原始数据',
   children: [{
     id: 3001, label: '订单管理'
+  }, {
+    id: 3012, label: '采购管理'
   }, {
     id: 3002, label: '刷单管理'
   }, {
