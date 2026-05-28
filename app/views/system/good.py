@@ -28,14 +28,14 @@ def addList(request):
 
         # 处理优先级
         priority = int(good.get('p'))
-        follow = GoodFollow.objects.filter(shop_id=shop_id, good_id=good['i']).first()
+        follow = GoodFollow.objects.getByGood(shop_id, good['i'])
         if priority > 0:
             if follow:
-                GoodFollow.objects.set(follow.id, priority)
+                GoodFollow.objects.set(follow['id'], priority)
             else:
                 GoodFollow.objects.add(shop_id, good['i'], priority)
         elif follow:
-            GoodFollow.objects.delete(follow.id)
+            GoodFollow.objects.delete(follow['id'])
 
         # 处理别名
         for alias in good['as']:
@@ -106,7 +106,7 @@ def getList(request):
     good_type = int(post.get('type'))
     good_status = int(post.get('status'))
     follow = int(post.get('follow'))
-    follow_ids = list(GoodFollow.objects.filter(shop_id=shop_id).values_list('good_id', flat=True))
+    follow_ids = GoodFollow.objects.getGoodIds(shop_id)
     total = Good.objects.total(shop_id, search, good_type, good_status, follow, follow_ids)
     datas = Good.objects.getList(shop_id, page, num, search, good_type, good_status, follow, follow_ids)
     response = success({

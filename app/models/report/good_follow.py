@@ -15,6 +15,12 @@ class GoodFollowManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
+    def getByGood(self, shop_id, good_id):
+        return self.encoder(self.filter(shop_id=shop_id, good_id=good_id).first())
+
+    def getGoodIds(self, shop_id):
+        return list(self.filter(shop_id=shop_id).values_list('good_id', flat=True))
+
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 
@@ -22,6 +28,11 @@ class GoodFollowManager(models.Manager):
         left = (page - 1) * num
         right = page * num
         return self.encoderList(self.filter(shop_id=shop_id).order_by('-priority')[left:right])
+
+    def encoder(self, good):
+        if good:
+            return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'priority'])
+        return None
 
     def encoderList(self, goods):
         if goods:
