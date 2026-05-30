@@ -21,7 +21,7 @@ def addList(request):
         promotion_type = promotion['t']
         promotion_note = promotion['n']
         if UserPromotion.objects.getByDate(user_id, shop_id, create_date, promotion_type):
-            response = failed('重复数据')
+            response = failed('重复数据：日期(' + create_date + ')')
             return JsonResponse(response, encoder=MyJSONEncoder)
         UserPromotion.objects.add(user_id, shop_id, create_date, payment, promotion_type, promotion_note)
 
