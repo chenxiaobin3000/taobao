@@ -1,7 +1,6 @@
 @echo off
 rd /S /Q app\__pycache__
 rd /S /Q app\migrations\__pycache__
-del /S /Q app\migrations\__init__.py
 rd /S /Q server\__pycache__
 
 rd /S /Q app\models\__pycache__

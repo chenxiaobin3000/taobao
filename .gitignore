@@ -1,6 +1,5 @@
 .DS_Store
 *.pyc
-app/migrations/*
 app/templates/index.html
 .claude/*
 .venv/*
