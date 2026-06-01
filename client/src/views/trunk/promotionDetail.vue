@@ -185,8 +185,10 @@ export default {
         this.listQuery
       ).then(response => {
         this.userList = response.data.data
+        const currentUser = this.userList.find(v => v.user_id === this.userdata.user.id)
+        this.listQuery.uid = currentUser ? currentUser.user_id : 0
         this.userList.unshift({ user_id: 0, name: '☆ 主干 ☆' })
-        this.getPromotionDetailList()
+        this.handleChangeUser()
       })
     },
     getUserPromotionDetailList() {
@@ -204,8 +206,7 @@ export default {
     },
     handleChangeShop() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
-      this.listQuery.uid = 0
-      this.getPromotionDetailList()
+      this.getUserListByShop()
     },
     handleChangeUser() {
       if (this.listQuery.uid === 0) {
