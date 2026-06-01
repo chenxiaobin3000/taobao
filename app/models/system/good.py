@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.forms.models import model_to_dict
+from app.models.const.good_follow import GoodFollowStatus
 
 # 商品表
 class GoodManager(models.Manager):
@@ -64,9 +65,9 @@ class GoodManager(models.Manager):
             queryset = queryset.filter(good_type=good_type)
         if good_status:
             queryset = queryset.filter(good_status=good_status)
-        if follow == 1:
+        if follow == GoodFollowStatus.HAS_FOLLOW:
             queryset = queryset.filter(good_id__in=follow_ids or [])
-        elif follow == 2 and follow_ids:
+        elif follow == GoodFollowStatus.NOT_FOLLOW and follow_ids:
             queryset = queryset.exclude(good_id__in=follow_ids)
         return queryset
 

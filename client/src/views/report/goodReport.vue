@@ -12,7 +12,7 @@
         <el-col :span="5">
           <el-form-item label="关注:" prop="followName">
             <el-select v-model="listQuery.follow" class="filter-item" placeholder="请选择" @change="handleSelect">
-              <el-option v-for="item in followList" :key="'F' + item.id" :label="item.name" :value="item.id" />
+              <el-option v-for="item in followFilterList" :key="'F' + item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -119,7 +119,7 @@ export default {
       listReport: null,
       loading: false,
       shopList: [], // 本公司所有店铺列表
-      followList: [], // 关注状态列表
+      followFilterList: [], // 关注状态列表
       listQuery: {
         id: 0,
         follow: 1,
@@ -148,7 +148,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.followList = GoodFollowStatus.getList()
+    this.followFilterList = GoodFollowStatus.getList()
     this.listQuery.sdate = new Date()
     this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
     const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 180

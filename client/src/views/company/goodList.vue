@@ -181,7 +181,7 @@ export default {
         search: null,
         type: 0,
         status: 0,
-        follow: 0
+        follow: 1
       },
       temp: {},
       followTemp: {},
@@ -214,7 +214,7 @@ export default {
     this.typeFilterList = [{ id: 0, name: '全部类型' }].concat(this.typeList)
     this.statusList = GoodStatus.getList()
     this.statusFilterList = [{ id: 0, name: '全部状态' }].concat(this.statusList)
-    this.followList = GoodFollowStatus.getList()
+    this.followFilterList = GoodFollowStatus.getList()
     this.resetTemp()
     this.getOwnShopList()
   },

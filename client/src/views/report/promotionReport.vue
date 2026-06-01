@@ -12,7 +12,7 @@
         <el-col :span="6">
           <el-form-item label="关注:" prop="followName">
             <el-select v-model="listQuery.follow" class="filter-item" placeholder="请选择" @change="handleSelect">
-              <el-option v-for="item in followList" :key="'F' + item.id" :label="item.name" :value="item.id" />
+              <el-option v-for="item in followFilterList" :key="'F' + item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -60,7 +60,7 @@ export default {
       list: null,
       loading: false,
       shopList: [], // 本公司所有店铺列表
-      followList: [], // 关注状态列表
+      followFilterList: [], // 关注状态列表
       periodList: [
         { key: 'yesterday', name: '昨天' },
         { key: 'before_yesterday', name: '前天' },
@@ -105,7 +105,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.followList = GoodFollowStatus.getList()
+    this.followFilterList = GoodFollowStatus.getList()
     this.listQuery.date = new Date().toLocaleDateString().replace(/\//g, '-')
     this.getOwnShopList()
   },
