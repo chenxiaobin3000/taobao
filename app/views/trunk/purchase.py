@@ -20,6 +20,7 @@ def merge(request):
         # 批量添加
         for purchase in purchases:
             purchase_id = purchase['purchase_id']
+            purchase_account = purchase['purchase_account']
             payment = purchase['payment']
             freight = purchase['freight']
             total = purchase['total']
@@ -27,21 +28,22 @@ def merge(request):
             create_time = purchase['create_time']
             product_name = purchase['product_name']
             purchase_note = purchase['purchase_note']
-            find_object = Purchase.objects.filter(purchase_id=purchase_id).first()
+            find_object = Purchase.objects.getByPurchaseId(purchase_id)
             if find_object:
                 payment = Decimal(str(payment))
                 freight = Decimal(str(freight))
                 total = Decimal(str(total))
                 order_status = int(order_status)
-                if find_object.payment == payment and find_object.freight == freight and find_object.total == total and find_object.order_status == order_status:
+                if find_object.purchase_account == purchase_account and find_object.payment == payment and find_object.freight == freight and find_object.total == total and find_object.order_status == order_status:
                     continue
+                find_object.purchase_account = purchase_account
                 find_object.payment = payment
                 find_object.freight = freight
                 find_object.total = total
                 find_object.order_status = order_status
-                find_object.save(update_fields=['payment', 'freight', 'total', 'order_status'])
+                find_object.save(update_fields=['purchase_account', 'payment', 'freight', 'total', 'order_status'])
             else:
-                Purchase.objects.add(purchase_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
+                Purchase.objects.add(purchase_id, purchase_account, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
         # 清空临时数据
         UserPurchase.objects.deleteAll(user_id)

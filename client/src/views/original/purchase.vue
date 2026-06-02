@@ -31,6 +31,11 @@
           {{ scope.row.purchase_id }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="采购账号" width="120">
+        <template slot-scope="scope">
+          {{ scope.row.purchase_account }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="付款金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.payment }}
@@ -161,13 +166,13 @@ export default {
       this.uploadProgress = 0
       this.uploadProgressText = ''
       const purchase_id = header[0]
-      const payment = header[1]
-      const freight = header[2]
-      const total = header[3]
-      const order_status = header[4]
-      const create_time = header[5]
-      const product_name = header[6]
-      const purchase_note = header[7]
+      const purchase_account = header[2]
+      const payment = header[5]
+      const freight = header[6]
+      const total = header[7]
+      const order_status = header[8]
+      const create_time = header[9]
+      const product_name = header[17]
       const purchases = []
       const errors = []
       results.forEach((v, index) => {
@@ -177,13 +182,13 @@ export default {
         }
         purchases.push({
           pid: v[purchase_id],
+          pa: v[purchase_account],
           payment: v[payment],
           freight: v[freight],
           total: v[total],
           status: status,
           ctime: v[create_time],
-          pn: v[product_name],
-          note: v[purchase_note] || ''
+          pn: v[product_name]
         })
       })
       if (errors.length > 0) {

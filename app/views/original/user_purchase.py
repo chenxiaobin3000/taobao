@@ -18,28 +18,30 @@ def addList(request):
     # 批量添加
     for purchase in purchases:
         purchase_id = purchase['pid']
+        purchase_account = purchase.get('pa') or ''
         payment = purchase['payment']
         freight = purchase['freight']
         total = purchase['total']
         order_status = purchase['status']
         create_time = purchase['ctime']
         product_name = purchase['pn']
-        purchase_note = purchase['note']
-        find_object = UserPurchase.objects.filter(user_id=user_id, purchase_id=purchase_id).first()
+        purchase_note = ''
+        find_object = UserPurchase.objects.getByPurchaseId(user_id, purchase_id)
         if find_object:
             payment = Decimal(str(payment))
             freight = Decimal(str(freight))
             total = Decimal(str(total))
             order_status = int(order_status)
-            if find_object.payment == payment and find_object.freight == freight and find_object.total == total and find_object.order_status == order_status:
+            if find_object.purchase_account == purchase_account and find_object.payment == payment and find_object.freight == freight and find_object.total == total and find_object.order_status == order_status:
                 continue
+            find_object.purchase_account = purchase_account
             find_object.payment = payment
             find_object.freight = freight
             find_object.total = total
             find_object.order_status = order_status
-            find_object.save(update_fields=['payment', 'freight', 'total', 'order_status'])
+            find_object.save(update_fields=['purchase_account', 'payment', 'freight', 'total', 'order_status'])
         else:
-            UserPurchase.objects.add(user_id, purchase_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
+            UserPurchase.objects.add(user_id, purchase_id, purchase_account, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)

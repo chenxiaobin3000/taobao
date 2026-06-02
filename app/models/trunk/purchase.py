@@ -4,8 +4,8 @@ from django.forms.models import model_to_dict
 
 # 采购表
 class PurchaseManager(models.Manager):
-    def add(self, purchase_id, payment, freight, total, order_status, create_time, product_name, purchase_note):
-        return self.create(purchase_id=purchase_id, payment=payment, freight=freight, total=total, order_status=order_status, create_time=create_time, product_name=product_name, purchase_note=purchase_note)
+    def add(self, purchase_id, purchase_account, payment, freight, total, order_status, create_time, product_name, purchase_note):
+        return self.create(purchase_id=purchase_id, purchase_account=purchase_account, payment=payment, freight=freight, total=total, order_status=order_status, create_time=create_time, product_name=product_name, purchase_note=purchase_note)
 
     def set(self, pk, order_status):
         purchase = self.get(pk=pk)
@@ -17,6 +17,9 @@ class PurchaseManager(models.Manager):
 
     def getById(self, purchase_id):
         return self.encoder(self.filter(purchase_id=purchase_id).first())
+
+    def getByPurchaseId(self, purchase_id):
+        return self.filter(purchase_id=purchase_id).first()
 
     def filterByDate(self, start_date=None, end_date=None, search=None):
         queryset = self.all()
@@ -40,17 +43,18 @@ class PurchaseManager(models.Manager):
 
     def encoder(self, purchase):
         if purchase:
-            return model_to_dict(purchase, fields=['id', 'purchase_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note'])
+            return model_to_dict(purchase, fields=['id', 'purchase_id', 'purchase_account', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note'])
         return None
 
     def encoderList(self, purchases):
         if purchases:
-            return [model_to_dict(purchase, fields=['id', 'purchase_id', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note']) for purchase in purchases]
+            return [model_to_dict(purchase, fields=['id', 'purchase_id', 'purchase_account', 'payment', 'freight', 'total', 'order_status', 'create_time', 'product_name', 'purchase_note']) for purchase in purchases]
         return None
     
 class Purchase(models.Model):
     objects = PurchaseManager()
     purchase_id = models.CharField(max_length=20, db_index=True) # 采购id
+    purchase_account = models.CharField(max_length=16, default='') # 采购账号
     payment = models.DecimalField(max_digits=6, decimal_places=2) # 付款金额
     freight = models.DecimalField(max_digits=6, decimal_places=2) # 运费
     total = models.DecimalField(max_digits=6, decimal_places=2) # 付款总计

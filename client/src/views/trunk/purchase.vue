@@ -5,7 +5,7 @@
         <el-col :span="4">
           <el-form-item label="来源:" prop="fromName">
             <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择来源" @change="handleChangeUser">
-              <el-option v-for="item in userList" :key="'U' + item.user_id" :label="item.name" :value="item.user_id" />
+              <el-option v-for="item in userList" :key="'U' + item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -29,6 +29,11 @@
       <el-table-column align="center" label="采购编号" width="160">
         <template slot-scope="scope">
           {{ scope.row.purchase_id }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="采购账号" width="120">
+        <template slot-scope="scope">
+          {{ scope.row.purchase_account }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="付款金额" width="80">
