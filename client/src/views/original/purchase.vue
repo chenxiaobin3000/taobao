@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app-container">
     <div class="excel-import-row">
       <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
@@ -9,13 +9,6 @@
     </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="6">
-          <el-form-item label="店铺:" prop="shopName">
-            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-            </el-select>
-          </el-form-item>
-        </el-col>
         <el-col :span="6">
           <el-form-item label="开始日期:" prop="startDate" label-width="80px">
             <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
@@ -36,11 +29,6 @@
       <el-table-column align="center" label="采购编号" width="160">
         <template slot-scope="scope">
           {{ scope.row.purchase_id }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="订单编号" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.order_id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="付款金额" width="80">
@@ -95,7 +83,6 @@ import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { OrderStatus } from '@/utils/const'
 import { getUserPurchaseList, addUserPurchaseList, delUserPurchase, delAllUserPurchase } from '@/api/original/purchase'
-import { getOwnShopList } from '@/api/system/shop'
 
 export default {
   components: { Pagination, UploadExcelComponent },
@@ -106,9 +93,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
-      shopList: [],
       listQuery: {
-        id: 0,
         uid: 0,
         page: 1,
         num: 10,
@@ -142,14 +127,13 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = this.$store.getters.shop
     this.listQuery.uid = this.userdata.user.id
     this.listQuery.sdate = new Date()
     this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
     const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 180
     this.listQuery.sdate.setTime(seconds)
     this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
-    this.getOwnShopList()
+    this.getUserPurchaseList()
   },
   methods: {
     getUserPurchaseList() {
@@ -165,25 +149,8 @@ export default {
         Promise.reject(error)
       })
     },
-    getOwnShopList() {
-      getOwnShopList({
-        id: this.userdata.company.id,
-        uid: this.userdata.user.id
-      }).then(response => {
-        this.shopList = response.data.data
-        if (this.listQuery.id === 0) {
-          this.listQuery.id = this.shopList[0].id
-        }
-        this.getUserPurchaseList()
-      })
-    },
     num2status(num) {
       return OrderStatus.num2text(num)
-    },
-    handleChange() {
-      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
-      this.listQuery.page = 1
-      this.getUserPurchaseList()
     },
     handleSelect() {
       this.listQuery.page = 1
@@ -194,24 +161,22 @@ export default {
       this.uploadProgress = 0
       this.uploadProgressText = ''
       const purchase_id = header[0]
-      const order_id = header[1]
-      const payment = header[2]
-      const freight = header[3]
-      const total = header[4]
-      const order_status = header[5]
-      const create_time = header[6]
-      const product_name = header[7]
-      const purchase_note = header[8]
+      const payment = header[1]
+      const freight = header[2]
+      const total = header[3]
+      const order_status = header[4]
+      const create_time = header[5]
+      const product_name = header[6]
+      const purchase_note = header[7]
       const purchases = []
       const errors = []
       results.forEach((v, index) => {
         const status = OrderStatus.text2num(v[order_status])
         if (status === OrderStatus.OTHER) {
-          errors.push(`行号: ${index + 2}\r\n原因: 订单状态异常\r\n采购编号: ${v[purchase_id]}\r\n订单编号: ${v[order_id]}`)
+          errors.push(`行号: ${index + 2}\r\n原因: 订单状态异常\r\n采购编号: ${v[purchase_id]}\r\n`)
         }
         purchases.push({
           pid: v[purchase_id],
-          oid: v[order_id],
           payment: v[payment],
           freight: v[freight],
           total: v[total],
@@ -240,7 +205,6 @@ export default {
         for (let i = 0; i < total; i += chunkSize) {
           const chunk = purchases.slice(i, i + chunkSize)
           await addUserPurchaseList({
-            id: this.listQuery.id,
             uid: this.userdata.user.id,
             p: chunk
           })
@@ -287,10 +251,9 @@ export default {
         type: 'warning'
       }).then(() => {
         delAllUserPurchase({
-          id: this.listQuery.id,
           uid: this.userdata.user.id
         }).then(() => {
-          this.$message({ type: 'success', message: '删除成功!' })
+          this.$message({ type: 'success', message: '鍒犻櫎鎴愬姛!' })
           this.getUserPurchaseList()
         })
       })

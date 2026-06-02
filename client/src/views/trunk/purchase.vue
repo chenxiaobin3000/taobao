@@ -1,14 +1,7 @@
-<template>
+﻿<template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="4">
-          <el-form-item label="店铺:" prop="shopName">
-            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
-              <el-option v-for="item in shopList" :key="'S' + item.id" :label="item.name" :value="item.id" />
-            </el-select>
-          </el-form-item>
-        </el-col>
         <el-col :span="4">
           <el-form-item label="来源:" prop="fromName">
             <el-select v-model="listQuery.uid" class="filter-item" placeholder="请选择来源" @change="handleChangeUser">
@@ -36,11 +29,6 @@
       <el-table-column align="center" label="采购编号" width="160">
         <template slot-scope="scope">
           {{ scope.row.purchase_id }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="订单编号" width="160">
-        <template slot-scope="scope">
-          {{ scope.row.order_id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="付款金额" width="80">
@@ -95,8 +83,7 @@ import Pagination from '@/components/Pagination'
 import { OrderStatus } from '@/utils/const'
 import { getPurchaseList, mergePurchase, delPurchase } from '@/api/trunk/purchase'
 import { getUserPurchaseList } from '@/api/original/purchase'
-import { getOwnShopList } from '@/api/system/shop'
-import { getUserListByShop } from '@/api/system/userShop'
+import { getUserList } from '@/api/system/user'
 
 export default {
   components: { Pagination },
@@ -107,10 +94,8 @@ export default {
       list: null,
       total: 0,
       loading: false,
-      shopList: [],
       userList: [],
       listQuery: {
-        id: 0,
         uid: 0,
         page: 1,
         num: 10,
@@ -141,13 +126,12 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = this.$store.getters.shop
     this.listQuery.sdate = new Date()
     this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
     const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 180
     this.listQuery.sdate.setTime(seconds)
     this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
-    this.getOwnShopList()
+    this.getUserList()
   },
   methods: {
     getPurchaseList() {
@@ -163,26 +147,16 @@ export default {
         Promise.reject(error)
       })
     },
-    getOwnShopList() {
-      getOwnShopList({
+    getUserList() {
+      getUserList({
         id: this.userdata.company.id,
-        uid: this.userdata.user.id
+        page: 1,
+        num: 1000
       }).then(response => {
-        this.shopList = response.data.data
-        if (this.listQuery.id === 0) {
-          this.listQuery.id = this.shopList[0].id
-        }
-        this.getUserListByShop()
-      })
-    },
-    getUserListByShop() {
-      getUserListByShop(
-        this.listQuery
-      ).then(response => {
-        this.userList = response.data.data
-        const currentUser = this.userList.find(v => v.user_id === this.userdata.user.id)
-        this.listQuery.uid = currentUser ? currentUser.user_id : 0
-        this.userList.unshift({ user_id: 0, name: '☆ 主干 ☆' })
+        this.userList = response.data.data.list || []
+        const currentUser = this.userList.find(v => v.id === this.userdata.user.id)
+        this.listQuery.uid = currentUser ? currentUser.id : 0
+        this.userList.unshift({ id: 0, name: '☆ 主干 ☆' })
         this.handlePage()
       })
     },
@@ -201,11 +175,6 @@ export default {
     },
     num2type(num) {
       return OrderStatus.num2text(num)
-    },
-    handleChangeShop() {
-      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
-      this.listQuery.page = 1
-      this.getUserListByShop()
     },
     handleChangeUser() {
       this.listQuery.page = 1
@@ -233,7 +202,6 @@ export default {
         type: 'warning'
       }).then(() => {
         mergePurchase({
-          id: this.listQuery.id,
           uid: this.listQuery.uid
         }).then(() => {
           this.$message({ type: 'success', message: '合并成功!' })

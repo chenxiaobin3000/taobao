@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from datetime import datetime, timedelta
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
@@ -12,15 +13,13 @@ from app.views.common import success
 @transaction.atomic
 def merge(request):
     post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    user_id = request.user_id
-    purchases = UserPurchase.objects.getAll(user_id, shop_id)
+    user_id = int(post.get('uid') or request.user_id)
+    purchases = UserPurchase.objects.getAll(user_id)
 
     if purchases:
         # 批量添加
         for purchase in purchases:
             purchase_id = purchase['purchase_id']
-            order_id = purchase['order_id']
             payment = purchase['payment']
             freight = purchase['freight']
             total = purchase['total']
@@ -28,14 +27,24 @@ def merge(request):
             create_time = purchase['create_time']
             product_name = purchase['product_name']
             purchase_note = purchase['purchase_note']
-            find_object = Purchase.objects.getById(shop_id, purchase_id)
+            find_object = Purchase.objects.filter(purchase_id=purchase_id).first()
             if find_object:
-                Purchase.objects.set(find_object['id'], order_status)
+                payment = Decimal(str(payment))
+                freight = Decimal(str(freight))
+                total = Decimal(str(total))
+                order_status = int(order_status)
+                if find_object.payment == payment and find_object.freight == freight and find_object.total == total and find_object.order_status == order_status:
+                    continue
+                find_object.payment = payment
+                find_object.freight = freight
+                find_object.total = total
+                find_object.order_status = order_status
+                find_object.save(update_fields=['payment', 'freight', 'total', 'order_status'])
             else:
-                Purchase.objects.add(shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
+                Purchase.objects.add(purchase_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
         # 清空临时数据
-        UserPurchase.objects.deleteAll(user_id, shop_id)
+        UserPurchase.objects.deleteAll(user_id)
 
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
@@ -63,7 +72,6 @@ def delete(request):
 @transaction.atomic
 def getList(request):
     post = json.loads(request.body)
-    shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
     search = post.get('search')
@@ -73,8 +81,8 @@ def getList(request):
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
     if end_date:
         end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
-    total = Purchase.objects.total(shop_id, start_date, end_date, search)
-    datas = Purchase.objects.getList(shop_id, page, num, start_date, end_date, search)
+    total = Purchase.objects.total(start_date, end_date, search)
+    datas = Purchase.objects.getList(page, num, start_date, end_date, search)
     response = success({
             'total': total,
             'list': datas

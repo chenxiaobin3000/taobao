@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from datetime import datetime, timedelta
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
@@ -11,14 +12,12 @@ from app.views.common import success
 @transaction.atomic
 def addList(request):
     post = json.loads(request.body)
-    shop_id = int(post.get('id'))
     user_id = request.user_id
     purchases = post.get('p')
 
     # 批量添加
     for purchase in purchases:
         purchase_id = purchase['pid']
-        order_id = purchase['oid']
         payment = purchase['payment']
         freight = purchase['freight']
         total = purchase['total']
@@ -26,7 +25,21 @@ def addList(request):
         create_time = purchase['ctime']
         product_name = purchase['pn']
         purchase_note = purchase['note']
-        UserPurchase.objects.add(user_id, shop_id, purchase_id, order_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
+        find_object = UserPurchase.objects.filter(user_id=user_id, purchase_id=purchase_id).first()
+        if find_object:
+            payment = Decimal(str(payment))
+            freight = Decimal(str(freight))
+            total = Decimal(str(total))
+            order_status = int(order_status)
+            if find_object.payment == payment and find_object.freight == freight and find_object.total == total and find_object.order_status == order_status:
+                continue
+            find_object.payment = payment
+            find_object.freight = freight
+            find_object.total = total
+            find_object.order_status = order_status
+            find_object.save(update_fields=['payment', 'freight', 'total', 'order_status'])
+        else:
+            UserPurchase.objects.add(user_id, purchase_id, payment, freight, total, order_status, create_time, product_name, purchase_note)
 
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
@@ -53,10 +66,8 @@ def delete(request):
 @require_POST
 @transaction.atomic
 def deleteAll(request):
-    post = json.loads(request.body)
-    id = int(post.get('id'))
     user_id = request.user_id
-    UserPurchase.objects.deleteAll(user_id, id)
+    UserPurchase.objects.deleteAll(user_id)
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -64,8 +75,7 @@ def deleteAll(request):
 @transaction.atomic
 def getList(request):
     post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    user_id = request.user_id
+    user_id = int(post.get('uid') or request.user_id)
     page = int(post.get('page'))
     num = int(post.get('num'))
     search = post.get('search')
@@ -75,8 +85,8 @@ def getList(request):
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
     if end_date:
         end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
-    total = UserPurchase.objects.total(user_id, shop_id, start_date, end_date, search)
-    purchases = UserPurchase.objects.getList(user_id, shop_id, page, num, start_date, end_date, search)
+    total = UserPurchase.objects.total(user_id, start_date, end_date, search)
+    purchases = UserPurchase.objects.getList(user_id, page, num, start_date, end_date, search)
     response = success({
             'total': total,
             'list': purchases
