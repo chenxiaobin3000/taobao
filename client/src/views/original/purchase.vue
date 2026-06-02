@@ -36,22 +36,22 @@
           {{ scope.row.purchase_account }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="付款金额" width="80">
+      <el-table-column align="center" label="金额" width="60">
         <template slot-scope="scope">
           {{ scope.row.payment }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="运费" width="80">
+      <el-table-column align="center" label="运费" width="60">
         <template slot-scope="scope">
           {{ scope.row.freight }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="付款总计" width="80">
+      <el-table-column align="center" label="总计" width="60">
         <template slot-scope="scope">
           {{ scope.row.total }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单状态" width="180">
+      <el-table-column align="center" label="订单状态" width="80">
         <template slot-scope="scope">
           {{ num2status(scope.row.order_status) }}
         </template>
@@ -61,12 +61,12 @@
           {{ scope.row.create_time }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品名称" width="180">
+      <el-table-column align="center" label="商品名称">
         <template slot-scope="scope">
           {{ scope.row.product_name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="备注">
+      <el-table-column align="center" label="备注" width="60">
         <template slot-scope="scope">
           {{ scope.row.purchase_note }}
         </template>
@@ -87,6 +87,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { PurchaseStatus } from '@/utils/const'
+import { excelDateToText } from '@/utils/excel'
 import { getUserPurchaseList, addUserPurchaseList, delUserPurchase, delAllUserPurchase } from '@/api/original/purchase'
 
 export default {
@@ -172,7 +173,7 @@ export default {
       const total = header[8]
       const order_status = header[9]
       const create_time = header[10]
-      const product_name = header[17]
+      const product_name = header[18]
       const purchases = []
       const errors = []
       results.forEach((v, index) => {
@@ -191,7 +192,7 @@ export default {
           freight: v[freight],
           total: v[total],
           status: status,
-          ctime: v[create_time],
+          ctime: excelDateToText(v[create_time]),
           pn: v[product_name]
         })
       })

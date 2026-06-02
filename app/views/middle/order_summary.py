@@ -9,6 +9,7 @@ from app.models.const.order_status import OrderStatus
 from app.models.middle.order_summary import OrderSummary
 from app.models.middle.day_summary import DaySummary
 from app.models.middle.deduction_summary import DeductionSummary
+from app.models.middle.exist_purchase import ExistPurchase
 from app.models.trunk.order import Order
 from app.models.trunk.fake import Fake
 from app.models.trunk.refund import Refund
@@ -47,6 +48,15 @@ def flush(request):
     if orders:
         for order in orders:
             order_id = order['order_id']
+            procure_ids = order['procure_ids']
+            if procure_ids:
+                for purchase_id in procure_ids.split('|'):
+                    purchase_id = purchase_id.strip()
+                    if not purchase_id:
+                        continue
+                    if ExistPurchase.objects.filter(shop_id=shop_id, purchase_id=purchase_id).exists():
+                        continue
+                    ExistPurchase.objects.add(shop_id, purchase_id)
             data = {
                 'refund_customer': 0,
                 'refund_platform': 0,
