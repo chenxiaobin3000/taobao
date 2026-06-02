@@ -86,7 +86,7 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { OrderStatus } from '@/utils/const'
+import { PurchaseStatus } from '@/utils/const'
 import { getUserPurchaseList, addUserPurchaseList, delUserPurchase, delAllUserPurchase } from '@/api/original/purchase'
 
 export default {
@@ -155,7 +155,7 @@ export default {
       })
     },
     num2status(num) {
-      return OrderStatus.num2text(num)
+      return PurchaseStatus.num2text(num)
     },
     handleSelect() {
       this.listQuery.page = 1
@@ -169,19 +169,23 @@ export default {
       const purchase_account = header[2]
       const payment = header[5]
       const freight = header[6]
-      const total = header[7]
-      const order_status = header[8]
-      const create_time = header[9]
+      const total = header[8]
+      const order_status = header[9]
+      const create_time = header[10]
       const product_name = header[17]
       const purchases = []
       const errors = []
       results.forEach((v, index) => {
-        const status = OrderStatus.text2num(v[order_status])
-        if (status === OrderStatus.OTHER) {
-          errors.push(`行号: ${index + 2}\r\n原因: 订单状态异常\r\n采购编号: ${v[purchase_id]}\r\n`)
+        const purchaseId = v[purchase_id]
+        if (!purchaseId) {
+          return
+        }
+        const status = PurchaseStatus.text2num(v[order_status])
+        if (status === PurchaseStatus.OTHER) {
+          errors.push(`行号: ${index + 2}\r\n原因: 订单状态异常\r\n采购编号: ${purchaseId}\r\n`)
         }
         purchases.push({
-          pid: v[purchase_id],
+          pid: purchaseId,
           pa: v[purchase_account],
           payment: v[payment],
           freight: v[freight],

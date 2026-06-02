@@ -610,6 +610,39 @@ export const PromotionType = {
   }
 }
 
+// 采购状态
+export const PurchaseStatus = {
+  SUCCESS: 1, // 交易成功
+  CLOSE: 2, // 交易关闭
+  OTHER: 3, // 异常
+
+  text2num(text) {
+    if (text === '交易成功') {
+      return this.SUCCESS
+    } else if (text === '交易关闭') {
+      return this.CLOSE
+    } else { // 异常
+      return this.OTHER
+    }
+  },
+  num2text(num) {
+    switch (num) {
+      case this.SUCCESS:
+        return '交易成功'
+      case this.CLOSE:
+        return '交易关闭'
+    }
+    return '异常'
+  },
+  getList() {
+    return [{
+      id: this.SUCCESS, name: '交易成功'
+    }, {
+      id: this.CLOSE, name: '交易关闭'
+    }]
+  }
+}
+
 // 退货状态
 export const RefundStatus = {
   SUCCESS: 1, // 退款成功

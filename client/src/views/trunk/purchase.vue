@@ -85,7 +85,7 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
-import { OrderStatus } from '@/utils/const'
+import { PurchaseStatus } from '@/utils/const'
 import { getPurchaseList, mergePurchase, delPurchase } from '@/api/trunk/purchase'
 import { getUserPurchaseList } from '@/api/original/purchase'
 import { getUserList } from '@/api/system/user'
@@ -179,7 +179,7 @@ export default {
       })
     },
     num2type(num) {
-      return OrderStatus.num2text(num)
+      return PurchaseStatus.num2text(num)
     },
     handleChangeUser() {
       this.listQuery.page = 1
