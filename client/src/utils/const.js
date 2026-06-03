@@ -551,7 +551,7 @@ export const OrderStatus = {
       case this.UNPAID:
         return '等待买家付款'
       case this.UNCREATED:
-        return '未创建支付宝交易'
+        return '未创建付款'
     }
     return '异常'
   },
@@ -569,7 +569,7 @@ export const OrderStatus = {
     }, {
       id: this.UNPAID, name: '待付款'
     }, {
-      id: this.UNCREATED, name: '未创建支付宝交易'
+      id: this.UNCREATED, name: '未创建付款'
     }]
   }
 }

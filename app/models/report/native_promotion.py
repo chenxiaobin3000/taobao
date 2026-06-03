@@ -9,7 +9,7 @@ class NativePromotion(Model):
                 """
                 SELECT
                     strftime('%%Y-%%m', create_date) AS create_month,
-                    SUM(payment) AS payment
+                    COALESCE(SUM(payment), 0) AS payment
                 FROM t_promotion
                 WHERE
                     shop_id = %s

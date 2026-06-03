@@ -25,14 +25,21 @@ def getList(request):
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
     if end_date:
         end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+    good_id_search = None
+    if search:
+        keyword = str(search).strip()
+        good = Good.objects.getById(shop_id, keyword)
+        if good:
+            good_id_search = good['good_id']
+            search = None
     total = []
     datas = None
     if status == OrderStatus.OTHER:
-        total = NativeOrder().total(shop_id, start_date, end_date, search)
-        datas = NativeOrder().getList(shop_id, page, num, start_date, end_date, search)
+        total = NativeOrder().total(shop_id, start_date, end_date, search, good_id_search)
+        datas = NativeOrder().getList(shop_id, page, num, start_date, end_date, search, good_id_search)
     else:
-        total = NativeOrder().totalByStatus(shop_id, status, start_date, end_date, search)
-        datas = NativeOrder().getListByStatus(shop_id, status, page, num, start_date, end_date, search)
+        total = NativeOrder().totalByStatus(shop_id, status, start_date, end_date, search, good_id_search)
+        datas = NativeOrder().getListByStatus(shop_id, status, page, num, start_date, end_date, search, good_id_search)
 
     # 解析商品名称
     if datas:
@@ -51,14 +58,14 @@ def getList(request):
                 data['good_names'] = data['good_names'][:-3]
 
     response = success({
-            'total': total['total'],
-            'payment': total['payment'],
-            'refund_customer': total['refund_customer'],
-            'refund_platform': total['refund_platform'],
-            'procure': total['procure'],
-            'refund_procure': total['refund_procure'],
-            'transfer': total['transfer'],
-            'deduction': total['deduction'],
+            'total': round(total['total'], 2),
+            'payment': round(total['payment'], 2),
+            'refund_customer': round(total['refund_customer'], 2),
+            'refund_platform': round(total['refund_platform'], 2),
+            'procure': round(total['procure'], 2),
+            'refund_procure': round(total['refund_procure'], 2),
+            'transfer': round(total['transfer'], 2),
+            'deduction': round(total['deduction'], 2),
             'list': datas
         })
     return JsonResponse(response, encoder=MyJSONEncoder)

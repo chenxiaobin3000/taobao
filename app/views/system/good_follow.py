@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
-from app.models.report.good_follow import GoodFollow
+from app.models.system.good_follow import GoodFollow
 from app.views.common import success
 
 @require_POST

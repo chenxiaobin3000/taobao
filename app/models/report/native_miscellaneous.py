@@ -9,7 +9,7 @@ class NativeMiscellaneous(Model):
                 """
                 SELECT
                     strftime('%%Y-%%m', create_date) AS create_month,
-                    SUM(amount) AS amount
+                    COALESCE(SUM(amount), 0) AS amount
                 FROM t_miscellaneous
                 WHERE
                     shop_id = %s

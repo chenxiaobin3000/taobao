@@ -1,16 +1,10 @@
 <template>
   <div class="app-container">
     <div class="receipt-import-row">
-      <el-upload
-        class="receipt-upload"
-        drag
-        action=""
-        :show-file-list="false"
-        :before-upload="beforeUpload"
-        :http-request="uploadReceipt"
-      >
-        <div class="el-upload__text">拖入进项发票PDF，或<em>点击上传</em></div>
-      </el-upload>
+      <div class="receipt-upload" @click="handleClickUpload" @drop.prevent="handleDrop" @dragover.prevent @dragenter.prevent>
+        <span>拖拽发票文件到这里<em>浏览本地</em></span>
+        <input ref="receiptFile" type="file" accept="application/pdf,.pdf" @change="handleFileChange">
+      </div>
     </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
@@ -165,28 +159,41 @@ export default {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getReceiptFromList()
     },
-    beforeUpload(file) {
+    handleClickUpload() {
+      this.$refs.receiptFile.click()
+    },
+    handleFileChange(e) {
+      const file = e.target.files[0]
+      e.target.value = ''
+      this.uploadReceipt(file)
+    },
+    handleDrop(e) {
+      const file = e.dataTransfer.files[0]
+      this.uploadReceipt(file)
+    },
+    checkUploadFile(file) {
+      if (!file) {
+        return false
+      }
       const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
       if (!isPdf) {
         this.$message({ type: 'error', message: '请上传PDF文件!' })
       }
       return isPdf
     },
-    async uploadReceipt(option) {
+    async uploadReceipt(file) {
+      if (!this.checkUploadFile(file)) {
+        return
+      }
       const data = new FormData()
       data.append('id', this.listQuery.id)
-      data.append('file', option.file)
+      data.append('file', file)
       try {
         await addReceiptFrom(data)
         this.$message({ type: 'success', message: '识别成功!' })
         this.getReceiptFromList()
-        if (option.onSuccess) {
-          option.onSuccess()
-        }
       } catch (error) {
-        if (option.onError) {
-          option.onError(error)
-        }
+        Promise.reject(error)
       }
     },
     handleDelete(row) {
@@ -221,19 +228,30 @@ export default {
 
 .receipt-upload {
   width: 100%;
-}
-
-.receipt-upload ::v-deep .el-upload,
-.receipt-upload ::v-deep .el-upload-dragger {
-  width: 100%;
-}
-
-.receipt-upload ::v-deep .el-upload-dragger {
   height: 36px;
+  line-height: 34px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  box-sizing: border-box;
 }
 
-.receipt-upload ::v-deep .el-upload__text {
-  line-height: 34px;
+.receipt-upload:hover {
+  border-color: #409eff;
+}
+
+.receipt-upload span {
   font-size: 13px;
+  color: #606266;
+}
+
+.receipt-upload em {
+  color: #409eff;
+  font-style: normal;
+}
+
+.receipt-upload input {
+  display: none;
 }
 </style>

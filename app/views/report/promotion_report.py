@@ -12,7 +12,7 @@ from app.models.const.good_type import GoodType
 from app.models.const.order_status import OrderStatus
 from app.models.system.good import Good
 from app.models.middle.order_summary import OrderSummary
-from app.models.report.good_follow import GoodFollow
+from app.models.system.good_follow import GoodFollow
 from app.models.report.native_promotion_detail import NativePromotionDetail
 from app.views.common import failed, success
 

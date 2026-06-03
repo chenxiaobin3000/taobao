@@ -154,7 +154,7 @@ import UploadExcelComponent from '@/components/UploadExcel'
 import { GoodFollowStatus, GoodOriginType, GoodStockType, GoodStatus, GoodType } from '@/utils/const'
 import { getGoodList, addGoodList, delGood, setGood, flushGood } from '@/api/system/good'
 import { getGoodAliasById, addGoodAlias, delGoodAlias, delGoodAliasById } from '@/api/system/goodAlias'
-import { getGoodFollowList, addGoodFollow, setGoodFollow, delGoodFollow } from '@/api/report/goodFollow'
+import { getGoodFollowList, addGoodFollow, setGoodFollow, delGoodFollow } from '@/api/system/goodFollow'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {

@@ -9,8 +9,8 @@ class NativeFake(Model):
                 """
                 SELECT
                     strftime('%%Y-%%m', create_date) AS create_month,
-                    SUM(commission) AS commission,
-					SUM(freight) AS freight
+                    COALESCE(SUM(commission), 0) AS commission,
+					COALESCE(SUM(freight), 0) AS freight
                 FROM t_fake_summary
                 WHERE
                     shop_id = %s

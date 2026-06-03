@@ -8,9 +8,9 @@ class NativePromotionDetail(Model):
             cursor.execute(
                 """
                 SELECT good_id,
-                    SUM(cost) AS cost,
-	                SUM(deal_amount) AS deal_amount,
-	                SUM(deal_num) AS deal_num
+                    COALESCE(SUM(cost), 0) AS cost,
+	                COALESCE(SUM(deal_amount), 0) AS deal_amount,
+	                COALESCE(SUM(deal_num), 0) AS deal_num
                 FROM t_promotion_detail
                 WHERE
 	                shop_id = %s
@@ -24,9 +24,9 @@ class NativePromotionDetail(Model):
             cursor.execute(
                 """
                 SELECT good_id,
-                    SUM(cost) AS cost,
-	                SUM(deal_amount) AS deal_amount,
-	                SUM(deal_num) AS deal_num
+                    COALESCE(SUM(cost), 0) AS cost,
+	                COALESCE(SUM(deal_amount), 0) AS deal_amount,
+	                COALESCE(SUM(deal_num), 0) AS deal_num
                 FROM t_promotion_detail
                 WHERE
 	                shop_id = %s
@@ -40,9 +40,9 @@ class NativePromotionDetail(Model):
             cursor.execute(
                 """
                 SELECT good_id, promotion_date,
-                    SUM(cost) AS cost,
-	                SUM(deal_amount) AS deal_amount,
-	                SUM(deal_num) AS deal_num
+                    COALESCE(SUM(cost), 0) AS cost,
+	                COALESCE(SUM(deal_amount), 0) AS deal_amount,
+	                COALESCE(SUM(deal_num), 0) AS deal_num
                 FROM t_promotion_detail
                 WHERE
 	                shop_id = %s

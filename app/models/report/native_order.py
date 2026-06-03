@@ -3,66 +3,72 @@ from app.models.model import Model
 
 # 订单表
 class NativeOrder(Model):
-    def _append_filters(self, where, params, start_date=None, end_date=None, search=None):
+    def _append_filters(self, where, params, start_date=None, end_date=None, search=None, good_id_search=None):
         if start_date:
             where.append("create_time >= %s")
             params.append(start_date)
         if end_date:
             where.append("create_time < %s")
             params.append(end_date)
+        if good_id_search:
+            keyword = str(good_id_search).strip()
+            if keyword:
+                where.append("good_ids LIKE %s")
+                params.append(f"%{keyword}%")
+            return
         if search:
             keyword = str(search).strip()
             if keyword:
                 where.append("order_id = %s")
                 params.append(keyword)
 
-    def total(self, shop_id, start_date=None, end_date=None, search=None):
+    def total(self, shop_id, start_date=None, end_date=None, search=None, good_id_search=None):
         where = ["shop_id = %s"]
         params = [shop_id]
-        self._append_filters(where, params, start_date, end_date, search)
+        self._append_filters(where, params, start_date, end_date, search, good_id_search)
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
                 SELECT
                     COUNT(id) as total,
-                    SUM(payment) as payment,
-                    SUM(refund_customer) as refund_customer,
-                    SUM(refund_platform) as refund_platform,
-                    SUM(procure) as procure,
-                    SUM(refund_procure) as refund_procure,
-                    SUM(transfer) as transfer,
-                    SUM(deduction) as deduction
+                    COALESCE(SUM(payment), 0) as payment,
+                    COALESCE(SUM(refund_customer), 0) as refund_customer,
+                    COALESCE(SUM(refund_platform), 0) as refund_platform,
+                    COALESCE(SUM(procure), 0) as procure,
+                    COALESCE(SUM(refund_procure), 0) as refund_procure,
+                    COALESCE(SUM(transfer), 0) as transfer,
+                    COALESCE(SUM(deduction), 0) as deduction
                 FROM t_order_summary
                 WHERE
                     {' AND '.join(where)}""", params)
             return self.dictfetchall(cursor)[0]
 
-    def totalByStatus(self, shop_id, status, start_date=None, end_date=None, search=None):
+    def totalByStatus(self, shop_id, status, start_date=None, end_date=None, search=None, good_id_search=None):
         where = ["shop_id = %s", "order_status = %s"]
         params = [shop_id, status]
-        self._append_filters(where, params, start_date, end_date, search)
+        self._append_filters(where, params, start_date, end_date, search, good_id_search)
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
                 SELECT
                     COUNT(id) as total,
-                    SUM(payment) as payment,
-                    SUM(refund_customer) as refund_customer,
-                    SUM(refund_platform) as refund_platform,
-                    SUM(procure) as procure,
-                    SUM(refund_procure) as refund_procure,
-                    SUM(transfer) as transfer,
-                    SUM(deduction) as deduction
+                    COALESCE(SUM(payment), 0) as payment,
+                    COALESCE(SUM(refund_customer), 0) as refund_customer,
+                    COALESCE(SUM(refund_platform), 0) as refund_platform,
+                    COALESCE(SUM(procure), 0) as procure,
+                    COALESCE(SUM(refund_procure), 0) as refund_procure,
+                    COALESCE(SUM(transfer), 0) as transfer,
+                    COALESCE(SUM(deduction), 0) as deduction
                 FROM t_order_summary
                 WHERE
                     {' AND '.join(where)}""", params)
             return self.dictfetchall(cursor)[0]
 
-    def getList(self, shop_id, page, num, start_date=None, end_date=None, search=None):
+    def getList(self, shop_id, page, num, start_date=None, end_date=None, search=None, good_id_search=None):
         left = (page - 1) * num
         where = ["shop_id = %s"]
         params = [shop_id]
-        self._append_filters(where, params, start_date, end_date, search)
+        self._append_filters(where, params, start_date, end_date, search, good_id_search)
         params.extend([num, left])
         with connection.cursor() as cursor:
             cursor.execute(
@@ -76,11 +82,11 @@ class NativeOrder(Model):
                 OFFSET %s""", params)
             return self.dictfetchall(cursor)
 
-    def getListByStatus(self, shop_id, status, page, num, start_date=None, end_date=None, search=None):
+    def getListByStatus(self, shop_id, status, page, num, start_date=None, end_date=None, search=None, good_id_search=None):
         left = (page - 1) * num
         where = ["shop_id = %s", "order_status = %s"]
         params = [shop_id, status]
-        self._append_filters(where, params, start_date, end_date, search)
+        self._append_filters(where, params, start_date, end_date, search, good_id_search)
         params.extend([num, left])
         with connection.cursor() as cursor:
             cursor.execute(
@@ -100,13 +106,13 @@ class NativeOrder(Model):
                 """
                 SELECT
                     strftime('%%Y-%%m-%%d', create_time) AS create_date,
-                    SUM(payment) AS payment,
-                    SUM(refund_customer) AS refund_customer,
-                    SUM(refund_platform) AS refund_platform,
-                    SUM(procure) AS procure,
-                    SUM(refund_procure) AS refund_procure,
-                    SUM(transfer) AS transfer,
-                    SUM(deduction) AS deduction
+                    COALESCE(SUM(payment), 0) AS payment,
+                    COALESCE(SUM(refund_customer), 0) AS refund_customer,
+                    COALESCE(SUM(refund_platform), 0) AS refund_platform,
+                    COALESCE(SUM(procure), 0) AS procure,
+                    COALESCE(SUM(refund_procure), 0) AS refund_procure,
+                    COALESCE(SUM(transfer), 0) AS transfer,
+                    COALESCE(SUM(deduction), 0) AS deduction
                 FROM t_order_summary
                 WHERE
                     shop_id = %s
@@ -124,14 +130,14 @@ class NativeOrder(Model):
                 """
                 SELECT
                     strftime('%%Y-%%m', create_date) AS create_month,
-                    SUM(payment) AS payment,
-                    SUM(refund_customer) AS refund_customer,
-                    SUM(refund_platform) AS refund_platform,
-                    SUM(procure) AS procure,
-                    SUM(refund_procure) AS refund_procure,
-                    SUM(transfer) AS transfer,
-                    SUM(deduction) AS deduction,
-                    SUM(fake) AS fake
+                    COALESCE(SUM(payment), 0) AS payment,
+                    COALESCE(SUM(refund_customer), 0) AS refund_customer,
+                    COALESCE(SUM(refund_platform), 0) AS refund_platform,
+                    COALESCE(SUM(procure), 0) AS procure,
+                    COALESCE(SUM(refund_procure), 0) AS refund_procure,
+                    COALESCE(SUM(transfer), 0) AS transfer,
+                    COALESCE(SUM(deduction), 0) AS deduction,
+                    COALESCE(SUM(fake), 0) AS fake
                 FROM t_day_summary
                 WHERE
                     shop_id = %s

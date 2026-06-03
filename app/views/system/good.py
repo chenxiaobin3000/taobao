@@ -5,7 +5,7 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
-from app.models.report.good_follow import GoodFollow
+from app.models.system.good_follow import GoodFollow
 from app.models.trunk.fake import Fake
 from app.models.trunk.promotion_detail import PromotionDetail
 from app.views.common import success
