@@ -5,15 +5,8 @@ export function addReceiptTo(data) {
   return request({
     url: `${path}/add`,
     method: 'post',
-    data
-  })
-}
-
-export function setReceiptTo(data) {
-  return request({
-    url: `${path}/set`,
-    method: 'post',
-    data
+    data,
+    timeout: 5000
   })
 }
 

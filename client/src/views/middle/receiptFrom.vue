@@ -1,5 +1,17 @@
 <template>
   <div class="app-container">
+    <div class="receipt-import-row">
+      <el-upload
+        class="receipt-upload"
+        drag
+        action=""
+        :show-file-list="false"
+        :before-upload="beforeUpload"
+        :http-request="uploadReceipt"
+      >
+        <div class="el-upload__text">拖入进项发票PDF，或<em>点击上传</em></div>
+      </el-upload>
+    </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
         <el-col :span="6">
@@ -8,9 +20,6 @@
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
-        </el-col>
-        <el-col :span="18">
-          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -41,38 +50,14 @@
           {{ scope.row.create_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="center" label="操作" width="80">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getReceiptFromList" />
-
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="项目名称">
-          <el-select v-model="temp.project_id" class="filter-item" placeholder="请选择项目">
-            <el-option v-for="item in projectList" :key="item.id" :label="item.project_name" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="数量">
-          <el-input v-model="temp.project_num" />
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="temp.receipt_note" />
-        </el-form-item>
-        <el-form-item label="日期">
-          <el-date-picker v-model="temp.create_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -81,7 +66,7 @@ import Pagination from '@/components/Pagination'
 import { getOwnShopList } from '@/api/system/shop'
 import { getUserList } from '@/api/system/user'
 import { getReceiptItemList } from '@/api/middle/receiptItem'
-import { addReceiptFrom, setReceiptFrom, delReceiptFrom, getReceiptFromList } from '@/api/middle/receiptFrom'
+import { addReceiptFrom, delReceiptFrom, getReceiptFromList } from '@/api/middle/receiptFrom'
 
 export default {
   components: { Pagination },
@@ -99,13 +84,6 @@ export default {
         id: 0,
         page: 1,
         num: 10
-      },
-      temp: {},
-      dialogVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改进项',
-        create: '新增进项'
       }
     }
   },
@@ -119,19 +97,9 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.resetTemp()
     this.getOwnShopList()
   },
   methods: {
-    resetTemp() {
-      this.temp = {
-        id: 0,
-        create_date: new Date().toLocaleDateString().replace(/\//g, '-'),
-        project_id: 0,
-        project_num: 1,
-        receipt_note: ''
-      }
-    },
     getReceiptFromList() {
       this.loading = true
       getReceiptFromList(
@@ -197,44 +165,29 @@ export default {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getReceiptFromList()
     },
-    handleCreate() {
-      this.resetTemp()
-      if (this.projectList.length > 0) {
-        this.temp.project_id = this.projectList[0].id
+    beforeUpload(file) {
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+      if (!isPdf) {
+        this.$message({ type: 'error', message: '请上传PDF文件!' })
       }
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
+      return isPdf
     },
-    createData() {
-      addReceiptFrom({
-        id: this.listQuery.id,
-        cdate: this.temp.create_date,
-        name: this.temp.project_id,
-        num: this.temp.project_num,
-        note: this.temp.receipt_note
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
+    async uploadReceipt(option) {
+      const data = new FormData()
+      data.append('id', this.listQuery.id)
+      data.append('file', option.file)
+      try {
+        await addReceiptFrom(data)
+        this.$message({ type: 'success', message: '识别成功!' })
         this.getReceiptFromList()
-        this.dialogVisible = false
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
-      this.dialogVisible = true
-    },
-    updateData() {
-      setReceiptFrom({
-        id: this.temp.id,
-        cdate: this.temp.create_date,
-        name: this.temp.project_id,
-        num: this.temp.project_num,
-        note: this.temp.receipt_note
-      }).then(() => {
-        this.$message({ type: 'success', message: '修改成功!' })
-        this.getReceiptFromList()
-        this.dialogVisible = false
-      })
+        if (option.onSuccess) {
+          option.onSuccess()
+        }
+      } catch (error) {
+        if (option.onError) {
+          option.onError(error)
+        }
+      }
     },
     handleDelete(row) {
       this.$confirm('确定要删除吗?', '提示', {
@@ -253,3 +206,34 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.receipt-import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  min-height: 48px;
+  padding: 6px 1%;
+  margin-bottom: 8px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.receipt-upload {
+  width: 100%;
+}
+
+.receipt-upload ::v-deep .el-upload,
+.receipt-upload ::v-deep .el-upload-dragger {
+  width: 100%;
+}
+
+.receipt-upload ::v-deep .el-upload-dragger {
+  height: 36px;
+}
+
+.receipt-upload ::v-deep .el-upload__text {
+  line-height: 34px;
+  font-size: 13px;
+}
+</style>
