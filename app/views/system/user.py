@@ -69,7 +69,7 @@ def getInfo(request):
     pk = request.user_id
     user = User.objects.find(pk)
     if not user:
-        response = failed('login expired', -3)
+        response = failed('登录超时', -3)
         return JsonResponse(response, encoder=MyJSONEncoder)
 
     # 公司信息

@@ -39,6 +39,6 @@ class TokenAuthMiddleware:
     def auth_failed(self):
         return JsonResponse({
             'code': -3,
-            'msg': 'login expired',
+            'msg': '登录超时',
             'data': {}
         }, encoder=MyJSONEncoder)
