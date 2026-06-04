@@ -5,10 +5,10 @@ from app.models.report.native_order import NativeOrder
 
 # 订单汇总表
 class OrderSummaryManager(models.Manager):
-    def add(self, shop_id, order_id, payment, refund_customer, refund_platform, procure, refund_procure, transfer, order_status, create_time, good_ids, deduction, deduction_detail):
-        return self.create(shop_id=shop_id, order_id=order_id, payment=payment, refund_customer=refund_customer, refund_platform=refund_platform, procure=procure, refund_procure=refund_procure, transfer=transfer, order_status=order_status, create_time=create_time, good_ids=good_ids, deduction=deduction, deduction_detail=deduction_detail)
+    def add(self, shop_id, order_id, payment, refund_customer, refund_platform, procure, refund_procure, transfer, order_status, create_time, refund_time, good_ids, deduction, deduction_detail):
+        return self.create(shop_id=shop_id, order_id=order_id, payment=payment, refund_customer=refund_customer, refund_platform=refund_platform, procure=procure, refund_procure=refund_procure, transfer=transfer, order_status=order_status, create_time=create_time, refund_time=refund_time, good_ids=good_ids, deduction=deduction, deduction_detail=deduction_detail)
 
-    def set(self, pk, payment, refund_customer, refund_platform, procure, refund_procure, transfer, order_status, create_time, good_ids, deduction, deduction_detail):
+    def set(self, pk, payment, refund_customer, refund_platform, procure, refund_procure, transfer, order_status, create_time, refund_time, good_ids, deduction, deduction_detail):
         order = self.get(pk=pk)
         order.payment = payment
         order.refund_customer = refund_customer
@@ -18,6 +18,7 @@ class OrderSummaryManager(models.Manager):
         order.transfer = transfer
         order.order_status = order_status
         order.create_time = create_time
+        order.refund_time = refund_time
         order.good_ids = good_ids
         order.deduction = deduction
         order.deduction_detail = deduction_detail
@@ -53,12 +54,12 @@ class OrderSummaryManager(models.Manager):
 
     def encoder(self, order):
         if order:
-            return model_to_dict(order, fields=['id', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'good_ids', 'deduction', 'deduction_detail'])
+            return model_to_dict(order, fields=['id', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'refund_time', 'good_ids', 'deduction', 'deduction_detail'])
         return None
 
     def encoderList(self, ordera):
         if ordera:
-            return [model_to_dict(order, fields=['id', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'good_ids', 'deduction', 'deduction_detail']) for order in ordera]
+            return [model_to_dict(order, fields=['id', 'shop_id', 'order_id', 'payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'refund_time', 'good_ids', 'deduction', 'deduction_detail']) for order in ordera]
         return None
 
 class OrderSummary(models.Model):
@@ -73,6 +74,7 @@ class OrderSummary(models.Model):
     transfer = models.DecimalField(max_digits=10, decimal_places=2) # 打款金额
     order_status = models.IntegerField(db_index=True) # 状态
     create_time = models.DateTimeField(db_index=True) # 创建时间
+    refund_time = models.DateTimeField(null=True, blank=True) # 退货时间
     good_ids = models.CharField(max_length=256) # 商品id列表，|分割
     deduction = models.DecimalField(max_digits=10, decimal_places=2) # 扣款金额
     deduction_detail = models.CharField(max_length=64) # 扣款明细

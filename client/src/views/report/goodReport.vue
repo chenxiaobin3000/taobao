@@ -51,7 +51,7 @@
           {{ scope.row.cost }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="成交金额" width="80">
+      <el-table-column align="center" label="推广成交" width="80">
         <template slot-scope="scope">
           {{ scope.row.deal_amount }}
         </template>
@@ -66,24 +66,29 @@
           {{ scope.row.all }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="总退货率" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.all_return }}%
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="实际金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.payment }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="退款金额" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.close }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="秒退金额" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.flash }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="总退货率" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.all_return }}%
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="净退货率" width="80">
         <template slot-scope="scope">
           {{ scope.row.return }}%
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="退款" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.refund }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="采购" width="80">

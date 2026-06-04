@@ -65,6 +65,11 @@
           {{ scope.row.create_time }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="退货时间" width="160">
+        <template slot-scope="scope">
+          {{ scope.row.refund_time }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="商品" width="80">
         <template slot-scope="scope">
           {{ scope.row.good_names }}

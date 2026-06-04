@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import cmp_to_key
 from django.views.decorators.http import require_POST
@@ -70,16 +70,33 @@ def getList(request):
                         data['refund'] += order['refund_customer']
                         data['refund'] += order['refund_platform']
                         data['procure'] += order['procure']
+                        data['refund_procure'] += order['refund_procure']
                         data['deduction'] += order['deduction']
                         if len(order['good_ids']) == len(data['good_id']) + 1:
                             break
             elif order['order_status'] == OrderStatus.CLOSE:
-                for data in datas:
-                    if order['good_ids'].find(data['good_id']) != -1:
-                        data['close'] += order['payment']
-                        data['deduction'] += order['deduction']
-                        if len(order['good_ids']) == len(data['good_id']) + 1:
-                            break
+                if is_refund_after_payment(order):
+                    for data in datas:
+                        if order['good_ids'].find(data['good_id']) != -1:
+                            data['close'] += order['payment']
+                            data['close_refund'] += order['refund_customer']
+                            data['close_refund'] += order['refund_platform']
+                            data['close_procure'] += order['procure']
+                            data['close_refund_procure'] += order['refund_procure']
+                            data['close_deduction'] += order['deduction']
+                            if len(order['good_ids']) == len(data['good_id']) + 1:
+                                break
+                else:
+                    for data in datas:
+                        if order['good_ids'].find(data['good_id']) != -1:
+                            data['flash'] += order['payment']
+                            data['flash_refund'] += order['refund_customer']
+                            data['flash_refund'] += order['refund_platform']
+                            data['flash_procure'] += order['procure']
+                            data['flash_refund_procure'] += order['refund_procure']
+                            data['flash_deduction'] += order['deduction']
+                            if len(order['good_ids']) == len(data['good_id']) + 1:
+                                break
 
     # 获取推广数据
     promotions= NativePromotionDetail().getSumByDateRange(shop_id, start_date, end_date)
@@ -96,10 +113,20 @@ def getList(request):
         data['payment'] = round(data['payment'], 2)
         data['refund'] = round(data['refund'], 2)
         data['procure'] = round(data['procure'], 2)
+        data['refund_procure'] = round(data['refund_procure'], 2)
         data['deduction'] = round(data['deduction'], 2)
         data['close'] = round(data['close'], 2)
-        data['all'] = round(data['payment'] + data['close'], 2) # 总金额
-        data['profit'] = round(data['payment'] - Decimal(data['cost']) - data['procure'] - data['deduction'], 2) # 利润
+        data['close_refund'] = round(data['close_refund'], 2)
+        data['close_procure'] = round(data['close_procure'], 2)
+        data['close_refund_procure'] = round(data['close_refund_procure'], 2)
+        data['close_deduction'] = round(data['close_deduction'], 2)
+        data['flash'] = round(data['flash'], 2)
+        data['flash_refund'] = round(data['flash_refund'], 2)
+        data['flash_procure'] = round(data['flash_procure'], 2)
+        data['flash_refund_procure'] = round(data['flash_refund_procure'], 2)
+        data['flash_deduction'] = round(data['flash_deduction'], 2)
+        data['all'] = round(data['payment'] + data['close'] + data['flash'], 2) # 总金额
+        data['profit'] = round(data['payment'] - data['refund'] - Decimal(data['cost']) - data['procure'] - data['deduction'], 2) # 利润
         data['all_return'] = round(round(data['refund'] / (data['payment'] + data['close'] + data['refund'] + Decimal(0.01)), 3) * 100, 1) # 总退货率
         data['return'] = round(round(data['refund'] / (data['payment'] + data['refund'] + Decimal(0.01)), 3) * 100, 1) # 净退货率
 
@@ -120,6 +147,26 @@ def init_data(id, name):
         'payment': 0,
         'refund': 0,
         'procure': 0,
+        'refund_procure': 0,
         'deduction': 0,
-        'close': 0
+        'close': 0,
+        'close_refund': 0,
+        'close_procure': 0,
+        'close_refund_procure': 0,
+        'close_deduction': 0,
+        'flash': 0,
+        'flash_refund': 0,
+        'flash_procure': 0,
+        'flash_refund_procure': 0,
+        'flash_deduction': 0,
+        'all': 0,
+        'profit': 0,
+        'all_return': 0,
+        'return': 0
     }
+
+def is_refund_after_payment(order):
+    refund_time = order.get('refund_time')
+    if not refund_time:
+        return False
+    return refund_time - order['create_time'] > timedelta(minutes=30)

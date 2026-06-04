@@ -60,6 +60,7 @@ def flush(request):
             data = {
                 'refund_customer': 0,
                 'refund_platform': 0,
+                'refund_time': None,
                 'transfer': 0,
                 'deduction': 0,
                 'deduction_detail': ''
@@ -71,6 +72,8 @@ def flush(request):
                 for refund in refunds:
                     data['refund_customer'] += refund['refund_pay']
                     data['refund_platform'] += refund['refund_platform']
+                    if not data['refund_time'] or data['refund_time'] < refund['apply_time']:
+                        data['refund_time'] = refund['apply_time']
 
             # 打款
             if order_id in transfers:
@@ -92,10 +95,10 @@ def flush(request):
             # 已经存在，且数据一样就跳过
             find_object = OrderSummary.objects.getById(shop_id, order_id)
             if find_object:
-                if find_object['payment'] != order['payment'] or find_object['refund_customer'] != data['refund_customer'] or find_object['refund_platform'] != data['refund_platform'] or find_object['procure'] != order['procure'] or find_object['refund_procure'] != refund_procure or find_object['transfer'] != data['transfer'] or find_object['order_status'] != order['order_status'] or find_object['create_time'] != order['create_time'] or find_object['good_ids'] != order['good_ids'] or find_object['deduction'] != deduction['amount']:
-                    OrderSummary.objects.set(find_object['id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
+                if find_object['payment'] != order['payment'] or find_object['refund_customer'] != data['refund_customer'] or find_object['refund_platform'] != data['refund_platform'] or find_object['procure'] != order['procure'] or find_object['refund_procure'] != refund_procure or find_object['transfer'] != data['transfer'] or find_object['order_status'] != order['order_status'] or find_object['create_time'] != order['create_time'] or find_object['refund_time'] != data['refund_time'] or find_object['good_ids'] != order['good_ids'] or find_object['deduction'] != deduction['amount']:
+                    OrderSummary.objects.set(find_object['id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], data['refund_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
             else:
-                OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
+                OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], data['refund_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
 
     # 按天统计刷单扣款
     fake_deduction = {}
