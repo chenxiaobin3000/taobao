@@ -1,7 +1,5 @@
 import json
 from datetime import datetime, timedelta
-from decimal import Decimal
-from functools import cmp_to_key
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -106,7 +104,9 @@ def getList(request):
                 if data['good_id'] == pormotion['good_id']:
                     data['cost'] = round(pormotion['cost'], 2)
                     data['deal_amount'] = round(pormotion['deal_amount'], 2)
-                    data['deal_num'] = round(pormotion['deal_num'], 2)
+                    data['deal_num'] = pormotion['deal_num']
+                    data['shop_cart'] = pormotion['shop_cart']
+                    data['favorites'] = pormotion['deal_num']
                     break
 
     for data in datas:
@@ -125,13 +125,6 @@ def getList(request):
         data['flash_procure'] = round(data['flash_procure'], 2)
         data['flash_refund_procure'] = round(data['flash_refund_procure'], 2)
         data['flash_deduction'] = round(data['flash_deduction'], 2)
-        data['all'] = round(data['payment'] + data['close'] + data['flash'], 2) # 总金额
-        data['profit'] = round(data['payment'] - data['refund'] - Decimal(data['cost']) - data['procure'] - data['deduction'], 2) # 利润
-        data['all_return'] = round(round(data['refund'] / (data['payment'] + data['close'] + data['refund'] + Decimal(0.01)), 3) * 100, 1) # 总退货率
-        data['return'] = round(round(data['refund'] / (data['payment'] + data['refund'] + Decimal(0.01)), 3) * 100, 1) # 净退货率
-
-    # 按利润排序
-    datas = sorted(datas, key = cmp_to_key(lambda a, b: b['profit'] - a['profit']))
     response['data'] = {
         'list': datas
     }
@@ -144,6 +137,8 @@ def init_data(id, name):
         'cost': 0,
         'deal_amount': 0,
         'deal_num': 0,
+        'shop_cart': 0,
+        'favorites': 0,
         'payment': 0,
         'refund': 0,
         'procure': 0,
@@ -158,11 +153,7 @@ def init_data(id, name):
         'flash_refund': 0,
         'flash_procure': 0,
         'flash_refund_procure': 0,
-        'flash_deduction': 0,
-        'all': 0,
-        'profit': 0,
-        'all_return': 0,
-        'return': 0
+        'flash_deduction': 0
     }
 
 def is_refund_after_payment(order):

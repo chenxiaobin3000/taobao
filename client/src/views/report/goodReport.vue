@@ -51,6 +51,11 @@
           {{ scope.row.cost }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="名义比" width="60">
+        <template slot-scope="scope">
+          {{ scope.row.roi1 }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="推广成交" width="80">
         <template slot-scope="scope">
           {{ scope.row.deal_amount }}
@@ -71,6 +76,11 @@
           {{ scope.row.payment }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="实际比" width="60">
+        <template slot-scope="scope">
+          {{ scope.row.roi2 }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="退款金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.close }}
@@ -81,14 +91,14 @@
           {{ scope.row.flash }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="总退货率" width="80">
+      <el-table-column align="center" label="总退货率" width="70">
         <template slot-scope="scope">
-          {{ scope.row.all_return }}%
+          {{ scope.row.return1 }}%
         </template>
       </el-table-column>
-      <el-table-column align="center" label="净退货率" width="80">
+      <el-table-column align="center" label="净退货率" width="70">
         <template slot-scope="scope">
-          {{ scope.row.return }}%
+          {{ scope.row.return2 }}%
         </template>
       </el-table-column>
       <el-table-column align="center" label="采购" width="80">
@@ -99,6 +109,16 @@
       <el-table-column align="center" label="扣款" width="80">
         <template slot-scope="scope">
           {{ scope.row.deduction }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="购物车" width="60">
+        <template slot-scope="scope">
+          {{ scope.row.shop_cart }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="收藏" width="60">
+        <template slot-scope="scope">
+          {{ scope.row.favorites }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注">
@@ -167,7 +187,7 @@ export default {
       getGoodReport(
         this.listQuery
       ).then(response => {
-        this.listReport = response.data.data.list
+        this.listReport = this.buildReportList(response.data.data.list)
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -192,6 +212,37 @@ export default {
     },
     handleSelect() {
       this.getGoodReport()
+    },
+    buildReportList(list) {
+      if (!list) {
+        return []
+      }
+      return list.map(item => {
+        const payment = this.toNumber(item.payment)
+        const close = this.toNumber(item.close)
+        const flash = this.toNumber(item.flash)
+        const refund = this.toNumber(item.refund)
+        const cost = this.toNumber(item.cost)
+        const deal_amount = this.toNumber(item.deal_amount)
+        const procure = this.toNumber(item.procure)
+        const deduction = this.toNumber(item.deduction)
+
+        item.all = this.round(payment + close + flash)
+        item.profit = this.round(payment - refund - cost - procure - deduction)
+        item.roi1 = this.round(deal_amount / cost)
+        item.roi2 = this.round((payment - refund) / cost)
+        item.return1 = this.round(this.round((refund + close + flash) / (payment + close + flash), 3) * 100, 1)
+        item.return2 = this.round(this.round((refund + close) / (payment + close), 3) * 100, 1)
+        return item
+      }).sort((a, b) => b.profit - a.profit)
+    },
+    toNumber(value) {
+      const number = Number(value)
+      return Number.isFinite(number) ? number : 0
+    },
+    round(value, digits = 2) {
+      const factor = Math.pow(10, digits)
+      return Math.round(this.toNumber(value) * factor) / factor
     }
   }
 }

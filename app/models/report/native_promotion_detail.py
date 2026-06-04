@@ -10,7 +10,9 @@ class NativePromotionDetail(Model):
                 SELECT good_id,
                     COALESCE(SUM(cost), 0) AS cost,
 	                COALESCE(SUM(deal_amount), 0) AS deal_amount,
-	                COALESCE(SUM(deal_num), 0) AS deal_num
+	                COALESCE(SUM(deal_num), 0) AS deal_num,
+                    COALESCE(SUM(shop_cart), 0) AS shop_cart,
+                    COALESCE(SUM(favorites), 0) AS favorites
                 FROM t_promotion_detail
                 WHERE
 	                shop_id = %s
@@ -33,21 +35,4 @@ class NativePromotionDetail(Model):
 	                AND promotion_date >= %s
 	                AND promotion_date < %s
                 GROUP BY good_id""", [shop_id, start_date, end_date])
-            return self.dictfetchall(cursor)
-        
-    def getListByDateRange(self, shop_id, start_date, end_date):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT good_id, promotion_date,
-                    COALESCE(SUM(cost), 0) AS cost,
-	                COALESCE(SUM(deal_amount), 0) AS deal_amount,
-	                COALESCE(SUM(deal_num), 0) AS deal_num
-                FROM t_promotion_detail
-                WHERE
-	                shop_id = %s
-	                AND promotion_date > %s
-	                AND promotion_date < %s
-                GROUP BY good_id, promotion_date
-                ORDER BY promotion_date ASC""", [shop_id, start_date, end_date])
             return self.dictfetchall(cursor)
