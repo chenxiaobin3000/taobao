@@ -104,19 +104,24 @@
           <div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="总金额" width="70">
+      <el-table-column align="center" label="总金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.amount }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="毛利" width="70">
+      <el-table-column align="center" label="毛利" width="80">
         <template slot-scope="scope">
           {{ scope.row.income }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="推广" width="70">
         <template slot-scope="scope">
-          {{ scope.row.promotion }}
+          <strong>{{ scope.row.promotion }}</strong>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="投产" width="70">
+        <template slot-scope="scope">
+          <div :style="{ color: scope.row.roi > 1.2 ? 'green' : 'red' }">{{ scope.row.roi }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="扣款" width="70">
@@ -124,19 +129,19 @@
           {{ scope.row.deduction }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="刷单佣金" width="70">
+      <el-table-column align="center" label="刷佣" width="60">
         <template slot-scope="scope">
           {{ scope.row.fake }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="刷单扣款" width="70">
+      <el-table-column align="center" label="刷扣" width="60">
         <template slot-scope="scope">
           {{ scope.row.fake_deduction }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="未完结" width="70">
+      <el-table-column align="center" label="未完结" width="80">
         <template slot-scope="scope">
-          {{ scope.row.pending }}
+          <strong>{{ scope.row.pending }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="未完退款" width="70">
@@ -156,7 +161,7 @@
       </el-table-column>
       <el-table-column align="center" label="已完结" width="70">
         <template slot-scope="scope">
-          {{ scope.row.settled }}
+          <strong>{{ scope.row.settled }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="已完退款" width="70">
@@ -176,7 +181,7 @@
       </el-table-column>
       <el-table-column align="center" label="已关闭" width="70">
         <template slot-scope="scope">
-          {{ scope.row.close }}
+          <strong>{{ scope.row.close }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="关闭退款" width="70">
@@ -297,7 +302,7 @@ export default {
         this.promotion = response.data.data.promotion
         this.fake = response.data.data.fake
         this.fake_deduction = response.data.data.fake_deduction
-        // 成交
+        // 总金额
         this.amount = parseFloat(this.pending) + parseFloat(this.settled) + parseFloat(this.close)
         // 毛利
         this.income = parseFloat(this.pending) - parseFloat(this.pending_procure) + parseFloat(this.settled) - parseFloat(this.settled_procure)
@@ -305,21 +310,22 @@ export default {
         this.profit = parseFloat(this.settled) - parseFloat(this.settled_refund) - parseFloat(this.settled_procure) + parseFloat(this.settled_refund_procure) - parseFloat(this.promotion) - parseFloat(this.transfer) - parseFloat(this.deduction) - parseFloat(this.fake) - parseFloat(this.fake_deduction)
         // 预估
         this.expect = parseFloat(this.pending) - parseFloat(this.pending_refund) - parseFloat(this.pending_procure) + parseFloat(this.pending_refund_procure) + this.profit
-        this.amount = this.amount.toFixed(2)
-        this.income = this.income.toFixed(2)
-        this.profit = this.profit.toFixed(2)
-        this.expect = this.expect.toFixed(2)
+        this.amount = this.amount.toFixed(1)
+        this.income = this.income.toFixed(1)
+        this.profit = this.profit.toFixed(1)
+        this.expect = this.expect.toFixed(1)
 
         this.list = response.data.data.list
         this.list.forEach(v => {
           v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
-          v.income = parseFloat(v.pending) - parseFloat(v.pending_refund) + parseFloat(v.settled) - parseFloat(v.settled_procure)
+          v.income = parseFloat(v.pending) - parseFloat(v.pending_procure) + parseFloat(v.settled) - parseFloat(v.settled_procure)
           v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction)
           v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
-          v.amount = v.amount.toFixed(2)
-          v.income = v.income.toFixed(2)
-          v.profit = v.profit.toFixed(2)
-          v.expect = v.expect.toFixed(2)
+          v.roi = parseFloat(v.promotion) === 0 ? '0.00' : (v.income / parseFloat(v.promotion)).toFixed(2)
+          v.amount = v.amount.toFixed(1)
+          v.income = v.income.toFixed(1)
+          v.profit = v.profit.toFixed(1)
+          v.expect = v.expect.toFixed(1)
         })
         this.loading = false
       }).catch(error => {

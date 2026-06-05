@@ -103,7 +103,12 @@
       </el-table-column>
       <el-table-column align="center" label="推广" width="80">
         <template slot-scope="scope">
-          {{ scope.row.promotion }}
+          <strong>{{ scope.row.promotion }}</strong>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="投产" width="70">
+        <template slot-scope="scope">
+          <div :style="{ color: scope.row.roi > 1.2 ? 'green' : 'red' }">{{ scope.row.roi }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="扣款" width="70">
@@ -123,7 +128,7 @@
       </el-table-column>
       <el-table-column align="center" label="未完结" width="70">
         <template slot-scope="scope">
-          {{ scope.row.pending }}
+          <strong>{{ scope.row.pending }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="未完退款" width="70">
@@ -143,7 +148,7 @@
       </el-table-column>
       <el-table-column align="center" label="已完结" width="80">
         <template slot-scope="scope">
-          {{ scope.row.settled }}
+          <strong>{{ scope.row.settled }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="已完退款" width="70">
@@ -163,7 +168,7 @@
       </el-table-column>
       <el-table-column align="center" label="已关闭" width="80">
         <template slot-scope="scope">
-          {{ scope.row.close }}
+          <strong>{{ scope.row.close }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="关闭退款" width="80">
@@ -304,6 +309,7 @@ export default {
           v.income = parseFloat(v.pending) - parseFloat(v.pending_refund) + parseFloat(v.settled) - parseFloat(v.settled_procure)
           v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction) - parseFloat(v.misc)
           v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
+          v.roi = parseFloat(v.promotion) === 0 ? '0.00' : (v.income / parseFloat(v.promotion)).toFixed(2)
           v.amount = v.amount.toFixed(1)
           v.income = v.income.toFixed(1)
           v.profit = v.profit.toFixed(1)
@@ -372,12 +378,14 @@ export default {
           const income = pending + settled
           const profit = settled - settled_refund - settled_procure + settled_refund_procure - promotion - transfer - deduction - fake - fake_deduction - misc
           const expect = pending - pending_refund - pending_procure + pending_refund_procure + profit
+          const roi = promotion === 0 ? '0.00' : (income / promotion).toFixed(2)
           this.list.unshift({
             create_date: y + '年',
             amount: amount.toFixed(1),
             income: income.toFixed(1),
             profit: profit.toFixed(1),
             expect: expect.toFixed(1),
+            roi,
             pending: pending.toFixed(1),
             pending_refund: pending_refund.toFixed(1),
             pending_procure: pending_procure.toFixed(1),
