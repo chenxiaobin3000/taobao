@@ -119,7 +119,7 @@
           <strong>{{ scope.row.promotion }}</strong>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="投产" width="70">
+      <el-table-column align="center" label="投产" width="60">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.roi > 1.2 ? 'green' : 'red' }">{{ scope.row.roi }}</div>
         </template>

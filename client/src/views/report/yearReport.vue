@@ -106,7 +106,7 @@
           <strong>{{ scope.row.promotion }}</strong>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="投产" width="70">
+      <el-table-column align="center" label="投产" width="60">
         <template slot-scope="scope">
           <div :style="{ color: scope.row.roi > 1.2 ? 'green' : 'red' }">{{ scope.row.roi }}</div>
         </template>
@@ -206,6 +206,7 @@
 <script>
 import { mapState } from 'vuex'
 import { getYearReport } from '@/api/report/yearReport'
+import { getDayReport } from '@/api/report/dayReport'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {
@@ -240,7 +241,8 @@ export default {
       shopList: [], // 本公司所有店铺列表
       listQuery: {
         id: 0
-      }
+      },
+      dayReportCache: {}
     }
   },
   computed: {
@@ -302,18 +304,12 @@ export default {
         this.profit = this.profit.toFixed(1)
         this.expect = this.expect.toFixed(1)
 
+        this.dayReportCache = {}
+
         // 预处理数据
         const data = response.data.data.list
         Object.entries(data).forEach(([k, v]) => {
-          v.amount = parseFloat(v.pending) + parseFloat(v.settled) + parseFloat(v.close)
-          v.income = parseFloat(v.pending) - parseFloat(v.pending_refund) + parseFloat(v.settled) - parseFloat(v.settled_procure)
-          v.profit = parseFloat(v.settled) - parseFloat(v.settled_refund) - parseFloat(v.settled_procure) + parseFloat(v.settled_refund_procure) - parseFloat(v.promotion) - parseFloat(v.transfer) - parseFloat(v.deduction) - parseFloat(v.fake) - parseFloat(v.fake_deduction) - parseFloat(v.misc)
-          v.expect = parseFloat(v.pending) - parseFloat(v.pending_refund) - parseFloat(v.pending_procure) + parseFloat(v.pending_refund_procure) + v.profit
-          v.roi = parseFloat(v.promotion) === 0 ? '0.00' : (v.income / parseFloat(v.promotion)).toFixed(2)
-          v.amount = v.amount.toFixed(1)
-          v.income = v.income.toFixed(1)
-          v.profit = v.profit.toFixed(1)
-          v.expect = v.expect.toFixed(1)
+          this.buildReportRow(v)
         })
 
         // 按年份统计插入数据
@@ -353,6 +349,11 @@ export default {
             const temp = data[key]
             temp.create_date = y + '年' + (m + 1) + '月'
             temp.is_show = 0
+            temp.report_type = 'month'
+            temp.year_key = String(y)
+            temp.month_key = key
+            temp.day_loaded = false
+            temp.day_expanded = false
             pending += temp.pending
             pending_refund += temp.pending_refund
             pending_procure += temp.pending_procure
@@ -404,7 +405,9 @@ export default {
             fake: fake.toFixed(1),
             fake_deduction: fake_deduction.toFixed(1),
             misc: misc.toFixed(1),
-            is_show: 1
+            is_show: 1,
+            report_type: 'year',
+            year_key: String(y)
           })
         }
         this.loading = false
@@ -426,12 +429,17 @@ export default {
       })
     },
     rowClassName({ row, rowIndex }) {
-      if (row.is_show !== 0) {
-        if (row.create_date.indexOf('月') === -1) {
-          return 'year-row'
-        }
-      } else {
+      if (row.is_show === 0) {
         return 'hidden-row'
+      }
+      if (row.report_type === 'year') {
+        return 'year-row'
+      }
+      if (row.report_type === 'month') {
+        return 'month-row'
+      }
+      if (row.report_type === 'day') {
+        return 'day-row'
       }
     },
     handleChange() {
@@ -439,15 +447,87 @@ export default {
       this.getYearReport()
     },
     handleRowClick(row, column, event) {
-      // 只处理年
-      if (row.create_date.indexOf('月') === -1) {
-        const year = row.create_date
-        this.list.forEach(v => {
-          if (v.create_date.indexOf('月') !== -1 && v.create_date.indexOf(year) !== -1) {
-            v.is_show = v.is_show === 0 ? 1 : 0
-          }
-        })
+      if (row.report_type === 'year') {
+        this.toggleMonthRows(row)
+      } else if (row.report_type === 'month') {
+        this.toggleDayRows(row)
       }
+    },
+    toggleMonthRows(row) {
+      const months = this.list.filter(v => v.report_type === 'month' && v.year_key === row.year_key)
+      const isShow = months.some(v => v.is_show === 0)
+      this.list.forEach(v => {
+        if (v.year_key !== row.year_key) {
+          return
+        }
+        if (v.report_type === 'month') {
+          v.is_show = isShow ? 1 : 0
+        } else if (v.report_type === 'day') {
+          const month = months.find(item => item.month_key === v.month_key)
+          v.is_show = isShow && month && month.day_expanded ? 1 : 0
+        }
+      })
+    },
+    toggleDayRows(row) {
+      if (row.day_loaded) {
+        row.day_expanded = !row.day_expanded
+        this.setDayRowsVisible(row.month_key, row.day_expanded ? 1 : 0)
+        return
+      }
+      this.loading = true
+      getDayReport({
+        id: this.listQuery.id,
+        sdate: `${row.month_key}-01`,
+        edate: this.getNextMonth(row.month_key)
+      }).then(response => {
+        const dayRows = (response.data.data.list || []).map(item => {
+          this.buildReportRow(item)
+          item.is_show = 1
+          item.report_type = 'day'
+          item.year_key = row.year_key
+          item.month_key = row.month_key
+          return item
+        })
+        this.dayReportCache[row.month_key] = dayRows
+        row.day_loaded = true
+        row.day_expanded = true
+        const index = this.list.indexOf(row)
+        this.list.splice(index + 1, 0, ...dayRows)
+        this.loading = false
+      }).catch(error => {
+        this.loading = false
+        Promise.reject(error)
+      })
+    },
+    setDayRowsVisible(monthKey, isShow) {
+      this.list.forEach(v => {
+        if (v.report_type === 'day' && v.month_key === monthKey) {
+          v.is_show = isShow
+        }
+      })
+    },
+    buildReportRow(row) {
+      row.misc = row.misc || 0
+      row.amount = parseFloat(row.pending) + parseFloat(row.settled) + parseFloat(row.close)
+      row.income = parseFloat(row.pending) - parseFloat(row.pending_refund) + parseFloat(row.settled) - parseFloat(row.settled_procure)
+      row.profit = parseFloat(row.settled) - parseFloat(row.settled_refund) - parseFloat(row.settled_procure) + parseFloat(row.settled_refund_procure) - parseFloat(row.promotion) - parseFloat(row.transfer) - parseFloat(row.deduction) - parseFloat(row.fake) - parseFloat(row.fake_deduction) - parseFloat(row.misc || 0)
+      row.expect = parseFloat(row.pending) - parseFloat(row.pending_refund) - parseFloat(row.pending_procure) + parseFloat(row.pending_refund_procure) + row.profit
+      row.roi = parseFloat(row.promotion) === 0 ? '0.00' : (row.income / parseFloat(row.promotion)).toFixed(2)
+      row.amount = row.amount.toFixed(1)
+      row.income = row.income.toFixed(1)
+      row.profit = row.profit.toFixed(1)
+      row.expect = row.expect.toFixed(1)
+      return row
+    },
+    getNextMonth(monthKey) {
+      const parts = monthKey.split('-')
+      let year = parseInt(parts[0])
+      let month = parseInt(parts[1]) + 1
+      if (month > 12) {
+        year += 1
+        month = 1
+      }
+      return `${year}-${month > 9 ? month : '0' + month}-01`
     }
   }
 }
@@ -455,7 +535,15 @@ export default {
 
 <style lang="scss">
 .el-table .year-row {
-  background-color: rgba(220, 220, 220, 0.3);
+  background-color: rgba(180, 180, 180, 0.3);
+}
+
+.el-table .month-row {
+  background-color: rgba(235, 235, 235, 0.3);
+}
+
+.el-table .day-row {
+  background-color: rgba(250, 250, 250, 0.3);
 }
 
 .el-table .hidden-row {
