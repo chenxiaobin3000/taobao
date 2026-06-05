@@ -46,14 +46,19 @@
         <template slot-scope="scope"><div :style="{ color: scope.row.profit < 0 ? 'red' : 'green' }">{{ scope.row.profit }}</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="花费" width="80">
+      <el-table-column align="center" label="实际金额" width="80">
         <template slot-scope="scope">
-          {{ scope.row.cost }}
+          <strong>{{ scope.row.payment }}</strong>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="名义比" width="60">
+      <el-table-column align="center" label="花费" width="80">
         <template slot-scope="scope">
-          {{ scope.row.roi1 }}
+          <strong>{{ scope.row.cost }}</strong>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="实际比" width="60">
+        <template slot-scope="scope">
+          <strong>{{ scope.row.roi2 }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="推广成交" width="80">
@@ -66,21 +71,17 @@
           {{ scope.row.deal_num }}
         </template>
       </el-table-column>
+      <el-table-column align="center" label="名义比" width="60">
+        <template slot-scope="scope">
+          {{ scope.row.roi1 }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="总金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.all }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="实际金额" width="80">
-        <template slot-scope="scope">
-          {{ scope.row.payment }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="实际比" width="60">
-        <template slot-scope="scope">
-          {{ scope.row.roi2 }}
-        </template>
-      </el-table-column>
+
       <el-table-column align="center" label="退款金额" width="80">
         <template slot-scope="scope">
           {{ scope.row.close }}
@@ -103,7 +104,12 @@
       </el-table-column>
       <el-table-column align="center" label="采购" width="80">
         <template slot-scope="scope">
-          {{ scope.row.procure }}
+          <strong>{{ scope.row.procure }}</strong>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="利润比" width="70">
+        <template slot-scope="scope">
+          <strong>{{ scope.row.profit_rate }}</strong>
         </template>
       </el-table-column>
       <el-table-column align="center" label="扣款" width="80">
@@ -166,7 +172,7 @@ export default {
   mounted: function() {
     setTimeout(() => {
       if (this.$refs.table) {
-        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 78
+        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 20
       }
     }, 1000)
   },
@@ -231,6 +237,7 @@ export default {
         item.profit = this.round(payment - refund - cost - procure - deduction)
         item.roi1 = this.round(deal_amount / cost)
         item.roi2 = this.round((payment - refund) / cost)
+        item.profit_rate = payment === 0 ? '0.0%' : this.round(((payment - procure) / payment) * 100, 1).toFixed(1) + '%'
         item.return1 = this.round(this.round((refund + close + flash) / (payment + close + flash), 3) * 100, 1)
         item.return2 = this.round(this.round((refund + close) / (payment + close), 3) * 100, 1)
         return item
