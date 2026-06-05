@@ -40,8 +40,10 @@ def getList(request):
         ('yesterday', yesterday, today),
         ('before_yesterday', before_yesterday, yesterday),
         ('three_days', today - timedelta(days=3), today),
+        ('five_days', today - timedelta(days=5), today - timedelta(days=4)),
         ('seven_days', today - timedelta(days=7), today),
-        ('fifteen_days', today - timedelta(days=15), today)
+        ('fifteen_days', today - timedelta(days=15), today),
+        ('thirty_days', today - timedelta(days=30), today)
     ]
 
     for key, start_date, end_date in periods:
@@ -126,7 +128,6 @@ def fill_period_data(shop_id, datas, key, start_date, end_date):
                 if data['good_id'] == promotion['good_id']:
                     data[key]['cost'] = round(promotion['cost'], 2)
                     data[key]['deal_amount'] = round(promotion['deal_amount'], 2)
-                    data[key]['deal_num'] = round(promotion['deal_num'], 2)
                     break
 
     for data in datas:
@@ -134,7 +135,6 @@ def fill_period_data(shop_id, datas, key, start_date, end_date):
         metric['payment'] = round(metric['payment'], 2)
         metric['procure'] = round(metric['procure'], 2)
         metric['close'] = round(metric['close'], 2)
-        metric['all'] = round(metric['payment'] + metric['close'], 2)
         metric['profit'] = round(metric['payment'] - Decimal(metric['cost']) - metric['procure'], 2)
 
 def init_data(id, name):
@@ -144,8 +144,10 @@ def init_data(id, name):
         'yesterday': init_metric(),
         'before_yesterday': init_metric(),
         'three_days': init_metric(),
+        'five_days': init_metric(),
         'seven_days': init_metric(),
-        'fifteen_days': init_metric()
+        'fifteen_days': init_metric(),
+        'thirty_days': init_metric()
     }
 
 def init_metric():
@@ -153,8 +155,6 @@ def init_metric():
         'profit': 0,
         'cost': 0,
         'deal_amount': 0,
-        'deal_num': 0,
-        'all': 0,
         'payment': 0,
         'procure': 0,
         'close': 0

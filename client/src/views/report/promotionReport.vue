@@ -38,7 +38,7 @@
         <el-table-column v-for="period in periodList" :key="metric.key + period.key" align="center" :label="period.name" :width="metric.width">
           <template slot-scope="scope">
             <div v-if="metric.key === 'profit'" :style="{ color: scope.row[period.key][metric.key] < 0 ? 'red' : 'green' }">{{ scope.row[period.key][metric.key] }}</div>
-            <span v-else>{{ scope.row[period.key][metric.key] }}</span>
+            <span v-else>{{ getMetricValue(scope.row, period.key, metric.key) }}</span>
           </template>
         </el-table-column>
       </el-table-column>
@@ -62,19 +62,21 @@ export default {
       shopList: [], // 本公司所有店铺列表
       followFilterList: [], // 关注状态列表
       periodList: [
-        { key: 'yesterday', name: '昨天' },
-        { key: 'before_yesterday', name: '前天' },
+        { key: 'yesterday', name: '前1天' },
+        { key: 'before_yesterday', name: '前2天' },
         { key: 'three_days', name: '前3天' },
+        { key: 'five_days', name: '前5天' },
         { key: 'seven_days', name: '前7天' },
-        { key: 'fifteen_days', name: '前15天' }
+        { key: 'fifteen_days', name: '前15天' },
+        { key: 'thirty_days', name: '前30天' }
       ],
       metricList: [
         { key: 'profit', name: '利润', width: 80 },
         { key: 'cost', name: '花费', width: 80 },
-        { key: 'deal_amount', name: '成交金额', width: 80 },
-        { key: 'deal_num', name: '笔数', width: 60 },
-        { key: 'all', name: '总金额', width: 80 },
-        { key: 'payment', name: '实际金额', width: 80 }
+        { key: 'payment', name: '实际', width: 80 },
+        { key: 'payment_rate', name: '实际比', width: 60 },
+        { key: 'deal_amount', name: '成交', width: 80 },
+        { key: 'deal_rate', name: '成交比', width: 60 }
       ],
       listQuery: {
         id: 0,
@@ -98,7 +100,7 @@ export default {
   mounted: function() {
     setTimeout(() => {
       if (this.$refs.table) {
-        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 78
+        this.tableHeight = window.innerHeight - this.$refs.table.$el.offsetTop - 20
       }
     }, 1000)
   },
@@ -110,6 +112,23 @@ export default {
     this.getOwnShopList()
   },
   methods: {
+    getMetricValue(row, periodKey, metricKey) {
+      const period = row[periodKey] || {}
+      if (metricKey === 'payment_rate') {
+        return this.formatRatio(period.payment, period.cost)
+      }
+      if (metricKey === 'deal_rate') {
+        return this.formatRatio(period.deal_amount, period.cost)
+      }
+      return period[metricKey]
+    },
+    formatRatio(value, cost) {
+      const costValue = Number(cost) || 0
+      if (costValue === 0) {
+        return '0.00'
+      }
+      return ((Number(value) || 0) / costValue).toFixed(2)
+    },
     getPromotionReport() {
       this.loading = true
       getPromotionReport(
