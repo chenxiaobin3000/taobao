@@ -37,8 +37,14 @@
       <el-table-column v-for="metric in metricList" :key="metric.key" align="center" :label="metric.name">
         <el-table-column v-for="period in periodList" :key="metric.key + period.key" align="center" :label="period.name" :width="metric.width">
           <template slot-scope="scope">
-            <div v-if="metric.key === 'profit'" :style="{ color: scope.row[period.key][metric.key] < 0 ? 'red' : 'green' }">{{ scope.row[period.key][metric.key] }}</div>
-            <span v-else>{{ getMetricValue(scope.row, period.key, metric.key) }}</span>
+            <div class="metric-cell">
+              <div v-if="metric.key === 'profit'" :style="{ color: getMetricValue(scope.row, period.key, metric.key) < 0 ? 'red' : 'green' }">{{ getMetricValue(scope.row, period.key, metric.key) }}</div>
+              <div v-else>{{ getMetricValue(scope.row, period.key, metric.key) }}</div>
+              <div v-if="period.singleKey" class="metric-single">
+                <span v-if="metric.key === 'profit'" :style="{ color: getMetricValue(scope.row, period.singleKey, metric.key) < 0 ? 'red' : 'green' }">{{ getMetricValue(scope.row, period.singleKey, metric.key) }}</span>
+                <span v-else>{{ getMetricValue(scope.row, period.singleKey, metric.key) }}</span>
+              </div>
+            </div>
           </template>
         </el-table-column>
       </el-table-column>
@@ -62,13 +68,13 @@ export default {
       shopList: [], // 本公司所有店铺列表
       followFilterList: [], // 关注状态列表
       periodList: [
-        { key: 'yesterday', name: '前1天' },
-        { key: 'before_yesterday', name: '前2天' },
-        { key: 'three_days', name: '前3天' },
-        { key: 'five_days', name: '前5天' },
-        { key: 'seven_days', name: '前7天' },
-        { key: 'fifteen_days', name: '前15天' },
-        { key: 'thirty_days', name: '前30天' }
+        { key: 'yesterday', name: '前1天', singleKey: 'day_1' },
+        { key: 'before_yesterday', name: '前2天', singleKey: 'day_2' },
+        { key: 'three_days', name: '前3天', singleKey: 'day_3' },
+        { key: 'five_days', name: '前5天', singleKey: 'day_4' },
+        { key: 'seven_days', name: '前7天', singleKey: 'day_5' },
+        { key: 'fifteen_days', name: '前15天', singleKey: 'day_6' },
+        { key: 'thirty_days', name: '前30天', singleKey: 'day_7' }
       ],
       metricList: [
         { key: 'profit', name: '利润', width: 80 },
@@ -163,3 +169,14 @@ export default {
   }
 }
 </script>
+<style scoped>
+.metric-cell {
+  line-height: 18px;
+}
+
+.metric-single {
+  margin-top: 2px;
+  color: #909399;
+  font-size: 12px;
+}
+</style>

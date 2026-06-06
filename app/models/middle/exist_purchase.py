@@ -13,6 +13,12 @@ class ExistPurchaseManager(models.Manager):
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 
+    def getExistingIds(self, shop_id, purchase_ids):
+        return set(self.filter(shop_id=shop_id, purchase_id__in=purchase_ids).values_list('purchase_id', flat=True))
+
+    def addList(self, purchases):
+        return self.bulk_create(purchases, batch_size=1000)
+
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num

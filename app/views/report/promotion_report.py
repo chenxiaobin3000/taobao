@@ -38,13 +38,15 @@ def getList(request):
     before_yesterday = today - timedelta(days=2)
     periods = [
         ('yesterday', yesterday, today),
-        ('before_yesterday', before_yesterday, yesterday),
+        ('before_yesterday', before_yesterday, today),
         ('three_days', today - timedelta(days=3), today),
-        ('five_days', today - timedelta(days=5), today - timedelta(days=4)),
+        ('five_days', today - timedelta(days=5), today),
         ('seven_days', today - timedelta(days=7), today),
         ('fifteen_days', today - timedelta(days=15), today),
         ('thirty_days', today - timedelta(days=30), today)
     ]
+    for i in range(1, 8):
+        periods.append((f'day_{i}', today - timedelta(days=i), today - timedelta(days=i - 1)))
 
     for key, start_date, end_date in periods:
         fill_period_data(shop_id, datas, key, start_date, end_date)
@@ -147,7 +149,14 @@ def init_data(id, name):
         'five_days': init_metric(),
         'seven_days': init_metric(),
         'fifteen_days': init_metric(),
-        'thirty_days': init_metric()
+        'thirty_days': init_metric(),
+        'day_1': init_metric(),
+        'day_2': init_metric(),
+        'day_3': init_metric(),
+        'day_4': init_metric(),
+        'day_5': init_metric(),
+        'day_6': init_metric(),
+        'day_7': init_metric()
     }
 
 def init_metric():

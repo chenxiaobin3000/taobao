@@ -30,6 +30,9 @@ class OrderSummaryManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 
+    def getMapByIds(self, shop_id, order_ids):
+        return {order.order_id: order for order in self.filter(shop_id=shop_id, order_id__in=order_ids)}
+
     def filterBySearch(self, shop_id, search=None):
         queryset = self.filter(shop_id=shop_id)
         if search:

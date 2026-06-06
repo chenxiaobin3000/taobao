@@ -21,6 +21,9 @@ class OrderManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id).first())
 
+    def getIds(self, shop_id, order_ids):
+        return set(self.filter(shop_id=shop_id, order_id__in=order_ids).values_list('order_id', flat=True))
+
     def filterByDate(self, shop_id, start_date=None, end_date=None, search=None):
         queryset = self.filter(shop_id=shop_id)
         if start_date:
@@ -43,6 +46,9 @@ class OrderManager(models.Manager):
 
     def getListByDate(self, shop_id, start_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date).order_by('-create_time'))
+
+    def getListByDateRange(self, shop_id, start_date, end_date):
+        return list(self.filter(shop_id=shop_id, create_time__gte=start_date, create_time__lt=end_date).values('order_id', 'payment', 'procure', 'order_status', 'create_time', 'good_ids', 'procure_ids', 'order_note'))
 
     def encoder(self, order):
         if order:

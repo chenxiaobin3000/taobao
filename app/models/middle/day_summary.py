@@ -10,8 +10,14 @@ class DaySummaryManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def deleteByDate(self, shop_id, create_date):
-        return self.filter(shop_id=shop_id, create_date__gte=create_date).delete()
+    def deleteByDate(self, shop_id, create_date, end_date=None):
+        queryset = self.filter(shop_id=shop_id, create_date__gte=create_date)
+        if end_date:
+            queryset = queryset.filter(create_date__lt=end_date)
+        return queryset.delete()
+
+    def addList(self, summaries):
+        return self.bulk_create(summaries, batch_size=1000)
 
     def getByDate(self, shop_id, create_date, order_status):
         return self.encoder(self.filter(shop_id=shop_id, create_date=create_date, order_status=order_status).first())

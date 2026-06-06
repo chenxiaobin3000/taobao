@@ -36,6 +36,12 @@ class PolymerizeManager(models.Manager):
     def getAll(self, shop_id, start_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=start_date))
 
+    def getAllByDate(self, shop_id, start_date, end_date):
+        return list(self.filter(shop_id=shop_id, create_time__gte=start_date, create_time__lt=end_date).values('order_id', 'amount', 'amount_type', 'create_time', 'polymerize_note'))
+
+    def getAllByIds(self, shop_id, order_ids, start_date, end_date):
+        return list(self.filter(shop_id=shop_id, order_id__in=order_ids, create_time__gte=start_date, create_time__lt=end_date).values('order_id', 'amount', 'amount_type', 'create_time', 'polymerize_note'))
+
     def encoder(self, polymerize):
         if polymerize:
             return model_to_dict(polymerize, fields=['id', 'order_id', 'finance_type', 'amount', 'amount_type', 'create_time', 'polymerize_note'])

@@ -10,8 +10,11 @@ class OmissionManager(models.Manager):
     def delete(self, pk):
         return self.get(pk=pk).delete()
 
-    def deleteByDate(self, shop_id, create_time):
-        return self.filter(shop_id=shop_id, create_time__gte=create_time).delete()
+    def deleteByDate(self, shop_id, create_time, end_time=None):
+        queryset = self.filter(shop_id=shop_id, create_time__gte=create_time)
+        if end_time:
+            queryset = queryset.filter(create_time__lt=end_time)
+        return queryset.delete()
 
     def filterByDate(self, shop_id, start_date=None, end_date=None):
         queryset = self.filter(shop_id=shop_id)

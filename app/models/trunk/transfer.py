@@ -36,6 +36,10 @@ class TransferManager(models.Manager):
     def getListByDate(self, shop_id, create_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gt=create_date))
 
+    def getAmountMapByIds(self, shop_id, order_ids, start_date, end_date):
+        transfers = self.filter(shop_id=shop_id, order_id__in=order_ids, create_time__gte=start_date, create_time__lt=end_date).values('order_id').annotate(amount_sum=models.Sum('amount'))
+        return {transfer['order_id']: transfer['amount_sum'] for transfer in transfers}
+
     def encoder(self, transfer):
         if transfer:
             return model_to_dict(transfer, fields=['id', 'shop_id', 'user_name', 'payee_name', 'order_id', 'amount', 'create_time', 'transfer_note'])
