@@ -44,7 +44,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { getCostReport } from '@/api/report/costReport'
+import { getGoodRadar } from '@/api/report/goodRadar'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {
@@ -80,9 +80,9 @@ export default {
     this.getOwnShopList()
   },
   methods: {
-    getCostReport() {
+    getGoodRadar() {
       this.loading = true
-      getCostReport(
+      getGoodRadar(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
@@ -102,7 +102,7 @@ export default {
         if (this.listQuery.id === 0) {
           this.listQuery.id = this.shopList[0].id
         }
-        this.getCostReport()
+        this.getGoodRadar()
       })
     }
   }
