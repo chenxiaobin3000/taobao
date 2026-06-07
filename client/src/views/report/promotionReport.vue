@@ -37,8 +37,14 @@
       <el-table-column v-for="metric in metricList" :key="metric.key" align="center" :label="metric.name">
         <el-table-column v-for="period in periodList" :key="metric.key + period.key" align="center" :label="period.name" :width="metric.width">
           <template slot-scope="scope">
-            <div v-if="metric.key === 'profit'" :style="{ color: scope.row[period.key][metric.key] < 0 ? 'red' : 'green' }">{{ scope.row[period.key][metric.key] }}</div>
-            <span v-else>{{ getMetricValue(scope.row, period.key, metric.key) }}</span>
+            <div class="metric-cell">
+              <div v-if="metric.key === 'profit'" :style="{ color: getMetricValue(scope.row, period.key, metric.key) < 0 ? 'red' : 'green' }">{{ getMetricValue(scope.row, period.key, metric.key) }}</div>
+              <div v-else>{{ getMetricValue(scope.row, period.key, metric.key) }}</div>
+              <div v-if="period.singleKey" class="metric-single">
+                <span v-if="metric.key === 'profit'" :style="{ color: getMetricValue(scope.row, period.singleKey, metric.key) < 0 ? 'red' : 'green' }">{{ getMetricValue(scope.row, period.singleKey, metric.key) }}</span>
+                <span v-else>{{ getMetricValue(scope.row, period.singleKey, metric.key) }}</span>
+              </div>
+            </div>
           </template>
         </el-table-column>
       </el-table-column>
@@ -61,14 +67,14 @@ export default {
       loading: false,
       shopList: [], // 本公司所有店铺列表
       followFilterList: [], // 关注状态列表
-      periodList: [
-        { key: 'yesterday', name: '前1天' },
-        { key: 'before_yesterday', name: '前2天' },
-        { key: 'three_days', name: '前3天' },
-        { key: 'five_days', name: '前5天' },
-        { key: 'seven_days', name: '前7天' },
-        { key: 'fifteen_days', name: '前15天' },
-        { key: 'thirty_days', name: '前30天' }
+      basePeriodList: [
+        { key: 'yesterday', days: 1, singleKey: 'day_1' },
+        { key: 'before_yesterday', days: 2, singleKey: 'day_2' },
+        { key: 'three_days', days: 3, singleKey: 'day_3' },
+        { key: 'five_days', days: 5, singleKey: 'day_4' },
+        { key: 'seven_days', days: 7, singleKey: 'day_5' },
+        { key: 'fifteen_days', days: 15, singleKey: 'day_6' },
+        { key: 'thirty_days', days: 30, singleKey: 'day_7' }
       ],
       metricList: [
         { key: 'profit', name: '利润', width: 80 },
@@ -89,7 +95,17 @@ export default {
   computed: {
     ...mapState({
       search: state => state.header.search
-    })
+    }),
+    periodList() {
+      const baseDate = this.parseDate(this.listQuery.date) || new Date()
+      return this.basePeriodList.map(period => {
+        const startDate = this.addDays(baseDate, -period.days)
+        return {
+          ...period,
+          name: this.formatMonthDay(startDate)
+        }
+      })
+    }
   },
   watch: {
     search(newVal, oldVal) {
@@ -129,6 +145,25 @@ export default {
       }
       return ((Number(value) || 0) / costValue).toFixed(2)
     },
+    parseDate(value) {
+      if (value instanceof Date) {
+        return value
+      }
+      if (!value) {
+        return null
+      }
+      return new Date(value.replace(/-/g, '/'))
+    },
+    addDays(date, days) {
+      const result = new Date(date.getTime())
+      result.setDate(result.getDate() + days)
+      return result
+    },
+    formatMonthDay(date) {
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${month}-${day}`
+    },
     getPromotionReport() {
       this.loading = true
       getPromotionReport(
@@ -163,3 +198,14 @@ export default {
   }
 }
 </script>
+<style scoped>
+.metric-cell {
+  line-height: 18px;
+}
+
+.metric-single {
+  margin-top: 2px;
+  color: #909399;
+  font-size: 12px;
+}
+</style>

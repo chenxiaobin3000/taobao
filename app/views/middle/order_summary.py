@@ -4,6 +4,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
+from django.conf import settings
 from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
 from app.models.middle.order_summary import OrderSummary
@@ -23,40 +24,41 @@ def flush(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     now_date = timezone.now()
-    start_date = datetime.strptime(post.get('sdate'), "%Y-%m-%d")
+    start_date = parse_date(post.get('sdate'))
+    base_start_date = parse_date(post.get('full_sdate')) if post.get('full_sdate') else start_date
+    end_date = parse_date(post.get('edate')) if post.get('edate') else now_date
     response = success()
 
-    # 计算开始日期至今的数据
-    duration = now_date - start_date
-    days = duration.days
-    if days < 1:
+    # 计算开始日期至结束日期的数据
+    if end_date <= start_date:
         return JsonResponse(failed('开始日期要早于当前时间'), encoder=MyJSONEncoder)
 
-    # 小额打款数据
-    transfers = {}
-    datas = Transfer.objects.getListByDate(shop_id, start_date)
-    if datas:
-        for data in datas:
-            order_id = data['order_id']
-            if order_id in transfers:
-                transfers[order_id] += data['amount']
-            else:
-                transfers[order_id] = data['amount']
-
-    # 生成所有订单数据
-    orders = Order.objects.getListByDate(shop_id, start_date)
+    # 生成本批次订单数据
+    orders = Order.objects.getListByDateRange(shop_id, start_date, end_date)
     if orders:
+        order_ids = {order['order_id'] for order in orders}
+        transfers = Transfer.objects.getAmountMapByIds(shop_id, order_ids, base_start_date, now_date)
+        refunds = Refund.objects.getMapByIds(shop_id, order_ids)
+        deductions = DeductionSummary.objects.getMapByIds(shop_id, order_ids)
+        exists_orders = OrderSummary.objects.getMapByIds(shop_id, order_ids)
+
+        purchase_ids = set()
         for order in orders:
-            order_id = order['order_id']
             procure_ids = order['procure_ids']
             if procure_ids:
                 for purchase_id in procure_ids.split('|'):
                     purchase_id = purchase_id.strip()
-                    if not purchase_id:
-                        continue
-                    if ExistPurchase.objects.filter(shop_id=shop_id, purchase_id=purchase_id).exists():
-                        continue
-                    ExistPurchase.objects.add(shop_id, purchase_id)
+                    if purchase_id:
+                        purchase_ids.add(purchase_id)
+        exists_purchase_ids = ExistPurchase.objects.getExistingIds(shop_id, purchase_ids)
+        create_purchases = [ExistPurchase(shop_id=shop_id, purchase_id=purchase_id) for purchase_id in purchase_ids if purchase_id not in exists_purchase_ids]
+        if create_purchases:
+            ExistPurchase.objects.addList(create_purchases)
+
+        create_summaries = []
+        update_summaries = []
+        for order in orders:
+            order_id = order['order_id']
             data = {
                 'refund_customer': 0,
                 'refund_platform': 0,
@@ -67,23 +69,21 @@ def flush(request):
             }
 
             # 退款
-            refunds = Refund.objects.getById(shop_id, order_id)
-            if refunds:
-                for refund in refunds:
-                    data['refund_customer'] += refund['refund_pay']
-                    data['refund_platform'] += refund['refund_platform']
-                    if not data['refund_time'] or data['refund_time'] < refund['apply_time']:
-                        data['refund_time'] = refund['apply_time']
+            refund = refunds.get(order_id)
+            if refund:
+                data['refund_customer'] = refund['refund_customer']
+                data['refund_platform'] = refund['refund_platform']
+                data['refund_time'] = refund['refund_time']
 
             # 打款
             if order_id in transfers:
                 data['transfer'] = transfers[order_id]
 
             # 扣款
-            deduction = DeductionSummary.objects.getById(shop_id, order_id)
+            deduction = deductions.get(order_id)
             if deduction:
-                data['deduction'] = deduction['amount']
-                data['deduction_detail'] = deduction['deduction_detail']
+                data['deduction'] = deduction.amount
+                data['deduction_detail'] = deduction.deduction_detail
             else:
                 deduction = { 'amount': 0 }
 
@@ -93,37 +93,74 @@ def flush(request):
                 refund_procure = order['procure']
 
             # 已经存在，且数据一样就跳过
-            find_object = OrderSummary.objects.getById(shop_id, order_id)
+            find_object = exists_orders.get(order_id)
             if find_object:
-                if find_object['payment'] != order['payment'] or find_object['refund_customer'] != data['refund_customer'] or find_object['refund_platform'] != data['refund_platform'] or find_object['procure'] != order['procure'] or find_object['refund_procure'] != refund_procure or find_object['transfer'] != data['transfer'] or find_object['order_status'] != order['order_status'] or find_object['create_time'] != order['create_time'] or find_object['refund_time'] != data['refund_time'] or find_object['good_ids'] != order['good_ids'] or find_object['deduction'] != deduction['amount']:
-                    OrderSummary.objects.set(find_object['id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], data['refund_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
+                if find_object.payment != order['payment'] or find_object.refund_customer != data['refund_customer'] or find_object.refund_platform != data['refund_platform'] or find_object.procure != order['procure'] or find_object.refund_procure != refund_procure or find_object.transfer != data['transfer'] or find_object.order_status != order['order_status'] or find_object.create_time != order['create_time'] or find_object.refund_time != data['refund_time'] or find_object.good_ids != order['good_ids'] or find_object.deduction != data['deduction'] or find_object.deduction_detail != data['deduction_detail']:
+                    find_object.payment = order['payment']
+                    find_object.refund_customer = data['refund_customer']
+                    find_object.refund_platform = data['refund_platform']
+                    find_object.procure = order['procure']
+                    find_object.refund_procure = refund_procure
+                    find_object.transfer = data['transfer']
+                    find_object.order_status = order['order_status']
+                    find_object.create_time = order['create_time']
+                    find_object.refund_time = data['refund_time']
+                    find_object.good_ids = order['good_ids']
+                    find_object.deduction = data['deduction']
+                    find_object.deduction_detail = data['deduction_detail']
+                    update_summaries.append(find_object)
             else:
-                OrderSummary.objects.add(shop_id, order['order_id'], order['payment'], data['refund_customer'], data['refund_platform'], order['procure'], refund_procure, data['transfer'], order['order_status'], order['create_time'], data['refund_time'], order['good_ids'], data['deduction'], data['deduction_detail'])
+                create_summaries.append(OrderSummary(shop_id=shop_id, order_id=order['order_id'], payment=order['payment'], refund_customer=data['refund_customer'], refund_platform=data['refund_platform'], procure=order['procure'], refund_procure=refund_procure, transfer=data['transfer'], order_status=order['order_status'], create_time=order['create_time'], refund_time=data['refund_time'], good_ids=order['good_ids'], deduction=data['deduction'], deduction_detail=data['deduction_detail']))
+
+        if create_summaries:
+            OrderSummary.objects.bulk_create(create_summaries, batch_size=1000)
+        if update_summaries:
+            OrderSummary.objects.bulk_update(update_summaries, ['payment', 'refund_customer', 'refund_platform', 'procure', 'refund_procure', 'transfer', 'order_status', 'create_time', 'refund_time', 'good_ids', 'deduction', 'deduction_detail'], batch_size=1000)
 
     # 按天统计刷单扣款
     fake_deduction = {}
+    days = (end_date - start_date).days
+    fake_order_ids = set()
+    fake_days = {}
     for i in range(0, days):
         start = start_date + timedelta(days=i)
         end = start_date + timedelta(days=i+1)
         fakes = Fake.objects.getListByDay(shop_id, start, end)
         if fakes:
-            temp = 0
+            fake_days[start.strftime("%Y-%m-%d")] = fakes
             for fake in fakes:
-                deduction = DeductionSummary.objects.getById(shop_id, fake['order_id'])
-                if deduction:
-                    temp += deduction['amount']
-            fake_deduction[start.strftime("%Y-%m-%d")] = temp
+                fake_order_ids.add(fake['order_id'])
+    fake_deductions = DeductionSummary.objects.getMapByIds(shop_id, fake_order_ids)
+    for create_date, fakes in fake_days.items():
+        temp = 0
+        for fake in fakes:
+            deduction = fake_deductions.get(fake['order_id'])
+            if deduction:
+                temp += deduction.amount
+        fake_deduction[create_date] = temp
 
     # 刷新日报
-    DaySummary.objects.deleteByDate(shop_id, start_date)
+    DaySummary.objects.deleteByDate(shop_id, start_date.date(), end_date.date())
+    day_summaries = []
     for status in [OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.SUCCESS, OrderStatus.CLOSE]:
         days = OrderSummary.objects.getAll(shop_id, status, start_date, now_date)
         if days:
             for day in days:
+                day_date = datetime.strptime(day['create_date'], "%Y-%m-%d").date()
+                if day_date < start_date.date() or day_date >= end_date.date():
+                    continue
                 temp = fake_deduction[day['create_date']] if day['create_date'] in fake_deduction else 0
-                DaySummary.objects.add(shop_id, day['create_date'], status, day['payment'], day['refund_customer'], day['refund_platform'], day['procure'], day['refund_procure'], day['transfer'], day['deduction'], temp)
+                day_summaries.append(DaySummary(shop_id=shop_id, create_date=day['create_date'], order_status=status, payment=day['payment'], refund_customer=day['refund_customer'], refund_platform=day['refund_platform'], procure=day['procure'], refund_procure=day['refund_procure'], transfer=day['transfer'], deduction=day['deduction'], fake=temp))
+    if day_summaries:
+        DaySummary.objects.addList(day_summaries)
 
     return JsonResponse(response, encoder=MyJSONEncoder)
+
+def parse_date(date_text):
+    date_value = datetime.strptime(date_text, "%Y-%m-%d")
+    if settings.USE_TZ and timezone.is_naive(date_value):
+        date_value = timezone.make_aware(date_value)
+    return date_value
 
 @require_POST
 @transaction.atomic

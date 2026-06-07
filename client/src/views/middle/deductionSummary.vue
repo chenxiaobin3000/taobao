@@ -15,10 +15,14 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleFlush()">刷新</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:60px" :loading="flushing" :disabled="flushing" @click="handleFlush()">刷新</el-button>
         </el-col>
       </el-row>
     </el-form>
+    <div v-if="flushing || flushProgress > 0" class="flush-progress">
+      <el-progress :percentage="flushProgress" />
+      <span>{{ flushProgressText }}</span>
+    </div>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="订单编号" width="160">
         <template slot-scope="scope">
@@ -57,6 +61,9 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      flushing: false,
+      flushProgress: 0,
+      flushProgressText: '',
       shopList: [], // 本公司所有店铺列表
       start_date: 0,
       listQuery: {
@@ -146,15 +153,82 @@ export default {
       this.listQuery.page = 1
       this.getDeductionSummaryList()
     },
-    handleFlush() {
-      flushDeductionSummary({
-        id: this.listQuery.id,
-        sdate: this.start_date
-      }).then(() => {
+    async handleFlush() {
+      const start = this.parseDate(this.start_date)
+      const end = this.addDays(this.today(), 1)
+      if (!start || start >= end) {
+        this.$message({ type: 'error', message: '开始日期要早于当前时间' })
+        return
+      }
+      const chunkDays = 15
+      const totalDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)))
+      let finishedDays = 0
+      let cursor = start
+      this.flushing = true
+      this.flushProgress = 0
+      this.flushProgressText = `刷新中: 0/${totalDays}天`
+      try {
+        while (cursor < end) {
+          const next = this.addDays(cursor, chunkDays)
+          const batchEnd = next < end ? next : end
+          await flushDeductionSummary({
+            id: this.listQuery.id,
+            full_sdate: this.formatDate(start),
+            sdate: this.formatDate(cursor),
+            edate: this.formatDate(batchEnd)
+          })
+          finishedDays = Math.min(totalDays, Math.ceil((batchEnd.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)))
+          this.flushProgress = Math.floor((finishedDays / totalDays) * 100)
+          this.flushProgressText = `刷新中: ${finishedDays}/${totalDays}天`
+          cursor = batchEnd
+        }
+        this.flushProgress = 100
+        this.flushProgressText = `刷新完成: ${totalDays}/${totalDays}天`
         this.$message({ type: 'success', message: '刷新成功!' })
         this.getDeductionSummaryList()
-      })
+      } finally {
+        this.flushing = false
+      }
+    },
+    parseDate(value) {
+      if (value instanceof Date) {
+        return value
+      }
+      if (!value) {
+        return null
+      }
+      return new Date(value.replace(/-/g, '/'))
+    },
+    addDays(date, days) {
+      const result = new Date(date.getTime())
+      result.setDate(result.getDate() + days)
+      return result
+    },
+    today() {
+      const now = new Date()
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    },
+    formatDate(date) {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
     }
   }
 }
 </script>
+<style scoped>
+.flush-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  padding: 0 1% 8px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.flush-progress ::v-deep .el-progress {
+  flex: 1 1 auto;
+}
+</style>

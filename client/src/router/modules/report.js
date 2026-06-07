@@ -18,14 +18,14 @@ export default {
     path: 'dayReport', component: () => import('@/views/report/dayReport'),
     name: 'report_dayReport', meta: { title: '日报汇总', roles: [5003] }
   }, {
-    path: 'goodReport', component: () => import('@/views/report/goodReport'),
-    name: 'report_goodReport', meta: { title: '商品汇总', roles: [5004] }
-  }, {
     path: 'promotionReport', component: () => import('@/views/report/promotionReport'),
     name: 'report_promotionReport', meta: { title: '推广汇总', roles: [5005] }
   }, {
-    path: 'costReport', component: () => import('@/views/report/costReport'),
-    name: 'report_costReport', meta: { title: '成本汇总', roles: [5006] }
+    path: 'goodReport', component: () => import('@/views/report/goodReport'),
+    name: 'report_goodReport', meta: { title: '商品汇总', roles: [5004] }
+  }, {
+    path: 'goodRadar', component: () => import('@/views/report/goodRadar'),
+    name: 'report_goodRadar', meta: { title: '商品雷达', roles: [5006] }
   }, {
     path: 'orderReport', component: () => import('@/views/report/orderReport'),
     name: 'report_orderReport', meta: { title: '订单汇总', roles: [5007] }

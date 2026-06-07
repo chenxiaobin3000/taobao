@@ -24,6 +24,23 @@ class RefundManager(models.Manager):
     def getById(self, shop_id, order_id):
         return self.encoderList(self.filter(shop_id=shop_id, order_id=order_id))
 
+    def getMapByIds(self, shop_id, order_ids):
+        refunds = self.filter(shop_id=shop_id, order_id__in=order_ids).values('order_id', 'refund_pay', 'refund_platform', 'apply_time')
+        refund_map = {}
+        for refund in refunds:
+            order_id = refund['order_id']
+            if order_id not in refund_map:
+                refund_map[order_id] = {
+                    'refund_customer': 0,
+                    'refund_platform': 0,
+                    'refund_time': None
+                }
+            refund_map[order_id]['refund_customer'] += refund['refund_pay']
+            refund_map[order_id]['refund_platform'] += refund['refund_platform']
+            if not refund_map[order_id]['refund_time'] or refund_map[order_id]['refund_time'] < refund['apply_time']:
+                refund_map[order_id]['refund_time'] = refund['apply_time']
+        return refund_map
+
     def getByIdAndTime(self, shop_id, order_id, refund_id, product_id, apply_time):
         return self.encoder(self.filter(shop_id=shop_id, order_id=order_id, refund_id=refund_id, product_id=product_id, apply_time=apply_time).first())
 
