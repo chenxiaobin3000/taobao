@@ -18,6 +18,8 @@ export const MyRoleData = [{
     id: 5008, label: '遗漏汇总'
   }, {
     id: 5009, label: '采购汇总'
+  }, {
+    id: 5010, label: '报税汇总'
   }]
 }, {
   id: 6000, label: '辅助工具',

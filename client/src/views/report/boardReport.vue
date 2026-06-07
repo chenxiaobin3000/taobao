@@ -76,7 +76,7 @@
       </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row :row-class-name="rowClassName" @row-click="handleRowClick">
-      <el-table-column align="center" label="日期" width="90">
+      <el-table-column align="center" label="日期" width="110">
         <template slot-scope="scope">
           {{ scope.row.create_date }}
         </template>

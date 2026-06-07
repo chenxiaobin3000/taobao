@@ -35,5 +35,8 @@ export default {
   }, {
     path: 'purchaseReport', component: () => import('@/views/report/purchaseReport'),
     name: 'report_purchaseReport', meta: { title: '采购汇总', roles: [5009] }
+  }, {
+    path: 'taxReport', component: () => import('@/views/report/taxReport'),
+    name: 'report_taxReport', meta: { title: '报税汇总', roles: [5010] }
   }]
 }
