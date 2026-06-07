@@ -21,10 +21,19 @@
           <div>推广: {{ promotion ? promotion : 0 }}</div>
         </el-col>
         <el-col :span="3">
-          <div>报税: {{ tax ? tax : 0 }}</div>
+          <div>毛利: {{ gross_profit ? gross_profit : 0 }}</div>
+        </el-col>
+        <el-col :span="3">
+          <div>毛报税: {{ tax ? tax : 0 }}</div>
         </el-col>
         <el-col :span="3">
           <div>扣款: {{ deduction ? deduction : 0 }}</div>
+        </el-col>
+        <el-col :span="3">
+          <div>净利: {{ net_profit ? net_profit : 0 }}</div>
+        </el-col>
+        <el-col :span="3">
+          <div>净报税: {{ net_tax ? net_tax : 0 }}</div>
         </el-col>
       </el-row>
     </el-form>
@@ -54,7 +63,12 @@
           {{ scope.row.promotion }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="报税" width="80">
+      <el-table-column align="center" label="毛利" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.gross_profit }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="毛报税" width="80">
         <template slot-scope="scope">
           {{ scope.row.tax }}
         </template>
@@ -62,6 +76,16 @@
       <el-table-column align="center" label="扣款" width="70">
         <template slot-scope="scope">
           {{ scope.row.deduction }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="净利" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.net_profit }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="净报税" width="80">
+        <template slot-scope="scope">
+          {{ scope.row.net_tax }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注">
@@ -84,8 +108,11 @@ export default {
       list: null,
       deal: 0, // 成交
       deal_tax: 0, // 成交报税
-      tax: 0, // 报税
+      gross_profit: 0, // 毛利
+      tax: 0, // 毛报税
+      net_tax: 0, // 净报税
       deduction: 0, // 扣款
+      net_profit: 0, // 净利
       promotion: 0, // 推广
       loading: false,
       checkedShops: [], // 选中的店铺
@@ -131,8 +158,11 @@ export default {
       }).then(response => {
         this.deal = response.data.data.deal
         this.deal_tax = response.data.data.deal_tax
+        this.gross_profit = response.data.data.gross_profit
         this.tax = response.data.data.tax
+        this.net_tax = response.data.data.net_tax
         this.deduction = response.data.data.deduction
+        this.net_profit = response.data.data.net_profit
         this.promotion = response.data.data.promotion
         this.buildList(response.data.data.list)
         this.loading = false
@@ -193,16 +223,22 @@ export default {
       return {
         deal: 0,
         deal_tax: 0,
+        gross_profit: 0,
         tax: 0,
+        net_tax: 0,
         deduction: 0,
+        net_profit: 0,
         promotion: 0
       }
     },
     addTotal(total, item) {
       total.deal += item.deal
       total.deal_tax += item.deal_tax
+      total.gross_profit += item.gross_profit
       total.tax += item.tax
+      total.net_tax += item.net_tax
       total.deduction += item.deduction
+      total.net_profit += item.net_profit
       total.promotion += item.promotion
     },
     buildQuarterTotal(monthTotals, start, end) {
@@ -240,8 +276,11 @@ export default {
         name: name,
         deal: total.deal.toFixed(1),
         deal_tax: total.deal_tax.toFixed(1),
+        gross_profit: total.gross_profit.toFixed(1),
         tax: total.tax.toFixed(1),
+        net_tax: total.net_tax.toFixed(1),
         deduction: total.deduction.toFixed(1),
+        net_profit: total.net_profit.toFixed(1),
         promotion: total.promotion.toFixed(1),
         is_show: isShow,
         row_type: rowType,
