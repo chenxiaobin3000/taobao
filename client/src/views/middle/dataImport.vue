@@ -1,36 +1,37 @@
 <template>
-  <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="48px" class="import-row">
+  <div class="app-container data-import-page">
+    <div class="import-row">
+      <div
+        class="file-upload"
+        :class="{ disabled: processing }"
+        @click="handleClickUpload"
+        @drop.prevent="handleDrop"
+        @dragover.prevent
+        @dragenter.prevent
+      >
+        <span>{{ processing ? '正在处理，请稍候' : '拖拽原始数据文件夹到这里' }}<em v-if="!processing">浏览本地</em></span>
+        <input
+          ref="importFolder"
+          type="file"
+          webkitdirectory
+          directory
+          multiple
+          accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          @change="handleFolderChange"
+        >
+      </div>
+    </div>
+
+    <el-form :model="listQuery" label-position="left" label-width="50px" class="filter-row">
       <el-row>
-        <el-col :span="5">
+        <el-col :span="6">
           <el-form-item label="店铺">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" :disabled="processing" @change="handleShopChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="14">
-          <div
-            class="file-upload"
-            :class="{ disabled: processing }"
-            @click="handleClickUpload"
-            @drop.prevent="handleDrop"
-            @dragover.prevent
-            @dragenter.prevent
-          >
-            <span>{{ processing ? '正在处理，请稍候' : '拖拽原始数据文件夹到这里' }}<em v-if="!processing">浏览本地</em></span>
-            <input
-              ref="importFolder"
-              type="file"
-              webkitdirectory
-              directory
-              multiple
-              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              @change="handleFolderChange"
-            >
-          </div>
-        </el-col>
-        <el-col :span="5">
+        <el-col :span="18">
           <el-button type="primary" :loading="processing" :disabled="!listQuery.id" class="merge-button" @click="handleMergeAll">一键合并</el-button>
         </el-col>
       </el-row>
@@ -40,8 +41,8 @@
 
     <el-input
       v-model="processInfo"
+      class="process-info"
       type="textarea"
-      :rows="20"
       readonly
       resize="none"
       placeholder="处理信息会显示在这里"
@@ -496,6 +497,12 @@ export default {
 </script>
 
 <style scoped>
+.data-import-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 84px);
+}
+
 .import-row {
   position: sticky;
   top: 0;
@@ -507,12 +514,13 @@ export default {
   border-bottom: 1px solid #d8dce5;
 }
 
-.import-row ::v-deep .el-form-item {
-  margin-bottom: 0;
+.filter-row {
+  width: 100%;
+  padding: 0 1% 0 1%;
 }
 
-.import-row ::v-deep .el-select {
-  width: 100%;
+.filter-row ::v-deep .el-form-item {
+  margin-bottom: 0;
 }
 
 .file-upload {
@@ -557,5 +565,15 @@ export default {
 
 .progress {
   margin: 0 1% 12px;
+}
+
+.process-info {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 12px;
+}
+
+.process-info ::v-deep .el-textarea__inner {
+  height: 100%;
 }
 </style>
