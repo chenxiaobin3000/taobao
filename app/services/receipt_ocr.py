@@ -169,12 +169,21 @@ class ReceiptOCR:
 
     @staticmethod
     def _parse_company_id(text):
-        match = re.search(r'购买方信息[\s\S]{0,120}?(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', text)
-        if not match:
-            match = re.search(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', text)
+        buyer_text = ReceiptOCR._parse_party_text(text, '购买方信息', '销售方信息')
+        match = re.search(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', buyer_text)
         if not match:
             return ''
         return match.group(1)[:20]
+
+    @staticmethod
+    def _parse_party_text(text, start_keyword, end_keyword):
+        start_index = text.find(start_keyword)
+        if start_index < 0:
+            return ''
+        end_index = text.find(end_keyword, start_index + len(start_keyword))
+        if end_index < 0:
+            return text[start_index:]
+        return text[start_index:end_index]
 
     @staticmethod
     def _parse_seller_id(text):

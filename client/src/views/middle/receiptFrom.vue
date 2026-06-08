@@ -155,13 +155,15 @@ export default {
         this.loadReceiptItemList()
       })
     },
-    loadReceiptItemList() {
-      getReceiptItemList({
+    loadReceiptItemList(loadList = true) {
+      return getReceiptItemList({
         page: 1,
         num: 1000
       }).then(response => {
         this.projectList = response.data.data.list || []
-        this.getReceiptFromList()
+        if (loadList) {
+          this.getReceiptFromList()
+        }
       })
     },
     userId2Name(id) {
@@ -230,7 +232,7 @@ export default {
       try {
         await addReceiptFrom(data)
         this.$message({ type: 'success', message: '识别成功!' })
-        this.getReceiptFromList()
+        await this.loadReceiptItemList()
       } catch (error) {
         const message = error.response && error.response.data && error.response.data.msg ? error.response.data.msg : '识别失败!'
         this.$message({ type: 'error', message })
