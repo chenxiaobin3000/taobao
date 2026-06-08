@@ -15,6 +15,10 @@
       </el-row>
     </el-form>
 
+    <div class="missing-summary">
+      <span>缺失: </span><span :style="{ color: missing ? 'red' : 'green' }">{{ missing || '无' }}</span>
+    </div>
+
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="日期" width="140px">
         <template slot-scope="scope">
@@ -29,6 +33,13 @@
       <el-table-column align="left" header-align="center" label="出项">
         <template slot-scope="scope">
           {{ scope.row.to_text }}
+        </template>
+      </el-table-column>
+      <el-table-column align="left" header-align="center" label="校验" width="180px">
+        <template slot-scope="scope">
+          <span v-for="(item, index) in scope.row.check_items" :key="index">
+            <span :style="{ color: item.success ? 'green' : 'red' }">{{ item.text }}</span><span v-if="index < scope.row.check_items.length - 1">;</span>
+          </span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="100px">
@@ -49,6 +60,7 @@ export default {
       tableHeight: 600,
       list: [],
       total: 0,
+      missing: '',
       loading: false,
       listQuery: {
         sdate: '',
@@ -91,6 +103,7 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list || []
+        this.missing = response.data.data.missing || ''
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -102,3 +115,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.missing-summary {
+  padding: 0 1% 8px 1%;
+  font-size: 13px;
+}
+</style>

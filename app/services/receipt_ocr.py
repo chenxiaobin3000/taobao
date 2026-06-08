@@ -25,6 +25,10 @@ class ReceiptOCR:
                 temp_path = temp_file.name
                 for chunk in upload_file.chunks():
                     temp_file.write(chunk)
+            if suffix.lower() == '.pdf':
+                text = cls._extract_pdf_text(temp_path)
+                if cls._is_valid_pdf_text(text):
+                    return cls._text_to_lines(text)
             return cls.recognize(temp_path)
         finally:
             if temp_path and os.path.exists(temp_path):
@@ -33,6 +37,34 @@ class ReceiptOCR:
     @staticmethod
     def get_text(lines):
         return '\n'.join([line['text'] for line in lines if line.get('text')])
+
+    @staticmethod
+    def _extract_pdf_text(pdf_path):
+        try:
+            from pypdf import PdfReader
+        except ImportError:
+            return ''
+        try:
+            reader = PdfReader(pdf_path)
+            texts = []
+            for page in reader.pages:
+                page_text = page.extract_text() or ''
+                if page_text:
+                    texts.append(page_text)
+            return '\n'.join(texts)
+        except Exception:
+            return ''
+
+    @staticmethod
+    def _is_valid_pdf_text(text):
+        if not text:
+            return False
+        compact_text = re.sub(r'\s+', '', text)
+        return '发票' in compact_text and ('项目名称' in compact_text or '开票日期' in compact_text)
+
+    @staticmethod
+    def _text_to_lines(text):
+        return [{'text': line.strip(), 'score': None, 'box': None} for line in text.splitlines() if line.strip()]
 
     @classmethod
     def parse_common(cls, text, receipt_items, create_project=None):
