@@ -1,0 +1,560 @@
+<template>
+  <div class="app-container">
+    <el-form :model="listQuery" label-position="left" label-width="48px" class="import-row">
+      <el-row :gutter="12">
+        <el-col :span="5">
+          <el-form-item label="店铺">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" :disabled="processing" @change="handleShopChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="16">
+          <div
+            class="file-upload"
+            :class="{ disabled: processing }"
+            @click="handleClickUpload"
+            @drop.prevent="handleDrop"
+            @dragover.prevent
+            @dragenter.prevent
+          >
+            <span>{{ processing ? '正在处理，请稍候' : '拖拽原始数据文件夹到这里' }}<em v-if="!processing">浏览本地</em></span>
+            <input
+              ref="importFolder"
+              type="file"
+              webkitdirectory
+              directory
+              multiple
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              @change="handleFolderChange"
+            >
+          </div>
+        </el-col>
+        <el-col :span="3">
+          <el-button type="primary" :loading="processing" :disabled="!listQuery.id" class="merge-button" @click="handleMergeAll">一键合并</el-button>
+        </el-col>
+      </el-row>
+    </el-form>
+
+    <el-progress v-if="processing || progress > 0" :percentage="progress" class="progress" />
+
+    <el-input
+      v-model="processInfo"
+      type="textarea"
+      :rows="20"
+      readonly
+      resize="none"
+      placeholder="处理信息会显示在这里"
+    />
+  </div>
+</template>
+
+<script>
+import XLSX from 'xlsx'
+import { excelDateToText } from '@/utils/excel'
+import { DeductionType, FinanceType, NoneTime, OrderStatus, PromotionType, RefundStatus, RefundType } from '@/utils/const'
+import { extractOrderProcure, parseDeductionRows } from '@/utils/deduction'
+import { getOwnShopList } from '@/api/system/shop'
+import { addUserOrderList } from '@/api/original/order'
+import { addUserPromotionList } from '@/api/original/promotion'
+import { addUserPromotionDetailList } from '@/api/original/promotionDetail'
+import { addUserDeductionList } from '@/api/original/deduction'
+import { addUserPolymerizeList } from '@/api/original/polymerize'
+import { addUserRefundList } from '@/api/original/refund'
+import { addUserTransferList } from '@/api/original/transfer'
+import { mergeOrder } from '@/api/trunk/order'
+import { mergePromotion } from '@/api/trunk/promotion'
+import { mergePromotionDetail } from '@/api/trunk/promotionDetail'
+import { mergeDeduction } from '@/api/trunk/deduction'
+import { mergePolymerize } from '@/api/trunk/polymerize'
+import { mergeRefund } from '@/api/trunk/refund'
+import { mergeTransfer } from '@/api/trunk/transfer'
+
+const MODULES = [
+  { name: '订单', payload: 'o', parse: 'parseOrders', add: addUserOrderList, merge: mergeOrder },
+  { name: '推广', payload: 'p', parse: 'parsePromotions', add: addUserPromotionList, merge: mergePromotion },
+  { name: '推广明细', payload: 'p', parse: 'parsePromotionDetails', add: addUserPromotionDetailList, merge: mergePromotionDetail },
+  { name: '扣费', payload: 'd', parse: 'parseDeductions', add: addUserDeductionList, merge: mergeDeduction },
+  { name: '聚合', payload: 'p', parse: 'parsePolymerizes', add: addUserPolymerizeList, merge: mergePolymerize },
+  { name: '退货', payload: 'r', parse: 'parseRefunds', add: addUserRefundList, merge: mergeRefund },
+  { name: '打款', payload: 't', parse: 'parseTransfers', add: addUserTransferList, merge: mergeTransfer }
+]
+
+export default {
+  data() {
+    return {
+      userdata: {},
+      shopList: [],
+      listQuery: {
+        id: 0,
+        uid: 0
+      },
+      processInfo: '',
+      processing: false,
+      progress: 0
+    }
+  },
+  created() {
+    this.userdata = this.$store.getters.userdata
+    this.listQuery.id = this.$store.getters.shop
+    this.listQuery.uid = this.userdata.user.id
+    this.getOwnShopList()
+  },
+  methods: {
+    getOwnShopList() {
+      getOwnShopList({
+        id: this.userdata.company.id,
+        uid: this.userdata.user.id
+      }).then(response => {
+        this.shopList = response.data.data
+        if (this.listQuery.id === 0 && this.shopList.length > 0) {
+          this.listQuery.id = this.shopList[0].id
+        }
+      })
+    },
+    handleShopChange() {
+      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+    },
+    handleClickUpload() {
+      if (this.processing) {
+        return
+      }
+      this.$refs.importFolder.click()
+    },
+    async handleFolderChange(e) {
+      const files = Array.from(e.target.files || [])
+      e.target.value = ''
+      await this.handleFiles(files)
+    },
+    async handleDrop(e) {
+      if (this.processing) {
+        return
+      }
+      const files = await this.getDroppedFiles(e.dataTransfer)
+      await this.handleFiles(files)
+    },
+    async getDroppedFiles(dataTransfer) {
+      const items = Array.from(dataTransfer.items || [])
+      if (items.length > 0 && items[0].webkitGetAsEntry) {
+        const files = []
+        for (const item of items) {
+          const entry = item.webkitGetAsEntry()
+          if (entry) {
+            files.push(...await this.readEntry(entry))
+          }
+        }
+        return files
+      }
+      return Array.from(dataTransfer.files || [])
+    },
+    readEntry(entry) {
+      if (entry.isFile) {
+        return new Promise(resolve => {
+          entry.file(file => resolve([file]))
+        })
+      }
+      if (entry.isDirectory) {
+        return new Promise(resolve => {
+          const reader = entry.createReader()
+          const entries = []
+          const readBatch = () => {
+            reader.readEntries(async batch => {
+              if (batch.length === 0) {
+                const files = []
+                for (const item of entries) {
+                  files.push(...await this.readEntry(item))
+                }
+                resolve(files)
+              } else {
+                entries.push(...batch)
+                readBatch()
+              }
+            })
+          }
+          readBatch()
+        })
+      }
+      return Promise.resolve([])
+    },
+    async handleFiles(files) {
+      if (!this.listQuery.id) {
+        this.$message({ type: 'error', message: '请先选择店铺!' })
+        return
+      }
+      const excelFiles = files.filter(file => this.isExcel(file.name))
+      if (excelFiles.length === 0) {
+        this.$message({ type: 'error', message: '文件夹中没有Excel文件!' })
+        return
+      }
+      const fileMap = this.buildModuleFileMap(excelFiles)
+      this.processing = true
+      this.progress = 0
+      this.processInfo = ''
+      this.log(`开始批量导入，店铺ID: ${this.listQuery.id}`)
+      try {
+        for (let i = 0; i < MODULES.length; i++) {
+          const module = MODULES[i]
+          const file = fileMap[module.name]
+          if (!file) {
+            this.log(`${module.name}: 未找到同名Excel，跳过`)
+            this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
+            continue
+          }
+          this.log(`${module.name}: 读取 ${file.name}`)
+          const sheet = await this.readExcel(file)
+          const records = this[module.parse](sheet.results, sheet.header)
+          this.log(`${module.name}: 解析 ${records.length} 条`)
+          await this.uploadChunks(module, records)
+          this.log(`${module.name}: 原始数据导入完成`)
+          await this.mergeModule(module)
+          this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
+        }
+        this.progress = 100
+        this.log('批量导入完成')
+        this.$message({ type: 'success', message: '批量导入完成!' })
+      } catch (error) {
+        this.log(`处理失败: ${this.getErrorMessage(error)}`)
+        this.$message({ type: 'error', message: '批量导入失败，请查看处理信息!' })
+      } finally {
+        this.processing = false
+      }
+    },
+    async handleMergeAll() {
+      if (!this.listQuery.id) {
+        this.$message({ type: 'error', message: '请先选择店铺!' })
+        return
+      }
+      this.processing = true
+      this.progress = 0
+      this.processInfo = ''
+      this.log(`开始一键合并，店铺ID: ${this.listQuery.id}`)
+      try {
+        await this.mergeAllModules()
+        this.progress = 100
+        this.log('一键合并完成')
+        this.$message({ type: 'success', message: '一键合并完成!' })
+      } catch (error) {
+        this.log(`合并失败: ${this.getErrorMessage(error)}`)
+        this.$message({ type: 'error', message: '一键合并失败，请查看处理信息!' })
+      } finally {
+        this.processing = false
+      }
+    },
+    async mergeAllModules() {
+      for (let i = 0; i < MODULES.length; i++) {
+        await this.mergeModule(MODULES[i])
+        this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
+      }
+    },
+    async mergeModule(module) {
+      await module.merge({ id: this.listQuery.id })
+      this.log(`${module.name}: 已合并到主干`)
+    },
+    buildModuleFileMap(files) {
+      const map = {}
+      files.forEach(file => {
+        const name = file.name.replace(/\.(xlsx|xls)$/i, '')
+        if (MODULES.some(item => item.name === name) && !map[name]) {
+          map[name] = file
+        }
+      })
+      return map
+    },
+    isExcel(name) {
+      return /\.xlsx?$/i.test(name)
+    },
+    readExcel(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = e => {
+          try {
+            const data = new Uint8Array(e.target.result)
+            const workbook = XLSX.read(data, { type: 'array' })
+            const sheetName = workbook.SheetNames[0]
+            const worksheet = workbook.Sheets[sheetName]
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' })
+            const header = rows[0] || []
+            const body = rows.slice(1).filter(row => row.some(value => value !== ''))
+            const results = body.map(row => {
+              const item = {}
+              header.forEach((key, index) => {
+                item[key] = row[index] === undefined ? '' : row[index]
+              })
+              return item
+            })
+            resolve({ header, results })
+          } catch (error) {
+            reject(error)
+          }
+        }
+        reader.onerror = () => reject(reader.error)
+        reader.readAsArrayBuffer(file)
+      })
+    },
+    async uploadChunks(module, records) {
+      const chunkSize = 1000
+      for (let i = 0; i < records.length; i += chunkSize) {
+        const chunk = records.slice(i, i + chunkSize)
+        await module.add({
+          id: this.listQuery.id,
+          uid: this.userdata.user.id,
+          [module.payload]: chunk
+        })
+        this.log(`${module.name}: 已上传 ${Math.min(i + chunk.length, records.length)}/${records.length}`)
+      }
+    },
+    parseOrders(results, header) {
+      const orderId = header[0]
+      const payment = header[6]
+      const orderStatus = header[2]
+      const createTime = header[3]
+      const productName = header[4]
+      const orderNote = header[5]
+      const records = results.map(v => ({
+        id: v[orderId],
+        pa: v[payment],
+        pr: 0,
+        st: OrderStatus.text2num(v[orderStatus]),
+        ct: v[createTime],
+        na: v[productName],
+        pi: '',
+        no: v[orderNote]
+      }))
+      records.forEach((record, index) => {
+        if (record.st === OrderStatus.OTHER) {
+          throw new Error(`订单第${index + 2}行状态异常`)
+        }
+        const ext = extractOrderProcure(record.no, record.id, message => this.log(message))
+        if (ext[0]) {
+          record.pr = ext[1]
+          record.pi = ext[2]
+        } else if (![OrderStatus.CLOSE, OrderStatus.UNPAID, OrderStatus.PAID, OrderStatus.UNCREATED].includes(record.st) && parseFloat(record.pa) > 6) {
+          throw new Error(`订单第${index + 2}行备注解析异常: ${record.id}`)
+        }
+      })
+      return records
+    },
+    parsePromotions(results, header) {
+      const output = header[2]
+      const createDate = header[1]
+      const payment = header[4]
+      const promotionNote = header[6]
+      const records = []
+      results.forEach(v => {
+        if (v[output] === '支出') {
+          records.push({
+            d: excelDateToText(v[createDate], 'yyyy-MM-dd'),
+            p: v[payment],
+            t: PromotionType.text2num(v[promotionNote]),
+            n: v[promotionNote]
+          })
+        }
+      })
+      records.forEach((record, index) => {
+        if (record.t === PromotionType.OTHER) {
+          throw new Error(`推广第${index + 2}行类型异常`)
+        }
+      })
+      return records
+    },
+    parsePromotionDetails(results, header) {
+      const promotionDate = header[0]
+      const goodId = header[1]
+      const showNum = header[4]
+      const clickNum = header[5]
+      const clickRate = header[7]
+      const cost = header[6]
+      const averageCost = header[8]
+      const thousandCost = header[9]
+      const dealAmount = header[18]
+      const dealNum = header[19]
+      const dealCost = header[25]
+      const shopCart = header[26]
+      const favorites = header[30]
+      const roi = header[23]
+      return results.map(v => ({
+        pd: excelDateToText(v[promotionDate], 'yyyy-MM-dd'),
+        id: v[goodId],
+        sn: v[showNum] ? v[showNum] : 0,
+        cn: v[clickNum] ? v[clickNum] : 0,
+        cr: v[clickRate] ? v[clickRate] : 0,
+        co: v[cost] ? v[cost] : 0,
+        ac: v[averageCost] ? v[averageCost] : 0,
+        tc: v[thousandCost] ? v[thousandCost] : 0,
+        da: v[dealAmount] ? v[dealAmount] : 0,
+        dn: v[dealNum] ? v[dealNum] : 0,
+        dc: v[dealCost] ? v[dealCost] : 0,
+        sc: v[shopCart] ? v[shopCart] : 0,
+        fa: v[favorites] ? v[favorites] : 0,
+        roi: v[roi] ? v[roi] : 0
+      }))
+    },
+    parseDeductions(results, header) {
+      return parseDeductionRows(results, {
+        createTime: header[0],
+        financeType: header[4],
+        amount: header[6],
+        goodName: header[11],
+        deductionNote: header[12]
+      })
+    },
+    parsePolymerizes(results, header) {
+      const orderId = header[2]
+      const financeType = header[3]
+      const amount = header[5]
+      const createTime = header[0]
+      const polymerizeNote = header[7]
+      const records = []
+      results.forEach((v, index) => {
+        const ftype = FinanceType.text2num(v[financeType])
+        if (v[amount] > 0 && ftype !== FinanceType.CASH) {
+          if (!v[polymerizeNote] || v[polymerizeNote].length < 2) {
+            throw new Error(`聚合第${index + 2}行没有备注信息`)
+          }
+          records.push({
+            o: v[orderId],
+            f: ftype,
+            a: v[amount],
+            t: DeductionType.text2num(v[polymerizeNote]),
+            c: v[createTime],
+            n: v[polymerizeNote]
+          })
+        }
+      })
+      records.forEach((record, index) => {
+        if (record.t === DeductionType.OTHER || record.o.length !== 19) {
+          throw new Error(`聚合第${index + 2}行数据异常`)
+        }
+      })
+      return records
+    },
+    parseRefunds(results, header) {
+      const refundId = header[1]
+      const orderId = header[0]
+      const productId = header[12]
+      const actualPay = header[4]
+      const refundPay = header[5]
+      const refundPlatform = header[14]
+      const refundType = header[11]
+      const refundStatus = header[10]
+      const payTime = header[2]
+      const applyTime = header[8]
+      const timeoutTime = header[9]
+      const completeTime = header[3]
+      const records = results.map(v => ({
+        uid: v[refundId],
+        oid: v[orderId],
+        pid: v[productId],
+        ap: v[actualPay],
+        rp: v[refundPay],
+        rl: v[refundPlatform],
+        rt: RefundType.text2num(v[refundType]),
+        rs: RefundStatus.text2num(v[refundStatus]),
+        pt: v[payTime],
+        at: v[applyTime],
+        tt: v[timeoutTime] === '' ? NoneTime : v[timeoutTime],
+        ct: v[completeTime] === '' ? NoneTime : v[completeTime]
+      }))
+      records.forEach((record, index) => {
+        if (record.rt === RefundType.OTHER || record.rs === RefundStatus.OTHER) {
+          throw new Error(`退货第${index + 2}行数据异常`)
+        }
+      })
+      return records
+    },
+    parseTransfers(results, header) {
+      const userName = header[0]
+      const payeeName = header[1]
+      const orderId = header[7]
+      const amount = header[4]
+      const createTime = header[5]
+      const transferNote = header[9]
+      return results.map(v => ({
+        n: v[userName],
+        p: v[payeeName],
+        o: v[orderId],
+        a: v[amount],
+        c: excelDateToText(v[createTime]),
+        tn: v[transferNote]
+      }))
+    },
+    log(message) {
+      const line = `[${new Date().toLocaleTimeString()}] ${message}`
+      this.processInfo = this.processInfo ? `${this.processInfo}\n${line}` : line
+    },
+    getErrorMessage(error) {
+      if (!error) {
+        return '未知错误'
+      }
+      if (error.response && error.response.data && error.response.data.msg) {
+        return error.response.data.msg
+      }
+      return error.message || String(error)
+    }
+  }
+}
+</script>
+
+<style scoped>
+.import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  min-height: 48px;
+  padding: 6px 1%;
+  margin-bottom: 12px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.import-row ::v-deep .el-form-item {
+  margin-bottom: 0;
+}
+
+.import-row ::v-deep .el-select {
+  width: 100%;
+}
+
+.file-upload {
+  width: 100%;
+  height: 36px;
+  line-height: 34px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.merge-button {
+  width: 100%;
+}
+
+.file-upload:hover {
+  border-color: #409eff;
+}
+
+.file-upload.disabled {
+  cursor: not-allowed;
+  background: #f5f7fa;
+}
+
+.file-upload span {
+  font-size: 13px;
+  color: #606266;
+}
+
+.file-upload em {
+  margin-left: 8px;
+  color: #409eff;
+  font-style: normal;
+}
+
+.file-upload input {
+  display: none;
+}
+
+.progress {
+  margin: 0 1% 12px;
+}
+</style>

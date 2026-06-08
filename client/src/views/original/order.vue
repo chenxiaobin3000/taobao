@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app-container">
     <div class="excel-import-row">
       <upload-excel-component :on-success="handleSuccess" width="100%" line-height="32px" height="36px" />
@@ -85,6 +85,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
 import { OrderStatus } from '@/utils/const'
+import { extractOrderProcure } from '@/utils/deduction'
 import { getUserOrderList, addUserOrderList, delUserOrder, delAllUserOrder } from '@/api/original/order'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -212,7 +213,7 @@ export default {
           errors.push(this.formatImportError(i, '订单状态异常', o[i]))
           continue
         }
-        const ext = this.extract(o[i].no, o[i].id)
+        const ext = extractOrderProcure(o[i].no, o[i].id, message => console.log(message))
         if (ext[0]) {
           o[i].pr = ext[1]
           o[i].pi = ext[2]
@@ -312,53 +313,6 @@ export default {
           this.getUserOrderList()
         })
       })
-    },
-    // 从备注提取采购金额和订单号
-    extract(note, id) {
-      const ret = [false, -1, '']
-      // 空数据直接返回0
-      if (note === undefined) {
-        return [true, 0, '0000000000000000000']
-      }
-      // 校验人工审核
-      let count = 0
-      const notes = note.split('|')
-      for (let i = 0; i < notes.length; ++i) {
-        if (notes[i].length > 19) {
-          ++count
-        }
-      }
-      if (count > 2 && note.indexOf('元-利润:0元') === -1) {
-        console.log(notes.length)
-        console.log('未经人工校验:' + id + ',' + note)
-        return ret
-      }
-      const data = notes[0].trim()
-      // 忽略长度小于订单编号的数据
-      if (data.length < 20) {
-        return ret
-      }
-      // 按标准格式查找: tb:id-采购价:0元-利润:0元 |
-      const first = data.indexOf(':')
-      if (first === -1) {
-        console.log('没有找到账号信息:' + id + ',' + note)
-        return ret
-      }
-      const second = data.indexOf('-采购价:', first + 1)
-      if (second === -1 || second - first !== 20) {
-        console.log('没有找到-采购价:' + id + ',' + note)
-        return ret
-      }
-      // 查找采购价
-      const third = data.indexOf('元-利润:', second + 5)
-      if (third === -1) {
-        console.log('没有找到元-利润:' + id + ',' + note)
-        return ret
-      }
-      ret[0] = true
-      ret[1] = data.substring(second + 5, third)
-      ret[2] = data.substring(first + 1, second)
-      return ret
     }
   }
 }

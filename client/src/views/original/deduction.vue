@@ -79,7 +79,8 @@
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import UploadExcelComponent from '@/components/UploadExcel'
-import { DefaultOrder, DeductionType, FinanceType } from '@/utils/const'
+import { DeductionType, FinanceType } from '@/utils/const'
+import { parseDeductionRows } from '@/utils/deduction'
 import { getUserDeductionList, addUserDeductionList, delUserDeduction, delAllUserDeduction } from '@/api/original/deduction'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -184,187 +185,19 @@ export default {
       this.uploading = false
       this.uploadProgress = 0
       this.uploadProgressText = ''
-      const create_time = header[0]
-      const finance_type = header[4]
-      const amount = header[6]
-      const good_name = header[11]
-      const deduction_note = header[12]
-      const d = []
-      let stop = false
-      results.forEach(v => {
-        if (v[amount] > 0 && !stop) {
-          let oid = ''
-          let dtype = DeductionType.OTHER
-          let note = v[deduction_note]
-          const ftype = FinanceType.text2num(v[finance_type])
-          if (ftype === FinanceType.PUBLIC) {
-            // 忽略公共缴费
-            return
-          }
-          if (note.length < 2) {
-            // 忽略在线支付
-            if (ftype === FinanceType.ONLINE) {
-              dtype = DeductionType.ONLINE
-              note = v[good_name]
-            } else {
-              stop = true
-              this.$message({ type: 'error', message: '没有备注信息!' })
-              console.log(v)
-              return
-            }
-          } else {
-            if (ftype === FinanceType.TRANSFER && note === '收款') {
-              dtype = DeductionType.ZHUAN_ZHANG
-              note = '刷单'
-            } else {
-              dtype = DeductionType.text2num(note)
-            }
-          }
-          // 从备注抓取订单号
-          let key = 0
-          let first = 0
-          let second = 0
-          switch (dtype) {
-            case DeductionType.FU_WU_FEI: // 基础软件服务费
-            case DeductionType.XIN_XIANG: // 品牌新享淘宝新客营销
-            case DeductionType.XIN_KE: // 淘宝新客礼金技术服务费
-            case DeductionType.TAO_JIN_BI: // 淘金币软件服务费
-            case DeductionType.XIAN_YONG_HOU_FU: // 先用后付技术服务费()
-            case DeductionType.KUA_JING_JI_CHU: // 淘宝天猫跨境服务基础费
-            case DeductionType.KUA_JING_DA_JIAN: // 出海增长计划中大件跨境服务增值费
-            case DeductionType.TAO_TE: // 淘特营销推广服务费
-            case DeductionType.XIAN_SHI: // 限时红包代商家垫付扣回
-            case DeductionType.XIN_PIN: // 品牌新享淘宝新品营销
-            case DeductionType.XIN_XIANG_FU_WU: // 品牌新享-淘宝营销托管
-            case DeductionType.XIAO_FEI_QUAN: // 消费券代付资金扣回
-            case DeductionType.GUAN_KONG: // 保证金管控资金使用
-            case DeductionType.XIAN_SHI_LI_JIN: // 限时礼金软件服务费
-              key = note.indexOf('(KY_ITEM)')
-              if (key === -1) {
-                first = note.indexOf('(') + 1
-              } else {
-                first = note.indexOf('(', key + 1) + 1
-              }
-              second = note.indexOf(')', first)
-              if (first !== -1 && second !== -1 && second - first === 19) {
-                oid = note.substring(first, second)
-              } else {
-                stop = true
-                this.$message({ type: 'error', message: '备注信息格式异常!' })
-                console.log(v)
-                return
-              }
-              break
-
-            case DeductionType.TI_YAN: // 消费者体验提升计划服务费
-              first = note.indexOf('订单号') + 3
-              if (first !== -1) {
-                oid = note.substring(first, first + 19)
-              } else {
-                stop = true
-                this.$message({ type: 'error', message: '备注信息格式异常!' })
-                console.log(v)
-                return
-              }
-              break
-
-            case DeductionType.XIAN_YONG_TIAO_ZHANG: // 先用后付技术服务费-
-              first = note.indexOf('(') + 1
-              second = note.indexOf(')', first)
-              if (first !== -1 && second !== -1 && second - first === 19) {
-                oid = note.substring(first, second)
-              } else {
-                stop = true
-                this.$message({ type: 'error', message: '备注信息格式异常!' })
-                console.log(v)
-                return
-              }
-              break
-
-            case DeductionType.KUA_JING_ZENG_ZHI: // 淘宝天猫跨境服务增值费
-              first = note.indexOf('(') + 1
-              second = note.indexOf('_', first)
-              if (first !== -1 && second !== -1 && second - first === 19) {
-                oid = note.substring(first, second)
-              } else {
-                second = note.indexOf(')', first)
-                if (first !== -1 && second !== -1 && second - first === 19) {
-                  oid = note.substring(first, second)
-                } else {
-                  stop = true
-                  this.$message({ type: 'error', message: '备注信息格式异常!' })
-                  console.log(v)
-                  return
-                }
-              }
-              break
-
-            case DeductionType.JI_YUN_WU_LIU: // 商家集运物流服务费
-            case DeductionType.JI_YUN_CAO_ZUO_FEI: // 商家集运中转操作费
-              first = note.indexOf('交易单号：') + 5
-              if (first !== -1) {
-                oid = note.substring(first, first + 19)
-              } else {
-                stop = true
-                this.$message({ type: 'error', message: '备注信息格式异常!' })
-                console.log(v)
-                return
-              }
-              break
-
-            // 无订单信息
-            case DeductionType.GONG_YI: // 公益宝贝捐赠
-            case DeductionType.YAN_CHI_FA_HUO: // 延迟发货赔付
-            case DeductionType.XU_JIA_FA_HUO: // 虚假发货赔付
-            case DeductionType.WU_LIU_YI_CHANG: // 物流异常赔付
-            case DeductionType.QUE_HUO: // 缺货赔付
-            case DeductionType.HUA_BEI: // 花呗服务费
-            case DeductionType.WU_LIU_CHAO_SHI: // 物流轨迹超时
-            case DeductionType.YAN_CHI_HUAN_HUO: // 延迟换货补偿红包
-              oid = DefaultOrder
-              break
-
-            // 不处理
-            case DeductionType.TUI_KUAN: // 退款
-            case DeductionType.ZHUAN_ZHANG: // 转账
-            case DeductionType.BAO_ZHENG_JIN: // 保证金
-            case DeductionType.DA_KUAN: // 小额打款
-            case DeductionType.CHONG_ZHI: // 万相台无界版自动充值
-            case DeductionType.ONLINE: // 在线支付
-              oid = DefaultOrder
-              break
-
-            case DeductionType.OTHER: // 异常
-              stop = true
-              this.$message({ type: 'error', message: '备注信息异常!' })
-              console.log(v)
-              return
-          }
-          if (oid.length !== 19) {
-            this.$message({ type: 'error', message: '关联订单号异常!' })
-            console.log(v)
-            return
-          }
-          d.push({
-            o: oid,
-            f: ftype,
-            a: v[amount],
-            t: dtype,
-            c: v[create_time],
-            n: note
-          })
-        }
-      })
-      if (stop) {
+      let d = []
+      try {
+        d = parseDeductionRows(results, {
+          createTime: header[0],
+          financeType: header[4],
+          amount: header[6],
+          goodName: header[11],
+          deductionNote: header[12]
+        })
+      } catch (error) {
+        this.$message({ type: 'error', message: error.message || '异常数据!' })
+        console.log(error)
         return
-      }
-      // 预校验数据
-      for (let i = 0; i < d.length; ++i) {
-        if (d[i].t === DeductionType.OTHER || d[i].o.length !== 19) {
-          this.$message({ type: 'error', message: '异常数据!' })
-          console.log(d[i])
-          return
-        }
       }
       await this.uploadExcelChunks(d)
       this.$message({ type: 'success', message: '导入成功!' })
