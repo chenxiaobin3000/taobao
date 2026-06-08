@@ -53,9 +53,10 @@
 <script>
 import XLSX from 'xlsx'
 import { excelDateToText } from '@/utils/excel'
-import { DeductionType, FinanceType, NoneTime, OrderStatus, PromotionType, RefundStatus, RefundType } from '@/utils/const'
+import { DeductionType, FinanceType, GoodOriginType, GoodStatus, GoodStockType, GoodType, NoneTime, OrderStatus, PromotionType, RefundStatus, RefundType } from '@/utils/const'
 import { extractOrderProcure, parseDeductionRows } from '@/utils/deduction'
 import { getOwnShopList } from '@/api/system/shop'
+import { addGoodList } from '@/api/system/good'
 import { addUserOrderList } from '@/api/original/order'
 import { addUserPromotionList } from '@/api/original/promotion'
 import { addUserPromotionDetailList } from '@/api/original/promotionDetail'
@@ -72,6 +73,7 @@ import { mergeRefund } from '@/api/trunk/refund'
 import { mergeTransfer } from '@/api/trunk/transfer'
 
 const MODULES = [
+  { name: '商品', payload: 'g', parse: 'parseGoods', add: addGoodList },
   { name: '订单', payload: 'o', parse: 'parseOrders', add: addUserOrderList, merge: mergeOrder },
   { name: '推广', payload: 'p', parse: 'parsePromotions', add: addUserPromotionList, merge: mergePromotion },
   { name: '推广明细', payload: 'p', parse: 'parsePromotionDetails', add: addUserPromotionDetailList, merge: mergePromotionDetail },
@@ -204,10 +206,15 @@ export default {
           this.log(`${module.name}: 读取 ${file.name}`)
           const sheet = await this.readExcel(file)
           const records = this[module.parse](sheet.results, sheet.header)
+          if (records.length === 0) {
+            throw new Error(`${module.name}: 没有可导入数据`)
+          }
           this.log(`${module.name}: 解析 ${records.length} 条`)
           await this.uploadChunks(module, records)
           this.log(`${module.name}: 原始数据导入完成`)
-          await this.mergeModule(module)
+          if (module.merge) {
+            await this.mergeModule(module)
+          }
           this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
         }
         this.progress = 100
@@ -242,9 +249,10 @@ export default {
       }
     },
     async mergeAllModules() {
-      for (let i = 0; i < MODULES.length; i++) {
-        await this.mergeModule(MODULES[i])
-        this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
+      const mergeModules = MODULES.filter(v => v.merge)
+      for (let i = 0; i < mergeModules.length; i++) {
+        await this.mergeModule(mergeModules[i])
+        this.progress = Math.floor(((i + 1) / mergeModules.length) * 100)
       }
     },
     async mergeModule(module) {
@@ -255,7 +263,10 @@ export default {
       const map = {}
       files.forEach(file => {
         const name = file.name.replace(/\.(xlsx|xls)$/i, '')
-        if (MODULES.some(item => item.name === name) && !map[name]) {
+        if (MODULES.some(item => item.name === name)) {
+          if (map[name]) {
+            throw new Error(`${name}: 存在重复Excel文件`)
+          }
           map[name] = file
         }
       })
@@ -303,6 +314,66 @@ export default {
         })
         this.log(`${module.name}: 已上传 ${Math.min(i + chunk.length, records.length)}/${records.length}`)
       }
+    },
+    parseGoods(results, header) {
+      const shortName = header[0]
+      const goodId = header[1]
+      const priority = header[2]
+      const type = header[3]
+      const status = header[4]
+      const origin = header[5]
+      const originType = header[6]
+      const stock = header[7]
+      const stockType = header[8]
+      const name = header[9]
+      const alias1 = header[10]
+      const alias2 = header[11]
+      const alias3 = header[12]
+      const alias4 = header[13]
+      const alias5 = header[14]
+      const records = results.map((v, index) => {
+        const typeNum = GoodType.text2num(v[type])
+        const statusNum = GoodStatus.text2num(v[status])
+        const originNum = GoodOriginType.text2num(v[originType])
+        const stockNum = GoodStockType.text2num(v[stockType])
+        const priorityNum = parseInt(v[priority] || 0)
+        if (isNaN(priorityNum) || priorityNum < 0 || priorityNum > 10) {
+          throw new Error(`商品第${index + 2}行优先级异常: ${v[goodId]}`)
+        }
+        if (typeNum === GoodType.OTHER) {
+          throw new Error(`商品第${index + 2}行类型异常: ${v[goodId]}`)
+        }
+        if (statusNum === GoodStatus.OTHER) {
+          throw new Error(`商品第${index + 2}行状态异常: ${v[goodId]}`)
+        }
+        if (originNum === GoodOriginType.OTHER) {
+          throw new Error(`商品第${index + 2}行外部编号异常: ${v[goodId]}`)
+        }
+        if (stockNum === GoodStockType.OTHER) {
+          throw new Error(`商品第${index + 2}行进货编号异常: ${v[goodId]}`)
+        }
+        return {
+          i: v[goodId],
+          n: v[name],
+          sn: v[shortName],
+          o: v[origin],
+          ot: originNum,
+          st: v[stock],
+          stt: stockNum,
+          t: typeNum,
+          s: statusNum,
+          p: priorityNum,
+          as: [v[alias1], v[alias2], v[alias3], v[alias4], v[alias5]]
+        }
+      })
+      for (let i = 0; i < records.length - 1; ++i) {
+        for (let j = i + 1; j < records.length; ++j) {
+          if (records[i].i === records[j].i) {
+            throw new Error(`商品编号重复: ${records[i].i}`)
+          }
+        }
+      }
+      return records
     },
     parseOrders(results, header) {
       const orderId = header[0]
