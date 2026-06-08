@@ -10,7 +10,7 @@
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
         <el-col :span="6">
-          <el-form-item label="店铺:" prop="shopName">
+          <el-form-item label="店铺:">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>

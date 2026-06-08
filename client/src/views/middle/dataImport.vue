@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="48px" class="import-row">
-      <el-row :gutter="12">
+      <el-row>
         <el-col :span="5">
           <el-form-item label="店铺">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" :disabled="processing" @change="handleShopChange">
@@ -9,7 +9,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16">
+        <el-col :span="14">
           <div
             class="file-upload"
             :class="{ disabled: processing }"
@@ -30,7 +30,7 @@
             >
           </div>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="5">
           <el-button type="primary" :loading="processing" :disabled="!listQuery.id" class="merge-button" @click="handleMergeAll">一键合并</el-button>
         </el-col>
       </el-row>
@@ -527,7 +527,8 @@ export default {
 }
 
 .merge-button {
-  width: 100%;
+  float: right;
+  width: 80px;
 }
 
 .file-upload:hover {

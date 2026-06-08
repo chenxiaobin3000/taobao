@@ -10,12 +10,12 @@
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
         <el-col :span="6">
-          <el-form-item label="开始日期:" prop="startDate" label-width="80px">
+          <el-form-item label="开始日期:" label-width="80px">
             <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="结束日期:" prop="endDate" label-width="80px">
+          <el-form-item label="结束日期:" label-width="80px">
             <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
           </el-form-item>
         </el-col>
