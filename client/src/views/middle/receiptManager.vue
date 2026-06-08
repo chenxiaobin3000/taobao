@@ -16,7 +16,7 @@
     </el-form>
 
     <div class="missing-summary">
-      <span>缺失: </span><span :style="{ color: missing ? 'red' : 'green' }">{{ missing || '无' }}</span>
+      <span>缺失: </span><span :style="{ color: missing ? 'red' : 'green' }">{{ missingSummary }}</span>
     </div>
 
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
@@ -27,19 +27,17 @@
       </el-table-column>
       <el-table-column align="left" header-align="center" label="进项">
         <template slot-scope="scope">
-          {{ scope.row.from_text }}
+          <div v-for="(item, index) in splitText(scope.row.from_text)" :key="index">{{ item }}</div>
         </template>
       </el-table-column>
       <el-table-column align="left" header-align="center" label="出项">
         <template slot-scope="scope">
-          {{ scope.row.to_text }}
+          <div v-for="(item, index) in splitText(scope.row.to_text)" :key="index">{{ item }}</div>
         </template>
       </el-table-column>
       <el-table-column align="left" header-align="center" label="校验" width="180px">
         <template slot-scope="scope">
-          <span v-for="(item, index) in scope.row.check_items" :key="index">
-            <span :style="{ color: item.success ? 'green' : 'red' }">{{ item.text }}</span><span v-if="index < scope.row.check_items.length - 1">;</span>
-          </span>
+          <div v-for="(item, index) in splitText(scope.row.check_text)" :key="index" :style="{ color: scope.row.check_success ? 'green' : 'red' }">{{ item }}</div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="100px">
@@ -111,6 +109,20 @@ export default {
       })
     },
     handleRelate(row) {
+    },
+    splitText(text) {
+      if (!text) {
+        return []
+      }
+      return text.split(';')
+    }
+  },
+  computed: {
+    missingSummary() {
+      if (!this.missing) {
+        return '无'
+      }
+      return this.missing.split(';').map(item => `<${item}>`).join('；')
     }
   }
 }

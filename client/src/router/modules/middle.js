@@ -27,7 +27,7 @@ export default {
     path: 'goodPrepare', component: () => import('@/views/middle/goodPrepare'),
     name: 'middle_goodPrepare', meta: { title: '预备商品', roles: [6005] }
   }, {
-    path: 'receiptItem', component: () => import('@/views/middle/receiptItem'),
+    path: 'receiptItem', component: () => import('@/views/middle/receiptManager'),
     name: 'middle_receiptItem', meta: { title: '发票管理', roles: [6006] }
   }, {
     path: 'receiptFrom', component: () => import('@/views/middle/receiptFrom'),

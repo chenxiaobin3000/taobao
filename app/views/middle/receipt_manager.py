@@ -34,7 +34,9 @@ def get_row(result, create_date):
             'create_date': date_key,
             'from_text': '',
             'to_text': '',
-            'check_items': [],
+            'check_text': '',
+            'check_success': True,
+            '_missing': {},
             'has_to': False
         }
     return result[date_key]
@@ -47,13 +49,6 @@ def append_text(row, key, text):
         row[key] = text
 
 
-def append_check(row, text, success):
-    row['check_items'].append({
-        'text': text,
-        'success': success
-    })
-
-
 def build_events(from_receipts, to_receipts):
     events = []
     for receipt in from_receipts:
@@ -61,6 +56,22 @@ def build_events(from_receipts, to_receipts):
     for receipt in to_receipts:
         events.append((receipt.create_date, 1, receipt.id, receipt))
     return sorted(events, key=lambda item: (item[0], item[1], item[2]))
+
+
+def format_missing(missing, project_map):
+    return ';'.join([f"{project_map.get(project_id, '异常')}*{num}" for project_id, num in missing.items() if num > 0])
+
+
+def finalize_rows(result, project_map):
+    for row in result.values():
+        missing_text = format_missing(row['_missing'], project_map)
+        if missing_text:
+            row['check_text'] = missing_text
+            row['check_success'] = False
+        elif row['has_to']:
+            row['check_text'] = '已开'
+            row['check_success'] = True
+        row.pop('_missing')
 
 
 def build_invoice_list(from_receipts, to_receipts, project_map):
@@ -81,14 +92,14 @@ def build_invoice_list(from_receipts, to_receipts, project_map):
         current = available.get(receipt.project_id, 0)
         if current >= receipt.project_num:
             available[receipt.project_id] = current - receipt.project_num
-            append_check(row, '已开', True)
         else:
             available[receipt.project_id] = 0
             missing_num = receipt.project_num - current
             missing[receipt.project_id] = missing.get(receipt.project_id, 0) + missing_num
-            append_check(row, f'缺少{missing_num}', False)
+            row['_missing'][receipt.project_id] = row['_missing'].get(receipt.project_id, 0) + missing_num
+    finalize_rows(result, project_map)
     datas = sorted(result.values(), key=lambda item: item['create_date'], reverse=True)
-    missing_text = ';'.join([f"{project_map.get(project_id, '异常')}*{num}" for project_id, num in missing.items() if num > 0])
+    missing_text = format_missing(missing, project_map)
     return datas, missing_text
 
 
