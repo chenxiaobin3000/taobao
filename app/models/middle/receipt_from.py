@@ -4,8 +4,8 @@ from django.forms.models import model_to_dict
 
 # 进项表
 class ReceiptFromManager(models.Manager):
-    def add(self, shop_id, create_date, user_id, project_id, project_num, receipt_note):
-        return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, project_id=project_id, project_num=project_num, receipt_note=receipt_note)
+    def add(self, shop_id, create_date, user_id, project_id, project_num, receipt_note, amount=0, tax=0, tax_rate=0, company='', company_id=''):
+        return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, project_id=project_id, project_num=project_num, receipt_note=receipt_note, amount=amount, tax=tax, tax_rate=tax_rate, company=company, company_id=company_id)
 
     def delete(self, pk):
         return self.get(pk=pk).delete()
@@ -20,7 +20,7 @@ class ReceiptFromManager(models.Manager):
 
     def encoderList(self, receipts):
         if receipts:
-            return [model_to_dict(receipt, fields=['id', 'shop_id', 'create_date', 'user_id', 'project_id', 'project_num', 'receipt_note']) for receipt in receipts]
+            return [model_to_dict(receipt, fields=['id', 'shop_id', 'create_date', 'user_id', 'project_id', 'project_num', 'amount', 'tax', 'tax_rate', 'company', 'company_id', 'receipt_note']) for receipt in receipts]
         return None
 
 class ReceiptFrom(models.Model):
@@ -30,6 +30,11 @@ class ReceiptFrom(models.Model):
     user_id = models.IntegerField(db_index=True) # 填报人
     project_id = models.IntegerField(db_index=True) # 项目
     project_num = models.IntegerField(db_index=True) # 数量
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0) # 金额
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0) # 税额
+    tax_rate = models.IntegerField(default=0) # 税率
+    company = models.CharField(max_length=20, default='') # 抬头
+    company_id = models.CharField(max_length=20, default='') # 税号
     receipt_note = models.CharField(max_length=20) # 备注
     ctime = models.DateTimeField(default=timezone.now)
 

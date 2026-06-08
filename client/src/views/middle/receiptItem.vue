@@ -1,71 +1,58 @@
 <template>
   <div class="app-container">
-    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item>
-        <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleCreate()">新建</el-button>
-      </el-form-item>
+    <el-form :model="listQuery" label-position="left" label-width="80px" style="width: 100%; padding: 0 1% 0 1%;">
+      <el-row>
+        <el-col :span="6">
+          <el-form-item label="开始日期:">
+            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" @change="handleSelect" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="结束日期:">
+            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" @change="handleSelect" />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="项目名称" width="300">
+      <el-table-column align="center" label="日期" width="140px">
         <template slot-scope="scope">
-          {{ scope.row.project_name }}
+          {{ scope.row.create_date }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="备注">
+      <el-table-column align="left" header-align="center" label="进项">
         <template slot-scope="scope">
-          {{ scope.row.project_note }}
+          {{ scope.row.from_text }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="160">
+      <el-table-column align="left" header-align="center" label="出项">
+        <template slot-scope="scope">
+          {{ scope.row.to_text }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" width="100px">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
-          <el-button type="danger" size="mini" @click="handleDelete(row)">删除</el-button>
+          <el-button v-if="row.has_to" type="primary" size="mini" @click="handleRelate(row)">关联</el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.num" @pagination="getReceiptItemList" />
-
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVisible">
-      <el-form :model="temp" label-position="left" label-width="70px" style="width: 100%; padding: 0 4% 0 4%;">
-        <el-form-item label="项目名称">
-          <el-input v-model="temp.project_name" />
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="temp.project_note" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import Pagination from '@/components/Pagination'
-import { addReceiptItem, setReceiptItem, delReceiptItem, getReceiptItemList } from '@/api/middle/receiptItem'
+import { getReceiptManagerList } from '@/api/middle/receiptManager'
 
 export default {
-  components: { Pagination },
   data() {
     return {
       tableHeight: 600,
-      list: null,
+      list: [],
       total: 0,
       loading: false,
       listQuery: {
-        page: 1,
-        num: 10
-      },
-      temp: {},
-      dialogVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改发票项',
-        create: '新增发票项'
+        sdate: '',
+        edate: ''
       }
     }
   },
@@ -77,74 +64,40 @@ export default {
     }, 1000)
   },
   created() {
-    this.resetTemp()
-    this.getReceiptItemList()
+    this.initDate()
+    this.getInvoiceList()
   },
   methods: {
-    resetTemp() {
-      this.temp = {
-        id: 0,
-        project_name: '',
-        project_note: ''
-      }
+    initDate() {
+      const endDate = new Date()
+      const startDate = new Date()
+      startDate.setMonth(startDate.getMonth() - 6)
+      this.listQuery.edate = this.formatDate(endDate)
+      this.listQuery.sdate = this.formatDate(startDate)
     },
-    getReceiptItemList() {
+    formatDate(date) {
+      const year = date.getFullYear()
+      const month = `${date.getMonth() + 1}`.padStart(2, '0')
+      const day = `${date.getDate()}`.padStart(2, '0')
+      return `${year}-${month}-${day}`
+    },
+    handleSelect() {
+      this.getInvoiceList()
+    },
+    getInvoiceList() {
       this.loading = true
-      getReceiptItemList(
+      getReceiptManagerList(
         this.listQuery
       ).then(response => {
         this.total = response.data.data.total
-        this.list = response.data.data.list
+        this.list = response.data.data.list || []
         this.loading = false
       }).catch(error => {
         this.loading = false
         Promise.reject(error)
       })
     },
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
-    },
-    createData() {
-      addReceiptItem({
-        name: this.temp.project_name,
-        note: this.temp.project_note
-      }).then(() => {
-        this.$message({ type: 'success', message: '新增成功!' })
-        this.getReceiptItemList()
-        this.dialogVisible = false
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
-      this.dialogVisible = true
-    },
-    updateData() {
-      setReceiptItem({
-        id: this.temp.id,
-        name: this.temp.project_name,
-        note: this.temp.project_note
-      }).then(() => {
-        this.$message({ type: 'success', message: '修改成功!' })
-        this.getReceiptItemList()
-        this.dialogVisible = false
-      })
-    },
-    handleDelete(row) {
-      this.$confirm('确定要删除吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        delReceiptItem({
-          id: row.id
-        }).then(() => {
-          this.$message({ type: 'success', message: '删除成功!' })
-          this.getReceiptItemList()
-        })
-      })
+    handleRelate(row) {
     }
   }
 }

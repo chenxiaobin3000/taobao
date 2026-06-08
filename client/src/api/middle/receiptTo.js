@@ -6,7 +6,7 @@ export function addReceiptTo(data) {
     url: `${path}/add`,
     method: 'post',
     data,
-    timeout: 5000
+    timeout: 120000
   })
 }
 

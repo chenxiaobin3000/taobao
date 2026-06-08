@@ -2,6 +2,7 @@ import threading
 import os
 import re
 import tempfile
+from decimal import Decimal
 
 
 class ReceiptOCR:
@@ -34,22 +35,37 @@ class ReceiptOCR:
         return '\n'.join([line['text'] for line in lines if line.get('text')])
 
     @classmethod
-    def parse_common(cls, text, receipt_items):
+    def parse_common(cls, text, receipt_items, create_project=None):
         project = cls._match_project(text, receipt_items)
         if not project:
-            raise ValueError('未识别到发票项目')
+            project_name = cls._parse_project_name(text)
+            if project_name and create_project:
+                project = create_project(project_name)
+            if not project:
+                preview = cls._compact_text(text)[:500]
+                if preview:
+                    projects = cls._format_projects(receipt_items)
+                    if projects:
+                        raise ValueError(f'未识别到发票项目，识别内容：{preview}；已配置项目：{projects}')
+                    raise ValueError(f'未识别到发票项目，识别内容：{preview}')
+                raise ValueError('未识别到发票项目')
         return {
             'create_date': cls._parse_date(text),
             'project_id': project['id'],
             'project_num': cls._parse_num(text),
-            'receipt_note': 'OCR识别'
+            'amount': cls._parse_amount(text),
+            'tax': cls._parse_tax(text),
+            'tax_rate': cls._parse_tax_rate(text),
+            'company': cls._parse_seller_name(text),
+            'company_id': cls._parse_seller_id(text),
+            'receipt_note': '文件扫描'
         }
 
     @classmethod
-    def parse_to(cls, text, receipt_items):
-        data = cls.parse_common(text, receipt_items)
-        data['receipt_id'] = cls._parse_tax_id(text)
-        data['receipt_name'] = cls._parse_receipt_name(text)
+    def parse_to(cls, text, receipt_items, create_project=None):
+        data = cls.parse_common(text, receipt_items, create_project)
+        data['company'] = cls._parse_receipt_name(text)
+        data['company_id'] = cls._parse_company_id(text)
         return data
 
     @classmethod
@@ -86,6 +102,63 @@ class ReceiptOCR:
         return 1
 
     @staticmethod
+    def _parse_project_name(text):
+        match = re.search(r'\*[^*\s]{1,20}\*[^ \t\r\n]{1,30}', text)
+        if not match:
+            return ''
+        return match.group(0).strip(' ，,;；')[:20]
+
+    @staticmethod
+    def _parse_amount(text):
+        match = re.search(r'合\s*计\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)', text)
+        if match:
+            return Decimal(match.group(1)).quantize(Decimal('0.01'))
+        amounts = re.findall(r'[￥¥]\s*([0-9]+(?:\.[0-9]+)?)', text)
+        if amounts:
+            return Decimal(amounts[0]).quantize(Decimal('0.01'))
+        return Decimal('0.00')
+
+    @staticmethod
+    def _parse_tax(text):
+        match = re.search(r'合\s*计\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)', text)
+        if match:
+            return Decimal(match.group(2)).quantize(Decimal('0.01'))
+        amounts = re.findall(r'[￥¥]\s*([0-9]+(?:\.[0-9]+)?)', text)
+        if len(amounts) > 1:
+            return Decimal(amounts[1]).quantize(Decimal('0.01'))
+        return Decimal('0.00')
+
+    @staticmethod
+    def _parse_tax_rate(text):
+        match = re.search(r'(\d+)\s*%', text)
+        if not match:
+            return 0
+        return int(match.group(1))
+
+    @staticmethod
+    def _parse_company_id(text):
+        match = re.search(r'购买方信息[\s\S]{0,120}?(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', text)
+        if not match:
+            match = re.search(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', text)
+        if not match:
+            return ''
+        return match.group(1)[:20]
+
+    @staticmethod
+    def _parse_seller_id(text):
+        seller_text = text
+        seller_index = text.find('销售方信息')
+        if seller_index >= 0:
+            seller_text = text[seller_index:]
+        seller_tax_ids = re.findall(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', seller_text)
+        if seller_tax_ids:
+            return seller_tax_ids[-1][:20]
+        tax_ids = re.findall(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', text)
+        if tax_ids:
+            return tax_ids[-1][:20]
+        return ''
+
+    @staticmethod
     def _parse_tax_id(text):
         match = re.search(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]?\s*([0-9A-Z]{15,20})', text)
         if not match:
@@ -104,18 +177,70 @@ class ReceiptOCR:
             match = re.search(r'名称[:：]\s*([^\n]+)', text)
         if not match:
             raise ValueError('未识别到抬头')
-        name = re.split(r'(纳税人识别号|统一社会信用代码|税号|地址|电话|开户行|账号)', match.group(1))[0].strip()
+        name = re.split(r'(销售方信息|纳税人识别号|统一社会信用代码|税号|地址|电话|开户行|账号)', match.group(1))[0].strip()
         if not name:
             raise ValueError('未识别到抬头')
         return name[:20]
 
     @staticmethod
+    def _parse_seller_name(text):
+        match = re.search(r'销售方信息[\s\S]{0,120}?名称[:：]\s*([^\n]+)', text)
+        if not match:
+            return ''
+        name = re.split(r'(购买方信息|纳税人识别号|统一社会信用代码|税号|地址|电话|开户行|账号)', match.group(1))[0].strip()
+        if not name:
+            return ''
+        return name[:20]
+
+    @staticmethod
     def _match_project(text, receipt_items):
+        norm_text = ReceiptOCR._normalize_match_text(text)
         for item in receipt_items:
             project_name = item.get('project_name')
-            if project_name and project_name in text:
-                return item
+            project_note = item.get('project_note')
+            for keyword in ReceiptOCR._iter_keywords(project_name):
+                if ReceiptOCR._match_keyword(norm_text, keyword):
+                    return item
+            for keyword in ReceiptOCR._iter_keywords(project_note):
+                if ReceiptOCR._match_keyword(norm_text, keyword):
+                    return item
         return None
+
+    @staticmethod
+    def _iter_keywords(value):
+        if not value:
+            return []
+        return [keyword for keyword in re.split(r'[,，、;；|/\s]+', str(value)) if keyword]
+
+    @staticmethod
+    def _match_keyword(norm_text, keyword):
+        norm_keyword = ReceiptOCR._normalize_match_text(keyword)
+        return bool(norm_keyword and norm_keyword in norm_text)
+
+    @staticmethod
+    def _normalize_match_text(value):
+        if not value:
+            return ''
+        value = str(value).lower()
+        return re.sub(r'[\s\W_]+', '', value)
+
+    @staticmethod
+    def _compact_text(value):
+        if not value:
+            return ''
+        return re.sub(r'\s+', ' ', str(value)).strip()
+
+    @staticmethod
+    def _format_projects(receipt_items):
+        values = []
+        for item in receipt_items[:20]:
+            name = item.get('project_name')
+            note = item.get('project_note')
+            if name and note:
+                values.append(f'{name}({note})')
+            elif name:
+                values.append(str(name))
+        return '，'.join(values)
 
     @staticmethod
     def _create_ocr(paddle_ocr):

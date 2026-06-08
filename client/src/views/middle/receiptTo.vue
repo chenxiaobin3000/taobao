@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <div class="receipt-import-row">
-      <div class="receipt-upload" @click="handleClickUpload" @drop.prevent="handleDrop" @dragover.prevent @dragenter.prevent>
-        <span>拖拽发票文件到这里<em>浏览本地</em></span>
+      <div class="receipt-upload" :class="{ disabled: uploading }" @click="handleClickUpload" @drop="handleDrop" @dragover="handleDragover" @dragenter="handleDragover">
+        <span>{{ uploading ? '正在识别发票，请稍候' : '拖拽发票文件到这里' }}<em v-if="!uploading">浏览本地</em></span>
         <input ref="receiptFile" type="file" accept="application/pdf,.pdf" @change="handleFileChange">
       </div>
     </div>
@@ -19,24 +19,39 @@
     </el-form>
 
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="税号" width="180px">
-        <template slot-scope="scope">
-          {{ scope.row.receipt_id }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="抬头" width="180px">
-        <template slot-scope="scope">
-          {{ scope.row.receipt_name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="项目名称" width="300px">
+      <el-table-column align="center" label="项目名称" width="200px">
         <template slot-scope="scope">
           {{ projectId2Name(scope.row.project_id) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="数量" width="80px">
+      <el-table-column align="center" label="数量" width="60px">
         <template slot-scope="scope">
           {{ scope.row.project_num }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="金额" width="80px">
+        <template slot-scope="scope">
+          {{ scope.row.amount }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="税额" width="60px">
+        <template slot-scope="scope">
+          {{ scope.row.tax }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="税率" width="60px">
+        <template slot-scope="scope">
+          {{ scope.row.tax_rate }}%
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="抬头" width="240px">
+        <template slot-scope="scope">
+          {{ scope.row.company }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="税号" width="180px">
+        <template slot-scope="scope">
+          {{ scope.row.company_id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="填报人" width="80px">
@@ -82,6 +97,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      uploading: false,
       shopList: [],
       userList: [],
       projectList: [],
@@ -171,6 +187,9 @@ export default {
       this.getReceiptToList()
     },
     handleClickUpload() {
+      if (this.uploading) {
+        return
+      }
       this.$refs.receiptFile.click()
     },
     handleFileChange(e) {
@@ -178,7 +197,16 @@ export default {
       e.target.value = ''
       this.uploadReceipt(file)
     },
+    handleDragover(e) {
+      e.preventDefault()
+      e.stopPropagation()
+    },
     handleDrop(e) {
+      e.preventDefault()
+      e.stopPropagation()
+      if (this.uploading) {
+        return
+      }
       const file = e.dataTransfer.files[0]
       this.uploadReceipt(file)
     },
@@ -199,12 +227,16 @@ export default {
       const data = new FormData()
       data.append('id', this.listQuery.id)
       data.append('file', file)
+      this.uploading = true
       try {
         await addReceiptTo(data)
         this.$message({ type: 'success', message: '识别成功!' })
         this.getReceiptToList()
       } catch (error) {
-        Promise.reject(error)
+        const message = error.response && error.response.data && error.response.data.msg ? error.response.data.msg : '识别失败!'
+        this.$message({ type: 'error', message })
+      } finally {
+        this.uploading = false
       }
     },
     handleDelete(row) {
@@ -250,6 +282,11 @@ export default {
 
 .receipt-upload:hover {
   border-color: #409eff;
+}
+
+.receipt-upload.disabled {
+  cursor: not-allowed;
+  background: #f5f7fa;
 }
 
 .receipt-upload span {

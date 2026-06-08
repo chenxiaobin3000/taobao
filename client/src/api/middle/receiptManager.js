@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-const path = '/receipt_item'
+const path = '/receipt_manager'
 
-export function getReceiptItemList(data) {
+export function getReceiptManagerList(data) {
   return request({
     url: `${path}/getList`,
     method: 'post',

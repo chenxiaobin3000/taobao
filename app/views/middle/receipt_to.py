@@ -8,6 +8,14 @@ from app.models.middle.receipt_to import ReceiptTo
 from app.services.receipt_ocr import ReceiptOCR
 from app.views.common import failed, success
 
+def create_receipt_item(project_name):
+    item = ReceiptItem.objects.add(project_name, 'OCR自动添加')
+    return {
+        'id': item.id,
+        'project_name': item.project_name,
+        'project_note': item.project_note
+    }
+
 @require_POST
 @transaction.atomic
 def add(request):
@@ -18,8 +26,8 @@ def add(request):
             lines = ReceiptOCR.recognize_upload(upload_file)
             text = ReceiptOCR.get_text(lines)
             items = ReceiptItem.objects.getList(1, 1000) or []
-            data = ReceiptOCR.parse_to(text, items)
-            ReceiptTo.objects.add(shop_id, data['create_date'], request.user_id, data['receipt_id'], data['receipt_name'], data['project_id'], data['project_num'], data['receipt_note'])
+            data = ReceiptOCR.parse_to(text, items, create_receipt_item)
+            ReceiptTo.objects.add(shop_id, data['create_date'], request.user_id, data['project_id'], data['project_num'], data['receipt_note'], data['amount'], data['tax'], data['tax_rate'], data['company'], data['company_id'])
         except (RuntimeError, ValueError) as exc:
             return JsonResponse(failed(str(exc)), encoder=MyJSONEncoder)
         response = success()
@@ -29,12 +37,15 @@ def add(request):
     shop_id = int(post.get('id'))
     create_date = post.get('cdate')
     user_id = request.user_id
-    receipt_id = post.get('rid')
-    receipt_name = post.get('name')
     project_id = int(post.get('pid'))
     project_num = int(post.get('num'))
+    amount = post.get('amount', 0)
+    tax = post.get('tax', 0)
+    tax_rate = int(post.get('tax_rate', 0))
+    company = post.get('company', '')
+    company_id = post.get('company_id', '')
     receipt_note = post.get('note')
-    ReceiptTo.objects.add(shop_id, create_date, user_id, receipt_id, receipt_name, project_id, project_num, receipt_note)
+    ReceiptTo.objects.add(shop_id, create_date, user_id, project_id, project_num, receipt_note, amount, tax, tax_rate, company, company_id)
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
