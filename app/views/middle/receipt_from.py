@@ -5,8 +5,15 @@ from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.middle.receipt_from import ReceiptFrom
 from app.models.middle.receipt_item import ReceiptItem
+from app.models.middle.receipt_owner import ReceiptOwner
 from app.services.receipt_ocr import ReceiptOCR
 from app.views.common import failed, success
+
+def validate_receipt_owner(company, company_id):
+    if ReceiptOwner.objects.total() <= 0:
+        raise ValueError('请先在公司信息中登记公司发票信息')
+    if not ReceiptOwner.objects.existsOwner(company, company_id):
+        raise ValueError(f'购买方不在公司发票登记中：{company} {company_id}')
 
 def create_receipt_item(project_name):
     item = ReceiptItem.objects.add(project_name, 'OCR自动添加')
@@ -27,6 +34,9 @@ def add(request):
             text = ReceiptOCR.get_text(lines)
             items = ReceiptItem.objects.getList(1, 1000) or []
             data = ReceiptOCR.parse_common(text, items, create_receipt_item)
+            validate_receipt_owner(ReceiptOCR._parse_receipt_name(text), ReceiptOCR._parse_company_id(text))
+            if ReceiptFrom.objects.existsReceipt(data['create_date'], data['amount'], data['company_id']):
+                return JsonResponse(success({'duplicate': True}), encoder=MyJSONEncoder)
             ReceiptFrom.objects.add(shop_id, data['create_date'], request.user_id, data['project_id'], data['project_num'], data['receipt_note'], data['amount'], data['tax'], data['tax_rate'], data['company'], data['company_id'])
         except (RuntimeError, ValueError) as exc:
             return JsonResponse(failed(str(exc)), encoder=MyJSONEncoder)
@@ -45,6 +55,8 @@ def add(request):
     company = post.get('company', '')
     company_id = post.get('company_id', '')
     receipt_note = post.get('note')
+    if ReceiptFrom.objects.existsReceipt(create_date, amount, company_id):
+        return JsonResponse(success({'duplicate': True}), encoder=MyJSONEncoder)
     ReceiptFrom.objects.add(shop_id, create_date, user_id, project_id, project_num, receipt_note, amount, tax, tax_rate, company, company_id)
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -7,6 +7,9 @@ class ReceiptToManager(models.Manager):
     def add(self, shop_id, create_date, user_id, project_id, project_num, receipt_note, amount=0, tax=0, tax_rate=0, company='', company_id=''):
         return self.create(shop_id=shop_id, create_date=create_date, user_id=user_id, project_id=project_id, project_num=project_num, receipt_note=receipt_note, amount=amount, tax=tax, tax_rate=tax_rate, company=company, company_id=company_id)
 
+    def existsReceipt(self, create_date, amount=0, company_id=''):
+        return self.filter(create_date=create_date, amount=amount, company_id=company_id).exists()
+
     def delete(self, pk):
         return self.get(pk=pk).delete()
 

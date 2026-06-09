@@ -135,10 +135,23 @@ class ReceiptOCR:
 
     @staticmethod
     def _parse_project_name(text):
-        match = re.search(r'\*[^*\s]{1,20}\*[^ \t\r\n]{1,30}', text)
-        if not match:
-            return ''
-        return match.group(0).strip(' ，,;；')[:20]
+        patterns = [
+            r'项目名称[\s\S]{0,80}?([^\s￥¥\d]{1,20}\*[^ \t\r\n￥¥]{1,30})',
+            r'\*[^*\s]{1,20}\*[^ \t\r\n￥¥]{1,30}',
+            r'[\u4e00-\u9fa5]{1,20}\*[\u4e00-\u9fa5A-Za-z0-9（）()\-]{1,30}'
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                value = match.group(1) if match.lastindex else match.group(0)
+                value = re.split(r'(规格型号|单位|数量|单价|金额|税率|税额|合\s*计)', value)[0]
+                return value.strip(' ，,;；')[:20]
+        for token in re.split(r'\s+', text):
+            if '*' in token and not token.startswith('*'):
+                value = re.split(r'[￥¥\d]', token)[0]
+                if value:
+                    return value.strip(' ，,;；')[:20]
+        return ''
 
     @staticmethod
     def _parse_amount(text):
@@ -171,9 +184,17 @@ class ReceiptOCR:
     def _parse_company_id(text):
         buyer_text = ReceiptOCR._parse_party_text(text, '购买方信息', '销售方信息')
         match = re.search(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', buyer_text)
-        if not match:
+        if match:
+            return match.group(1)[:20]
+        buyer_name = ReceiptOCR._parse_receipt_name(text)
+        if '个人' in buyer_name:
             return ''
-        return match.group(1)[:20]
+        tax_ids = re.findall(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', text)
+        if len(tax_ids) >= 2:
+            return tax_ids[0][:20]
+        if len(tax_ids) == 1 and tax_ids[0] != ReceiptOCR._parse_seller_id(text):
+            return tax_ids[0][:20]
+        return ''
 
     @staticmethod
     def _parse_party_text(text, start_keyword, end_keyword):

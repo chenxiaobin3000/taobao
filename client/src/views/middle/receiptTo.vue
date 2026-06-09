@@ -5,6 +5,13 @@
         <span>{{ uploading ? '正在识别发票，请稍候' : '拖拽发票文件到这里' }}<em v-if="!uploading">浏览本地</em></span>
         <input ref="receiptFile" type="file" accept="application/pdf,.pdf" @change="handleFileChange">
       </div>
+      <input ref="receiptFolder" type="file" webkitdirectory directory multiple style="display:none" @change="handleFolderChange">
+    </div>
+    <div v-if="uploadProgress.visible" class="receipt-progress">
+      <div class="receipt-progress-text">
+        正在导入 {{ uploadProgress.current }}/{{ uploadProgress.total }}：{{ uploadProgress.fileName }}
+      </div>
+      <el-progress :percentage="uploadProgress.percentage" />
     </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
@@ -14,6 +21,9 @@
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
+        </el-col>
+        <el-col :span="18">
+          <el-button type="primary" size="mini" style="float:right;width:80px" :disabled="uploading" @click="handleClickFolderUpload">批量导入</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -98,6 +108,13 @@ export default {
       total: 0,
       loading: false,
       uploading: false,
+      uploadProgress: {
+        visible: false,
+        current: 0,
+        total: 0,
+        percentage: 0,
+        fileName: ''
+      },
       shopList: [],
       userList: [],
       projectList: [],
@@ -194,10 +211,21 @@ export default {
       }
       this.$refs.receiptFile.click()
     },
+    handleClickFolderUpload() {
+      if (this.uploading) {
+        return
+      }
+      this.$refs.receiptFolder.click()
+    },
     handleFileChange(e) {
       const file = e.target.files[0]
       e.target.value = ''
       this.uploadReceipt(file)
+    },
+    handleFolderChange(e) {
+      const files = this.getTopLevelPdfFiles(Array.from(e.target.files || []))
+      e.target.value = ''
+      this.uploadReceiptFolder(files)
     },
     handleDragover(e) {
       e.preventDefault()
@@ -222,23 +250,91 @@ export default {
       }
       return isPdf
     },
+    getTopLevelPdfFiles(files) {
+      return files.filter(file => {
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+        if (!isPdf) {
+          return false
+        }
+        if (!file.webkitRelativePath) {
+          return true
+        }
+        return file.webkitRelativePath.split('/').length === 2
+      })
+    },
+    submitReceipt(file) {
+      const data = new FormData()
+      data.append('id', this.listQuery.id)
+      data.append('file', file)
+      return addReceiptTo(data)
+    },
+    resetUploadProgress() {
+      this.uploadProgress = {
+        visible: false,
+        current: 0,
+        total: 0,
+        percentage: 0,
+        fileName: ''
+      }
+    },
+    setUploadProgress(current, total, fileName) {
+      this.uploadProgress = {
+        visible: true,
+        current,
+        total,
+        percentage: total > 0 ? Math.round(current * 100 / total) : 0,
+        fileName
+      }
+    },
     async uploadReceipt(file) {
       if (!this.checkUploadFile(file)) {
         return
       }
-      const data = new FormData()
-      data.append('id', this.listQuery.id)
-      data.append('file', file)
       this.uploading = true
       try {
-        await addReceiptTo(data)
-        this.$message({ type: 'success', message: '识别成功!' })
+        const response = await this.submitReceipt(file)
+        if (response.data.data && response.data.data.duplicate) {
+          this.$message({ type: 'warning', message: '发票已存在!' })
+        } else {
+          this.$message({ type: 'success', message: '识别成功!' })
+        }
         await this.loadReceiptItemList()
       } catch (error) {
         const message = error.response && error.response.data && error.response.data.msg ? error.response.data.msg : '识别失败!'
         this.$message({ type: 'error', message })
       } finally {
         this.uploading = false
+      }
+    },
+    async uploadReceiptFolder(files) {
+      if (files.length === 0) {
+        this.$message({ type: 'warning', message: '未找到PDF文件!' })
+        return
+      }
+      this.uploading = true
+      let successCount = 0
+      let duplicateCount = 0
+      let failCount = 0
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
+          this.setUploadProgress(i + 1, files.length, file.name)
+          try {
+            const response = await this.submitReceipt(file)
+            if (response.data.data && response.data.data.duplicate) {
+              duplicateCount += 1
+            } else {
+              successCount += 1
+            }
+          } catch (error) {
+            failCount += 1
+          }
+        }
+        await this.loadReceiptItemList()
+        this.$message({ type: failCount > 0 ? 'warning' : 'success', message: `导入完成，成功${successCount}，重复${duplicateCount}，失败${failCount}` })
+      } finally {
+        this.uploading = false
+        this.resetUploadProgress()
       }
     },
     handleDelete(row) {
@@ -269,6 +365,16 @@ export default {
   margin-bottom: 8px;
   background: #fff;
   border-bottom: 1px solid #d8dce5;
+}
+
+.receipt-progress {
+  padding: 0 1% 8px 1%;
+}
+
+.receipt-progress-text {
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #606266;
 }
 
 .receipt-upload {

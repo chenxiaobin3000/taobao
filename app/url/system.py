@@ -1,6 +1,6 @@
 from django.urls import path
 from app.views import account
-from app.views.system import company, good, good_alias, good_follow, market, permission, role, shop, user, user_shop
+from app.views.system import company, good, good_alias, good_follow, market, permission, receipt_owner, role, shop, user, user_shop
 
 url_system = [
     # 账号
@@ -43,6 +43,11 @@ url_system = [
     path('api/market/del', market.delete),
     path('api/market/get', market.get),
     path('api/market/getList', market.getList),
+
+    # 发票主体
+    path('api/receipt_owner/add', receipt_owner.add),
+    path('api/receipt_owner/del', receipt_owner.delete),
+    path('api/receipt_owner/getList', receipt_owner.getList),
 
     # 权限
     path('api/permission/add', permission.add),
