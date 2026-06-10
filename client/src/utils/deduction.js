@@ -1,4 +1,5 @@
 import { DefaultOrder, DeductionType, FinanceType } from '@/utils/const'
+import { excelDateToText } from '@/utils/excel'
 
 export function extractOrderProcure(note, id, onLog) {
   const ret = [false, -1, '']
@@ -72,7 +73,7 @@ export function parseDeductionRows(results, columns, moduleName = '扣费') {
       f: ftype,
       a: row[columns.amount],
       t: parsed.deductionType,
-      c: row[columns.createTime],
+      c: excelDateToText(row[columns.createTime]),
       n: parsed.note
     })
   })

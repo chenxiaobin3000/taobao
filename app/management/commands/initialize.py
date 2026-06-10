@@ -41,6 +41,7 @@ class Command(BaseCommand):
         Permission.objects.add(1, 3010)
         Permission.objects.add(1, 3011)
         Permission.objects.add(1, 3012)
+        Permission.objects.add(1, 3013)
         Permission.objects.add(1, 4000)
         Permission.objects.add(1, 4001)
         Permission.objects.add(1, 4002)
