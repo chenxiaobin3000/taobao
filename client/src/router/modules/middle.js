@@ -21,9 +21,6 @@ export default {
     path: 'deductionSummary', component: () => import('@/views/middle/deductionSummary'),
     name: 'middle_deductionSummary', meta: { title: '扣款管理', roles: [6004] }
   }, {
-    path: 'dataImport', component: () => import('@/views/middle/dataImport'),
-    name: 'middle_dataImport', meta: { title: '批量导入', roles: [6009] }
-  }, {
     path: 'goodPrepare', component: () => import('@/views/middle/goodPrepare'),
     name: 'middle_goodPrepare', meta: { title: '预备商品', roles: [6005] }
   }, {

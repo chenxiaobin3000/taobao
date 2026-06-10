@@ -9,6 +9,9 @@ export default {
     roles: [3000]
   },
   children: [{
+    path: 'dataImport', component: () => import('@/views/original/dataImport'),
+    name: 'original_dataImport', meta: { title: '批量导入', roles: [3013] }
+  }, {
     path: 'order', component: () => import('@/views/original/order'),
     name: 'original_order', meta: { title: '订单管理', roles: [3001] }
   }, {

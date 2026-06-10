@@ -33,6 +33,7 @@
         </el-col>
         <el-col :span="18">
           <el-button type="primary" :loading="processing" :disabled="!listQuery.id" class="merge-button" @click="handleMergeAll">一键合并</el-button>
+          <el-button type="danger" :loading="processing" :disabled="!listQuery.id" class="clear-button" @click="handleClearAll">一键清空</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -57,13 +58,18 @@ import { DeductionType, FinanceType, GoodOriginType, GoodStatus, GoodStockType, 
 import { extractOrderProcure, parseDeductionRows } from '@/utils/deduction'
 import { getOwnShopList } from '@/api/system/shop'
 import { addGoodList } from '@/api/system/good'
-import { addUserOrderList } from '@/api/original/order'
-import { addUserPromotionList } from '@/api/original/promotion'
-import { addUserPromotionDetailList } from '@/api/original/promotionDetail'
-import { addUserDeductionList } from '@/api/original/deduction'
-import { addUserPolymerizeList } from '@/api/original/polymerize'
-import { addUserRefundList } from '@/api/original/refund'
-import { addUserTransferList } from '@/api/original/transfer'
+import { addUserOrderList, delAllUserOrder } from '@/api/original/order'
+import { delAllUserFake } from '@/api/original/fake'
+import { addUserPromotionList, delAllUserPromotion } from '@/api/original/promotion'
+import { addUserPromotionDetailList, delAllUserPromotionDetail } from '@/api/original/promotionDetail'
+import { addUserDeductionList, delAllUserDeduction } from '@/api/original/deduction'
+import { delAllUserDeductionDiscard } from '@/api/original/deductionDiscard'
+import { addUserPolymerizeList, delAllUserPolymerize } from '@/api/original/polymerize'
+import { delAllUserPolymerizeDiscard } from '@/api/original/polymerizeDiscard'
+import { addUserRefundList, delAllUserRefund } from '@/api/original/refund'
+import { delAllUserRefundGift } from '@/api/original/refundGift'
+import { addUserTransferList, delAllUserTransfer } from '@/api/original/transfer'
+import { delAllUserPurchase } from '@/api/original/purchase'
 import { mergeOrder } from '@/api/trunk/order'
 import { mergePromotion } from '@/api/trunk/promotion'
 import { mergePromotionDetail } from '@/api/trunk/promotionDetail'
@@ -81,6 +87,21 @@ const MODULES = [
   { name: '聚合', payload: 'p', parse: 'parsePolymerizes', add: addUserPolymerizeList, merge: mergePolymerize },
   { name: '退货', payload: 'r', parse: 'parseRefunds', add: addUserRefundList, merge: mergeRefund },
   { name: '打款', payload: 't', parse: 'parseTransfers', add: addUserTransferList, merge: mergeTransfer }
+]
+
+const CLEAR_MODULES = [
+  { name: '订单', delAll: delAllUserOrder },
+  { name: '刷单', delAll: delAllUserFake },
+  { name: '推广', delAll: delAllUserPromotion },
+  { name: '推广明细', delAll: delAllUserPromotionDetail },
+  { name: '扣费', delAll: delAllUserDeduction },
+  { name: '扣费(过滤)', delAll: delAllUserDeductionDiscard },
+  { name: '聚合', delAll: delAllUserPolymerize },
+  { name: '聚合(过滤)', delAll: delAllUserPolymerizeDiscard },
+  { name: '退货', delAll: delAllUserRefund },
+  { name: '退货(过滤)', delAll: delAllUserRefundGift },
+  { name: '打款', delAll: delAllUserTransfer },
+  { name: '采购', delAll: delAllUserPurchase }
 ]
 
 export default {
@@ -193,7 +214,7 @@ export default {
       this.processing = true
       this.progress = 0
       this.processInfo = ''
-      this.log(`开始批量导入，店铺ID: ${this.listQuery.id}`)
+      this.log(`开始批量导入，店铺: ${this.getShopName()}`)
       try {
         for (let i = 0; i < MODULES.length; i++) {
           const module = MODULES[i]
@@ -212,9 +233,6 @@ export default {
           this.log(`${module.name}: 解析 ${records.length} 条`)
           await this.uploadChunks(module, records)
           this.log(`${module.name}: 原始数据导入完成`)
-          if (module.merge) {
-            await this.mergeModule(module)
-          }
           this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
         }
         this.progress = 100
@@ -235,7 +253,7 @@ export default {
       this.processing = true
       this.progress = 0
       this.processInfo = ''
-      this.log(`开始一键合并，店铺ID: ${this.listQuery.id}`)
+      this.log(`开始一键合并，店铺: ${this.getShopName()}`)
       try {
         await this.mergeAllModules()
         this.progress = 100
@@ -244,6 +262,44 @@ export default {
       } catch (error) {
         this.log(`合并失败: ${this.getErrorMessage(error)}`)
         this.$message({ type: 'error', message: '一键合并失败，请查看处理信息!' })
+      } finally {
+        this.processing = false
+      }
+    },
+    handleClearAll() {
+      if (!this.listQuery.id) {
+        this.$message({ type: 'error', message: '请先选择店铺!' })
+        return
+      }
+      this.$confirm('确定要清空当前店铺下所有原始数据吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.clearAllOriginalData()
+      })
+    },
+    async clearAllOriginalData() {
+      this.processing = true
+      this.progress = 0
+      this.processInfo = ''
+      this.log(`开始一键清空，店铺: ${this.getShopName()}`)
+      try {
+        for (let i = 0; i < CLEAR_MODULES.length; i++) {
+          const module = CLEAR_MODULES[i]
+          await module.delAll({
+            id: this.listQuery.id,
+            uid: this.userdata.user.id
+          })
+          this.progress = Math.floor(((i + 1) / CLEAR_MODULES.length) * 100)
+          this.log(`${module.name}: 已清空`)
+        }
+        this.progress = 100
+        this.log('一键清空完成')
+        this.$message({ type: 'success', message: '一键清空完成!' })
+      } catch (error) {
+        this.log(`清空失败: ${this.getErrorMessage(error)}`)
+        this.$message({ type: 'error', message: '一键清空失败，请查看处理信息!' })
       } finally {
         this.processing = false
       }
@@ -258,6 +314,10 @@ export default {
     async mergeModule(module) {
       await module.merge({ id: this.listQuery.id })
       this.log(`${module.name}: 已合并到主干`)
+    },
+    getShopName() {
+      const shop = this.shopList.find(item => item.id === this.listQuery.id)
+      return shop ? shop.name : ''
     },
     buildModuleFileMap(files) {
       const map = {}
@@ -392,19 +452,36 @@ export default {
         pi: '',
         no: v[orderNote]
       }))
+      const errors = []
       records.forEach((record, index) => {
         if (record.st === OrderStatus.OTHER) {
-          throw new Error(`订单第${index + 2}行状态异常`)
+          errors.push(this.formatOrderImportError(index, '订单状态异常', record))
+          return
         }
         const ext = extractOrderProcure(record.no, record.id, message => this.log(message))
         if (ext[0]) {
           record.pr = ext[1]
           record.pi = ext[2]
         } else if (![OrderStatus.CLOSE, OrderStatus.UNPAID, OrderStatus.PAID, OrderStatus.UNCREATED].includes(record.st) && parseFloat(record.pa) > 6) {
-          throw new Error(`订单第${index + 2}行备注解析异常: ${record.id}`)
+          errors.push(this.formatOrderImportError(index, '订单备注解析异常', record))
         }
       })
+      if (errors.length > 0) {
+        throw new Error(`订单数据异常，共${errors.length}条:\n\n${errors.join('\n\n')}`)
+      }
       return records
+    },
+    formatOrderImportError(index, reason, order) {
+      return [
+        `行号: ${index + 2}`,
+        `原因: ${reason}`,
+        `订单编号: ${order.id}`,
+        `订单状态: ${order.st}`,
+        `付款金额: ${order.pa}`,
+        `创建时间: ${order.ct}`,
+        `商品名称: ${order.na}`,
+        `备注: ${order.no}`
+      ].join('\n')
     },
     parsePromotions(results, header) {
       const output = header[2]
@@ -608,6 +685,12 @@ export default {
 .merge-button {
   float: right;
   width: 80px;
+}
+
+.clear-button {
+  float: right;
+  width: 80px;
+  margin-right: 10px;
 }
 
 .file-upload:hover {
