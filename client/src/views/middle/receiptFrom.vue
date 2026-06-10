@@ -17,7 +17,7 @@
       <el-row>
         <el-col :span="6">
           <el-form-item label="店铺:">
-            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" style="width: 160px;" @change="handleChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>

@@ -13,16 +13,16 @@
       </div>
       <el-progress :percentage="uploadProgress.percentage" />
     </div>
-    <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
+    <el-form :model="listQuery" label-position="left" label-width="60px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="6">
-          <el-form-item label="店铺:">
-            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+        <el-col :span="10">
+          <el-form-item label="开票方:">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择开票方" style="width: 320px;" @change="handleChange">
+              <el-option v-for="item in ownerList" :key="item.id" :label="item.company" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="18">
+        <el-col :span="14">
           <el-button type="primary" size="mini" style="float:right;width:80px" :disabled="uploading" @click="handleClickFolderUpload">批量导入</el-button>
         </el-col>
       </el-row>
@@ -93,8 +93,8 @@
 
 <script>
 import Pagination from '@/components/Pagination'
-import { getOwnShopList } from '@/api/system/shop'
 import { getUserList } from '@/api/system/user'
+import { getReceiptOwnerList } from '@/api/system/receiptOwner'
 import { getReceiptItemList } from '@/api/middle/receiptItem'
 import { addReceiptTo, delReceiptTo, getReceiptToList } from '@/api/middle/receiptTo'
 
@@ -115,7 +115,7 @@ export default {
         percentage: 0,
         fileName: ''
       },
-      shopList: [],
+      ownerList: [],
       userList: [],
       projectList: [],
       listQuery: {
@@ -134,8 +134,7 @@ export default {
   },
   created() {
     this.userdata = this.$store.getters.userdata
-    this.listQuery.id = this.$store.getters.shop
-    this.getOwnShopList()
+    this.getReceiptOwnerList()
   },
   methods: {
     getReceiptToList() {
@@ -151,14 +150,14 @@ export default {
         Promise.reject(error)
       })
     },
-    getOwnShopList() {
-      getOwnShopList({
-        id: this.userdata.company.id,
-        uid: this.userdata.user.id
+    getReceiptOwnerList() {
+      getReceiptOwnerList({
+        page: 1,
+        num: 1000
       }).then(response => {
-        this.shopList = response.data.data
-        if (this.listQuery.id === 0 && this.shopList.length > 0) {
-          this.listQuery.id = this.shopList[0].id
+        this.ownerList = response.data.data.list || []
+        if (this.listQuery.id === 0 && this.ownerList.length > 0) {
+          this.listQuery.id = this.ownerList[0].id
         }
         this.getUserList()
       })
@@ -202,7 +201,6 @@ export default {
     },
     handleChange() {
       this.listQuery.page = 1
-      this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getReceiptToList()
     },
     handleClickUpload() {
