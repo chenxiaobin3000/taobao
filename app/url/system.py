@@ -22,7 +22,7 @@ url_system = [
     path('api/good/set', good.set),
     path('api/good/del', good.delete),
     path('api/good/getList', good.getList),
-    path('api/good/getExportList', good.getExportList),
+    path('api/good/getInitZip', good.getInitZip),
 
     # 商品关注
     path('api/good_follow/add', good_follow.add),

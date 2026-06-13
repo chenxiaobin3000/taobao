@@ -42,6 +42,9 @@ service.interceptors.response.use(
    * Please return  response => response
   */
   response => {
+    if (response.config.responseType === 'blob') {
+      return response
+    }
     const res = response.data
     if (res.code !== 0) {
       if (res.code === -3) {

@@ -1,11 +1,12 @@
 import json
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.db import transaction
 from app.json_encoder import MyJSONEncoder
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
 from app.models.system.good_follow import GoodFollow
+from app.services.good_init_zip import build_init_zip
 from app.models.trunk.fake import Fake
 from app.models.trunk.promotion_detail import PromotionDetail
 from app.views.common import failed, success
@@ -117,32 +118,15 @@ def getList(request):
 
 @require_POST
 @transaction.atomic
-def getExportList(request):
+def getInitZip(request):
     post = json.loads(request.body)
-    shop_id = int(post.get('id'))
-    goods = Good.objects.getAll(shop_id) or []
-    aliases = GoodAlias.objects.getAllByShop(shop_id) or []
-    follows = GoodFollow.objects.getAllByShop(shop_id) or []
+    company_id = int(post.get('id'))
+    user_id = request.user_id
+    try:
+        data = build_init_zip(company_id, user_id)
+    except ValueError as exc:
+        return JsonResponse(failed(str(exc)), encoder=MyJSONEncoder)
 
-    alias_map = {}
-    for alias in aliases:
-        good_id = alias['good_id']
-        if good_id not in alias_map:
-            alias_map[good_id] = []
-        alias_map[good_id].append(alias['name'])
-
-    follow_map = {}
-    for follow in follows:
-        follow_map[follow['good_id']] = follow['priority']
-
-    datas = []
-    for good in goods:
-        good_aliases = alias_map.get(good['good_id'], [])
-        if len(good_aliases) > 5:
-            return JsonResponse(failed('商品别名超过5个:' + good['good_id'] + ',' + good['short_name']), encoder=MyJSONEncoder)
-        good['priority'] = follow_map.get(good['good_id'], 0)
-        good['aliases'] = good_aliases
-        datas.append(good)
-
-    response = success(datas)
-    return JsonResponse(response, encoder=MyJSONEncoder)
+    response = HttpResponse(data, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename="data_import_init.zip"'
+    return response

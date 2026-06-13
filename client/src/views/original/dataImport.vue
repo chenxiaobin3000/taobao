@@ -57,11 +57,12 @@
 
 <script>
 import XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 import { excelDateToText } from '@/utils/excel'
 import { DeductionType, FinanceType, GoodOriginType, GoodStatus, GoodStockType, GoodType, NoneTime, OrderStatus, PromotionType, RefundStatus, RefundType } from '@/utils/const'
 import { extractOrderProcure, parseDeductionRows } from '@/utils/deduction'
 import { getOwnShopList } from '@/api/system/shop'
-import { addGoodList, getGoodExportList } from '@/api/system/good'
+import { addGoodList, getGoodInitZip } from '@/api/system/good'
 import { addUserOrderList, delAllUserOrder } from '@/api/original/order'
 import { delAllUserFake } from '@/api/original/fake'
 import { addUserPromotionList, delAllUserPromotion } from '@/api/original/promotion'
@@ -119,8 +120,6 @@ const CLEAR_MODULES = [
   { name: '打款', delAll: delAllUserTransfer },
   { name: '采购', delAll: delAllUserPurchase }
 ]
-
-const INIT_PLACEHOLDER_FILES = ['打款', '订单', '聚合', '扣费', '推广', '推广明细', '退货']
 
 export default {
   data() {
@@ -292,123 +291,79 @@ export default {
       }
     },
     async handleInitializeFolder() {
-      if (!window.showDirectoryPicker) {
-        this.processLogs = []
-        this.log('当前浏览器不支持初始化文件夹，请使用新版 Chrome 或 Edge', 'error')
-        this.$message({ type: 'error', message: '当前浏览器不支持初始化文件夹!' })
-        return
-      }
       this.processing = true
       this.progress = 0
       this.processLogs = []
       try {
-        await this.getOwnShopList()
-        const shops = this.uniqueShops(this.shopList)
-        if (shops.length === 0) {
-          this.log('初始化失败: 当前账号没有可用店铺', 'error')
-          this.$message({ type: 'error', message: '当前账号没有可用店铺!' })
-          return
-        }
-        const directory = await window.showDirectoryPicker({ mode: 'readwrite' })
-        this.log(`开始初始化文件夹: ${directory.name}`)
-        let hasEntry = false
-        for await (const entry of directory.values()) {
-          hasEntry = true
-          this.log(`初始化失败: 文件夹内已存在 ${entry.name}`, 'error')
-          break
-        }
-        if (hasEntry) {
-          this.$message({ type: 'error', message: '请选择空文件夹!' })
-          return
-        }
-        const exportMap = await this.getAllGoodExportData(shops)
-        for (const shop of shops) {
-          const shopDirectory = await directory.getDirectoryHandle(shop.name, { create: true })
-          this.log(`已创建目录: ${shop.name}`, 'success')
-          await this.writeGoodExportFile(shopDirectory, exportMap[shop.id])
-          this.log(`${shop.name}: 已导出商品.xlsx`, 'success')
-          await this.writeInitPlaceholderFiles(shopDirectory)
-          this.log(`${shop.name}: 已创建导入占位文件`, 'success')
+        this.log('开始生成初始化压缩包')
+        const response = await getGoodInitZip({
+          id: this.userdata.company.id
+        })
+        const contentType = response.headers['content-type'] || ''
+        if (contentType.indexOf('application/json') !== -1) {
+          const message = await this.readBlobError(response.data)
+          throw new Error(message)
         }
         this.progress = 100
-        this.log('初始化完成', 'success')
-        this.$message({ type: 'success', message: '初始化完成!' })
-      } catch (error) {
-        if (error && error.name === 'AbortError') {
-          this.log('已取消初始化', 'warn')
-        } else {
-          this.log(`初始化失败: ${this.getErrorMessage(error)}`, 'error')
-          this.$message({ type: 'error', message: '初始化失败，请查看处理信息!' })
+        const saved = await this.saveInitZip(response.data)
+        if (!saved) {
+          this.log('已取消保存初始化压缩包', 'warn')
+          this.$message({ type: 'warning', message: '已取消保存!' })
+          return
         }
+        this.log('初始化压缩包生成完成', 'success')
+        this.$message({ type: 'success', message: '初始化压缩包生成完成!' })
+      } catch (error) {
+        this.log(`初始化失败: ${this.getErrorMessage(error)}`, 'error')
+        this.$message({ type: 'error', message: '初始化失败，请查看处理信息!' })
       } finally {
         this.processing = false
       }
     },
-    uniqueShops(shops) {
-      const names = new Set()
-      return shops.filter(shop => {
-        if (!shop.name || names.has(shop.name)) {
-          return false
+    async saveInitZip(blob) {
+      const fileName = '淘宝数据.zip'
+      if (window.isSecureContext && window.showSaveFilePicker) {
+        this.log('请选择初始化压缩包保存位置，默认位置为下载目录')
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            startIn: 'downloads',
+            types: [{
+              description: 'ZIP压缩包',
+              accept: {
+                'application/zip': ['.zip']
+              }
+            }]
+          })
+          const writable = await handle.createWritable()
+          await writable.write(blob)
+          await writable.close()
+          return true
+        } catch (error) {
+          if (error && error.name === 'AbortError') {
+            return false
+          }
+          throw error
         }
-        names.add(shop.name)
-        return true
-      })
-    },
-    async getAllGoodExportData(shops) {
-      const exportMap = {}
-      for (const shop of shops) {
-        this.log(`${shop.name}: 读取商品数据`)
-        const response = await getGoodExportList({ id: shop.id })
-        exportMap[shop.id] = response.data.data || []
-        this.log(`${shop.name}: 商品 ${exportMap[shop.id].length} 条`)
       }
-      return exportMap
+      this.log('当前环境不支持保存位置选择，已保存到浏览器默认下载目录', 'warn')
+      saveAs(blob, fileName)
+      return true
     },
-    async writeGoodExportFile(directory, goods) {
-      const rows = this.buildGoodExportRows(goods)
-      await this.writeExcelFile(directory, '商品.xlsx', '商品', rows)
-    },
-    async writeInitPlaceholderFiles(directory) {
-      for (const name of INIT_PLACEHOLDER_FILES) {
-        await directory.getFileHandle(name, { create: true })
-      }
-    },
-    async writeExcelFile(directory, fileName, sheetName, rows) {
-      const worksheet = XLSX.utils.aoa_to_sheet(rows)
-      const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
-      const data = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-      const file = await directory.getFileHandle(fileName, { create: true })
-      const writable = await file.createWritable()
-      await writable.write(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
-      await writable.close()
-    },
-    buildGoodExportRows(goods) {
-      const rows = [[
-        '名称', 'id', '优先级', '类型', '状态', '淘宝id', '外部', '进货id', '进货渠道', '完整名称',
-        '别名1', '别名2', '别名3', '别名4', '别名5'
-      ]]
-      goods.forEach(good => {
-        const aliases = good.aliases || []
-        rows.push([
-          good.short_name,
-          good.good_id,
-          good.priority || 0,
-          GoodType.num2text(good.good_type),
-          GoodStatus.num2text(good.good_status),
-          good.origin,
-          GoodOriginType.num2text(good.origin_type),
-          good.stock,
-          GoodStockType.num2text(good.stock_type),
-          good.name,
-          aliases[0] || '',
-          aliases[1] || '',
-          aliases[2] || '',
-          aliases[3] || '',
-          aliases[4] || ''
-        ])
+    readBlobError(blob) {
+      return new Promise(resolve => {
+        const reader = new FileReader()
+        reader.onload = e => {
+          try {
+            const data = JSON.parse(e.target.result)
+            resolve(data.msg || '未知错误')
+          } catch (error) {
+            resolve('未知错误')
+          }
+        }
+        reader.onerror = () => resolve('未知错误')
+        reader.readAsText(blob)
       })
-      return rows
     },
     handleClearAll() {
       if (!this.listQuery.id) {

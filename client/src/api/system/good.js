@@ -41,10 +41,11 @@ export function getGoodList(data) {
   })
 }
 
-export function getGoodExportList(data) {
+export function getGoodInitZip(data) {
   return request({
-    url: `${path}/getExportList`,
+    url: `${path}/getInitZip`,
     method: 'post',
+    responseType: 'blob',
     data
   })
 }

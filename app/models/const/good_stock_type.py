@@ -8,3 +8,12 @@ class GoodStockType:
     PIN_DUO_DUO = 3  # 拼多多
     DOU_YIN = 4      # 抖音
     OTHER = 5        # 异常
+
+    @staticmethod
+    def num2text(value):
+        return {
+            GoodStockType.ALIBABA: '阿里巴巴',
+            GoodStockType.TAO_BAO: '淘宝',
+            GoodStockType.PIN_DUO_DUO: '拼多多',
+            GoodStockType.DOU_YIN: '抖音'
+        }.get(value, '异常')

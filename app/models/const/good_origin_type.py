@@ -6,3 +6,10 @@ class GoodOriginType:
     TAO_BAO = 1     # 淘宝
     TIAN_MAO = 2    # 天猫
     OTHER = 3       # 异常
+
+    @staticmethod
+    def num2text(value):
+        return {
+            GoodOriginType.TAO_BAO: '淘宝',
+            GoodOriginType.TIAN_MAO: '天猫'
+        }.get(value, '异常')
