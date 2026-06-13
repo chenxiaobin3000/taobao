@@ -27,6 +27,9 @@ class GoodAliasManager(models.Manager):
     def getListById(self, shop_id, good_id):
         return self.encoderList(self.filter(shop_id=shop_id, good_id=good_id))
 
+    def getAllByShop(self, shop_id):
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('id'))
+
     def encoder(self, good):
         if good:
             return model_to_dict(good, fields=['id', 'shop_id', 'good_id', 'name'])

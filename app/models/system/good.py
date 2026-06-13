@@ -79,6 +79,9 @@ class GoodManager(models.Manager):
         right = page * num
         return self.encoderList(self.filterBySearch(shop_id, search, good_type, good_status, follow, follow_ids).order_by('-ctime')[left:right])
 
+    def getAll(self, shop_id):
+        return self.encoderList(self.filter(shop_id=shop_id).order_by('good_id'))
+
     def getListInIds(self, shop_id, ids):
         return self.encoderList(self.filter(shop_id=shop_id, good_id__in=ids).order_by('-ctime'))
 

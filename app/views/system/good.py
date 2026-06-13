@@ -8,7 +8,7 @@ from app.models.system.good_alias import GoodAlias
 from app.models.system.good_follow import GoodFollow
 from app.models.trunk.fake import Fake
 from app.models.trunk.promotion_detail import PromotionDetail
-from app.views.common import success
+from app.views.common import failed, success
 
 @require_POST
 @transaction.atomic
@@ -113,4 +113,36 @@ def getList(request):
             'total': total,
             'list': datas
         })
+    return JsonResponse(response, encoder=MyJSONEncoder)
+
+@require_POST
+@transaction.atomic
+def getExportList(request):
+    post = json.loads(request.body)
+    shop_id = int(post.get('id'))
+    goods = Good.objects.getAll(shop_id) or []
+    aliases = GoodAlias.objects.getAllByShop(shop_id) or []
+    follows = GoodFollow.objects.getAllByShop(shop_id) or []
+
+    alias_map = {}
+    for alias in aliases:
+        good_id = alias['good_id']
+        if good_id not in alias_map:
+            alias_map[good_id] = []
+        alias_map[good_id].append(alias['name'])
+
+    follow_map = {}
+    for follow in follows:
+        follow_map[follow['good_id']] = follow['priority']
+
+    datas = []
+    for good in goods:
+        good_aliases = alias_map.get(good['good_id'], [])
+        if len(good_aliases) > 5:
+            return JsonResponse(failed('商品别名超过5个:' + good['good_id'] + ',' + good['short_name']), encoder=MyJSONEncoder)
+        good['priority'] = follow_map.get(good['good_id'], 0)
+        good['aliases'] = good_aliases
+        datas.append(good)
+
+    response = success(datas)
     return JsonResponse(response, encoder=MyJSONEncoder)

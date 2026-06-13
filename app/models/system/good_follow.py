@@ -21,6 +21,9 @@ class GoodFollowManager(models.Manager):
     def getGoodIds(self, shop_id):
         return list(self.filter(shop_id=shop_id).values_list('good_id', flat=True))
 
+    def getAllByShop(self, shop_id):
+        return self.encoderList(self.filter(shop_id=shop_id))
+
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 

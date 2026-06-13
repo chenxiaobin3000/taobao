@@ -33,6 +33,7 @@
         </el-col>
         <el-col :span="18">
           <el-button type="primary" :loading="processing" :disabled="!listQuery.id" class="merge-button" @click="handleMergeAll">一键合并</el-button>
+          <el-button type="success" :loading="processing" class="init-button" @click="handleInitializeFolder">初始化</el-button>
           <el-button type="danger" :loading="processing" :disabled="!listQuery.id" class="clear-button" @click="handleClearAll">一键清空</el-button>
         </el-col>
       </el-row>
@@ -60,7 +61,7 @@ import { excelDateToText } from '@/utils/excel'
 import { DeductionType, FinanceType, GoodOriginType, GoodStatus, GoodStockType, GoodType, NoneTime, OrderStatus, PromotionType, RefundStatus, RefundType } from '@/utils/const'
 import { extractOrderProcure, parseDeductionRows } from '@/utils/deduction'
 import { getOwnShopList } from '@/api/system/shop'
-import { addGoodList } from '@/api/system/good'
+import { addGoodList, getGoodExportList } from '@/api/system/good'
 import { addUserOrderList, delAllUserOrder } from '@/api/original/order'
 import { delAllUserFake } from '@/api/original/fake'
 import { addUserPromotionList, delAllUserPromotion } from '@/api/original/promotion'
@@ -141,7 +142,7 @@ export default {
   },
   methods: {
     getOwnShopList() {
-      getOwnShopList({
+      return getOwnShopList({
         id: this.userdata.company.id,
         uid: this.userdata.user.id
       }).then(response => {
@@ -282,6 +283,115 @@ export default {
       } finally {
         this.processing = false
       }
+    },
+    async handleInitializeFolder() {
+      if (!window.showDirectoryPicker) {
+        this.processLogs = []
+        this.log('当前浏览器不支持初始化文件夹，请使用新版 Chrome 或 Edge', 'error')
+        this.$message({ type: 'error', message: '当前浏览器不支持初始化文件夹!' })
+        return
+      }
+      this.processing = true
+      this.progress = 0
+      this.processLogs = []
+      try {
+        await this.getOwnShopList()
+        const shops = this.uniqueShops(this.shopList)
+        if (shops.length === 0) {
+          this.log('初始化失败: 当前账号没有可用店铺', 'error')
+          this.$message({ type: 'error', message: '当前账号没有可用店铺!' })
+          return
+        }
+        const directory = await window.showDirectoryPicker({ mode: 'readwrite' })
+        this.log(`开始初始化文件夹: ${directory.name}`)
+        let hasEntry = false
+        for await (const entry of directory.values()) {
+          hasEntry = true
+          this.log(`初始化失败: 文件夹内已存在 ${entry.name}`, 'error')
+          break
+        }
+        if (hasEntry) {
+          this.$message({ type: 'error', message: '请选择空文件夹!' })
+          return
+        }
+        const exportMap = await this.getAllGoodExportData(shops)
+        for (const shop of shops) {
+          const shopDirectory = await directory.getDirectoryHandle(shop.name, { create: true })
+          this.log(`已创建目录: ${shop.name}`, 'success')
+          await this.writeGoodExportFile(shopDirectory, exportMap[shop.id])
+          this.log(`${shop.name}: 已导出商品.xlsx`, 'success')
+        }
+        this.progress = 100
+        this.log('初始化完成', 'success')
+        this.$message({ type: 'success', message: '初始化完成!' })
+      } catch (error) {
+        if (error && error.name === 'AbortError') {
+          this.log('已取消初始化', 'warn')
+        } else {
+          this.log(`初始化失败: ${this.getErrorMessage(error)}`, 'error')
+          this.$message({ type: 'error', message: '初始化失败，请查看处理信息!' })
+        }
+      } finally {
+        this.processing = false
+      }
+    },
+    uniqueShops(shops) {
+      const names = new Set()
+      return shops.filter(shop => {
+        if (!shop.name || names.has(shop.name)) {
+          return false
+        }
+        names.add(shop.name)
+        return true
+      })
+    },
+    async getAllGoodExportData(shops) {
+      const exportMap = {}
+      for (const shop of shops) {
+        this.log(`${shop.name}: 读取商品数据`)
+        const response = await getGoodExportList({ id: shop.id })
+        exportMap[shop.id] = response.data.data || []
+        this.log(`${shop.name}: 商品 ${exportMap[shop.id].length} 条`)
+      }
+      return exportMap
+    },
+    async writeGoodExportFile(directory, goods) {
+      const rows = this.buildGoodExportRows(goods)
+      const worksheet = XLSX.utils.aoa_to_sheet(rows)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, '商品')
+      const data = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+      const file = await directory.getFileHandle('商品.xlsx', { create: true })
+      const writable = await file.createWritable()
+      await writable.write(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+      await writable.close()
+    },
+    buildGoodExportRows(goods) {
+      const rows = [[
+        '名称', 'id', '优先级', '类型', '状态', '淘宝id', '外部', '进货id', '进货渠道', '完整名称',
+        '别名1', '别名2', '别名3', '别名4', '别名5'
+      ]]
+      goods.forEach(good => {
+        const aliases = good.aliases || []
+        rows.push([
+          good.short_name,
+          good.good_id,
+          good.priority || 0,
+          GoodType.num2text(good.good_type),
+          GoodStatus.num2text(good.good_status),
+          good.origin,
+          GoodOriginType.num2text(good.origin_type),
+          good.stock,
+          GoodStockType.num2text(good.stock_type),
+          good.name,
+          aliases[0] || '',
+          aliases[1] || '',
+          aliases[2] || '',
+          aliases[3] || '',
+          aliases[4] || ''
+        ])
+      })
+      return rows
     },
     handleClearAll() {
       if (!this.listQuery.id) {
@@ -706,6 +816,12 @@ export default {
 .merge-button {
   float: right;
   width: 80px;
+}
+
+.init-button {
+  float: right;
+  width: 80px;
+  margin-right: 10px;
 }
 
 .clear-button {

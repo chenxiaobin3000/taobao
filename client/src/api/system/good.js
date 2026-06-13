@@ -40,3 +40,11 @@ export function getGoodList(data) {
     data
   })
 }
+
+export function getGoodExportList(data) {
+  return request({
+    url: `${path}/getExportList`,
+    method: 'post',
+    data
+  })
+}
