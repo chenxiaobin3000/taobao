@@ -40,14 +40,17 @@
 
     <el-progress v-if="processing || progress > 0" :percentage="progress" class="progress" />
 
-    <el-input
-      v-model="processInfo"
-      class="process-info"
-      type="textarea"
-      readonly
-      resize="none"
-      placeholder="处理信息会显示在这里"
-    />
+    <div ref="processInfo" class="process-info">
+      <div v-if="processLogs.length === 0" class="process-placeholder">处理信息会显示在这里</div>
+      <div
+        v-for="(item, index) in processLogs"
+        :key="index"
+        class="process-line"
+        :class="`process-line-${item.type}`"
+      >
+        {{ item.text }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -71,6 +74,7 @@ import { delAllUserRefundGift } from '@/api/original/refundGift'
 import { addUserTransferList, delAllUserTransfer } from '@/api/original/transfer'
 import { delAllUserPurchase } from '@/api/original/purchase'
 import { mergeOrder } from '@/api/trunk/order'
+import { mergeFake } from '@/api/trunk/fake'
 import { mergePromotion } from '@/api/trunk/promotion'
 import { mergePromotionDetail } from '@/api/trunk/promotionDetail'
 import { mergeDeduction } from '@/api/trunk/deduction'
@@ -80,13 +84,24 @@ import { mergeTransfer } from '@/api/trunk/transfer'
 
 const MODULES = [
   { name: '商品', payload: 'g', parse: 'parseGoods', add: addGoodList },
-  { name: '订单', payload: 'o', parse: 'parseOrders', add: addUserOrderList, merge: mergeOrder },
-  { name: '推广', payload: 'p', parse: 'parsePromotions', add: addUserPromotionList, merge: mergePromotion },
-  { name: '推广明细', payload: 'p', parse: 'parsePromotionDetails', add: addUserPromotionDetailList, merge: mergePromotionDetail },
-  { name: '扣费', payload: 'd', parse: 'parseDeductions', add: addUserDeductionList, merge: mergeDeduction },
-  { name: '聚合', payload: 'p', parse: 'parsePolymerizes', add: addUserPolymerizeList, merge: mergePolymerize },
-  { name: '退货', payload: 'r', parse: 'parseRefunds', add: addUserRefundList, merge: mergeRefund },
-  { name: '打款', payload: 't', parse: 'parseTransfers', add: addUserTransferList, merge: mergeTransfer }
+  { name: '订单', payload: 'o', parse: 'parseOrders', add: addUserOrderList },
+  { name: '推广', payload: 'p', parse: 'parsePromotions', add: addUserPromotionList },
+  { name: '推广明细', payload: 'p', parse: 'parsePromotionDetails', add: addUserPromotionDetailList },
+  { name: '扣费', payload: 'd', parse: 'parseDeductions', add: addUserDeductionList },
+  { name: '聚合', payload: 'p', parse: 'parsePolymerizes', add: addUserPolymerizeList },
+  { name: '退货', payload: 'r', parse: 'parseRefunds', add: addUserRefundList },
+  { name: '打款', payload: 't', parse: 'parseTransfers', add: addUserTransferList }
+]
+
+const MERGE_MODULES = [
+  { name: '订单', merge: mergeOrder },
+  { name: '刷单', merge: mergeFake },
+  { name: '推广', merge: mergePromotion },
+  { name: '推广明细', merge: mergePromotionDetail },
+  { name: '扣费', merge: mergeDeduction },
+  { name: '聚合', merge: mergePolymerize },
+  { name: '退货', merge: mergeRefund },
+  { name: '打款', merge: mergeTransfer }
 ]
 
 const CLEAR_MODULES = [
@@ -113,7 +128,7 @@ export default {
         id: 0,
         uid: 0
       },
-      processInfo: '',
+      processLogs: [],
       processing: false,
       progress: 0
     }
@@ -207,20 +222,22 @@ export default {
       }
       const excelFiles = files.filter(file => this.isExcel(file.name))
       if (excelFiles.length === 0) {
+        this.processLogs = []
+        this.log('文件夹中没有Excel文件!', 'error')
         this.$message({ type: 'error', message: '文件夹中没有Excel文件!' })
         return
       }
       const fileMap = this.buildModuleFileMap(excelFiles)
       this.processing = true
       this.progress = 0
-      this.processInfo = ''
+      this.processLogs = []
       this.log(`开始批量导入，店铺: ${this.getShopName()}`)
       try {
         for (let i = 0; i < MODULES.length; i++) {
           const module = MODULES[i]
           const file = fileMap[module.name]
           if (!file) {
-            this.log(`${module.name}: 未找到同名Excel，跳过`)
+            this.log(`${module.name}: 未找到同名Excel，跳过`, 'warn')
             this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
             continue
           }
@@ -232,14 +249,14 @@ export default {
           }
           this.log(`${module.name}: 解析 ${records.length} 条`)
           await this.uploadChunks(module, records)
-          this.log(`${module.name}: 原始数据导入完成`)
+          this.log(`${module.name}: 原始数据导入完成`, 'success')
           this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
         }
         this.progress = 100
-        this.log('批量导入完成')
+        this.log('批量导入完成', 'success')
         this.$message({ type: 'success', message: '批量导入完成!' })
       } catch (error) {
-        this.log(`处理失败: ${this.getErrorMessage(error)}`)
+        this.log(`处理失败: ${this.getErrorMessage(error)}`, 'error')
         this.$message({ type: 'error', message: '批量导入失败，请查看处理信息!' })
       } finally {
         this.processing = false
@@ -252,15 +269,15 @@ export default {
       }
       this.processing = true
       this.progress = 0
-      this.processInfo = ''
+      this.processLogs = []
       this.log(`开始一键合并，店铺: ${this.getShopName()}`)
       try {
         await this.mergeAllModules()
         this.progress = 100
-        this.log('一键合并完成')
+        this.log('一键合并完成', 'success')
         this.$message({ type: 'success', message: '一键合并完成!' })
       } catch (error) {
-        this.log(`合并失败: ${this.getErrorMessage(error)}`)
+        this.log(`合并失败: ${this.getErrorMessage(error)}`, 'error')
         this.$message({ type: 'error', message: '一键合并失败，请查看处理信息!' })
       } finally {
         this.processing = false
@@ -282,7 +299,7 @@ export default {
     async clearAllOriginalData() {
       this.processing = true
       this.progress = 0
-      this.processInfo = ''
+      this.processLogs = []
       this.log(`开始一键清空，店铺: ${this.getShopName()}`)
       try {
         for (let i = 0; i < CLEAR_MODULES.length; i++) {
@@ -292,28 +309,27 @@ export default {
             uid: this.userdata.user.id
           })
           this.progress = Math.floor(((i + 1) / CLEAR_MODULES.length) * 100)
-          this.log(`${module.name}: 已清空`)
+          this.log(`${module.name}: 已清空`, 'success')
         }
         this.progress = 100
-        this.log('一键清空完成')
+        this.log('一键清空完成', 'success')
         this.$message({ type: 'success', message: '一键清空完成!' })
       } catch (error) {
-        this.log(`清空失败: ${this.getErrorMessage(error)}`)
+        this.log(`清空失败: ${this.getErrorMessage(error)}`, 'error')
         this.$message({ type: 'error', message: '一键清空失败，请查看处理信息!' })
       } finally {
         this.processing = false
       }
     },
     async mergeAllModules() {
-      const mergeModules = MODULES.filter(v => v.merge)
-      for (let i = 0; i < mergeModules.length; i++) {
-        await this.mergeModule(mergeModules[i])
-        this.progress = Math.floor(((i + 1) / mergeModules.length) * 100)
+      for (let i = 0; i < MERGE_MODULES.length; i++) {
+        await this.mergeModule(MERGE_MODULES[i])
+        this.progress = Math.floor(((i + 1) / MERGE_MODULES.length) * 100)
       }
     },
     async mergeModule(module) {
       await module.merge({ id: this.listQuery.id })
-      this.log(`${module.name}: 已合并到主干`)
+      this.log(`${module.name}: 已合并到主干`, 'success')
     },
     getShopName() {
       const shop = this.shopList.find(item => item.id === this.listQuery.id)
@@ -372,7 +388,7 @@ export default {
           uid: this.userdata.user.id,
           [module.payload]: chunk
         })
-        this.log(`${module.name}: 已上传 ${Math.min(i + chunk.length, records.length)}/${records.length}`)
+        this.log(`${module.name}: 已上传 ${Math.min(i + chunk.length, records.length)}/${records.length}`, 'success')
       }
     },
     parseGoods(results, header) {
@@ -627,9 +643,14 @@ export default {
         tn: v[transferNote]
       }))
     },
-    log(message) {
+    log(message, type = 'info') {
       const line = `[${new Date().toLocaleTimeString()}] ${message}`
-      this.processInfo = this.processInfo ? `${this.processInfo}\n${line}` : line
+      this.processLogs.push({ text: line, type })
+      this.$nextTick(() => {
+        if (this.$refs.processInfo) {
+          this.$refs.processInfo.scrollTop = this.$refs.processInfo.scrollHeight
+        }
+      })
     },
     getErrorMessage(error) {
       if (!error) {
@@ -725,9 +746,35 @@ export default {
   flex: 1 1 auto;
   min-height: 0;
   margin-top: 12px;
+  padding: 5px 15px;
+  overflow: auto;
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
-.process-info ::v-deep .el-textarea__inner {
-  height: 100%;
+.process-placeholder {
+  color: #c0c4cc;
+}
+
+.process-line {
+  margin: 0;
+}
+
+.process-line-error {
+  color: #f56c6c;
+}
+
+.process-line-success {
+  color: #67c23a;
+}
+
+.process-line-warn {
+  color: #e6a23c;
 }
 </style>
