@@ -32,7 +32,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="18">
-          <el-button type="primary" :loading="processing" :disabled="!listQuery.id" class="merge-button" @click="handleMergeAll">一键合并</el-button>
+          <el-button v-if="hasTrunkPermission" type="primary" :loading="processing" :disabled="!listQuery.id" class="merge-button" @click="handleMergeAll">一键合并</el-button>
           <el-button type="success" :loading="processing" class="init-button" @click="handleInitializeFolder">初始化</el-button>
           <el-button type="danger" :loading="processing" :disabled="!listQuery.id" class="clear-button" @click="handleClearAll">一键清空</el-button>
         </el-col>
@@ -134,6 +134,11 @@ export default {
       processLogs: [],
       processing: false,
       progress: 0
+    }
+  },
+  computed: {
+    hasTrunkPermission() {
+      return this.$store.getters.roles.includes(4000)
     }
   },
   created() {
