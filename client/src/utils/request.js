@@ -70,6 +70,14 @@ service.interceptors.response.use(
     }
   },
   error => {
+    if (!error.response) {
+      Message({
+        message: error.code === 'ECONNABORTED' ? '请求超时，请稍后重试' : '网络异常，请联系客服',
+        type: 'error',
+        duration: 2000
+      })
+      return Promise.reject(error)
+    }
     const status = error.response.status
     if (status === 400) {
       Message({

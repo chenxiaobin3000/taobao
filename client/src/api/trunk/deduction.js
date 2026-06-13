@@ -5,6 +5,7 @@ export function mergeDeduction(data) {
   return request({
     url: `${path}/merge`,
     method: 'post',
+    timeout: 60000,
     data
   })
 }

@@ -198,11 +198,20 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list
+        if (this.shouldFallbackToTrunk()) {
+          this.listQuery.uid = 0
+          this.$message({ type: 'info', message: '当前账号暂无数据，已显示主干数据' })
+          this.getPromotionDetailList()
+          return
+        }
         this.loading = false
       }).catch(error => {
         this.loading = false
         Promise.reject(error)
       })
+    },
+    shouldFallbackToTrunk() {
+      return this.listQuery.uid === this.userdata.user.id && this.listQuery.page === 1 && this.total === 0
     },
     handleChangeShop() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
