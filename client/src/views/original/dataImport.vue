@@ -120,6 +120,8 @@ const CLEAR_MODULES = [
   { name: '采购', delAll: delAllUserPurchase }
 ]
 
+const INIT_PLACEHOLDER_FILES = ['打款', '订单', '聚合', '扣费', '推广', '推广明细', '退货']
+
 export default {
   data() {
     return {
@@ -320,6 +322,8 @@ export default {
           this.log(`已创建目录: ${shop.name}`, 'success')
           await this.writeGoodExportFile(shopDirectory, exportMap[shop.id])
           this.log(`${shop.name}: 已导出商品.xlsx`, 'success')
+          await this.writeInitPlaceholderFiles(shopDirectory)
+          this.log(`${shop.name}: 已创建导入占位文件`, 'success')
         }
         this.progress = 100
         this.log('初始化完成', 'success')
@@ -357,11 +361,19 @@ export default {
     },
     async writeGoodExportFile(directory, goods) {
       const rows = this.buildGoodExportRows(goods)
+      await this.writeExcelFile(directory, '商品.xlsx', '商品', rows)
+    },
+    async writeInitPlaceholderFiles(directory) {
+      for (const name of INIT_PLACEHOLDER_FILES) {
+        await directory.getFileHandle(name, { create: true })
+      }
+    },
+    async writeExcelFile(directory, fileName, sheetName, rows) {
       const worksheet = XLSX.utils.aoa_to_sheet(rows)
       const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheet, '商品')
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
       const data = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-      const file = await directory.getFileHandle('商品.xlsx', { create: true })
+      const file = await directory.getFileHandle(fileName, { create: true })
       const writable = await file.createWritable()
       await writable.write(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
       await writable.close()
