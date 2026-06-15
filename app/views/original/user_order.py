@@ -106,7 +106,7 @@ def deleteAll(request):
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    user_id = request.user_id
+    user_id = int(post.get('uid') or request.user_id)
     page = int(post.get('page'))
     num = int(post.get('num'))
     search = post.get('search')

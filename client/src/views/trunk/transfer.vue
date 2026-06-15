@@ -91,6 +91,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      allowFallbackToTrunk: true,
       shopList: [], // 本公司所有店铺列表
       userList: [], // 本店铺所有负责人列表
       listQuery: {
@@ -141,6 +142,8 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list
+        this.allowFallbackToTrunk = false
+
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -178,11 +181,14 @@ export default {
         this.total = response.data.data.total
         this.list = response.data.data.list
         if (this.shouldFallbackToTrunk()) {
+          this.allowFallbackToTrunk = false
           this.listQuery.uid = 0
           this.$message({ type: 'info', message: '当前账号暂无数据，已显示主干数据' })
           this.getTransferList()
           return
         }
+        this.allowFallbackToTrunk = false
+
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -190,7 +196,7 @@ export default {
       })
     },
     shouldFallbackToTrunk() {
-      return this.listQuery.uid === this.userdata.user.id && this.listQuery.page === 1 && this.total === 0
+      return this.allowFallbackToTrunk && this.listQuery.uid === this.userdata.user.id && this.listQuery.page === 1 && this.total === 0
     },
     handleChangeShop() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)

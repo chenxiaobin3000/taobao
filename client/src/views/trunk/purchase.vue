@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
@@ -99,6 +99,7 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      allowFallbackToTrunk: true,
       userList: [],
       listQuery: {
         uid: 0,
@@ -146,6 +147,8 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list
+        this.allowFallbackToTrunk = false
+
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -173,11 +176,14 @@ export default {
         this.total = response.data.data.total
         this.list = response.data.data.list
         if (this.shouldFallbackToTrunk()) {
+          this.allowFallbackToTrunk = false
           this.listQuery.uid = 0
           this.$message({ type: 'info', message: '当前账号暂无数据，已显示主干数据' })
           this.getPurchaseList()
           return
         }
+        this.allowFallbackToTrunk = false
+
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -188,7 +194,7 @@ export default {
       return PurchaseStatus.num2text(num)
     },
     shouldFallbackToTrunk() {
-      return this.listQuery.uid === this.userdata.user.id && this.listQuery.page === 1 && this.total === 0
+      return this.allowFallbackToTrunk && this.listQuery.uid === this.userdata.user.id && this.listQuery.page === 1 && this.total === 0
     },
     handleChangeUser() {
       this.listQuery.page = 1
