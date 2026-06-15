@@ -349,6 +349,7 @@ export default {
 }
 
 .excel-import-progress {
+  order: -1;
   display: flex;
   align-items: center;
   gap: 10px;

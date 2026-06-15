@@ -85,14 +85,14 @@ import { mergeRefund } from '@/api/trunk/refund'
 import { mergeTransfer } from '@/api/trunk/transfer'
 
 const MODULES = [
-  { name: '商品', payload: 'g', parse: 'parseGoods', add: addGoodList },
-  { name: '订单', payload: 'o', parse: 'parseOrders', add: addUserOrderList },
-  { name: '推广', payload: 'p', parse: 'parsePromotions', add: addUserPromotionList },
-  { name: '推广明细', payload: 'p', parse: 'parsePromotionDetails', add: addUserPromotionDetailList },
-  { name: '扣费', payload: 'd', parse: 'parseDeductions', add: addUserDeductionList },
-  { name: '聚合', payload: 'p', parse: 'parsePolymerizes', add: addUserPolymerizeList },
-  { name: '退货', payload: 'r', parse: 'parseRefunds', add: addUserRefundList },
-  { name: '打款', payload: 't', parse: 'parseTransfers', add: addUserTransferList }
+  { name: '商品', permission: 2003, payload: 'g', parse: 'parseGoods', add: addGoodList },
+  { name: '订单', permission: 3001, payload: 'o', parse: 'parseOrders', add: addUserOrderList },
+  { name: '推广', permission: 3003, payload: 'p', parse: 'parsePromotions', add: addUserPromotionList },
+  { name: '推广明细', permission: 3004, payload: 'p', parse: 'parsePromotionDetails', add: addUserPromotionDetailList },
+  { name: '扣费', permission: 3005, payload: 'd', parse: 'parseDeductions', add: addUserDeductionList },
+  { name: '聚合', permission: 3007, payload: 'p', parse: 'parsePolymerizes', add: addUserPolymerizeList },
+  { name: '退货', permission: 3009, payload: 'r', parse: 'parseRefunds', add: addUserRefundList },
+  { name: '打款', permission: 3011, payload: 't', parse: 'parseTransfers', add: addUserTransferList }
 ]
 
 const MERGE_MODULES = [
@@ -234,18 +234,25 @@ export default {
         this.$message({ type: 'error', message: '文件夹中没有Excel文件!' })
         return
       }
-      const fileMap = this.buildModuleFileMap(excelFiles)
+      const allowedModules = this.getAllowedModules()
+      if (allowedModules.length === 0) {
+        this.processLogs = []
+        this.log('当前账号没有可导入模块权限', 'error')
+        this.$message({ type: 'error', message: '当前账号没有可导入模块权限!' })
+        return
+      }
+      const fileMap = this.buildModuleFileMap(excelFiles, allowedModules)
       this.processing = true
       this.progress = 0
       this.processLogs = []
       this.log(`开始批量导入，店铺: ${this.getShopName()}`)
       try {
-        for (let i = 0; i < MODULES.length; i++) {
-          const module = MODULES[i]
+        for (let i = 0; i < allowedModules.length; i++) {
+          const module = allowedModules[i]
           const file = fileMap[module.name]
           if (!file) {
             this.log(`${module.name}: 未找到同名Excel，跳过`, 'warn')
-            this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
+            this.progress = Math.floor(((i + 1) / allowedModules.length) * 100)
             continue
           }
           this.log(`${module.name}: 读取 ${file.name}`)
@@ -257,7 +264,7 @@ export default {
           this.log(`${module.name}: 解析 ${records.length} 条`)
           await this.uploadChunks(module, records)
           this.log(`${module.name}: 原始数据导入完成`, 'success')
-          this.progress = Math.floor(((i + 1) / MODULES.length) * 100)
+          this.progress = Math.floor(((i + 1) / allowedModules.length) * 100)
         }
         this.progress = 100
         this.log('批量导入完成', 'success')
@@ -417,15 +424,21 @@ export default {
       const shop = this.shopList.find(item => item.id === this.listQuery.id)
       return shop ? shop.name : ''
     },
-    buildModuleFileMap(files) {
+    getAllowedModules() {
+      const roles = this.$store.getters.roles || []
+      return MODULES.filter(module => roles.includes(module.permission))
+    },
+    buildModuleFileMap(files, modules) {
       const map = {}
       files.forEach(file => {
         const name = file.name.replace(/\.(xlsx|xls)$/i, '')
-        if (MODULES.some(item => item.name === name)) {
+        if (modules.some(item => item.name === name)) {
           if (map[name]) {
             throw new Error(`${name}: 存在重复Excel文件`)
           }
           map[name] = file
+        } else if (MODULES.some(item => item.name === name)) {
+          this.log(`${name}: 没有页面权限，跳过`, 'warn')
         }
       })
       return map

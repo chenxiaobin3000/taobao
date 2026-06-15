@@ -9,11 +9,22 @@ from app.models.const.good_type import GoodType
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
 from app.models.system.good_follow import GoodFollow
+from app.models.system.permission import Permission
 from app.models.system.shop import Shop
+from app.models.system.user import User
 from app.models.system.user_shop import UserShop
 
 
-INIT_PLACEHOLDER_FILES = ['打款', '订单', '聚合', '扣费', '推广', '推广明细', '退货']
+INIT_PLACEHOLDER_FILES = [
+    {'name': '订单', 'permission': 3001},
+    {'name': '推广', 'permission': 3003},
+    {'name': '推广明细', 'permission': 3004},
+    {'name': '扣费', 'permission': 3005},
+    {'name': '聚合', 'permission': 3007},
+    {'name': '退货', 'permission': 3009},
+    {'name': '打款', 'permission': 3011},
+    {'name': '采购', 'permission': 3012}
+]
 GOOD_EXPORT_HEADERS = ['名称', 'id', '优先级', '类型', '状态', '淘宝id', '外部', '进货id', '进货渠道', '完整名称', '别名1', '别名2', '别名3', '别名4', '别名5']
 
 
@@ -21,15 +32,18 @@ def build_init_zip(company_id, user_id):
     shops = get_user_shops(company_id, user_id)
     if not shops:
         raise ValueError('当前账号没有可用店铺')
+    permissions = get_user_permissions(user_id)
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as package:
         for shop in shops:
             folder = safe_zip_name(shop['name'])
-            goods = build_good_export_rows(shop['id'])
-            package.writestr(folder + '/商品.xlsx', build_xlsx(goods))
-            for filename in INIT_PLACEHOLDER_FILES:
-                package.writestr(folder + '/' + filename, b'')
+            if 2003 in permissions:
+                goods = build_good_export_rows(shop['id'])
+                package.writestr(folder + '/商品.xlsx', build_xlsx(goods))
+            for item in INIT_PLACEHOLDER_FILES:
+                if item['permission'] in permissions:
+                    package.writestr(folder + '/' + item['name'], b'')
     return zip_buffer.getvalue()
 
 
@@ -38,6 +52,12 @@ def get_user_shops(company_id, user_id):
     user_shops = UserShop.objects.getList(user_id, 1, 1000) or []
     shop_ids = set([item['shop_id'] for item in user_shops])
     return [shop for shop in shops if shop['id'] in shop_ids]
+
+
+def get_user_permissions(user_id):
+    user = User.objects.find(user_id)
+    permissions = Permission.objects.getList(user['role_id'], 1, 1000) or []
+    return set([item['permission'] for item in permissions])
 
 
 def build_good_export_rows(shop_id):
