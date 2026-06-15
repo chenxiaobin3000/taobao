@@ -5,6 +5,7 @@ export function addUserDeductionList(data) {
   return request({
     url: `${path}/addList`,
     method: 'post',
+    timeout: 60000,
     data
   })
 }
