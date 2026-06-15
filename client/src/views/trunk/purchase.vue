@@ -20,11 +20,12 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleMerge()">合并</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:60px" :loading="mergeProcessing" :disabled="mergeProcessing" @click="handleMerge()">合并</el-button>
           <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
     </el-form>
+    <el-progress v-if="mergeProcessing || mergeProgress > 0" :percentage="mergeProgress" class="merge-progress" />
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="采购编号" width="160">
         <template slot-scope="scope">
@@ -99,6 +100,9 @@ export default {
       list: null,
       total: 0,
       loading: false,
+      mergeProcessing: false,
+      mergeProgress: 0,
+      mergeTimer: null,
       allowFallbackToTrunk: true,
       userList: [],
       listQuery: {
@@ -211,7 +215,35 @@ export default {
         this.getUserPurchaseList()
       }
     },
+    startMergeProgress() {
+      this.mergeProcessing = true
+      this.mergeProgress = 5
+      if (this.mergeTimer) {
+        clearInterval(this.mergeTimer)
+      }
+      this.mergeTimer = setInterval(() => {
+        if (this.mergeProgress < 95) {
+          this.mergeProgress += this.mergeProgress < 60 ? 5 : 1
+        }
+      }, 800)
+    },
+    finishMergeProgress() {
+      if (this.mergeTimer) {
+        clearInterval(this.mergeTimer)
+        this.mergeTimer = null
+      }
+      this.mergeProgress = 100
+      this.mergeProcessing = false
+      setTimeout(() => {
+        if (!this.mergeProcessing) {
+          this.mergeProgress = 0
+        }
+      }, 800)
+    },
     handleMerge() {
+      if (this.mergeProcessing) {
+        return
+      }
       if (this.listQuery.uid === 0) {
         this.$message({ type: 'error', message: '不能合并主干!' })
         return
@@ -221,12 +253,17 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
+        this.startMergeProgress()
         mergePurchase({
           uid: this.listQuery.uid
         }).then(() => {
+          this.finishMergeProgress()
           this.$message({ type: 'success', message: '合并成功!' })
           this.listQuery.uid = 0
           this.getPurchaseList()
+        }).catch(error => {
+          this.finishMergeProgress()
+          Promise.reject(error)
         })
       })
     },
@@ -247,3 +284,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.merge-progress {
+  margin: 0 1% 12px;
+}
+</style>

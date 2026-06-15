@@ -412,9 +412,26 @@ export default {
     },
     async mergeAllModules() {
       for (let i = 0; i < MERGE_MODULES.length; i++) {
-        await this.mergeModule(MERGE_MODULES[i])
-        this.progress = Math.floor(((i + 1) / MERGE_MODULES.length) * 100)
+        const start = Math.floor((i / MERGE_MODULES.length) * 100)
+        const end = Math.floor(((i + 1) / MERGE_MODULES.length) * 100)
+        const module = MERGE_MODULES[i]
+        this.progress = start
+        this.log(`${module.name}: 开始合并`)
+        const timer = this.startModuleProgress(end)
+        try {
+          await this.mergeModule(module)
+        } finally {
+          clearInterval(timer)
+        }
+        this.progress = end
       }
+    },
+    startModuleProgress(max) {
+      return setInterval(() => {
+        if (this.progress < max - 1) {
+          this.progress += 1
+        }
+      }, 1000)
     },
     async mergeModule(module) {
       await module.merge({ id: this.listQuery.id })
