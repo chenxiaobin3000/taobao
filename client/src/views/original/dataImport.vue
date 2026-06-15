@@ -475,7 +475,7 @@ export default {
       })
     },
     async uploadChunks(module, records) {
-      const chunkSize = 1000
+      const chunkSize = 300
       for (let i = 0; i < records.length; i += chunkSize) {
         const chunk = records.slice(i, i + chunkSize)
         await module.add({

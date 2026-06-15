@@ -5,7 +5,7 @@ export function addUserRefundList(data) {
   return request({
     url: `${path}/addList`,
     method: 'post',
-    timeout: 60000,
+    timeout: 10000,
     data
   })
 }

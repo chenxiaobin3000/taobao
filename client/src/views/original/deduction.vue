@@ -204,7 +204,7 @@ export default {
       this.getUserDeductionList()
     },
     async uploadExcelChunks(records) {
-      const chunkSize = 1000
+      const chunkSize = 300
       const total = records.length
       this.uploading = true
       this.uploadProgress = 0
