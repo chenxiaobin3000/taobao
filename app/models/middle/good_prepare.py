@@ -18,6 +18,9 @@ class GoodPrepareManager(models.Manager):
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()
 
+    def getOrigins(self, shop_id, origins):
+        return set(self.filter(shop_id=shop_id, origin__in=origins).values_list('origin', flat=True))
+
     def getList(self, shop_id, page, num):
         left = (page - 1) * num
         right = page * num

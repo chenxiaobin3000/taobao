@@ -13,16 +13,28 @@ def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     goods = post.get('g') or []
+    origins = [
+        str(good.get('origin')).strip()
+        for good in goods
+        if good.get('origin') is not None and str(good.get('origin')).strip()
+    ]
+    exists_origins = GoodPrepare.objects.getOrigins(shop_id, origins)
+    handled_origins = set()
     for good in goods:
+        origin = str(good.get('origin')).strip() if good.get('origin') is not None else ''
+        if origin and (origin in exists_origins or origin in handled_origins):
+            continue
         GoodPrepare.objects.add(
             shop_id,
             good.get('name'),
-            good.get('origin'),
+            origin,
             int(good.get('origin_type')),
             good.get('stock'),
             int(good.get('stock_type')),
             good.get('note') or ''
         )
+        if origin:
+            handled_origins.add(origin)
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
