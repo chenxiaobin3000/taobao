@@ -9,16 +9,20 @@ from app.views.common import success
 
 @require_POST
 @transaction.atomic
-def add(request):
+def addList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    name = post.get('name')
-    origin = post.get('origin')
-    origin_type = int(post.get('origin_type'))
-    stock = post.get('stock')
-    stock_type = int(post.get('stock_type'))
-    good_note = post.get('note')
-    GoodPrepare.objects.add(shop_id, name, origin, origin_type, stock, stock_type, good_note)
+    goods = post.get('g') or []
+    for good in goods:
+        GoodPrepare.objects.add(
+            shop_id,
+            good.get('name'),
+            good.get('origin'),
+            int(good.get('origin_type')),
+            good.get('stock'),
+            int(good.get('stock_type')),
+            good.get('note') or ''
+        )
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 

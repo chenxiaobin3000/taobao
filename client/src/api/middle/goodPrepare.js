@@ -1,11 +1,12 @@
 import request from '@/utils/request'
 const path = '/good_prepare'
 
-export function addGoodPrepare(data) {
+export function addGoodPrepareList(data) {
   return request({
-    url: `${path}/add`,
+    url: `${path}/addList`,
     method: 'post',
-    data
+    data,
+    timeout: 10000
   })
 }
 
