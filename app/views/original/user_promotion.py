@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -18,9 +19,13 @@ def addList(request):
     for promotion in promotions:
         create_date = promotion['d']
         payment = promotion['p']
-        promotion_type = promotion['t']
+        promotion_type = int(promotion['t'])
         promotion_note = promotion['n']
-        if UserPromotion.objects.getByDate(user_id, shop_id, create_date, promotion_type):
+        find_object = UserPromotion.objects.getByDate(user_id, shop_id, create_date, promotion_type)
+        if find_object:
+            payment_decimal = Decimal(str(payment))
+            if find_object['payment'] == payment_decimal and find_object['promotion_type'] == promotion_type:
+                continue
             response = failed('重复数据：日期(' + create_date + ')')
             return JsonResponse(response, encoder=MyJSONEncoder)
         UserPromotion.objects.add(user_id, shop_id, create_date, payment, promotion_type, promotion_note)
