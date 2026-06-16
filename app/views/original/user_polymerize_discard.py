@@ -35,16 +35,21 @@ def getList(request):
     page = int(post.get('page'))
     num = int(post.get('num'))
     search = post.get('search')
+    amount_type = post.get('amount_type')
     start_date = post.get('sdate')
     end_date = post.get('edate')
+    if amount_type:
+        amount_type = int(amount_type)
     if start_date:
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
     if end_date:
         end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
-    total = UserPolymerizeDiscard.objects.total(user_id, shop_id, start_date, end_date, search)
-    polymerizes = UserPolymerizeDiscard.objects.getList(user_id, shop_id, page, num, start_date, end_date, search)
+    total = UserPolymerizeDiscard.objects.total(user_id, shop_id, start_date, end_date, search, amount_type)
+    polymerizes = UserPolymerizeDiscard.objects.getList(user_id, shop_id, page, num, start_date, end_date, search, amount_type)
+    amount_types = UserPolymerizeDiscard.objects.getAmountTypes(user_id, shop_id, start_date, end_date, search)
     response = success({
             'total': total,
-            'list': polymerizes
+            'list': polymerizes,
+            'amount_types': amount_types
         })
     return JsonResponse(response, encoder=MyJSONEncoder)

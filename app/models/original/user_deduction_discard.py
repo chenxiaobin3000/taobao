@@ -16,25 +16,30 @@ class UserDeductionDiscardManager(models.Manager):
     def getByCTime(self, user_id, shop_id, order_id, amount_type, create_time):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, order_id=order_id, amount_type=amount_type, create_time=create_time).first())
 
-    def filterByDate(self, user_id, shop_id, start_date=None, end_date=None, search=None):
+    def filterByDate(self, user_id, shop_id, start_date=None, end_date=None, search=None, amount_type=None):
         queryset = self.filter(user_id=user_id, shop_id=shop_id)
         if start_date:
             queryset = queryset.filter(create_time__gte=start_date)
         if end_date:
             queryset = queryset.filter(create_time__lt=end_date)
+        if amount_type:
+            queryset = queryset.filter(amount_type=amount_type)
         if search:
             keyword = str(search).strip()
             if keyword:
                 queryset = queryset.filter(order_id=keyword)
         return queryset
 
-    def total(self, user_id, shop_id, start_date=None, end_date=None, search=None):
-        return self.filterByDate(user_id, shop_id, start_date, end_date, search).count()
+    def total(self, user_id, shop_id, start_date=None, end_date=None, search=None, amount_type=None):
+        return self.filterByDate(user_id, shop_id, start_date, end_date, search, amount_type).count()
 
-    def getList(self, user_id, shop_id, page, num, start_date=None, end_date=None, search=None):
+    def getList(self, user_id, shop_id, page, num, start_date=None, end_date=None, search=None, amount_type=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filterByDate(user_id, shop_id, start_date, end_date, search).order_by('-create_time')[left:right])
+        return self.encoderList(self.filterByDate(user_id, shop_id, start_date, end_date, search, amount_type).order_by('-create_time')[left:right])
+
+    def getAmountTypes(self, user_id, shop_id, start_date=None, end_date=None, search=None):
+        return list(self.filterByDate(user_id, shop_id, start_date, end_date, search).values_list('amount_type', flat=True).distinct().order_by('amount_type'))
 
     def getAll(self, user_id, shop_id):
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_time'))

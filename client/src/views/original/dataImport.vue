@@ -112,11 +112,11 @@ const CLEAR_MODULES = [
   { name: '推广', delAll: delAllUserPromotion },
   { name: '推广明细', delAll: delAllUserPromotionDetail },
   { name: '扣费', delAll: delAllUserDeduction },
-  { name: '扣费(过滤)', delAll: delAllUserDeductionDiscard },
+  { name: '扣费过滤', delAll: delAllUserDeductionDiscard },
   { name: '聚合', delAll: delAllUserPolymerize },
-  { name: '聚合(过滤)', delAll: delAllUserPolymerizeDiscard },
+  { name: '聚合过滤', delAll: delAllUserPolymerizeDiscard },
   { name: '退货', delAll: delAllUserRefund },
-  { name: '退货(过滤)', delAll: delAllUserRefundGift },
+  { name: '退货过滤', delAll: delAllUserRefundGift },
   { name: '打款', delAll: delAllUserTransfer },
   { name: '采购', delAll: delAllUserPurchase }
 ]

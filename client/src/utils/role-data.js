@@ -76,15 +76,15 @@ export const MyRoleData = [{
   }, {
     id: 3005, label: '扣费管理'
   }, {
-    id: 3006, label: '扣费(过滤)'
+    id: 3006, label: '扣费过滤'
   }, {
     id: 3007, label: '聚合管理'
   }, {
-    id: 3008, label: '聚合(过滤)'
+    id: 3008, label: '聚合过滤'
   }, {
     id: 3009, label: '退货管理'
   }, {
-    id: 3010, label: '退货(过滤)'
+    id: 3010, label: '退货过滤'
   }, {
     id: 3011, label: '小额打款'
   }, {
