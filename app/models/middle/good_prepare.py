@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.forms.models import model_to_dict
 
-# 预备商品表
+# 上新商品表
 class GoodPrepareManager(models.Manager):
     def add(self, shop_id, name, origin, origin_type, stock, stock_type, good_note):
         return self.create(shop_id=shop_id, name=name, origin=origin, origin_type=origin_type, stock=stock, stock_type=stock_type, good_note=good_note)
