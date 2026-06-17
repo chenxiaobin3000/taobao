@@ -82,9 +82,10 @@ class ReceiptOCR:
                     raise ValueError(f'未识别到发票项目，识别内容：{preview}')
                 raise ValueError('未识别到发票项目')
         return {
+            'receipt_id': cls._parse_receipt_id(text),
             'create_date': cls._parse_date(text),
             'project_id': project['id'],
-            'project_num': cls._parse_num(text),
+            'project_num': cls._parse_num(text, project.get('project_name')),
             'amount': cls._parse_amount(text),
             'tax': cls._parse_tax(text),
             'tax_rate': cls._parse_tax_rate(text),
@@ -113,10 +114,42 @@ class ReceiptOCR:
         return cls._ocr
 
     @staticmethod
-    def _parse_date(text):
+    def _parse_receipt_id(text):
         patterns = [
-            r'开票日期[:：]?\s*(\d{4})年(\d{1,2})月(\d{1,2})日',
-            r'日期[:：]?\s*(\d{4})年(\d{1,2})月(\d{1,2})日',
+            r'发票\s*号码\s*[:：]?\s*([0-9]{8,20})',
+            r'发票\s*号\s*码\s*[:：]?\s*([0-9]{8,20})',
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                return match.group(1)[:20]
+
+        compact_text = re.sub(r'\s+', '', text)
+        compact_patterns = [
+            r'发票号码[:：]?([0-9]{8,20})',
+            r'发票代码[:：]?[0-9]{8,12}发票号码[:：]?([0-9]{8,20})',
+        ]
+        for pattern in compact_patterns:
+            match = re.search(pattern, compact_text)
+            if match:
+                return match.group(1)[:20]
+
+        numbers = re.findall(r'\b([0-9]{20})\b', text)
+        if numbers:
+            return numbers[0][:20]
+        spaced_numbers = re.findall(r'(?<![0-9])((?:[0-9]\s*){20})(?![0-9])', text)
+        if spaced_numbers:
+            return re.sub(r'\s+', '', spaced_numbers[0])[:20]
+        raise ValueError('未识别到发票号码')
+
+    @staticmethod
+    def _parse_date(text):
+        text = ReceiptOCR._compact_number_spaces(text)
+        patterns = [
+            r'开票日期[:：]?\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日',
+            r'日期[:：]?\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日',
+            r'(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日',
+            r'(?<!\d)(20\d{2})\D{1,4}(\d{1,2})\D{1,4}(\d{1,2})(?!\d)',
             r'(\d{4})[-./](\d{1,2})[-./](\d{1,2})'
         ]
         for pattern in patterns:
@@ -127,11 +160,70 @@ class ReceiptOCR:
         raise ValueError('未识别到开票日期')
 
     @staticmethod
-    def _parse_num(text):
+    def _parse_num(text, project_name=None):
         match = re.search(r'数量[:：]?\s*(\d+)', text)
         if match:
             return int(match.group(1))
+        if project_name:
+            count = ReceiptOCR._count_project_rows(text, project_name)
+            if count > 1:
+                return count
+            amount_count = ReceiptOCR._parse_num_by_amount(text, project_name)
+            if amount_count > 1:
+                return amount_count
         return 1
+
+    @staticmethod
+    def _count_project_rows(text, project_name):
+        norm_project = ReceiptOCR._normalize_match_text(project_name)
+        if not norm_project:
+            return 1
+        count = 0
+        for line in re.split(r'[\r\n]+', text):
+            if ReceiptOCR._match_keyword(ReceiptOCR._normalize_match_text(line), project_name):
+                count += 1
+        if count > 1:
+            return count
+
+        norm_text = ReceiptOCR._normalize_match_text(text)
+        count = norm_text.count(norm_project)
+        return count if count > 0 else 1
+
+    @staticmethod
+    def _parse_num_by_amount(text, project_name):
+        amount = ReceiptOCR._parse_amount(text)
+        tax = ReceiptOCR._parse_tax(text)
+        if amount <= 0:
+            return 1
+        for line in re.split(r'[\r\n]+', text):
+            if not ReceiptOCR._match_keyword(ReceiptOCR._normalize_match_text(line), project_name):
+                continue
+            unit_price = ReceiptOCR._parse_unit_price_from_line(line, amount, tax)
+            if unit_price <= 0:
+                continue
+            count = amount / unit_price
+            rounded_count = int(count.to_integral_value())
+            if rounded_count > 1 and abs(count - rounded_count) <= Decimal('0.02'):
+                return rounded_count
+        return 1
+
+    @staticmethod
+    def _parse_unit_price_from_line(line, amount, tax):
+        compact_line = re.sub(r'\s+', '', line)
+        tax_text = format(tax, 'f').rstrip('0').rstrip('.')
+        if tax_text:
+            tax_index = compact_line.find(tax_text)
+            if tax_index >= 0:
+                tail = compact_line[tax_index + len(tax_text):]
+                tail_number = re.search(r'([0-9]+(?:\.[0-9]+)?)', tail)
+                if tail_number:
+                    return Decimal(tail_number.group(1))
+
+        numbers = [Decimal(value) for value in re.findall(r'[0-9]+(?:\.[0-9]+)?', line)]
+        candidates = [value for value in numbers if value > 0 and value < amount and value != tax]
+        if candidates:
+            return candidates[-1]
+        return Decimal('0.00')
 
     @staticmethod
     def _parse_project_name(text):
@@ -155,6 +247,7 @@ class ReceiptOCR:
 
     @staticmethod
     def _parse_amount(text):
+        text = ReceiptOCR._compact_number_spaces(text)
         match = re.search(r'合\s*计\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)', text)
         if match:
             return Decimal(match.group(1)).quantize(Decimal('0.01'))
@@ -165,6 +258,7 @@ class ReceiptOCR:
 
     @staticmethod
     def _parse_tax(text):
+        text = ReceiptOCR._compact_number_spaces(text)
         match = re.search(r'合\s*计\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)\s*[￥¥]?\s*([0-9]+(?:\.[0-9]+)?)', text)
         if match:
             return Decimal(match.group(2)).quantize(Decimal('0.01'))
@@ -175,6 +269,7 @@ class ReceiptOCR:
 
     @staticmethod
     def _parse_tax_rate(text):
+        text = ReceiptOCR._compact_number_spaces(text)
         match = re.search(r'(\d+)\s*%', text)
         if not match:
             return 0
@@ -194,6 +289,9 @@ class ReceiptOCR:
             return tax_ids[0][:20]
         if len(tax_ids) == 1 and tax_ids[0] != ReceiptOCR._parse_seller_id(text):
             return tax_ids[0][:20]
+        spaced_tax_ids = ReceiptOCR._parse_spaced_tax_ids(text)
+        if spaced_tax_ids:
+            return spaced_tax_ids[0][:20]
         return ''
 
     @staticmethod
@@ -218,6 +316,11 @@ class ReceiptOCR:
         tax_ids = re.findall(r'(?:纳税人识别号|统一社会信用代码|税号)[:：]\s*([0-9A-Z]{15,20})', text)
         if tax_ids:
             return tax_ids[-1][:20]
+        spaced_tax_ids = ReceiptOCR._parse_spaced_tax_ids(text)
+        if spaced_tax_ids:
+            if len(spaced_tax_ids) >= 2:
+                return spaced_tax_ids[1][:20]
+            return spaced_tax_ids[0][:20]
         return ''
 
     @staticmethod
@@ -237,20 +340,125 @@ class ReceiptOCR:
         match = re.search(r'购买方信息[\s\S]{0,80}?名称[:：]\s*([^\n]+)', text)
         if not match:
             match = re.search(r'名称[:：]\s*([^\n]+)', text)
-        if not match:
-            raise ValueError('未识别到抬头')
-        name = re.split(r'(销售方信息|纳税人识别号|统一社会信用代码|税号|地址|电话|开户行|账号)', match.group(1))[0].strip()
-        if not name:
-            raise ValueError('未识别到抬头')
-        return name[:20]
+        if match:
+            name = re.split(r'(销售方信息|纳税人识别号|统一社会信用代码|税号|地址|电话|开户行|账号)', match.group(1))[0].strip()
+            name = ReceiptOCR._clean_party_name(name)
+            if name:
+                return name[:20]
+        names = ReceiptOCR._parse_pdf_party_names(text)
+        if names:
+            return names[0][:20]
+        raise ValueError('未识别到抬头')
 
     @staticmethod
     def _parse_seller_name(text):
         match = re.search(r'销售方信息[\s\S]{0,120}?名称[:：]\s*([^\n]+)', text)
-        if not match:
+        if match:
+            name = re.split(r'(购买方信息|纳税人识别号|统一社会信用代码|税号|地址|电话|开户行|账号)', match.group(1))[0].strip()
+            name = ReceiptOCR._clean_party_name(name)
+            if name:
+                return name[:20]
+        names = ReceiptOCR._parse_pdf_party_names(text)
+        if len(names) >= 2:
+            return names[1][:20]
+        return ''
+
+    @staticmethod
+    def _parse_spaced_tax_ids(text):
+        text = ReceiptOCR._compact_number_spaces(text)
+        values = []
+        for match in re.finditer(r'(?<![0-9A-Z])((?:[0-9A-Z]\s*){15,20})', text):
+            value = re.sub(r'\s+', '', match.group(1))
+            if ReceiptOCR._is_tax_id_like(value) and not ReceiptOCR._is_bank_account_match(text, match):
+                values.append(value)
+        return values
+
+    @staticmethod
+    def _parse_pdf_party_names(text):
+        text = ReceiptOCR._compact_number_spaces(text)
+        tax_matches = []
+        for match in re.finditer(r'(?<![0-9A-Z])((?:[0-9A-Z]\s*){15,20})', text):
+            value = re.sub(r'\s+', '', match.group(1))
+            if ReceiptOCR._is_tax_id_like(value) and not ReceiptOCR._is_bank_account_match(text, match):
+                tax_matches.append(match)
+        if len(tax_matches) == 1:
+            return ReceiptOCR._parse_single_tax_party_names(text[:tax_matches[0].start()])
+        if len(tax_matches) < 2:
+            return []
+        buyer_segment = text[:tax_matches[0].start()]
+        seller_segment = text[tax_matches[0].end():tax_matches[1].start()]
+        names = []
+        for segment in [buyer_segment, seller_segment]:
+            name = ReceiptOCR._extract_company_name(segment)
+            if name:
+                names.append(name)
+        return names
+
+    @staticmethod
+    def _parse_single_tax_party_names(text):
+        text = re.sub(r'\s+', '', text)
+        text = re.sub(r'\d{4}年\d{1,2}月\d{1,2}日', '', text)
+        buyer_matches = list(re.finditer(r'[\u4e00-\u9fa5]{2,10}[（(]个人[）)]', text))
+        if buyer_matches:
+            buyer_match = buyer_matches[-1]
+            buyer_name = ReceiptOCR._clean_party_name(buyer_match.group(0))
+            seller_name = ReceiptOCR._extract_company_name(text[buyer_match.end():])
+            names = []
+            if buyer_name:
+                names.append(buyer_name)
+            if seller_name:
+                names.append(seller_name)
+            return names
+
+        company_matches = list(re.finditer(r'[\u4e00-\u9fa5（）()]{2,40}?(?:有限公司|公司)', text))
+        if not company_matches:
+            return []
+
+        seller_match = company_matches[-1]
+        seller_name = ReceiptOCR._clean_party_name(seller_match.group(0))
+        buyer_segment = text[:seller_match.start()]
+        buyer_name = ''
+        if len(company_matches) > 1:
+            buyer_name = ReceiptOCR._clean_party_name(company_matches[-2].group(0))
+
+        names = []
+        if buyer_name:
+            names.append(buyer_name)
+        if seller_name:
+            names.append(seller_name)
+        return names
+
+    @staticmethod
+    def _is_tax_id_like(value):
+        if not value:
+            return False
+        if re.search(r'[A-Z]', value) and re.search(r'\d', value) and 15 <= len(value) <= 20:
+            return True
+        return value.isdigit() and len(value) in [15, 18]
+
+    @staticmethod
+    def _is_bank_account_match(text, match):
+        prefix = re.sub(r'\s+', '', text[max(0, match.start() - 20):match.start()])
+        return bool(re.search(r'(银行账号|银行帐号|账号|帐号)[:：;；]?$', prefix))
+
+    @staticmethod
+    def _extract_company_name(text):
+        text = re.sub(r'\s+', '', text)
+        text = re.sub(r'\d{4}年\d{1,2}月\d{1,2}日', '', text)
+        matches = re.findall(r'[\u4e00-\u9fa5（）()]{2,40}?(?:有限公司|公司|大学|学院|学校|中学|小学|个人[）)]?)', text)
+        if not matches:
             return ''
-        name = re.split(r'(购买方信息|纳税人识别号|统一社会信用代码|税号|地址|电话|开户行|账号)', match.group(1))[0].strip()
+        return ReceiptOCR._clean_party_name(matches[-1])
+
+    @staticmethod
+    def _clean_party_name(name):
         if not name:
+            return ''
+        name = re.sub(r'\s+', '', name)
+        name = re.sub(r'^(名称[:：]?)+', '', name)
+        name = re.sub(r'^.*(?:价税合计|项目名称|规格型号|单位|数量|单价|金额|税率|税额|合计|备注|开票人)', '', name)
+        name = re.split(r'(项目名称|规格型号|单位|数量|单价|金额|税率|税额|合计|价税合计|备注|开票人)', name)[0]
+        if not name or name in ['名称', '购买方信息', '销售方信息']:
             return ''
         return name[:20]
 
@@ -277,6 +485,8 @@ class ReceiptOCR:
     @staticmethod
     def _match_keyword(norm_text, keyword):
         norm_keyword = ReceiptOCR._normalize_match_text(keyword)
+        if len(norm_keyword) < 2:
+            return False
         return bool(norm_keyword and norm_keyword in norm_text)
 
     @staticmethod
@@ -291,6 +501,19 @@ class ReceiptOCR:
         if not value:
             return ''
         return re.sub(r'\s+', ' ', str(value)).strip()
+
+    @staticmethod
+    def _compact_number_spaces(value):
+        if not value:
+            return ''
+        value = str(value)
+        previous = None
+        while previous != value:
+            previous = value
+            value = re.sub(r'(?<=[0-9])\s+(?=[0-9])', '', value)
+            value = re.sub(r'(?<=[0-9])\s+(?=\.)', '', value)
+            value = re.sub(r'(?<=\.)\s+(?=[0-9])', '', value)
+        return value
 
     @staticmethod
     def _format_projects(receipt_items):

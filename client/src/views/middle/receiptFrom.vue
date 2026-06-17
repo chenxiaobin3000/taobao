@@ -29,7 +29,7 @@
     </el-form>
 
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="项目名称" width="200px">
+      <el-table-column align="center" label="项目名称" width="160px">
         <template slot-scope="scope">
           {{ projectId2Name(scope.row.project_id) }}
         </template>
@@ -54,7 +54,7 @@
           {{ scope.row.tax_rate }}%
         </template>
       </el-table-column>
-      <el-table-column align="center" label="抬头" width="240px">
+      <el-table-column align="center" label="抬头" width="300px">
         <template slot-scope="scope">
           {{ scope.row.company }}
         </template>
@@ -62,6 +62,11 @@
       <el-table-column align="center" label="税号" width="180px">
         <template slot-scope="scope">
           {{ scope.row.company_id }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="发票号码" width="160px">
+        <template slot-scope="scope">
+          {{ scope.row.receipt_id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="填报人" width="80px">
