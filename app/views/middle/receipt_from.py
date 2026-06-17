@@ -35,6 +35,7 @@ def add(request):
             text = ReceiptOCR.get_text(lines)
             items = ReceiptItem.objects.getList(1, 1000) or []
             data = ReceiptOCR.parse_common(text, items, create_receipt_item)
+            print('[receipt_from_ocr]', upload_file.name, text, json.dumps(data, ensure_ascii=False, default=str), flush=True)
             validate_receipt_owner(ReceiptOCR._parse_receipt_name(text), ReceiptOCR._parse_company_id(text))
             if ReceiptFrom.objects.existsReceipt(data['receipt_id']):
                 return JsonResponse(success({'duplicate': True}), encoder=MyJSONEncoder)

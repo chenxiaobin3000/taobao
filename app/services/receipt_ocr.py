@@ -445,7 +445,7 @@ class ReceiptOCR:
     def _extract_company_name(text):
         text = re.sub(r'\s+', '', text)
         text = re.sub(r'\d{4}年\d{1,2}月\d{1,2}日', '', text)
-        matches = re.findall(r'[\u4e00-\u9fa5（）()]{2,40}?(?:有限公司|公司|大学|学院|学校|中学|小学|个人[）)]?)', text)
+        matches = re.findall(r'[\u4e00-\u9fa5（）()]{2,40}?(?:有限公司|公司|大学|学院|学校|中学|小学|销售部|经营部|商行|工作室|厂|店|个人[）)]?)', text)
         if not matches:
             return ''
         return ReceiptOCR._clean_party_name(matches[-1])
@@ -458,7 +458,7 @@ class ReceiptOCR:
         name = re.sub(r'^(名称[:：]?)+', '', name)
         name = re.sub(r'^.*(?:价税合计|项目名称|规格型号|单位|数量|单价|金额|税率|税额|合计|备注|开票人)', '', name)
         name = re.split(r'(项目名称|规格型号|单位|数量|单价|金额|税率|税额|合计|价税合计|备注|开票人)', name)[0]
-        if not name or name in ['名称', '购买方信息', '销售方信息']:
+        if len(name) < 2 or name in ['名称', '购买方信息', '销售方信息', '购', '买', '销', '售']:
             return ''
         return name[:20]
 

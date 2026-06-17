@@ -14,93 +14,66 @@ def build_project_map():
     return {item['id']: item['project_name'] for item in items}
 
 
-def append_receipts(result, receipts, project_map, key):
-    for receipt in receipts:
-        row = get_row(result, receipt.create_date)
-        project_name = project_map.get(receipt.project_id, '异常')
-        text = f'{project_name}*{receipt.project_num}'
-        if row[key]:
-            row[key] += f';{text}'
-        else:
-            row[key] = text
-        if key == 'to_text':
-            row['has_to'] = True
-
-
-def get_row(result, create_date):
-    date_key = create_date.strftime('%Y-%m-%d')
-    if date_key not in result:
-        result[date_key] = {
-            'create_date': date_key,
-            'from_text': '',
-            'to_text': '',
-            'check_text': '',
-            'check_success': True,
-            '_missing': {},
-            'has_to': False
+def add_project_num(result, receipt, key):
+    if receipt.project_id not in result:
+        result[receipt.project_id] = {
+            'project_id': receipt.project_id,
+            'from_num': 0,
+            'to_num': 0
         }
-    return result[date_key]
-
-
-def append_text(row, key, text):
-    if row[key]:
-        row[key] += f';{text}'
-    else:
-        row[key] = text
-
-
-def build_events(from_receipts, to_receipts):
-    events = []
-    for receipt in from_receipts:
-        events.append((receipt.create_date, 0, receipt.id, receipt))
-    for receipt in to_receipts:
-        events.append((receipt.create_date, 1, receipt.id, receipt))
-    return sorted(events, key=lambda item: (item[0], item[1], item[2]))
-
-
-def format_missing(missing, project_map):
-    return ';'.join([f"{project_map.get(project_id, '异常')}*{num}" for project_id, num in missing.items() if num > 0])
-
-
-def finalize_rows(result, project_map):
-    for row in result.values():
-        missing_text = format_missing(row['_missing'], project_map)
-        if missing_text:
-            row['check_text'] = missing_text
-            row['check_success'] = False
-        elif row['has_to']:
-            row['check_text'] = '已开'
-            row['check_success'] = True
-        row.pop('_missing')
+    result[receipt.project_id][key] += receipt.project_num
 
 
 def build_invoice_list(from_receipts, to_receipts, project_map):
     result = {}
-    available = {}
-    missing = {}
-    for create_date, receipt_type, pk, receipt in build_events(from_receipts, to_receipts):
-        row = get_row(result, create_date)
-        project_name = project_map.get(receipt.project_id, '异常')
-        text = f'{project_name}*{receipt.project_num}'
-        if receipt_type == 0:
-            append_text(row, 'from_text', text)
-            available[receipt.project_id] = available.get(receipt.project_id, 0) + receipt.project_num
-            continue
+    for receipt in from_receipts:
+        add_project_num(result, receipt, 'from_num')
+    for receipt in to_receipts:
+        add_project_num(result, receipt, 'to_num')
 
-        append_text(row, 'to_text', text)
-        row['has_to'] = True
-        current = available.get(receipt.project_id, 0)
-        if current >= receipt.project_num:
-            available[receipt.project_id] = current - receipt.project_num
+    datas = []
+    for project_id, item in result.items():
+        from_num = item['from_num']
+        to_num = item['to_num']
+        has_from = from_num > 0
+        has_to = to_num > 0
+        check_text = ''
+        check_success = True
+        if has_to and has_from:
+            if from_num >= to_num:
+                check_text = '已开'
+            else:
+                check_text = f'缺少{to_num - from_num}'
+                check_success = False
+        elif has_to:
+            check_text = f'缺少{to_num}'
+            check_success = False
+
+        if has_to and has_from:
+            sort_type = 0
+        elif has_to:
+            sort_type = 1
         else:
-            available[receipt.project_id] = 0
-            missing_num = receipt.project_num - current
-            missing[receipt.project_id] = missing.get(receipt.project_id, 0) + missing_num
-            row['_missing'][receipt.project_id] = row['_missing'].get(receipt.project_id, 0) + missing_num
-    finalize_rows(result, project_map)
-    datas = sorted(result.values(), key=lambda item: item['create_date'], reverse=True)
-    missing_text = format_missing(missing, project_map)
-    return datas, missing_text
+            sort_type = 2
+
+        project_name = project_map.get(project_id, '异常')
+        datas.append({
+            'project_id': project_id,
+            'to_text': project_name if has_to else '',
+            'to_num': to_num if has_to else '',
+            'from_text': project_name if has_from else '',
+            'from_num': from_num if has_from else '',
+            'check_text': check_text,
+            'check_success': check_success,
+            'receipt_note': '',
+            'has_to': has_to,
+            '_sort_type': sort_type
+        })
+
+    datas = sorted(datas, key=lambda item: (item['_sort_type'], item['project_id']))
+    for item in datas:
+        item.pop('_sort_type')
+    return datas
 
 
 @require_POST
@@ -116,10 +89,9 @@ def getList(request):
     project_map = build_project_map()
     from_receipts = ReceiptFrom.objects.filter(create_date__gte=start_date, create_date__lte=end_date).order_by('create_date', 'id')
     to_receipts = ReceiptTo.objects.filter(create_date__gte=start_date, create_date__lte=end_date).order_by('create_date', 'id')
-    datas, missing_text = build_invoice_list(from_receipts, to_receipts, project_map)
+    datas = build_invoice_list(from_receipts, to_receipts, project_map)
     response = success({
             'total': len(datas),
-            'list': datas,
-            'missing': missing_text
+            'list': datas
         })
     return JsonResponse(response, encoder=MyJSONEncoder)

@@ -15,32 +15,38 @@
       </el-row>
     </el-form>
 
-    <div class="missing-summary">
-      <span>缺失: </span><span :style="{ color: missing ? 'red' : 'green' }">{{ missingSummary }}</span>
-    </div>
-
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
-      <el-table-column align="center" label="日期" width="140px">
+      <el-table-column align="left" header-align="center" label="出项">
         <template slot-scope="scope">
-          {{ scope.row.create_date }}
+          {{ scope.row.to_text }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="数量" width="80px">
+        <template slot-scope="scope">
+          {{ scope.row.to_num }}
         </template>
       </el-table-column>
       <el-table-column align="left" header-align="center" label="进项">
         <template slot-scope="scope">
-          <div v-for="(item, index) in splitText(scope.row.from_text)" :key="index">{{ item }}</div>
+          {{ scope.row.from_text }}
         </template>
       </el-table-column>
-      <el-table-column align="left" header-align="center" label="出项">
+      <el-table-column align="center" label="数量" width="80px">
         <template slot-scope="scope">
-          <div v-for="(item, index) in splitText(scope.row.to_text)" :key="index">{{ item }}</div>
+          {{ scope.row.from_num }}
         </template>
       </el-table-column>
       <el-table-column align="left" header-align="center" label="校验" width="180px">
         <template slot-scope="scope">
-          <div v-for="(item, index) in splitText(scope.row.check_text)" :key="index" :style="{ color: scope.row.check_success ? 'green' : 'red' }">{{ item }}</div>
+          <span :style="{ color: scope.row.check_success ? 'green' : 'red' }">{{ scope.row.check_text }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="100px">
+      <el-table-column align="left" header-align="center" label="备注">
+        <template slot-scope="scope">
+          {{ scope.row.receipt_note }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作（关联）" width="120px">
         <template slot-scope="{row}">
           <el-button v-if="row.has_to" type="primary" size="mini" @click="handleRelate(row)">关联</el-button>
         </template>
@@ -58,7 +64,6 @@ export default {
       tableHeight: 600,
       list: [],
       total: 0,
-      missing: '',
       loading: false,
       listQuery: {
         sdate: '',
@@ -101,7 +106,6 @@ export default {
       ).then(response => {
         this.total = response.data.data.total
         this.list = response.data.data.list || []
-        this.missing = response.data.data.missing || ''
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -109,28 +113,10 @@ export default {
       })
     },
     handleRelate(row) {
-    },
-    splitText(text) {
-      if (!text) {
-        return []
-      }
-      return text.split(';')
-    }
-  },
-  computed: {
-    missingSummary() {
-      if (!this.missing) {
-        return '无'
-      }
-      return this.missing.split(';').map(item => `<${item}>`).join('；')
     }
   }
 }
 </script>
 
 <style scoped>
-.missing-summary {
-  padding: 0 1% 8px 1%;
-  font-size: 13px;
-}
 </style>
