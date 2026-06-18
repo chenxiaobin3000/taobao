@@ -8,3 +8,11 @@ export function getReceiptManagerList(data) {
     data
   })
 }
+
+export function setReceiptMap(data) {
+  return request({
+    url: `${path}/setMap`,
+    method: 'post',
+    data
+  })
+}

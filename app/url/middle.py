@@ -40,6 +40,7 @@ url_middle = [
 
     # 发票管理
     path('api/receipt_manager/getList', receipt_manager.getList),
+    path('api/receipt_manager/setMap', receipt_manager.setMap),
 
     # 发票
     path('api/receipt_to/add', receipt_to.add),

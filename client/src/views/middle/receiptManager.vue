@@ -48,15 +48,37 @@
       </el-table-column>
       <el-table-column align="center" label="操作（关联）" width="120px">
         <template slot-scope="{row}">
-          <el-button v-if="row.has_to" type="primary" size="mini" @click="handleRelate(row)">关联</el-button>
+          <el-button v-if="row.has_from && !row.has_to" type="primary" size="mini" @click="handleRelate(row)">关联</el-button>
         </template>
       </el-table-column>
     </el-table>
+
+    <el-dialog title="关联发票项目" :visible.sync="mapDialog.visible" width="420px">
+      <el-form label-width="80px">
+        <el-form-item label="进项项目">
+          <span>{{ mapDialog.itemName }}</span>
+        </el-form-item>
+        <el-form-item label="关联出项">
+          <el-select v-model="mapDialog.mapId" placeholder="请选择出项项目" style="width: 100%;">
+            <el-option
+              v-for="item in relateOptions"
+              :key="item.project_id"
+              :label="relateOptionLabel(item)"
+              :value="item.project_id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="mapDialog.visible = false">取消</el-button>
+        <el-button type="primary" :loading="mapDialog.loading" @click="confirmRelate">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getReceiptManagerList } from '@/api/middle/receiptManager'
+import { getReceiptManagerList, setReceiptMap } from '@/api/middle/receiptManager'
 
 export default {
   data() {
@@ -65,6 +87,13 @@ export default {
       list: [],
       total: 0,
       loading: false,
+      mapDialog: {
+        visible: false,
+        loading: false,
+        itemId: 0,
+        itemName: '',
+        mapId: ''
+      },
       listQuery: {
         sdate: '',
         edate: ''
@@ -113,6 +142,43 @@ export default {
       })
     },
     handleRelate(row) {
+      this.mapDialog = {
+        visible: true,
+        loading: false,
+        itemId: row.project_id,
+        itemName: row.from_text,
+        mapId: ''
+      }
+    },
+    relateOptionLabel(row) {
+      if (row.check_success) {
+        return row.to_text
+      }
+      return `${row.to_text}（${row.check_text}）`
+    },
+    confirmRelate() {
+      if (!this.mapDialog.mapId) {
+        this.$message({ type: 'warning', message: '请选择出项项目' })
+        return
+      }
+      this.mapDialog.loading = true
+      setReceiptMap({
+        item_id: this.mapDialog.itemId,
+        map_id: this.mapDialog.mapId
+      }).then(() => {
+        this.$message({ type: 'success', message: '关联成功' })
+        this.mapDialog.visible = false
+        this.getInvoiceList()
+      }).finally(() => {
+        this.mapDialog.loading = false
+      })
+    }
+  },
+  computed: {
+    relateOptions() {
+      return this.list.filter(item => {
+        return item.has_to && (!item.has_from || !item.check_success) && item.project_id !== this.mapDialog.itemId
+      })
     }
   }
 }

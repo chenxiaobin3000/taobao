@@ -227,6 +227,9 @@ class ReceiptOCR:
 
     @staticmethod
     def _parse_project_name(text):
+        star_project_name = ReceiptOCR._parse_star_project_name(text)
+        if star_project_name:
+            return star_project_name
         patterns = [
             r'项目名称[\s\S]{0,80}?([^\s￥¥\d]{1,20}\*[^ \t\r\n￥¥]{1,30})',
             r'\*[^*\s]{1,20}\*[^ \t\r\n￥¥]{1,30}',
@@ -293,6 +296,22 @@ class ReceiptOCR:
         if spaced_tax_ids:
             return spaced_tax_ids[0][:20]
         return ''
+
+    @staticmethod
+    def _parse_star_project_name(text):
+        match = re.search(
+            r'\*\s*((?:[\u4e00-\u9fa5A-Za-z]\s*){1,20})'
+            r'\*\s*((?:[\u4e00-\u9fa5A-Za-z]\s*){1,30}?)'
+            r'(?=\s+\d\s*%|\s+\d+(?:\s*\.\s*\d+)?|[\r\n]|$)',
+            text
+        )
+        if not match:
+            return ''
+        category = re.sub(r'\s+', '', match.group(1))
+        name = re.sub(r'\s+', '', match.group(2))
+        if not category or not name:
+            return ''
+        return f'*{category}*{name}'[:20]
 
     @staticmethod
     def _parse_party_text(text, start_keyword, end_keyword):
@@ -465,15 +484,25 @@ class ReceiptOCR:
     @staticmethod
     def _match_project(text, receipt_items):
         norm_text = ReceiptOCR._normalize_match_text(text)
+        project_name = ReceiptOCR._parse_star_project_name(text)
+        norm_project_name = ReceiptOCR._normalize_match_text(project_name)
+        if norm_project_name:
+            for item in receipt_items:
+                item_name = ReceiptOCR._normalize_match_text(item.get('project_name'))
+                if item_name == norm_project_name:
+                    return item
+
+        candidates = []
         for item in receipt_items:
             project_name = item.get('project_name')
             project_note = item.get('project_note')
             for keyword in ReceiptOCR._iter_keywords(project_name):
-                if ReceiptOCR._match_keyword(norm_text, keyword):
-                    return item
+                candidates.append((len(ReceiptOCR._normalize_match_text(keyword)), item, keyword))
             for keyword in ReceiptOCR._iter_keywords(project_note):
-                if ReceiptOCR._match_keyword(norm_text, keyword):
-                    return item
+                candidates.append((len(ReceiptOCR._normalize_match_text(keyword)), item, keyword))
+        for _, item, keyword in sorted(candidates, key=lambda value: value[0], reverse=True):
+            if ReceiptOCR._match_keyword(norm_text, keyword):
+                return item
         return None
 
     @staticmethod
