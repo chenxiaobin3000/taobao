@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
+from app.models.middle.operational_cost import OperationalCost
 from app.models.report.native_order import NativeOrder
 from app.models.report.native_fake import NativeFake
 from app.models.report.native_miscellaneous import NativeMiscellaneous
@@ -37,8 +38,15 @@ def getList(request):
     fake = 0 # 刷单成本
     fake_deduction = 0 # 刷单扣款
     misc = 0 # 杂项
+    operational = 0 # 运营成本
 
     now_date = timezone.now()
+    operational_month, operational = OperationalCost.objects.groupByMonth(
+        request.user_id,
+        datetime(2025, 1, 1).date(),
+        now_date.date()
+    )
+
     datas_list = {}
     for shop_id in shop_ids:
         # 生成月份列表
@@ -206,6 +214,8 @@ def getList(request):
         'fake': round(fake, 1),
         'fake_deduction': round(fake_deduction, 1),
         'misc': round(misc, 1),
+        'operational': round(operational, 1),
+        'operational_month': operational_month,
         'list': datas
     }
     return JsonResponse(response, encoder=MyJSONEncoder)

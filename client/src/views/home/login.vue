@@ -200,6 +200,23 @@ $cursor: #fff;
     text-align: center;
     color: #999;
   }
+
+  .login-check {
+    .el-checkbox__input.is-checked .el-checkbox__inner,
+    .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+      background-color: #000;
+      border-color: #000;
+    }
+
+    .el-checkbox__input.is-checked + .el-checkbox__label {
+      color: #000;
+    }
+
+    .el-checkbox__input.is-focus .el-checkbox__inner,
+    .el-checkbox__inner:hover {
+      border-color: #000;
+    }
+  }
 }
 </style>
 

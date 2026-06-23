@@ -24,8 +24,6 @@ export const MyRoleData = [{
 }, {
   id: 6000, label: '辅助工具',
   children: [{
-    id: 6001, label: '杂项管理'
-  }, {
     id: 6002, label: '订单管理'
   }, {
     id: 6003, label: '刷单管理'
@@ -39,6 +37,10 @@ export const MyRoleData = [{
     id: 6007, label: '进项管理'
   }, {
     id: 6008, label: '出项管理'
+  }, {
+    id: 6001, label: '杂项管理'
+  }, {
+    id: 6009, label: '运营成本'
   }]
 }, {
   id: 4000, label: '存档数据',

@@ -1,5 +1,5 @@
 from django.urls import path
-from app.views.middle import deduction_summary, fake_summary, good_prepare, miscellaneous, order_summary, receipt_from, receipt_item, receipt_manager, receipt_to
+from app.views.middle import deduction_summary, fake_summary, good_prepare, miscellaneous, operational_cost, order_summary, receipt_from, receipt_item, receipt_manager, receipt_to
 
 url_middle = [
     # 扣款
@@ -25,6 +25,13 @@ url_middle = [
     path('api/misc/set', miscellaneous.set),
     path('api/misc/del', miscellaneous.delete),
     path('api/misc/getList', miscellaneous.getList),
+
+    # 运营成本
+    path('api/operational_cost/add', operational_cost.add),
+    path('api/operational_cost/addList', operational_cost.addList),
+    path('api/operational_cost/set', operational_cost.set),
+    path('api/operational_cost/del', operational_cost.delete),
+    path('api/operational_cost/getList', operational_cost.getList),
 
     # 扣款
     path('api/order_summary/flush', order_summary.flush),
