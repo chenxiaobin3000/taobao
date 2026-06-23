@@ -388,7 +388,7 @@ export default {
             let month_fake = 0
             let month_fake_deduction = 0
             let month_misc = 0
-            const month_operational = parseFloat(operationalMonth[key])
+            const month_operational = parseFloat(operationalMonth[key] || 0)
             this.shopList.forEach(v => {
               if (!this.checkedShops.includes(v.name)) {
                 return
