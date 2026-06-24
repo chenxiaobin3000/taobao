@@ -19,6 +19,8 @@ export const MyRoleData = [{
   }, {
     id: 5009, label: '采购汇总'
   }, {
+    id: 5011, label: '成本汇总'
+  }, {
     id: 5010, label: '报税汇总'
   }]
 }, {

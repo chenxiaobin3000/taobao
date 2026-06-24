@@ -444,6 +444,7 @@ export default {
             const expect = month_pending - month_pending_refund - month_pending_procure + month_pending_refund_procure + profit
             this.list.unshift({
               create_date: y + '年' + (m + 1) + '月汇总',
+              name: '合计',
               amount: amount.toFixed(1),
               income: income.toFixed(1),
               profit: profit.toFixed(1),
@@ -477,6 +478,7 @@ export default {
           const expect = pending - pending_refund - pending_procure + pending_refund_procure + profit
           this.list.unshift({
             create_date: y + '年汇总',
+            name: '合计',
             amount: amount.toFixed(1),
             income: income.toFixed(1),
             profit: profit.toFixed(1),
@@ -566,10 +568,12 @@ export default {
 <style lang="scss">
 .el-table .year-row {
   background-color: rgba(180, 180, 180, 0.3);
+  font-weight: bold;
 }
 
 .el-table .month-row {
   background-color: rgba(235, 235, 235, 0.3);
+  font-weight: bold;
 }
 
 .el-table .hidden-row {

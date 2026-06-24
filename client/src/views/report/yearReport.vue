@@ -101,7 +101,7 @@
           {{ scope.row.income }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="推广" width="80">
+      <el-table-column align="center" label="推广" width="90">
         <template slot-scope="scope">
           <strong>{{ scope.row.promotion }}</strong>
         </template>
@@ -126,7 +126,7 @@
           {{ scope.row.fake_deduction }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="未完结" width="70">
+      <el-table-column align="center" label="未完结" width="80">
         <template slot-scope="scope">
           <strong>{{ scope.row.pending }}</strong>
         </template>
@@ -146,7 +146,7 @@
           {{ scope.row.pending_refund_procure }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已完结" width="80">
+      <el-table-column align="center" label="已完结" width="90">
         <template slot-scope="scope">
           <strong>{{ scope.row.settled }}</strong>
         </template>
@@ -156,7 +156,7 @@
           {{ scope.row.settled_refund }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已完采购" width="70">
+      <el-table-column align="center" label="已完采购" width="80">
         <template slot-scope="scope">
           {{ scope.row.settled_procure }}
         </template>
@@ -166,7 +166,7 @@
           {{ scope.row.settled_refund_procure }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="已关闭" width="80">
+      <el-table-column align="center" label="已关闭" width="90">
         <template slot-scope="scope">
           <strong>{{ scope.row.close }}</strong>
         </template>
