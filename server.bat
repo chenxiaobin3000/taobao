@@ -1,7 +1,10 @@
 @echo off
-call backup.bat
-call clean.bat
-call migrate.bat
-call makemigrations.bat
-call migrate.bat
+
+for /d /r app %%d in (__pycache__) do (
+    if exist "%%d" rd /s /q "%%d"
+)
+
+python manage.py migrate
+python manage.py makemigrations app
+python manage.py migrate
 python manage.py runserver
