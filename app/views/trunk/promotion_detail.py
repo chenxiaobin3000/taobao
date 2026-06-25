@@ -17,10 +17,7 @@ def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     user_id = int(post.get('uid') or request.user_id)
-    try:
-        polymerizes = UserPromotionDetail.objects.getAll(user_id, shop_id)
-    except ValueError as e:
-        return JsonResponse(failed(str(e)), encoder=MyJSONEncoder)
+    polymerizes = UserPromotionDetail.objects.getAll(user_id, shop_id)
 
     if polymerizes:
         # 批量添加

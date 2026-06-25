@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -31,7 +32,10 @@ def addList(request):
         deal_cost = polymerize['dc']
         shop_cart = int(polymerize['sc'])
         favorites = int(polymerize['fa'])
-        roi = polymerize['roi']
+        roi = Decimal(str(polymerize['roi']))
+
+        if roi > 1000:
+            roi = 1000
 
         # 不存在就插入
         if UserPromotionDetail.objects.getByIdAndDate(user_id, shop_id, promotion_date, good_id):
