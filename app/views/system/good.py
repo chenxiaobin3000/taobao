@@ -1,8 +1,11 @@
 import json
+from datetime import datetime, timedelta
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
 from django.db import transaction
+from django.utils import timezone
 from app.json_encoder import MyJSONEncoder
+from app.models.middle.order_summary import OrderSummary
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
 from app.models.system.good_follow import GoodFollow
@@ -67,6 +70,12 @@ def flush(request):
                 if promotion:
                     Good.objects.setPromotionDate(good['id'], promotion['promotion_date'])
 
+    order_start_date = timezone.now() - timedelta(days=30)
+    promotion_start_date = datetime.now().date() - timedelta(days=30)
+    order_good_ids = OrderSummary.objects.getGoodIdsByDate(shop_id, order_start_date)
+    promotion_good_ids = PromotionDetail.objects.getGoodIdsByDate(shop_id, promotion_start_date)
+    GoodFollow.objects.refreshPriority(shop_id, order_good_ids, promotion_good_ids)
+
     response = success()
     return JsonResponse(response, encoder=MyJSONEncoder)
 
@@ -108,8 +117,9 @@ def getList(request):
     good_status = int(post.get('status'))
     follow = int(post.get('follow'))
     follow_ids = GoodFollow.objects.getGoodIds(shop_id)
+    follow_priority_map = GoodFollow.objects.getPriorityMap(shop_id)
     total = Good.objects.total(shop_id, search, good_type, good_status, follow, follow_ids)
-    datas = Good.objects.getList(shop_id, page, num, search, good_type, good_status, follow, follow_ids)
+    datas = Good.objects.getList(shop_id, page, num, search, good_type, good_status, follow, follow_ids, follow_priority_map)
     response = success({
             'total': total,
             'list': datas

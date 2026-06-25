@@ -74,10 +74,22 @@ class GoodManager(models.Manager):
     def total(self, shop_id, search=None, good_type=None, good_status=None, follow=0, follow_ids=None):
         return self.filterBySearch(shop_id, search, good_type, good_status, follow, follow_ids).count()
 
-    def getList(self, shop_id, page, num, search=None, good_type=None, good_status=None, follow=0, follow_ids=None):
+    def getList(self, shop_id, page, num, search=None, good_type=None, good_status=None, follow=0, follow_ids=None, follow_priority_map=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filterBySearch(shop_id, search, good_type, good_status, follow, follow_ids).order_by('-ctime')[left:right])
+        queryset = self.filterBySearch(shop_id, search, good_type, good_status, follow, follow_ids)
+        if follow == GoodFollowStatus.HAS_FOLLOW:
+            goods = list(queryset)
+            follow_priority_map = follow_priority_map or {}
+            goods.sort(key=lambda good: (follow_priority_map.get(good.good_id, 0), self.goodIdSortValue(good.good_id)), reverse=True)
+            return self.encoderList(goods[left:right])
+        return self.encoderList(queryset.order_by('-ctime')[left:right])
+
+    def goodIdSortValue(self, good_id):
+        try:
+            return int(good_id)
+        except (TypeError, ValueError):
+            return 0
 
     def getAll(self, shop_id):
         return self.encoderList(self.filter(shop_id=shop_id).order_by('good_id'))

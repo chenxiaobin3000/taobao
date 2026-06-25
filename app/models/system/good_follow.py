@@ -21,8 +21,35 @@ class GoodFollowManager(models.Manager):
     def getGoodIds(self, shop_id):
         return list(self.filter(shop_id=shop_id).values_list('good_id', flat=True))
 
+    def getPriorityMap(self, shop_id):
+        return {follow.good_id: follow.priority for follow in self.filter(shop_id=shop_id)}
+
     def getAllByShop(self, shop_id):
         return self.encoderList(self.filter(shop_id=shop_id))
+
+    def refreshPriority(self, shop_id, order_good_ids, promotion_good_ids):
+        order_good_ids = set(order_good_ids)
+        promotion_good_ids = set(promotion_good_ids)
+        active_good_ids = order_good_ids | promotion_good_ids
+        follows = {follow.good_id: follow for follow in self.filter(shop_id=shop_id)}
+        for good_id in active_good_ids:
+            if good_id in order_good_ids and good_id in promotion_good_ids:
+                priority = 8
+            elif good_id in order_good_ids:
+                priority = 10
+            else:
+                priority = 6
+            follow = follows.get(good_id)
+            if follow:
+                if follow.priority != priority:
+                    follow.priority = priority
+                    follow.save(update_fields=['priority'])
+            else:
+                self.add(shop_id, good_id, priority)
+        for good_id, follow in follows.items():
+            if good_id not in active_good_ids and follow.priority != 5:
+                follow.priority = 5
+                follow.save(update_fields=['priority'])
 
     def total(self, shop_id):
         return self.filter(shop_id=shop_id).count()

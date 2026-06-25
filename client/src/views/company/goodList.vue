@@ -51,7 +51,16 @@
       </el-table-column>
       <el-table-column align="center" label="优先级" width="70">
         <template slot-scope="{row}">
-          <a v-if="row.show" @click="handleEditPriority(row)">{{ row.priority }}</a>
+          <span v-if="row.show" class="priority-cell">
+            <a @click="handleEditPriority(row)">{{ row.priority }}</a>
+            <el-button
+              v-if="row.priority !== 0 && row.follow_id !== 0"
+              class="priority-delete"
+              icon="el-icon-close"
+              circle
+              @click.stop="handleDeletePriority(row)"
+            />
+          </span>
           <el-input v-else v-model="followTemp.priority" @keyup.enter.native="handleSetPriority" />
         </template>
       </el-table-column>
@@ -456,6 +465,13 @@ export default {
         })
       }
     },
+    handleDeletePriority(row) {
+      delGoodFollow({
+        id: row.follow_id
+      }).then(() => {
+        this.getGoodFollowList()
+      })
+    },
     updateData() {
       setGood({
         id: this.temp.id,
@@ -552,5 +568,30 @@ export default {
 
 .excel-import-row ::v-deep .drop .el-button {
   margin-left: 10px;
+}
+
+.priority-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.priority-delete {
+  width: 12px;
+  height: 12px;
+  min-height: 12px;
+  padding: 0;
+  font-size: 8px;
+  color: #909399;
+  background: #f4f4f5;
+  border-color: #dcdfe6;
+}
+
+.priority-delete:hover,
+.priority-delete:focus {
+  color: #606266;
+  background: #e9e9eb;
+  border-color: #c8c9cc;
 }
 </style>

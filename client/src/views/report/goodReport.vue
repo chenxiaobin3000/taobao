@@ -182,7 +182,7 @@ export default {
     this.followFilterList = GoodFollowStatus.getList()
     this.listQuery.sdate = new Date()
     this.listQuery.edate = new Date().toLocaleDateString().replace(/\//g, '-')
-    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 180
+    const seconds = this.listQuery.sdate.getTime() - 1000 * 60 * 60 * 24 * 30
     this.listQuery.sdate.setTime(seconds)
     this.listQuery.sdate = this.listQuery.sdate.toLocaleDateString().replace(/\//g, '-')
     this.getOwnShopList()

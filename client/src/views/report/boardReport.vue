@@ -4,7 +4,7 @@
       <el-row>
         <el-col :span="24">
           <el-checkbox-group v-model="checkedShops" @change="handleChange">
-            <el-checkbox v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" class="myCheckBox">
+            <el-checkbox v-for="item in shopList" :key="item.id" :label="item.id" class="myCheckBox">
               <div style="font-size:small">{{ item.name }}</div>
             </el-checkbox>
           </el-checkbox-group>
@@ -272,7 +272,7 @@ export default {
     getBoardReport() {
       const ids = []
       this.shopList.forEach(v => {
-        if (this.checkedShops.includes(v.name)) {
+        if (this.checkedShops.includes(v.id)) {
           ids.push(v.id)
         }
       })
@@ -389,8 +389,9 @@ export default {
             let month_fake_deduction = 0
             let month_misc = 0
             const month_operational = parseFloat(operationalMonth[key] || 0)
-            this.shopList.forEach(v => {
-              if (!this.checkedShops.includes(v.name)) {
+            const selectedShopList = this.shopList.filter(v => this.checkedShops.includes(v.id))
+            selectedShopList.slice().reverse().forEach(v => {
+              if (!this.checkedShops.includes(v.id)) {
                 return
               }
               const temp = data[key][v.id]
@@ -518,7 +519,7 @@ export default {
       }).then(response => {
         this.shopList = response.data.data
         this.shopList.forEach(v => {
-          this.checkedShops.push(v.name)
+          this.checkedShops.push(v.id)
           v.checked = true
         })
         this.getBoardReport()
