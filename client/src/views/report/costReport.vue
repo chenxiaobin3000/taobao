@@ -40,6 +40,9 @@
       <el-table-column align="center" label="待结算" width="120">
         <template slot-scope="scope">{{ scope.row.pending }}</template>
       </el-table-column>
+      <el-table-column align="center" label="保证金" width="120">
+        <template slot-scope="scope">{{ scope.row.deposit }}</template>
+      </el-table-column>
       <el-table-column align="center" label="备注">
         <div><br></div>
       </el-table-column>

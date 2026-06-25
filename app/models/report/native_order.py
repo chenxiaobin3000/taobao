@@ -124,6 +124,31 @@ class NativeOrder(Model):
                 """, [shop_id, order_status, start_date, end_date])
             return self.dictfetchall(cursor)
 
+    def groupByDateRange(self, shop_ids, start_date, end_date):
+        if not shop_ids:
+            return []
+        placeholders = ','.join(['%s'] * len(shop_ids))
+        params = list(shop_ids) + [start_date, end_date]
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT
+                    shop_id,
+                    strftime('%%Y-%%m-%%d', create_date) AS create_date,
+                    order_status,
+                    COALESCE(SUM(payment), 0) AS payment,
+                    COALESCE(SUM(procure), 0) AS procure,
+                    COALESCE(SUM(refund_procure), 0) AS refund_procure
+                FROM t_day_summary
+                WHERE
+                    shop_id IN ({placeholders})
+                    AND create_date >= %s
+                    AND create_date <= %s
+                GROUP BY shop_id, create_date, order_status
+                ORDER BY create_date DESC
+                """, params)
+            return self.dictfetchall(cursor)
+
     def groupByMonth(self, shop_id, order_status):
         with connection.cursor() as cursor:
             cursor.execute(

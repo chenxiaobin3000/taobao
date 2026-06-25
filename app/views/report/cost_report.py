@@ -9,6 +9,7 @@ from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
 from app.models.report.native_order import NativeOrder
 from app.models.report.native_promotion import NativePromotion
+from app.models.system.shop import Shop
 from app.views.common import failed, success
 
 
@@ -19,7 +20,8 @@ def empty_row(create_date=None, shop_id=None):
         'total_cost': 0,
         'promotion': 0,
         'purchase': 0,
-        'pending': 0
+        'pending': 0,
+        'deposit': 0
     }
 
 
@@ -27,7 +29,8 @@ def format_row(row):
     row['promotion'] = round(row['promotion'], 1)
     row['purchase'] = round(row['purchase'], 1)
     row['pending'] = round(row['pending'], 1)
-    row['total_cost'] = round(row['promotion'] + row['purchase'], 1)
+    row['deposit'] = round(row['deposit'], 1)
+    row['total_cost'] = round(row['promotion'] + row['purchase'] + row['deposit'], 1)
     return row
 
 
@@ -35,6 +38,15 @@ def add_row(summary, row):
     summary['promotion'] += row['promotion']
     summary['purchase'] += row['purchase']
     summary['pending'] += row['pending']
+    summary['deposit'] += row['deposit']
+
+
+def get_shop_deposits(shop_ids):
+    deposits = {}
+    for shop_id in shop_ids:
+        shop = Shop.objects.find(shop_id)
+        deposits[str(shop_id)] = shop['deposit'] if shop else 0
+    return deposits
 
 
 def build_daily_data(shop_ids, start_date, end_date):
@@ -47,7 +59,7 @@ def build_daily_data(shop_ids, start_date, end_date):
             row['pending'] += order['payment']
         elif order['order_status'] == OrderStatus.SHIPPED:
             row['pending'] += order['payment']
-            row['purchase'] += order['refund_procure']
+            row['purchase'] += order['procure']
 
     promotions = NativePromotion().groupByDateRange(shop_ids, start_date, end_date)
     for promotion in promotions:
@@ -94,6 +106,7 @@ def getList(request):
     days = (end_date - start_date).days + 1
     data_start_date = start_date - timedelta(days=9)
     daily_data = build_daily_data(shop_ids, data_start_date, end_date)
+    shop_deposits = get_shop_deposits(shop_ids)
 
     for i in range(days):
         create_date = end_date - timedelta(days=i)
@@ -106,6 +119,8 @@ def getList(request):
             row = get_shop_window_data(daily_data, shop_id, window_start, create_date)
             row['create_date'] = date_key
             row['shop_id'] = str(shop_id)
+            row['deposit'] = shop_deposits.get(str(shop_id), 0)
+            format_row(row)
             datas[date_key][str(shop_id)] = row
             add_row(date_summary, row)
 
