@@ -1,3 +1,5 @@
+from decimal import InvalidOperation
+
 from django.db import models
 from django.utils import timezone
 from django.forms.models import model_to_dict
@@ -34,7 +36,13 @@ class UserPromotionDetailManager(models.Manager):
 
     def encoderList(self, promotions):
         if promotions:
-            return [model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_date', 'good_id', 'show_num', 'click_num', 'click_rate', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi']) for promotion in promotions]
+            datas = []
+            for index, promotion in enumerate(promotions, start=1):
+                try:
+                    datas.append(model_to_dict(promotion, fields=['id', 'shop_id', 'promotion_date', 'good_id', 'show_num', 'click_num', 'click_rate', 'cost', 'average_cost', 'thousand_cost', 'deal_amount', 'deal_num', 'deal_cost', 'shop_cart', 'favorites', 'roi']))
+                except InvalidOperation:
+                    raise ValueError('推广明细临时数据第' + str(index) + '行异常，请检查后重新导入')
+            return datas
         return None
 
 class UserPromotionDetail(models.Model):

@@ -206,7 +206,7 @@ export default {
       this.getUserPurchaseList()
     },
     async uploadPurchaseChunks(purchases) {
-      const chunkSize = 300
+      const chunkSize = 500
       const total = purchases.length
       this.uploading = true
       this.uploadProgress = 0

@@ -238,7 +238,7 @@ export default {
       this.getUserOrderList()
     },
     async uploadOrderChunks(orders) {
-      const chunkSize = 300
+      const chunkSize = 500
       const total = orders.length
       this.uploading = true
       this.uploadProgress = 0

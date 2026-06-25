@@ -7,8 +7,8 @@ from django.views.decorators.http import require_POST
 
 from app.json_encoder import MyJSONEncoder
 from app.models.const.order_status import OrderStatus
-from app.models.middle.day_summary import DaySummary
-from app.models.trunk.promotion import Promotion
+from app.models.report.native_order import NativeOrder
+from app.models.report.native_promotion import NativePromotion
 from app.views.common import failed, success
 
 
@@ -37,26 +37,36 @@ def add_row(summary, row):
     summary['pending'] += row['pending']
 
 
-def get_shop_window_data(shop_id, start_date, end_date):
+def build_daily_data(shop_ids, start_date, end_date):
+    daily_data = {}
+    orders = NativeOrder().groupByDateRange(shop_ids, start_date, end_date)
+    for order in orders:
+        key = (str(order['shop_id']), order['create_date'])
+        row = daily_data.setdefault(key, empty_row(order['create_date'], str(order['shop_id'])))
+        if order['order_status'] == OrderStatus.PAID:
+            row['pending'] += order['payment']
+        elif order['order_status'] == OrderStatus.SHIPPED:
+            row['pending'] += order['payment']
+            row['purchase'] += order['refund_procure']
+
+    promotions = NativePromotion().groupByDateRange(shop_ids, start_date, end_date)
+    for promotion in promotions:
+        key = (str(promotion['shop_id']), promotion['create_date'])
+        row = daily_data.setdefault(key, empty_row(promotion['create_date'], str(promotion['shop_id'])))
+        row['promotion'] += promotion['payment']
+
+    return daily_data
+
+
+def get_shop_window_data(daily_data, shop_id, start_date, end_date):
     row = empty_row()
-
     for i in range((end_date - start_date).days + 1):
-        create_date = start_date + timedelta(days=i)
-
-        promotions = Promotion.objects.getListByDate(shop_id, create_date)
-        if promotions:
-            for promotion in promotions:
-                row['promotion'] += promotion['payment']
-
-        paid = DaySummary.objects.getByDate(shop_id, create_date, OrderStatus.PAID)
-        if paid:
-            row['pending'] += paid['payment']
-
-        shipped = DaySummary.objects.getByDate(shop_id, create_date, OrderStatus.SHIPPED)
-        if shipped:
-            row['pending'] += shipped['payment']
-            row['purchase'] += shipped['refund_procure']
-
+        key = (str(shop_id), (start_date + timedelta(days=i)).strftime('%Y-%m-%d'))
+        day_data = daily_data.get(key)
+        if day_data:
+            row['promotion'] += day_data['promotion']
+            row['purchase'] += day_data['purchase']
+            row['pending'] += day_data['pending']
     return format_row(row)
 
 
@@ -82,6 +92,8 @@ def getList(request):
     datas = {}
     totals = empty_row()
     days = (end_date - start_date).days + 1
+    data_start_date = start_date - timedelta(days=9)
+    daily_data = build_daily_data(shop_ids, data_start_date, end_date)
 
     for i in range(days):
         create_date = end_date - timedelta(days=i)
@@ -91,7 +103,7 @@ def getList(request):
         date_summary = empty_row(date_key)
 
         for shop_id in shop_ids:
-            row = get_shop_window_data(shop_id, window_start, create_date)
+            row = get_shop_window_data(daily_data, shop_id, window_start, create_date)
             row['create_date'] = date_key
             row['shop_id'] = str(shop_id)
             datas[date_key][str(shop_id)] = row

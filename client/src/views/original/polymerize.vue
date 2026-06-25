@@ -246,7 +246,7 @@ export default {
       this.getUserPolymerizeList()
     },
     async uploadExcelChunks(records) {
-      const chunkSize = 300
+      const chunkSize = 500
       const total = records.length
       this.uploading = true
       this.uploadProgress = 0

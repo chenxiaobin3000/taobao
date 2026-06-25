@@ -1,12 +1,15 @@
 import json
-from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+
 from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
 from app.json_encoder import MyJSONEncoder
-from app.models.trunk.promotion_detail import PromotionDetail
 from app.models.original.user_promotion_detail import UserPromotionDetail
 from app.models.system.good import Good
-from app.views.common import success
+from app.models.trunk.promotion_detail import PromotionDetail
+from app.views.common import failed, success
+
 
 @require_POST
 @transaction.atomic
@@ -14,7 +17,10 @@ def merge(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
     user_id = int(post.get('uid') or request.user_id)
-    polymerizes = UserPromotionDetail.objects.getAll(user_id, shop_id)
+    try:
+        polymerizes = UserPromotionDetail.objects.getAll(user_id, shop_id)
+    except ValueError as e:
+        return JsonResponse(failed(str(e)), encoder=MyJSONEncoder)
 
     if polymerizes:
         # 批量添加
@@ -60,7 +66,7 @@ def getList(request):
                 data['good_name'] = data['good_id']
 
     response = success({
-            'total': total,
-            'list': datas
-        })
+        'total': total,
+        'list': datas
+    })
     return JsonResponse(response, encoder=MyJSONEncoder)
