@@ -28,4 +28,5 @@ urlpatterns = url_middle + url_original + url_report + url_system + url_trunk + 
     path('', TemplateView.as_view(template_name='index.html'))
 ]
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.BASE_DIR / 'static')
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.BASE_DIR / 'static')
