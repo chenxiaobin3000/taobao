@@ -12,7 +12,13 @@
         <el-col :span="5">
           <el-form-item label="商品:">
             <el-select v-model="listQuery.good_id" class="filter-item" placeholder="请选择商品" filterable @change="handleSelect">
-              <el-option v-for="item in goodList" :key="item.good_id" :label="item.short_name" :value="item.good_id" />
+              <el-option v-for="item in goodList" :key="item.good_id" :label="item.short_name" :value="item.good_id">
+                <div class="good-option">
+                  <img v-if="showGoodOptionImage(item)" :src="getGoodImageUrl(item)" class="good-option-img" @error="handleGoodOptionImageError(item)">
+                  <span class="good-option-img-placeholder" v-else />
+                  <span>{{ item.short_name }}</span>
+                </div>
+              </el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -259,7 +265,9 @@ export default {
       getGoodRadar(
         this.listQuery
       ).then(response => {
-        this.goodList = response.data.data.goods || []
+        this.goodList = (response.data.data.goods || []).map(item => Object.assign({
+          option_image_error: false
+        }, item))
         if (!this.listQuery.good_id && response.data.data.good_id) {
           this.listQuery.good_id = response.data.data.good_id
         }
@@ -289,6 +297,16 @@ export default {
     },
     handleSelect() {
       this.getGoodRadar()
+    },
+    getGoodImageUrl(item) {
+      const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
+      return basePath + '/' + this.listQuery.id + '/' + item.good_id + '.jpg'
+    },
+    showGoodOptionImage(item) {
+      return item.good_id && !item.option_image_error
+    },
+    handleGoodOptionImageError(item) {
+      this.$set(item, 'option_image_error', true)
     },
     buildReportList(list) {
       if (!list) {
@@ -342,4 +360,22 @@ export default {
   font-size: small;
   line-height: 24px;
 }
+
+.good-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.good-option-img,
+.good-option-img-placeholder {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+}
+
+.good-option-img {
+  object-fit: cover;
+}
+
 </style>

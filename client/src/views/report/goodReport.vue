@@ -32,6 +32,12 @@
       </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="listReport" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+      <el-table-column align="center" label="缩略图" width="70">
+        <template slot-scope="scope">
+          <img v-if="showGoodImage(scope.row)" :src="getGoodImageUrl(scope.row)" class="good-thumb" @error="handleGoodImageError(scope.row)">
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="商品编号" width="110">
         <template slot-scope="scope">
           {{ scope.row.good_id }}
@@ -219,6 +225,16 @@ export default {
     handleSelect() {
       this.getGoodReport()
     },
+    getGoodImageUrl(row) {
+      const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
+      return basePath + '/' + this.listQuery.id + '/' + row.good_id + '.jpg'
+    },
+    showGoodImage(row) {
+      return row.good_id && !row.image_error
+    },
+    handleGoodImageError(row) {
+      this.$set(row, 'image_error', true)
+    },
     buildReportList(list) {
       if (!list) {
         return []
@@ -240,6 +256,7 @@ export default {
         item.profit_rate = payment === 0 ? '0.0%' : this.round(((payment - procure) / payment) * 100, 1).toFixed(1) + '%'
         item.return1 = this.round(this.round((refund + close + flash) / (payment + close + flash), 3) * 100, 1)
         item.return2 = this.round(this.round((refund + close) / (payment + close), 3) * 100, 1)
+        item.image_error = false
         return item
       }).sort((a, b) => b.profit - a.profit)
     },
@@ -254,3 +271,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.good-thumb {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  object-fit: cover;
+}
+</style>

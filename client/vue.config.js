@@ -42,6 +42,10 @@ module.exports = {
         changeOrigin: true,
         pathRewrite: { '^/api': '/'}
       },
+      '/static': {
+        'target': 'http://localhost:8000',
+        changeOrigin: true
+      },
       '/upload': { 'target': 'http://localhost:8000/upload' },
     }
   },

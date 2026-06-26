@@ -24,6 +24,12 @@
       </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+      <el-table-column align="center" label="缩略图" width="70" fixed>
+        <template slot-scope="scope">
+          <img v-if="showGoodImage(scope.row)" :src="getGoodImageUrl(scope.row)" class="good-thumb" @error="handleGoodImageError(scope.row)">
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="商品编号" width="110" fixed>
         <template slot-scope="scope">
           {{ scope.row.good_id }}
@@ -169,7 +175,9 @@ export default {
       getPromotionReport(
         this.listQuery
       ).then(response => {
-        this.list = response.data.data.list
+        this.list = (response.data.data.list || []).map(item => Object.assign({
+          image_error: false
+        }, item))
         this.loading = false
       }).catch(error => {
         this.loading = false
@@ -194,6 +202,16 @@ export default {
     },
     handleSelect() {
       this.getPromotionReport()
+    },
+    getGoodImageUrl(row) {
+      const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
+      return basePath + '/' + this.listQuery.id + '/' + row.good_id + '.jpg'
+    },
+    showGoodImage(row) {
+      return row.good_id && !row.image_error
+    },
+    handleGoodImageError(row) {
+      this.$set(row, 'image_error', true)
     }
   }
 }
@@ -207,5 +225,13 @@ export default {
   margin-top: 2px;
   color: #909399;
   font-size: 12px;
+}
+
+.good-thumb {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  object-fit: cover;
 }
 </style>

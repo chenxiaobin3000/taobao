@@ -39,9 +39,14 @@
       </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+      <el-table-column align="center" label="缩略图" width="70">
+        <template slot-scope="scope">
+          <img v-if="showGoodImage(scope.row)" :src="getGoodImageUrl(scope.row)" class="good-thumb" @error="handleGoodImageError(scope.row)">
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="商品名称" width="100">
         <template slot-scope="scope">
-          <img v-if="scope.row.image_url" :src="scope.row.image_url" class="good-thumb">
           {{ scope.row.short_name }}
         </template>
       </el-table-column>
@@ -255,7 +260,8 @@ export default {
         this.list = (response.data.data.list || []).map(v => Object.assign({
           priority: 0,
           show: true,
-          follow_id: 0
+          follow_id: 0,
+          image_error: false
         }, v))
         this.getGoodFollowList()
       }).catch(error => {
@@ -311,6 +317,16 @@ export default {
     },
     handleJumpStock(id, type) {
       return GoodStockType.getUrl(id, type)
+    },
+    getGoodImageUrl(row) {
+      const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
+      return basePath + '/' + this.listQuery.id + '/' + row.origin + '.jpg'
+    },
+    showGoodImage(row) {
+      return row.origin && !row.image_error
+    },
+    handleGoodImageError(row) {
+      this.$set(row, 'image_error', true)
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
@@ -600,7 +616,7 @@ export default {
   display: block;
   width: 40px;
   height: 40px;
-  margin: 0 auto 4px;
+  margin: 0 auto;
   object-fit: cover;
 }
 </style>

@@ -9,16 +9,10 @@ from app.models.middle.order_summary import OrderSummary
 from app.models.system.good import Good
 from app.models.system.good_alias import GoodAlias
 from app.models.system.good_follow import GoodFollow
-from app.services.good_image import get_good_image_url
 from app.services.good_init_zip import build_init_zip
 from app.models.trunk.fake import Fake
 from app.models.trunk.promotion_detail import PromotionDetail
 from app.views.common import failed, success
-
-def build_absolute_url(request, url):
-    if not url:
-        return ''
-    return request.build_absolute_uri(url)
 
 @require_POST
 @transaction.atomic
@@ -126,9 +120,6 @@ def getList(request):
     follow_priority_map = GoodFollow.objects.getPriorityMap(shop_id)
     total = Good.objects.total(shop_id, search, good_type, good_status, follow, follow_ids)
     datas = Good.objects.getList(shop_id, page, num, search, good_type, good_status, follow, follow_ids, follow_priority_map)
-    if datas:
-        for data in datas:
-            data['image_url'] = build_absolute_url(request, get_good_image_url(shop_id, data['origin']))
     response = success({
             'total': total,
             'list': datas

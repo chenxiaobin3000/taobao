@@ -41,7 +41,7 @@ saveButton.addEventListener('click', async() => {
       throw new Error('未识别到商品图片')
     }
     const shopId = shopIdSelect.value
-    const filename = 'good_images/' + shopId + '/' + itemId + getImageExt(result)
+    const filename = 'good_images/' + shopId + '/' + itemId + '.jpg'
     await chrome.runtime.sendMessage({
       type: 'download',
       url: result,
@@ -76,16 +76,6 @@ function getItemId(url) {
   } catch (error) {
     return ''
   }
-}
-
-function getImageExt(url) {
-  const cleanUrl = url.split('?')[0]
-  const match = cleanUrl.match(/\.(jpg|jpeg|png|webp)(?:_|$)/i)
-  if (!match) {
-    return '.jpg'
-  }
-  const ext = match[1].toLowerCase()
-  return ext === 'jpeg' ? '.jpg' : '.' + ext
 }
 
 function extractImageUrl() {

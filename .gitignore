@@ -8,6 +8,7 @@ backup/*
 static/css
 static/fonts
 static/img
+static/good_images
 static/js
 static/favicon.ico
 
