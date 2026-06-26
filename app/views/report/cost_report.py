@@ -60,6 +60,8 @@ def build_daily_data(shop_ids, start_date, end_date):
         elif order['order_status'] == OrderStatus.SHIPPED:
             row['pending'] += order['payment']
             row['purchase'] += order['procure']
+        elif order['order_status'] == OrderStatus.SUCCESS:
+            row['purchase'] += order['procure']
 
     promotions = NativePromotion().groupByDateRange(shop_ids, start_date, end_date)
     for promotion in promotions:
