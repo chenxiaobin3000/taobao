@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Taobao Good Image Saver",
+  "version": "1.0.0",
+  "description": "Save Taobao/Tmall product thumbnail images by item id.",
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*.taobao.com/*",
+    "https://*.tmall.com/*",
+    "https://*.alicdn.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "保存商品图"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

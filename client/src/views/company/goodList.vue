@@ -41,12 +41,13 @@
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="商品名称" width="100">
         <template slot-scope="scope">
+          <img v-if="scope.row.image_url" :src="scope.row.image_url" class="good-thumb">
           {{ scope.row.short_name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="商品编码" width="120">
         <template slot-scope="scope">
-          {{ scope.row.good_id }}
+          <a :href="handleJumpOrigin(scope.row.origin, scope.row.origin_type)" target="_blank">{{ scope.row.good_id }}</a>
         </template>
       </el-table-column>
       <el-table-column align="center" label="优先级" width="70">
@@ -593,5 +594,13 @@ export default {
   color: #606266;
   background: #e9e9eb;
   border-color: #c8c9cc;
+}
+
+.good-thumb {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 4px;
+  object-fit: cover;
 }
 </style>
