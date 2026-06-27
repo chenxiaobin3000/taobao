@@ -205,10 +205,10 @@ export default {
     },
     getGoodImageUrl(row) {
       const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
-      return basePath + '/' + this.listQuery.id + '/' + row.good_id + '.jpg'
+      return basePath + '/' + this.listQuery.id + '/' + row.origin + '.jpg'
     },
     showGoodImage(row) {
-      return row.good_id && !row.image_error
+      return row.origin && !row.image_error
     },
     handleGoodImageError(row) {
       this.$set(row, 'image_error', true)

@@ -84,7 +84,7 @@ def get_goods(shop_id, follow, search=None):
     if goods:
         for good in goods:
             if good['good_status'] == GoodStatus.SALE and good['good_type'] == GoodType.NORMAL and match_good(good, search):
-                datas.append(init_data(good['good_id'], good['short_name']))
+                datas.append(init_data(good['good_id'], good['short_name'], good['origin']))
     return datas
 
 def match_good(good, search):
@@ -139,9 +139,10 @@ def fill_period_data(shop_id, datas, key, start_date, end_date):
         metric['close'] = round(metric['close'], 2)
         metric['profit'] = round(metric['payment'] - Decimal(metric['cost']) - metric['procure'], 2)
 
-def init_data(id, name):
+def init_data(id, name, origin):
     return {
         'good_id': id,
+        'origin': origin,
         'name': name,
         'yesterday': init_metric(),
         'before_yesterday': init_metric(),

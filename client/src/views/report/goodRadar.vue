@@ -300,10 +300,10 @@ export default {
     },
     getGoodImageUrl(item) {
       const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
-      return basePath + '/' + this.listQuery.id + '/' + item.good_id + '.jpg'
+      return basePath + '/' + this.listQuery.id + '/' + item.origin + '.jpg'
     },
     showGoodOptionImage(item) {
-      return item.good_id && !item.option_image_error
+      return item.origin && !item.option_image_error
     },
     handleGoodOptionImageError(item) {
       this.$set(item, 'option_image_error', true)
