@@ -13,3 +13,10 @@ class GoodOriginType:
             GoodOriginType.TAO_BAO: '淘宝',
             GoodOriginType.TIAN_MAO: '天猫'
         }.get(value, '异常')
+
+    @staticmethod
+    def num2path(value):
+        return {
+            GoodOriginType.TAO_BAO: 'taobao',
+            GoodOriginType.TIAN_MAO: 'tmall'
+        }.get(value, '')

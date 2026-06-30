@@ -32,7 +32,7 @@ def getList(request):
             if goods:
                 for good in goods:
                     if good['good_status'] == GoodStatus.SALE and good['good_type'] == GoodType.NORMAL:
-                        datas.append(init_data(good['good_id'], good['short_name'], good['origin']))
+                        datas.append(init_data(good['good_id'], good['short_name'], good['origin'], good['origin_type']))
 
         case GoodFollowStatus.HAS_FOLLOW:
             temps = GoodFollow.objects.getList(shop_id, 1, 1000)
@@ -42,7 +42,7 @@ def getList(request):
                 if goods:
                     for good in goods:
                         if good['good_status'] == GoodStatus.SALE and good['good_type'] == GoodType.NORMAL:
-                            datas.append(init_data(good['good_id'], good['short_name'], good['origin']))
+                            datas.append(init_data(good['good_id'], good['short_name'], good['origin'], good['origin_type']))
 
         case GoodFollowStatus.NOT_FOLLOW:
             temps = GoodFollow.objects.getList(shop_id, 1, 1000)
@@ -52,7 +52,7 @@ def getList(request):
                 if goods:
                     for good in goods:
                         if good['good_status'] == GoodStatus.SALE and good['good_type'] == GoodType.NORMAL:
-                            datas.append(init_data(good['good_id'], good['short_name'], good['origin']))
+                            datas.append(init_data(good['good_id'], good['short_name'], good['origin'], good['origin_type']))
 
         case _:
             return JsonResponse(failed('关注类型异常'), encoder=MyJSONEncoder)
@@ -130,10 +130,11 @@ def getList(request):
     }
     return JsonResponse(response, encoder=MyJSONEncoder)
 
-def init_data(id, name, origin):
+def init_data(id, name, origin, origin_type):
     return {
         'good_id': id,
         'origin': origin,
+        'origin_type': origin_type,
         'name': name,
         'cost': 0,
         'deal_amount': 0,

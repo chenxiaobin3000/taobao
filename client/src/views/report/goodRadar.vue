@@ -188,6 +188,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import { GoodOriginType } from '@/utils/const'
 import { getGoodRadar } from '@/api/report/goodRadar'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -300,10 +301,10 @@ export default {
     },
     getGoodImageUrl(item) {
       const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
-      return basePath + '/' + this.listQuery.id + '/' + item.origin + '.jpg'
+      return basePath + '/' + GoodOriginType.getImagePath(item.origin, item.origin_type)
     },
     showGoodOptionImage(item) {
-      return item.origin && !item.option_image_error
+      return GoodOriginType.getImagePath(item.origin, item.origin_type) && !item.option_image_error
     },
     handleGoodOptionImageError(item) {
       this.$set(item, 'option_image_error', true)

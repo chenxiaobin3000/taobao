@@ -1,25 +1,6 @@
-const SHOP_LIST = [
-  { id: 1, name: '德国KSTE' },
-  { id: 2, name: '挪威VER' },
-  { id: 3, name: '日本SKLA' },
-  { id: 5, name: '法国FALS' },
-  { id: 4, name: '酷娃KUWA' }
-]
-
-const shopIdSelect = document.getElementById('shopId')
+const SOURCE_DIRECTORY = 'taobao'
 const saveButton = document.getElementById('save')
 const statusEl = document.getElementById('status')
-
-initShopSelect()
-
-chrome.storage.local.get(['shopId'], data => {
-  const shopId = data.shopId || String(SHOP_LIST[0].id)
-  shopIdSelect.value = shopId
-})
-
-shopIdSelect.addEventListener('change', () => {
-  chrome.storage.local.set({ shopId: shopIdSelect.value })
-})
 
 saveButton.addEventListener('click', async() => {
   setStatus('处理中...')
@@ -40,8 +21,7 @@ saveButton.addEventListener('click', async() => {
     if (!result) {
       throw new Error('未识别到商品图片')
     }
-    const shopId = shopIdSelect.value
-    const filename = 'good_images/' + shopId + '/' + itemId + '.jpg'
+    const filename = 'good_images/' + SOURCE_DIRECTORY + '/' + itemId + '.jpg'
     await chrome.runtime.sendMessage({
       type: 'download',
       url: result,
@@ -54,16 +34,6 @@ saveButton.addEventListener('click', async() => {
     saveButton.disabled = false
   }
 })
-
-function initShopSelect() {
-  shopIdSelect.innerHTML = ''
-  SHOP_LIST.forEach(shop => {
-    const option = document.createElement('option')
-    option.value = String(shop.id)
-    option.textContent = shop.name
-    shopIdSelect.appendChild(option)
-  })
-}
 
 function setStatus(text) {
   statusEl.textContent = text

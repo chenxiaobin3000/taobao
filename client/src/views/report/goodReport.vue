@@ -144,7 +144,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { GoodFollowStatus } from '@/utils/const'
+import { GoodFollowStatus, GoodOriginType } from '@/utils/const'
 import { getGoodReport } from '@/api/report/goodReport'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -227,10 +227,10 @@ export default {
     },
     getGoodImageUrl(row) {
       const basePath = (process.env.VUE_APP_GOOD_IMAGE_PATH || 'http://localhost:8000/static/good_images').replace(/\/$/, '')
-      return basePath + '/' + this.listQuery.id + '/' + row.origin + '.jpg'
+      return basePath + '/' + GoodOriginType.getImagePath(row.origin, row.origin_type)
     },
     showGoodImage(row) {
-      return row.origin && !row.image_error
+      return GoodOriginType.getImagePath(row.origin, row.origin_type) && !row.image_error
     },
     handleGoodImageError(row) {
       this.$set(row, 'image_error', true)

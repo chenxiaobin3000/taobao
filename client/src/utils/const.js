@@ -408,6 +408,19 @@ export const GoodOriginType = {
         return 'https://detail.tmall.com/item.htm?id=' + id
     }
     return ''
+  },
+  num2path(num) {
+    switch (num) {
+      case this.TAO_BAO:
+        return 'taobao'
+      case this.TIAN_MAO:
+        return 'tmall'
+    }
+    return ''
+  },
+  getImagePath(id, type) {
+    const source = this.num2path(type)
+    return source && id ? source + '/' + id + '.jpg' : ''
   }
 }
 
