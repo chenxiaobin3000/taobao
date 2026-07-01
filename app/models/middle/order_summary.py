@@ -59,8 +59,21 @@ class OrderSummaryManager(models.Manager):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gte=start_date, create_time__lt=end_date).order_by('-create_time'))
 
     def getGoodIdsByDate(self, shop_id, start_date):
-        good_ids = set()
         datas = self.filter(shop_id=shop_id, create_time__gte=start_date).values_list('good_ids', flat=True)
+        return self.parseGoodIds(datas)
+
+    def getTransactionGoodIds(self, shop_id, start_date, end_date, min_payment, order_statuses):
+        datas = self.filter(
+            shop_id=shop_id,
+            create_time__gte=start_date,
+            create_time__lt=end_date,
+            payment__gt=min_payment,
+            order_status__in=order_statuses
+        ).values_list('good_ids', flat=True)
+        return self.parseGoodIds(datas)
+
+    def parseGoodIds(self, datas):
+        good_ids = set()
         for data in datas:
             if not data:
                 continue

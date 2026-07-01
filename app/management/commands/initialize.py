@@ -63,6 +63,7 @@ class Command(BaseCommand):
         Permission.objects.add(1, 5008)
         Permission.objects.add(1, 5009)
         Permission.objects.add(1, 5010)
+        Permission.objects.add(1, 5012)
         Permission.objects.add(1, 6000)
         Permission.objects.add(1, 6001)
         Permission.objects.add(1, 6002)

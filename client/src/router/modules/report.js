@@ -27,6 +27,9 @@ export default {
     path: 'goodRadar', component: () => import('@/views/report/goodRadar'),
     name: 'report_goodRadar', meta: { title: '商品雷达', roles: [5006] }
   }, {
+    path: 'recentTransaction', component: () => import('@/views/report/recentTransaction'),
+    name: 'report_recentTransaction', meta: { title: '近期成交', roles: [5012] }
+  }, {
     path: 'orderReport', component: () => import('@/views/report/orderReport'),
     name: 'report_orderReport', meta: { title: '订单汇总', roles: [5007] }
   }, {
