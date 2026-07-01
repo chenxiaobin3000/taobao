@@ -94,8 +94,11 @@ class GoodManager(models.Manager):
     def getAll(self, shop_id):
         return self.encoderList(self.filter(shop_id=shop_id).order_by('good_id'))
 
-    def getListInIds(self, shop_id, ids):
-        return self.encoderList(self.filter(shop_id=shop_id, good_id__in=ids).order_by('-ctime'))
+    def getListInIds(self, shop_id, ids, good_status=None):
+        queryset = self.filter(shop_id=shop_id, good_id__in=ids)
+        if good_status:
+            queryset = queryset.filter(good_status=good_status)
+        return self.encoderList(queryset.order_by('-ctime'))
 
     def getListNotInIds(self, shop_id, ids):
         return self.encoderList(self.filter(shop_id=shop_id).exclude(good_id__in=ids).order_by('-ctime'))

@@ -72,7 +72,7 @@ def flush(request):
 
     order_start_date = timezone.now() - timedelta(days=30)
     promotion_start_date = datetime.now().date() - timedelta(days=30)
-    order_good_ids = OrderSummary.objects.getGoodIdsByDate(shop_id, order_start_date)
+    order_good_ids = OrderSummary.objects.getGoodIdsByDate(shop_id, order_start_date, 10)
     promotion_good_ids = PromotionDetail.objects.getGoodIdsByDate(shop_id, promotion_start_date)
     GoodFollow.objects.refreshPriority(shop_id, order_good_ids, promotion_good_ids)
 

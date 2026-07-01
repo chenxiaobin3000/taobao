@@ -8,7 +8,7 @@ url_report = [
     # 商品雷达
     path('api/good_radar/getList', good_radar.getList),
 
-    # 近期成交
+    # 成交汇总
     path('api/recent_transaction/getList', recent_transaction.getList),
 
     # 日报

@@ -58,8 +58,12 @@ class OrderSummaryManager(models.Manager):
     def getListByDateIncludeStart(self, shop_id, start_date, end_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_time__gte=start_date, create_time__lt=end_date).order_by('-create_time'))
 
-    def getGoodIdsByDate(self, shop_id, start_date):
-        datas = self.filter(shop_id=shop_id, create_time__gte=start_date).values_list('good_ids', flat=True)
+    def getGoodIdsByDate(self, shop_id, start_date, min_payment):
+        datas = self.filter(
+            shop_id=shop_id,
+            create_time__gte=start_date,
+            payment__gt=min_payment
+        ).values_list('good_ids', flat=True)
         return self.parseGoodIds(datas)
 
     def getTransactionGoodIds(self, shop_id, start_date, end_date, min_payment, order_statuses):

@@ -4,7 +4,6 @@ from decimal import Decimal
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from app.json_encoder import MyJSONEncoder
-from app.models.const.good_follow import GoodFollowStatus
 from app.models.const.order_status import OrderStatus
 from app.models.middle.order_summary import OrderSummary
 from app.models.system.good import Good
@@ -16,7 +15,7 @@ from app.views.common import failed, success
 def getList(request):
     post = json.loads(request.body)
     shop_id = int(post.get('id'))
-    follow = int(post.get('follow'))
+    good_status = int(post.get('status') or 0)
 
     try:
         start_date = datetime.strptime(post.get('sdate'), '%Y-%m-%d')
@@ -34,16 +33,7 @@ def getList(request):
         Decimal('10'),
         [OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.SUCCESS]
     )
-    follow_ids = set(GoodFollow.objects.getGoodIds(shop_id))
-
-    if follow == GoodFollowStatus.HAS_FOLLOW:
-        good_ids &= follow_ids
-    elif follow == GoodFollowStatus.NOT_FOLLOW:
-        good_ids -= follow_ids
-    elif follow != GoodFollowStatus.ALL:
-        return JsonResponse(failed('关注类型异常'), encoder=MyJSONEncoder)
-
-    goods = Good.objects.getListInIds(shop_id, good_ids) or []
+    goods = Good.objects.getListInIds(shop_id, good_ids, good_status) or []
     priority_map = GoodFollow.objects.getPriorityMap(shop_id)
     for good in goods:
         good['priority'] = priority_map.get(good['good_id'], 0)

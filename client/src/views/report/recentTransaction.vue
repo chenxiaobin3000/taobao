@@ -10,9 +10,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="5">
-          <el-form-item label="关注:">
-            <el-select v-model="listQuery.follow" class="filter-item" placeholder="请选择" @change="getList">
-              <el-option v-for="item in followFilterList" :key="item.id" :label="item.name" :value="item.id" />
+          <el-form-item label="状态:">
+            <el-select v-model="listQuery.status" class="filter-item" placeholder="请选择" @change="getList">
+              <el-option v-for="item in statusFilterList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -81,7 +81,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { GoodFollowStatus, GoodOriginType, GoodStatus, GoodStockType, GoodType } from '@/utils/const'
+import { GoodOriginType, GoodStatus, GoodStockType, GoodType } from '@/utils/const'
 import { getRecentTransactionList } from '@/api/report/recentTransaction'
 import { getOwnShopList } from '@/api/system/shop'
 
@@ -93,12 +93,12 @@ export default {
       tableHeight: 600,
       list: [],
       shopList: [],
-      followFilterList: [],
+      statusFilterList: [],
       GoodStatus,
       GoodType,
       listQuery: {
         id: 0,
-        follow: GoodFollowStatus.ALL,
+        status: 0,
         sdate: '',
         edate: ''
       }
@@ -117,7 +117,7 @@ export default {
   created() {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
-    this.followFilterList = GoodFollowStatus.getList()
+    this.statusFilterList = [{ id: 0, name: '全部状态' }].concat(GoodStatus.getList())
     const endDate = new Date()
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - 30)
