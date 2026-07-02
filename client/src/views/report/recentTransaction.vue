@@ -44,7 +44,7 @@
       </el-table-column>
       <el-table-column align="center" label="商品编码" width="120">
         <template slot-scope="scope">
-          <a :href="getOriginUrl(scope.row)" target="_blank">{{ scope.row.good_id }}</a>
+          <a :href="handleJumpSelf(scope.row.good_id)" target="_blank">{{ scope.row.good_id }}</a>
         </template>
       </el-table-column>
       <el-table-column align="center" label="优先级" width="70">
@@ -162,6 +162,9 @@ export default {
     handleShopChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getList()
+    },
+    handleJumpSelf(id) {
+      return GoodOriginType.getUrl(id, GoodOriginType.TAO_BAO)
     },
     getOriginUrl(row) {
       return GoodOriginType.getUrl(row.origin, row.origin_type)
