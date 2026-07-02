@@ -169,29 +169,39 @@ export default {
     },
     async handleFolderChange(e) {
       const files = Array.from(e.target.files || [])
+      const folderName = this.getSelectedFolderName(files)
       e.target.value = ''
-      await this.handleFiles(files)
+      await this.handleFiles(files, folderName)
     },
     async handleDrop(e) {
       if (this.processing) {
         return
       }
-      const files = await this.getDroppedFiles(e.dataTransfer)
-      await this.handleFiles(files)
+      const result = await this.getDroppedFiles(e.dataTransfer)
+      await this.handleFiles(result.files, result.folderName)
     },
     async getDroppedFiles(dataTransfer) {
       const items = Array.from(dataTransfer.items || [])
       if (items.length > 0 && items[0].webkitGetAsEntry) {
         const files = []
+        const entries = []
         for (const item of items) {
           const entry = item.webkitGetAsEntry()
           if (entry) {
+            entries.push(entry)
             files.push(...await this.readEntry(entry))
           }
         }
-        return files
+        return {
+          files,
+          folderName: entries.length === 1 && entries[0].isDirectory ? entries[0].name : ''
+        }
       }
-      return Array.from(dataTransfer.files || [])
+      const files = Array.from(dataTransfer.files || [])
+      return {
+        files,
+        folderName: this.getSelectedFolderName(files)
+      }
     },
     readEntry(entry) {
       if (entry.isFile) {
@@ -222,9 +232,23 @@ export default {
       }
       return Promise.resolve([])
     },
-    async handleFiles(files) {
+    async handleFiles(files, folderName) {
       if (!this.listQuery.id) {
         this.$message({ type: 'error', message: '请先选择店铺!' })
+        return
+      }
+      const shopName = this.getShopName()
+      if (!folderName) {
+        this.processLogs = []
+        this.log('未识别到单个店铺文件夹，请拖入或选择店铺文件夹', 'error')
+        this.$message({ type: 'error', message: '请选择单个店铺文件夹!' })
+        return
+      }
+      if (folderName !== shopName) {
+        const message = `文件夹名称“${folderName}”与所选店铺“${shopName}”不一致`
+        this.processLogs = []
+        this.log(message, 'error')
+        this.$message({ type: 'error', message })
         return
       }
       const excelFiles = files.filter(file => this.isExcel(file.name))
@@ -440,6 +464,17 @@ export default {
     getShopName() {
       const shop = this.shopList.find(item => item.id === this.listQuery.id)
       return shop ? shop.name : ''
+    },
+    getSelectedFolderName(files) {
+      const folderNames = new Set()
+      files.forEach(file => {
+        const relativePath = file.webkitRelativePath || ''
+        const separatorIndex = relativePath.indexOf('/')
+        if (separatorIndex > 0) {
+          folderNames.add(relativePath.slice(0, separatorIndex))
+        }
+      })
+      return folderNames.size === 1 ? Array.from(folderNames)[0] : ''
     },
     getAllowedModules() {
       const roles = this.$store.getters.roles || []
