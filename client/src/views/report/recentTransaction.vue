@@ -368,9 +368,6 @@ export default {
 
 <style scoped>
 .excel-import-row {
-  position: sticky;
-  top: 0;
-  z-index: 9;
   display: flex;
   align-items: center;
   min-height: 48px;
