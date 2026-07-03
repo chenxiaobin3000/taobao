@@ -8,12 +8,32 @@
       </div>
     </div>
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
-      <el-form-item label="店铺:">
-        <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
-          <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
-      </el-form-item>
+      <el-row>
+        <el-col :span="5">
+          <el-form-item label="店铺:">
+            <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
+              <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="5">
+          <el-form-item label="开始日期:" label-width="80px">
+            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width:150px" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="5">
+          <el-form-item label="结束日期:" label-width="80px">
+            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width:150px" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="4">
+          <quick-date :query="listQuery" @change="handleSelect" />
+        </el-col>
+        <el-col :span="5">
+          <el-button type="danger" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleDeleteAll()">清空</el-button>
+          <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect">查询</el-button>
+        </el-col>
+      </el-row>
     </el-form>
     <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
       <el-table-column align="center" label="推广日期" width="120">
@@ -124,7 +144,9 @@ export default {
         uid: 0,
         page: 1,
         num: 10,
-        search: null
+        search: null,
+        sdate: '',
+        edate: ''
       },
       dialogVisible: false
     }
@@ -151,6 +173,11 @@ export default {
     this.userdata = this.$store.getters.userdata
     this.listQuery.id = this.$store.getters.shop
     this.listQuery.uid = this.userdata.user.id
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - 180)
+    this.listQuery.sdate = this.formatDate(startDate)
+    this.listQuery.edate = this.formatDate(endDate)
     this.getOwnShopList()
   },
   methods: {
@@ -181,7 +208,18 @@ export default {
     },
     handleChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+      this.listQuery.page = 1
       this.getUserPromotionDetailList()
+    },
+    handleSelect() {
+      this.listQuery.page = 1
+      this.getUserPromotionDetailList()
+    },
+    formatDate(date) {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
     },
 
     async handleSuccess({ results, header }) {

@@ -13,13 +13,21 @@ class PromotionManager(models.Manager):
     def getByDate(self, shop_id, create_date, promotion_type):
         return self.encoder(self.filter(shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first())
 
-    def total(self, shop_id):
-        return self.filter(shop_id=shop_id).count()
+    def filterByDate(self, shop_id, start_date=None, end_date=None):
+        queryset = self.filter(shop_id=shop_id)
+        if start_date:
+            queryset = queryset.filter(create_date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(create_date__lte=end_date)
+        return queryset
 
-    def getList(self, shop_id, page, num):
+    def total(self, shop_id, start_date=None, end_date=None):
+        return self.filterByDate(shop_id, start_date, end_date).count()
+
+    def getList(self, shop_id, page, num, start_date=None, end_date=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(shop_id=shop_id).order_by('-create_date')[left:right])
+        return self.encoderList(self.filterByDate(shop_id, start_date, end_date).order_by('-create_date')[left:right])
 
     def getListByDate(self, shop_id, create_date):
         return self.encoderList(self.filter(shop_id=shop_id, create_date=create_date))

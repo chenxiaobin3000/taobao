@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import transaction
@@ -46,8 +47,10 @@ def getList(request):
     shop_id = int(post.get('id'))
     page = int(post.get('page'))
     num = int(post.get('num'))
-    total = Promotion.objects.total(shop_id)
-    datas = Promotion.objects.getList(shop_id, page, num)
+    start_date = datetime.strptime(post.get('sdate'), '%Y-%m-%d').date() if post.get('sdate') else None
+    end_date = datetime.strptime(post.get('edate'), '%Y-%m-%d').date() if post.get('edate') else None
+    total = Promotion.objects.total(shop_id, start_date, end_date)
+    datas = Promotion.objects.getList(shop_id, page, num, start_date, end_date)
     response = success({
             'total': total,
             'list': datas

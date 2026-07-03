@@ -2,14 +2,14 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="5">
+        <el-col :span="4">
           <el-form-item label="店铺:">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChangeShop">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="5">
+        <el-col :span="4">
           <el-form-item label="状态:">
             <el-select v-model="listQuery.status" class="filter-item" placeholder="请选择状态" @change="handleChangeStatus">
               <el-option v-for="item in statusList" :key="'S' + item.id" :label="item.name" :value="item.id" />
@@ -18,15 +18,18 @@
         </el-col>
         <el-col :span="5">
           <el-form-item label="开始日期:" label-width="80px">
-            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" @change="clearQuickDate" />
           </el-form-item>
         </el-col>
         <el-col :span="5">
           <el-form-item label="结束日期:" label-width="80px">
-            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" @change="clearQuickDate" />
           </el-form-item>
         </el-col>
         <el-col :span="4">
+          <quick-date ref="quickDate" @change="handleQuickDate" />
+        </el-col>
+        <el-col :span="2">
           <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
@@ -129,12 +132,13 @@
 <script>
 import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
+import QuickDate from '@/components/QuickDate'
 import { DeductionType, OrderStatus } from '@/utils/const'
 import { getOrderReport } from '@/api/report/orderReport'
 import { getOwnShopList } from '@/api/system/shop'
 
 export default {
-  components: { Pagination },
+  components: { Pagination, QuickDate },
   data() {
     return {
       userdata: {},
@@ -260,6 +264,14 @@ export default {
     handleChangeStatus() {
       this.listQuery.page = 1
       this.getOrderReport()
+    },
+    handleQuickDate(range) {
+      this.listQuery.sdate = range.sdate
+      this.listQuery.edate = range.edate
+      this.handleSelect()
+    },
+    clearQuickDate() {
+      if (this.$refs.quickDate) this.$refs.quickDate.clear()
     },
     handleSelect() {
       this.listQuery.page = 1

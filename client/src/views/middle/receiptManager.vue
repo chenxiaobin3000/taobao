@@ -12,6 +12,9 @@
             <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" @change="handleSelect" />
           </el-form-item>
         </el-col>
+        <el-col :span="4">
+          <quick-date :query="listQuery" @change="handleSelect" />
+        </el-col>
       </el-row>
     </el-form>
 

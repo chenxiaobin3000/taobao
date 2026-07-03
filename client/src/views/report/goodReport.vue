@@ -2,14 +2,14 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="5">
+        <el-col :span="4">
           <el-form-item label="店铺:">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="5">
+        <el-col :span="4">
           <el-form-item label="关注:">
             <el-select v-model="listQuery.follow" class="filter-item" placeholder="请选择" @change="handleSelect">
               <el-option v-for="item in followFilterList" :key="'F' + item.id" :label="item.name" :value="item.id" />
@@ -18,15 +18,25 @@
         </el-col>
         <el-col :span="5">
           <el-form-item label="开始日期:" label-width="80px">
-            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+            <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" @change="clearQuickDate" />
           </el-form-item>
         </el-col>
         <el-col :span="5">
           <el-form-item label="结束日期:" label-width="80px">
-            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
+            <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" @change="clearQuickDate" />
           </el-form-item>
         </el-col>
         <el-col :span="4">
+          <div class="quick-date-groups">
+            <el-button-group class="quick-date-group">
+              <el-button v-for="item in quickDateRow1" :key="item.key" size="mini" class="custom-height-btn" :type="activeQuickDate === item.key ? 'primary' : ''" @click="setQuickDate(item.key)">{{ item.label }}</el-button>
+            </el-button-group>
+            <el-button-group class="quick-date-group">
+              <el-button v-for="item in quickDateRow2" :key="item.key" size="mini" class="custom-height-btn" :type="activeQuickDate === item.key ? 'primary' : ''" @click="setQuickDate(item.key)">{{ item.label }}</el-button>
+            </el-button-group>
+          </div>
+        </el-col>
+        <el-col :span="2">
           <el-button type="primary" size="mini" style="float:right;width:60px" @click="handleSelect()">查询</el-button>
         </el-col>
       </el-row>
@@ -155,6 +165,23 @@ export default {
       tableHeight: 600,
       listReport: null,
       loading: false,
+      activeQuickDate: '',
+      quickDateRow1: [
+        { key: 'currentYear', label: '本年' },
+        { key: 'lastMonth', label: '上月' },
+        { key: 'currentMonth', label: '本月' },
+        { key: 'lastWeek', label: '上周' },
+        { key: 'currentWeek', label: '本周' },
+        { key: 'yesterday', label: '昨天' }
+      ],
+      quickDateRow2: [
+        { key: 'days90', label: '90天' },
+        { key: 'days30', label: '30天' },
+        { key: 'days14', label: '14天' },
+        { key: 'days7', label: '7天' },
+        { key: 'days3', label: '3天' },
+        { key: 'today', label: '今天' }
+      ],
       shopList: [], // 本公司所有店铺列表
       followFilterList: [], // 关注状态列表
       listQuery: {
@@ -222,6 +249,56 @@ export default {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
       this.getGoodReport()
     },
+    setQuickDate(type) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      let startDate = new Date(today)
+      let endDate = this.addDays(today, 1)
+
+      if (type === 'currentYear') {
+        startDate = new Date(today.getFullYear(), 0, 1)
+      } else if (type === 'lastMonth') {
+        startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        endDate = new Date(today.getFullYear(), today.getMonth(), 1)
+      } else if (type === 'currentMonth') {
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+      } else if (type === 'lastWeek') {
+        const currentMonday = this.getMonday(today)
+        startDate = this.addDays(currentMonday, -7)
+        endDate = currentMonday
+      } else if (type === 'currentWeek') {
+        startDate = this.getMonday(today)
+      } else if (type === 'yesterday') {
+        startDate = this.addDays(today, -1)
+        endDate = today
+      } else if (type.indexOf('days') === 0) {
+        const days = Number(type.replace('days', ''))
+        startDate = this.addDays(today, -(days - 1))
+      }
+
+      this.listQuery.sdate = this.formatDate(startDate)
+      this.listQuery.edate = this.formatDate(endDate)
+      this.activeQuickDate = type
+      this.getGoodReport()
+    },
+    getMonday(date) {
+      const day = date.getDay() || 7
+      return this.addDays(date, 1 - day)
+    },
+    addDays(date, days) {
+      const result = new Date(date)
+      result.setDate(result.getDate() + days)
+      return result
+    },
+    formatDate(date) {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    },
+    clearQuickDate() {
+      this.activeQuickDate = ''
+    },
     handleSelect() {
       this.getGoodReport()
     },
@@ -273,6 +350,26 @@ export default {
 </script>
 
 <style scoped>
+.quick-date-groups {
+  height: 28px;
+}
+
+.quick-date-group {
+  display: flex;
+  width: auto;
+  height: 14px;
+}
+
+.custom-height-btn {
+  flex: none;
+  box-sizing: border-box;
+  width: 38px;
+  height: 14px;
+  padding: 0;
+  font-size: 10px;
+  line-height: 12px;
+}
+
 .good-thumb {
   display: block;
   width: 40px;

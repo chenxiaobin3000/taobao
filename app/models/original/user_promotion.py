@@ -16,13 +16,21 @@ class UserPromotionManager(models.Manager):
     def getByDate(self, user_id, shop_id, create_date, promotion_type):
         return self.encoder(self.filter(user_id=user_id, shop_id=shop_id, create_date=create_date, promotion_type=promotion_type).first())
 
-    def total(self, user_id, shop_id):
-        return self.filter(user_id=user_id, shop_id=shop_id).count()
+    def filterByDate(self, user_id, shop_id, start_date=None, end_date=None):
+        queryset = self.filter(user_id=user_id, shop_id=shop_id)
+        if start_date:
+            queryset = queryset.filter(create_date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(create_date__lte=end_date)
+        return queryset
 
-    def getList(self, user_id, shop_id, page, num):
+    def total(self, user_id, shop_id, start_date=None, end_date=None):
+        return self.filterByDate(user_id, shop_id, start_date, end_date).count()
+
+    def getList(self, user_id, shop_id, page, num, start_date=None, end_date=None):
         left = (page - 1) * num
         right = page * num
-        return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_date')[left:right])
+        return self.encoderList(self.filterByDate(user_id, shop_id, start_date, end_date).order_by('-create_date')[left:right])
 
     def getAll(self, user_id, shop_id):
         return self.encoderList(self.filter(user_id=user_id, shop_id=shop_id).order_by('-create_date'))

@@ -19,6 +19,9 @@
             <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
           </el-form-item>
         </el-col>
+        <el-col :span="4">
+          <quick-date :query="listQuery" @change="handleSelect" />
+        </el-col>
         <el-col :span="6">
           <el-button type="primary" size="mini" style="float:right;width:60px" :loading="mergeProcessing" :disabled="mergeProcessing" @click="handleMerge()">合并</el-button>
           <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect()">查询</el-button>

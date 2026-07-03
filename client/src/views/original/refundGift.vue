@@ -2,24 +2,27 @@
   <div class="app-container">
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1% 0 1%;">
       <el-row>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-form-item label="店铺:">
             <el-select v-model="listQuery.id" class="filter-item" placeholder="请选择店铺" @change="handleChange">
               <el-option v-for="item in shopList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-form-item label="开始日期:" label-width="80px">
             <el-date-picker v-model="listQuery.sdate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-form-item label="结束日期:" label-width="80px">
             <el-date-picker v-model="listQuery.edate" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="4">
+          <quick-date :query="listQuery" @change="handleSelect" />
+        </el-col>
+        <el-col :span="5">
           <el-button type="danger" size="mini" style="float:right;width:60px" @click="handleDeleteAll()">清空</el-button>
           <el-button type="primary" size="mini" style="float:right;width:60px;margin-right:10px;" @click="handleSelect()">查询</el-button>
         </el-col>

@@ -10,6 +10,8 @@ import './styles/element-variables.scss'
 import '@/styles/index.scss' // global css
 
 import App from './App'
+import QuickDate from '@/components/QuickDate'
+import QuickStartDate from '@/components/QuickStartDate'
 import store from './store'
 import router from './router'
 
@@ -17,6 +19,9 @@ import './icons' // icon
 import './permission' // permission control
 
 import * as filters from './filters' // global filters
+
+Vue.component('QuickDate', QuickDate)
+Vue.component('QuickStartDate', QuickStartDate)
 
 Vue.use(Element, {
   size: Cookies.get('size') || 'mini' // set element-ui default size: medium
