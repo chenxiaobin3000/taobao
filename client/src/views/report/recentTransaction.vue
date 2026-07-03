@@ -1,5 +1,9 @@
 <template>
   <div class="app-container">
+    <div class="excel-import-row">
+      <upload-excel-component :on-success="handleExcelSuccess" width="100%" line-height="32px" height="36px" />
+    </div>
+
     <el-form :model="listQuery" label-position="left" label-width="50px" style="width: 100%; padding: 0 1%;">
       <el-row>
         <el-col :span="4">
@@ -45,7 +49,7 @@
       </el-row>
     </el-form>
 
-    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row>
+    <el-table ref="table" v-loading="loading" :data="list" :height="tableHeight" style="width: 100%" border fit highlight-current-row :row-class-name="rowClassName">
       <el-table-column align="center" label="缩略图" width="70">
         <template slot-scope="scope">
           <img v-if="showGoodImage(scope.row)" :src="getGoodImageUrl(scope.row)" class="good-thumb" @error="handleGoodImageError(scope.row)">
@@ -89,6 +93,20 @@
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
     </el-table>
+
+    <div v-if="excelLoaded" class="unmatched-section">
+      <div class="unmatched-title">未成交商品</div>
+      <el-table :data="unmatchedGoods" style="width: 100%" border fit>
+        <el-table-column align="center" label="缩略图" width="70">
+          <template slot-scope="scope">
+            <img v-if="showGoodImage(scope.row)" :src="getGoodImageUrl(scope.row)" class="good-thumb" @error="handleGoodImageError(scope.row)">
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="good_id" label="商品ID" width="120" />
+        <el-table-column align="center" prop="name" label="商品名称" />
+      </el-table>
+    </div>
   </div>
 </template>
 
@@ -97,14 +115,19 @@ import { mapState } from 'vuex'
 import { GoodOriginType, GoodStatus, GoodStockType, GoodType } from '@/utils/const'
 import { getRecentTransactionList } from '@/api/report/recentTransaction'
 import { getOwnShopList } from '@/api/system/shop'
+import { getGoodList as getSystemGoodList } from '@/api/system/good'
+import UploadExcelComponent from '@/components/UploadExcel'
 
 export default {
+  components: { UploadExcelComponent },
   data() {
     return {
       userdata: {},
       loading: false,
       tableHeight: 600,
       list: [],
+      importedGoods: [],
+      excelLoaded: false,
       shopList: [],
       statusFilterList: [],
       activeQuickDate: '',
@@ -137,7 +160,14 @@ export default {
   computed: {
     ...mapState({
       search: state => state.header.search
-    })
+    }),
+    importedGoodIds() {
+      return this.importedGoods.map(item => item.good_id)
+    },
+    unmatchedGoods() {
+      const currentIds = new Set(this.list.map(item => this.normalizeGoodId(item.good_id)))
+      return this.importedGoods.filter(item => !currentIds.has(item.good_id))
+    }
   },
   watch: {
     search() {
@@ -163,6 +193,75 @@ export default {
     }, 1000)
   },
   methods: {
+    handleExcelSuccess({ results, header }) {
+      if (header.length < 2 || String(header[0]).trim() !== '商品ID' || String(header[1]).trim() !== '商品名称') {
+        this.$message({ type: 'error', message: 'Excel前两列表头必须是商品ID、商品名称' })
+        return
+      }
+      const idColumn = header[0]
+      const nameColumn = header[1]
+      const seenIds = new Set()
+      this.importedGoods = results.reduce((goods, row) => {
+        const goodId = this.normalizeGoodId(row[idColumn])
+        if (!goodId || seenIds.has(goodId)) {
+          return goods
+        }
+        seenIds.add(goodId)
+        goods.push({
+          good_id: goodId,
+          name: row[nameColumn] === null || row[nameColumn] === undefined ? '' : String(row[nameColumn]).trim(),
+          origin: '',
+          origin_type: 0,
+          image_error: false
+        })
+        return goods
+      }, [])
+      this.excelLoaded = true
+      this.loadImportedGoodDetails()
+      this.$message({ type: 'success', message: `已读取${this.importedGoods.length}个商品ID` })
+    },
+    loadImportedGoodDetails() {
+      if (!this.listQuery.id || !this.importedGoods.length) {
+        return
+      }
+      this.importedGoods.forEach(item => {
+        this.$set(item, 'origin', '')
+        this.$set(item, 'origin_type', 0)
+        this.$set(item, 'image_error', false)
+      })
+      getSystemGoodList({
+        id: this.listQuery.id,
+        page: 1,
+        num: 10000,
+        search: '',
+        type: 0,
+        status: 0,
+        follow: 0
+      }).then(response => {
+        const detailMap = new Map((response.data.data.list || []).map(item => [
+          this.normalizeGoodId(item.good_id),
+          item
+        ]))
+        this.importedGoods.forEach(item => {
+          const detail = detailMap.get(item.good_id)
+          if (detail) {
+            this.$set(item, 'origin', detail.origin)
+            this.$set(item, 'origin_type', detail.origin_type)
+            this.$set(item, 'image_error', false)
+          }
+        })
+      })
+    },
+    normalizeGoodId(value) {
+      if (value === null || value === undefined) {
+        return ''
+      }
+      return String(value).trim().replace(/\.0$/, '')
+    },
+    rowClassName({ row }) {
+      const goodId = this.normalizeGoodId(row.good_id)
+      return goodId && this.importedGoodIds.includes(goodId) ? 'matched-good-row' : ''
+    },
     getShopList() {
       getOwnShopList({
         id: this.userdata.company.id,
@@ -191,6 +290,7 @@ export default {
     },
     handleShopChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
+      this.loadImportedGoodDetails()
       this.getList()
     },
     handleJumpSelf(id) {
@@ -267,6 +367,34 @@ export default {
 </script>
 
 <style scoped>
+.excel-import-row {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 6px 1%;
+  margin-bottom: 8px;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+}
+
+.excel-import-row ::v-deep .drop {
+  margin: 0;
+  font-size: 13px;
+  border-width: 1px;
+}
+
+.excel-import-row > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.excel-import-row ::v-deep .drop .el-button {
+  margin-left: 10px;
+}
+
 .query-actions {
   display: flex;
   align-items: center;
@@ -300,5 +428,18 @@ export default {
   height: 40px;
   margin: 0 auto;
   object-fit: cover;
+}
+
+.unmatched-section {
+  margin-top: 20px;
+}
+
+.unmatched-title {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+::v-deep .el-table .matched-good-row {
+  background-color: rgba(180, 180, 180, 0.3);
 }
 </style>
