@@ -37,7 +37,10 @@
           </div>
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" size="mini" style="float:right;width:60px" @click="getList">查询</el-button>
+          <div class="query-actions">
+            <span>{{ list.length }}</span>
+            <el-button type="primary" size="mini" style="width:60px" @click="getList">查询</el-button>
+          </div>
         </el-col>
       </el-row>
     </el-form>
@@ -264,6 +267,13 @@ export default {
 </script>
 
 <style scoped>
+.query-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .quick-date-groups {
   height: 28px;
 }
