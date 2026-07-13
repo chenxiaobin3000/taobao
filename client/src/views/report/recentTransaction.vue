@@ -13,7 +13,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <el-form-item label="状态:">
             <el-select v-model="listQuery.status" class="filter-item" placeholder="请选择" @change="getList">
               <el-option v-for="item in statusFilterList" :key="item.id" :label="item.name" :value="item.id" />
@@ -40,9 +40,10 @@
             </el-button-group>
           </div>
         </el-col>
-        <el-col :span="2">
+        <el-col :span="3">
           <div class="query-actions">
             <span>{{ list.length }}</span>
+            <el-button type="warning" size="mini" style="width:60px" @click="handleExport">导出</el-button>
             <el-button type="primary" size="mini" style="width:60px" @click="getList">查询</el-button>
           </div>
         </el-col>
@@ -117,6 +118,7 @@ import { getRecentTransactionList } from '@/api/report/recentTransaction'
 import { getOwnShopList } from '@/api/system/shop'
 import { getGoodList as getSystemGoodList } from '@/api/system/good'
 import UploadExcelComponent from '@/components/UploadExcel'
+import XLSX from 'xlsx'
 
 export default {
   components: { UploadExcelComponent },
@@ -287,6 +289,20 @@ export default {
       }).finally(() => {
         this.loading = false
       })
+    },
+    handleExport() {
+      if (!this.list.length) {
+        this.$message({ type: 'warning', message: '没有可导出的数据' })
+        return
+      }
+      const rows = this.list.map(item => ({
+        商品名称: item.short_name,
+        商品编码: item.good_id
+      }))
+      const worksheet = XLSX.utils.json_to_sheet(rows)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, '成交汇总')
+      XLSX.writeFile(workbook, '成交汇总.xlsx')
     },
     handleShopChange() {
       this.$store.commit('header/SET_HEADER_SHOP', this.listQuery.id)
