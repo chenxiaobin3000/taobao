@@ -54,23 +54,17 @@
       <el-table-column align="center" label="操作" width="150">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
-          <el-button type="danger" size="mini" @click="handleClear(row)">清空</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog title="编辑刷单登记" :visible.sync="dialogVisible">
+    <el-dialog title="编辑收菜登记" :visible.sync="dialogVisible">
       <el-form :model="temp" label-position="left" label-width="80px" style="width: 100%; padding: 0 4%;">
         <el-form-item label="日期">
           <el-date-picker v-model="temp.prepare_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" disabled />
         </el-form-item>
-        <el-form-item label="店铺">
-          <el-select v-model="temp.shop_ids" multiple class="filter-item" placeholder="请选择店铺" style="width: 100%;">
-            <el-option v-for="item in editShopList" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="上新明细">
-          <el-input v-model="temp.prepare_detail" maxlength="20" show-word-limit />
+        <el-form-item label="收菜日期">
+          <el-date-picker v-model="temp.harvest_date" type="date" value-format="yyyy-MM-dd" class="filter-item" style="width: 150px;" />
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="temp.record_note" maxlength="20" show-word-limit />
@@ -87,7 +81,7 @@
 <script>
 import { mapState } from 'vuex'
 import { getOwnShopList } from '@/api/system/shop'
-import { clearGoodPrepareRecord, getGoodPrepareRecordList, setGoodPrepareRecord } from '@/api/middle/goodPrepareRecord'
+import { getGoodPrepareRecordList, setGoodPrepareRecord } from '@/api/middle/goodPrepareRecord'
 
 export default {
   data() {
@@ -127,13 +121,7 @@ export default {
   computed: {
     ...mapState({
       search: state => state.header.search
-    }),
-    editShopList() {
-      if (this.listQuery.id) {
-        return this.ownShopList.filter(item => item.id === this.listQuery.id)
-      }
-      return this.ownShopList
-    }
+    })
   },
   watch: {
     search() {
@@ -175,10 +163,11 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      if (!this.temp.shop_ids || !this.temp.shop_ids.length) {
-        this.temp.shop_ids = this.listQuery.id ? [this.listQuery.id] : []
+      if (!row.shop_ids || !row.shop_ids.length) {
+        this.$message({ type: 'warning', message: '当天没有刷单登记' })
+        return
       }
+      this.temp = Object.assign({}, row)
       this.temp.prepare_detail = row.edit_prepare_detail || row.prepare_detail || ''
       this.temp.harvest_date = row.edit_harvest_date || row.harvest_date || ''
       this.temp.record_note = row.edit_record_note || row.record_note || ''
@@ -195,21 +184,6 @@ export default {
         this.dialogVisible = false
         this.$message({ type: 'success', message: '保存成功' })
         this.getList()
-      })
-    },
-    handleClear(row) {
-      this.$confirm('确定要清空吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        clearGoodPrepareRecord({
-          ids: row.shop_ids,
-          cdate: row.prepare_date
-        }).then(() => {
-          this.$message({ type: 'success', message: '清空成功' })
-          this.getList()
-        })
       })
     },
     setQuickDate(type) {

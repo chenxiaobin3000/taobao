@@ -36,7 +36,9 @@ export const MyRoleData = [{
   }, {
     id: 6005, label: '上新商品'
   }, {
-    id: 6010, label: '上新记录'
+    id: 6010, label: '刷单登记'
+  }, {
+    id: 6011, label: '收菜登记'
   }, {
     id: 6006, label: '发票管理'
   }, {

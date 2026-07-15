@@ -22,7 +22,10 @@ export default {
     name: 'middle_goodPrepare', meta: { title: '上新商品', roles: [6005] }
   }, {
     path: 'goodPrepareRecord', component: () => import('@/views/middle/goodPrepareRecord'),
-    name: 'middle_goodPrepareRecord', meta: { title: '上新记录', roles: [6010] }
+    name: 'middle_goodPrepareRecord', meta: { title: '刷单登记', roles: [6010] }
+  }, {
+    path: 'goodHarvestRecord', component: () => import('@/views/middle/goodHarvestRecord'),
+    name: 'middle_goodHarvestRecord', meta: { title: '收菜登记', roles: [6011] }
   }, {
     path: 'receiptItem', component: () => import('@/views/middle/receiptManager'),
     name: 'middle_receiptItem', meta: { title: '发票管理', roles: [6006] }
