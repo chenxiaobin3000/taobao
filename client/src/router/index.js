@@ -8,6 +8,7 @@ import Layout from '@/layout'
 
 /* Router Modules */
 import companyRouter from './modules/company'
+import dataProcessRouter from './modules/dataProcess'
 import middleRouter from './modules/middle'
 import originalRouter from './modules/original'
 import reportRouter from './modules/report'
@@ -64,6 +65,7 @@ export const asyncRoutes = [
 
   /** when your routing map is too long, you can split it into small modules **/
   reportRouter,
+  dataProcessRouter,
   middleRouter,
   trunkRouter,
   originalRouter,

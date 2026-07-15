@@ -26,13 +26,20 @@ export const MyRoleData = [{
     id: 5010, label: '报税汇总'
   }]
 }, {
+  id: 7000, label: '数据处理',
+  children: [{
+    id: 7001, label: '订单管理'
+  }, {
+    id: 7002, label: '刷单管理'
+  }, {
+    id: 7003, label: '扣款管理'
+  }]
+}, {
   id: 6000, label: '辅助工具',
   children: [{
-    id: 6002, label: '订单管理'
+    id: 6009, label: '运营成本'
   }, {
-    id: 6003, label: '刷单管理'
-  }, {
-    id: 6004, label: '扣款管理'
+    id: 6001, label: '杂项管理'
   }, {
     id: 6005, label: '上新商品'
   }, {
@@ -45,10 +52,6 @@ export const MyRoleData = [{
     id: 6007, label: '进项管理'
   }, {
     id: 6008, label: '出项管理'
-  }, {
-    id: 6001, label: '杂项管理'
-  }, {
-    id: 6009, label: '运营成本'
   }]
 }, {
   id: 4000, label: '存档数据',

@@ -9,14 +9,11 @@ export default {
     roles: [6000]
   },
   children: [{
-    path: 'orderSummary', component: () => import('@/views/middle/orderSummary'),
-    name: 'middle_orderSummary', meta: { title: '订单管理', roles: [6002] }
+    path: 'operationalCost', component: () => import('@/views/middle/operationalCost'),
+    name: 'middle_operationalCost', meta: { title: '运营成本', roles: [6009] }
   }, {
-    path: 'fakeSummary', component: () => import('@/views/middle/fakeSummary'),
-    name: 'middle_fakeSummary', meta: { title: '刷单管理', roles: [6003] }
-  }, {
-    path: 'deductionSummary', component: () => import('@/views/middle/deductionSummary'),
-    name: 'middle_deductionSummary', meta: { title: '扣款管理', roles: [6004] }
+    path: 'miscellaneous', component: () => import('@/views/middle/miscellaneous'),
+    name: 'middle_miscellaneous', meta: { title: '杂项管理', roles: [6001] }
   }, {
     path: 'goodPrepare', component: () => import('@/views/middle/goodPrepare'),
     name: 'middle_goodPrepare', meta: { title: '上新商品', roles: [6005] }
@@ -35,11 +32,5 @@ export default {
   }, {
     path: 'receiptTo', component: () => import('@/views/middle/receiptTo'),
     name: 'middle_receiptTo', meta: { title: '出项管理', roles: [6008] }
-  }, {
-    path: 'miscellaneous', component: () => import('@/views/middle/miscellaneous'),
-    name: 'middle_miscellaneous', meta: { title: '杂项管理', roles: [6001] }
-  }, {
-    path: 'operationalCost', component: () => import('@/views/middle/operationalCost'),
-    name: 'middle_operationalCost', meta: { title: '运营成本', roles: [6009] }
   }]
 }
