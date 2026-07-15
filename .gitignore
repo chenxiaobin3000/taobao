@@ -3,7 +3,6 @@
 app/templates/index.html
 .venv/*
 venv/*
-backup/*
 
 static/css
 static/fonts
