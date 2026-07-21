@@ -15,6 +15,7 @@
 | 后端 | Python 3.10+ / Django 5.2.8 / django-cors-headers |
 | 前端 | Vue 2.6 / Vue Router 3 / Vuex 3 / Element UI 2.13 / ECharts 4.2 |
 | 构建 | Vue CLI 4 (前端) / Django manage.py (后端) |
+| 数据处理 | xlsx 导入导出 / ECharts 图表 (报表可视化) |
 | OCR | PaddleOCR 3.3 + PaddlePaddle 3.2 (发票识别) |
 
 ## 目录结构
@@ -55,21 +56,22 @@ python manage.py makemigrations app      # 生成迁移
 python manage.py migrate                 # 执行迁移
 python manage.py initialize              # 初始化基础数据
 ```
-或使用 bat 脚本: `server.bat` (备份→迁移→启动)、`init.bat`、`makemigrations.bat`、`migrate.bat`、`backup.bat`、`clean.bat`
+或使用批处理脚本: `server.bat` (备份→迁移→启动)、`init.bat`、`makemigrations.bat`、`migrate.bat`、`backup.bat`、`clean.bat`
 
 ### 前端
 ```bash
 cd client && npm install && npm run dev    # 开发 (localhost:9527)
 cd client && npm run build                 # 构建
 ```
-构建后执行 `client/deploy.bat` 复制产物到 Django 的 `static/` 和 `app/templates/`
+构建后执行 `client/deploy.bat` 复制产物到 Django 的 `static/` 和 `app/templates/`（或手动拷贝 dist/ 内容）
 
 ## 核心业务分层
 
 1. **原始数据** (`app/views/original/` + `app/models/original/`) — 批量导入、查询、删除/清空平台原始业务数据 (订单/刷单/推广/推广明细/扣费/聚合/采购/退货/小额打款)
-2. **归档数据** (`app/views/trunk/` + `app/models/trunk/`) — merge 接口将原始数据合并到核心业务表，查询/删除归档记录
-3. **汇总/辅助** (`app/views/middle/` + `app/models/middle/`) — flush 接口刷新订单汇总/扣款汇总/刷单汇总，上新商品/杂项/发票管理/运营成本
-4. **统计报表** (`app/views/report/` + `app/models/report/`) — 业绩大屏/年报/日报/商品/推广/成本/订单/遗漏等报表 (部分使用原生 SQL)
+2. **数据处理** (`client/src/views/middle/` 下单汇总/刷单汇总/扣款汇总页面，前端路由 `/dataProcess`) — 原始数据导入后进行汇总处理，作为归档前的中间状态管理
+3. **归档数据** (`app/views/trunk/` + `app/models/trunk/`) — merge 接口将原始数据合并到核心业务表，查询/删除归档记录
+4. **汇总/辅助** (`app/views/middle/` + `app/models/middle/`) — flush 接口刷新订单汇总/扣款汇总/刷单汇总，上新商品/刷单登记/收菜登记/杂项/发票管理/进项管理/出项管理/运营成本
+5. **统计报表** (`app/views/report/` + `app/models/report/`) — 业绩大屏/年报/日报/商品/推广/成本/订单/遗漏/采购/报税/成交/商品雷达等报表 (部分使用原生 SQL)
 
 ## 代码约定
 
@@ -85,7 +87,7 @@ cd client && npm run build                 # 构建
 ### 前端
 - 路由守卫: `client/src/permission.js` 中根据角色ID动态生成可访问路由
 - 菜单权限: `client/src/router/modules/*.js` 中 `meta.roles` 数组控制可见性
-  - 1000 = 系统功能, 2000 = 公司数据, 3000 = 原始数据, 4000 = 存档数据, 5000 = 统计报表, 6000 = 辅助工具
+  - 1000 = 系统功能, 2000 = 公司数据, 3000 = 原始数据, 4000 = 存档数据, 5000 = 统计报表, 6000 = 辅助工具, 7000 = 数据处理
 - API 封装在 `client/src/api/` 按模块拆分
 - 登录时密码 MD5 加密后提交
 - 请求拦截: `client/src/utils/request.js`，响应 code ≠ 0 时自动提示错误
@@ -96,7 +98,8 @@ cd client && npm run build                 # 构建
 - **ALLOWED_HOSTS** 当前 DEBUG 下为 `['*']`，生产环境需配置
 - SQLite 适合轻量部署，数据量增长后建议评估 MySQL/PostgreSQL
 - 前端依赖较老，建议使用 Node.js 兼容版本 (>=8.9) 避免构建问题
-- 新增接口: 在 `app/views/*` 编写视图 → 注册到 `app/url/*.py` → 前端 `client/src/api/` 添加封装
+- 新增接口: 在 `app/views/*` 编写视图 → 注册到 `app/url/*.py` → 前端 `client/src/api/` 添加封装 → `client/src/router/modules/` 添加路由
+- 汇总处理流程: 原始数据导入 → (前端 dataProcess 页面) → 归档 (merge) → 报表查询
 - 新增报表: 优先查看 `app/models/report/native_*.py` 中现有原生 SQL 模式
 - 前端构建产物 (dist/) 通过 deploy.bat 部署到 Django，gitignore 已排除 static/ 和 templates/index.html
 - 部分历史文件编码存在异常，建议统一使用 UTF-8
